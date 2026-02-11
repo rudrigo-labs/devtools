@@ -1,0 +1,27 @@
+<Solution>
+  <Folder Name="/Cli/">
+    <Project Path="Cli/DevTools.Cli/DevTools.Cli.csproj" Id="5aaa14e8-5816-4889-9e08-f375374c778a" />
+  </Folder>
+  <Folder Name="/Core/">
+    <Project Path="Core/DevTools.Core/DevTools.Core.csproj" />
+  </Folder>
+  <Folder Name="/Presentation/">
+    <Project Path="Presentation/DevTools.Presentation.Wpf/DevTools.Presentation.Wpf.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tools/DevTools.Tests/DevTools.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Tools/">
+    <Project Path="Tools/DevTools.Harvest/DevTools.Harvest.csproj" />
+    <Project Path="Tools/DevTools.Image/DevTools.Image.csproj" />
+    <Project Path="Tools/DevTools.Migrations/DevTools.Migrations.csproj" />
+    <Project Path="Tools/DevTools.Ngrok/DevTools.Ngrok.csproj" />
+    <Project Path="Tools/DevTools.Notes/DevTools.Notes.csproj" />
+    <Project Path="Tools/DevTools.Organizer/DevTools.Organizer.csproj" />
+    <Project Path="Tools/DevTools.Rename/DevTools.Rename.csproj" />
+    <Project Path="Tools/DevTools.SearchText/DevTools.SearchText.csproj" />
+    <Project Path="Tools/DevTools.Snapshot/DevTools.Snapshot.csproj" />
+    <Project Path="Tools/DevTools.SSHTunnel/DevTools.SSHTunnel.csproj" />
+    <Project Path="Tools/DevTools.Utf8Convert/DevTools.Utf8Convert.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,122 @@
+<Window x:Class="DevTools.Presentation.Wpf.Views.MigrationsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:components="clr-namespace:DevTools.Presentation.Wpf.Components"
+        mc:Ignorable="d"
+        Title="Migrations Helper" Height="500" Width="600"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="CanResizeWithGrip">
+
+    <Border Background="{DynamicResource WindowBackgroundBrush}" 
+            CornerRadius="8" 
+            BorderBrush="{DynamicResource BorderBrush}" 
+            BorderThickness="1">
+        <Grid x:Name="ContentGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Header -->
+                <RowDefinition Height="*"/>    <!-- Content -->
+                <RowDefinition Height="Auto"/> <!-- Footer -->
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row="0" MouseLeftButtonDown="Header_MouseLeftButtonDown" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="15,10">
+                    <TextBlock Text="Migrations Helper" 
+                               FontSize="16" 
+                               FontWeight="SemiBold" 
+                               Foreground="{DynamicResource PrimaryTextBrush}"/>
+                </StackPanel>
+
+                <Button Grid.Column="1" Click="Close_Click" 
+                        Style="{DynamicResource IconButtonStyle}" 
+                        Content="&#xE8BB;" 
+                        FontFamily="Segoe MDL2 Assets"
+                        Margin="0,0,10,0"/>
+            </Grid>
+
+            <!-- Content -->
+            <ScrollViewer Grid.Row="1" x:Name="MainContent" Margin="15,0,15,10">
+                <StackPanel>
+                    
+                    <!-- Caminhos -->
+                    <components:PathSelector x:Name="ProjectSelector" 
+                                         Title="Pasta Raiz do Projeto (Onde está o .csproj)"
+                                         IsFolderPicker="True"
+                                         Margin="0,0,0,15"/>
+
+                    <components:PathSelector x:Name="StartupSelector" 
+                                         Title="Startup Project (API/Web)"
+                                         IsFolderPicker="True"
+                                         Margin="0,0,0,15"/>
+
+                    <!-- Configuração -->
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Ação -->
+                        <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                            <TextBlock Text="Ação" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="ActionCombo" SelectionChanged="ActionCombo_SelectionChanged" SelectedIndex="0">
+                                <ComboBoxItem Content="Add Migration" Tag="Add"/>
+                                <ComboBoxItem Content="Update Database" Tag="Update"/>
+                            </ComboBox>
+                        </StackPanel>
+                        
+                        <!-- Provider -->
+                        <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                            <TextBlock Text="Provider" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="ProviderCombo" SelectedIndex="0">
+                                <ComboBoxItem Content="SQL Server" Tag="SqlServer"/>
+                                <ComboBoxItem Content="SQLite" Tag="Sqlite"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Campos Específicos -->
+                    <StackPanel x:Name="MigrationNamePanel" Margin="0,0,0,15">
+                        <TextBlock Text="Nome da Migration" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                        <TextBox x:Name="MigrationNameInput" Style="{StaticResource ModernTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,15">
+                        <TextBlock Text="DbContext Full Name (Opcional)" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                        <TextBox x:Name="DbContextInput" ToolTip="Ex: MyProject.Data.AppDbContext" Style="{StaticResource ModernTextBoxStyle}"/>
+                    </StackPanel>
+
+                    <CheckBox x:Name="DryRunCheck" Content="Dry Run (Gerar comando sem executar)" Margin="0,5,0,15"/>
+
+                    <!-- Output Area -->
+                    <Expander Header="Log de Saída" IsExpanded="True" BorderBrush="{DynamicResource BorderBrush}">
+                        <TextBox x:Name="OutputText" 
+                                 Height="100" 
+                                 TextWrapping="Wrap" 
+                                 IsReadOnly="True" 
+                                 FontFamily="Consolas"
+                                 FontSize="12"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Style="{StaticResource ModernTextBoxStyle}"/>
+                    </Expander>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Footer -->
+            <Border Grid.Row="2" x:Name="FooterPanel" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="15">
+                <Button Content="Executar Comando" 
+                        Click="Execute_Click" 
+                        Style="{DynamicResource PrimaryButtonStyle}"
+                        HorizontalAlignment="Right"/>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

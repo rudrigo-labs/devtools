@@ -1,0 +1,96 @@
+{
+  "rules": {
+    "extensions": [".cs", ".ts", ".js"],
+    "ignoreUsingPrefixes": ["System", "Microsoft"],
+    "excludeDirectories": [
+      "bin",
+      "obj",
+      ".git",
+      ".vs",
+      "node_modules",
+      "dist",
+      "build",
+      ".idea",
+      ".vscode",
+      ".next",
+      ".nuxt",
+      ".turbo",
+      "Snapshot"
+    ]
+  },
+  "weights": {
+    "fanInWeight": 2.0,
+    "fanOutWeight": 0.5,
+    "keywordDensityWeight": 1.0,
+    "densityScale": 100,
+    "staticMethodThreshold": 3,
+    "staticMethodBonus": 10.0,
+    "deadCodePenalty": 5.0,
+    "largeFileThresholdLines": 0,
+    "largeFilePenalty": 0
+  },
+  "categories": [
+    {
+      "name": "Security",
+      "weight": 1.0,
+      "keywords": [
+        "encrypt",
+        "decrypt",
+        "aes",
+        "hash",
+        "token",
+        "salt",
+        "jwt",
+        "crypto",
+        "password"
+      ]
+    },
+    {
+      "name": "Database",
+      "weight": 1.0,
+      "keywords": [
+        "db",
+        "database",
+        "sql",
+        "query",
+        "connection",
+        "transaction",
+        "repository",
+        "entity",
+        "migrate",
+        "migration"
+      ]
+    },
+    {
+      "name": "IO",
+      "weight": 1.0,
+      "keywords": [
+        "file",
+        "stream",
+        "path",
+        "directory",
+        "read",
+        "write",
+        "input",
+        "output"
+      ]
+    },
+    {
+      "name": "UI",
+      "weight": 1.0,
+      "keywords": [
+        "view",
+        "window",
+        "form",
+        "button",
+        "textbox",
+        "xaml",
+        "wpf",
+        "winforms",
+        "dialog"
+      ]
+    }
+  ],
+  "minScoreDefault": 0,
+  "topDefault": 100
+}

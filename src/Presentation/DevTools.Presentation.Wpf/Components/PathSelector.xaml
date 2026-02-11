@@ -1,0 +1,18 @@
+<UserControl x:Class="DevTools.Presentation.Wpf.Components.PathSelector"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="400">
+    <StackPanel>
+        <TextBlock x:Name="TitleBlock" Text="{Binding Title}" Foreground="#AAAAAA" Margin="0,0,0,5" FontSize="12"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="PathInput" Text="{Binding SelectedPath}" Style="{StaticResource ModernTextBoxStyle}" IsReadOnly="True" Margin="0,0,10,0"/>
+            <Button Grid.Column="1" Content="..." Width="40" Style="{StaticResource ModernButtonStyle}" Click="Browse_Click"/>
+        </Grid>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,691 @@
+<Window x:Class="DevTools.Presentation.Wpf.Views.DashboardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="DevTools Hub" Height="600" Width="900"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" WindowStartupLocation="Manual">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="SidebarBackground" Color="#252526"/>
+        <SolidColorBrush x:Key="ContentBackground" Color="#1E1E1E"/>
+        <SolidColorBrush x:Key="BorderColor" Color="#3F3F46"/>
+        <SolidColorBrush x:Key="AccentColor" Color="#007ACC"/>
+        
+        <Style TargetType="Button" x:Key="SidebarButtonStyle">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="15,0,0,0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#3E3E42"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="Button" x:Key="ToolCardStyle">
+            <Setter Property="Background" Value="#2D2D30"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="0,0,15,15"/>
+            <Setter Property="Height" Value="140"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4" BorderBrush="#3F3F46" BorderThickness="1">
+                            <!-- Simplificando o layout para evitar sobreposição -->
+                            <StackPanel Margin="15">
+                                <TextBlock Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" 
+                                           FontSize="28" Foreground="{StaticResource AccentColor}" 
+                                           FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+                                
+                                <TextBlock Text="{TemplateBinding Content}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,5"/>
+                                
+                                <TextBlock Text="{Binding ToolTip, RelativeSource={RelativeSource TemplatedParent}}" 
+                                           FontSize="12" Foreground="#999999" TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#3E3E42"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="{StaticResource ContentBackground}" 
+            BorderBrush="{StaticResource BorderColor}" 
+            BorderThickness="1" 
+            CornerRadius="8">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Sidebar -->
+                <Border Grid.Column="0" Background="{StaticResource SidebarBackground}" CornerRadius="8,0,0,8">
+                    <StackPanel Margin="0,20,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="20,0,0,30">
+                                <TextBlock Text="&#xE80F;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="{StaticResource AccentColor}" Margin="0,2,10,0"/>
+                                <TextBlock Text="DevTools" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                            </StackPanel>
+
+                            <Button Content="Ferramentas" Style="{StaticResource SidebarButtonStyle}" Tag="Tools" Click="NavButton_Click" Margin="0,0,0,5"/>
+                            <Button Content="Execuções (Jobs)" Style="{StaticResource SidebarButtonStyle}" Tag="Jobs" Click="NavButton_Click" Margin="0,0,0,5"/>
+                            <Button Content="Configurações" Style="{StaticResource SidebarButtonStyle}" Tag="Settings" Click="NavButton_Click" Margin="0,0,0,20"/>
+                            
+                            <Button Content="Minimizar para Bandeja" Style="{StaticResource SidebarButtonStyle}" Click="CloseButton_Click" Margin="0,0,0,5"/>
+                            <Button Content="Encerrar" Style="{StaticResource SidebarButtonStyle}" Click="Shutdown_Click" Foreground="#E81123"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Main Content -->
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="50"/> <!-- Increased Header Height -->
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                <!-- Window Drag/Close -->
+                <Grid Grid.Row="0" Background="Transparent">
+                    <Button HorizontalAlignment="Right" Click="CloseButton_Click"
+                            Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                            Width="40" Height="40" Background="Transparent" Foreground="#999999"
+                            BorderThickness="0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#C42B1C"/>
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+
+                <!-- Dynamic Content Area -->
+                <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="30,0,30,30" x:Name="MainTabControl">
+                    <TabControl.Resources>
+                        <Style TargetType="TabItem">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </Style>
+                    </TabControl.Resources>
+
+                    <!-- Tab: Tools -->
+                    <TabItem x:Name="TabTools">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,15,0">
+                            <StackPanel>
+                                <TextBlock Text="Ferramentas Disponíveis" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
+                                
+                                <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
+                                    <!-- Cards de Ferramentas -->
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Notas Rápidas" 
+                                            Tag="&#xE70B;" ToolTip="Anotações flutuantes always-on-top" Width="200" Click="OpenTool_Click" CommandParameter="Notes"/>
+                                    
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Organizador" 
+                                            Tag="&#xE8B7;" ToolTip="Organiza arquivos por extensão/data" Width="200" Click="OpenTool_Click" CommandParameter="Organizer"/>
+
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Renomeador" 
+                                            Tag="&#xE8AC;" ToolTip="Renomeação em massa com Regex" Width="200" Click="OpenTool_Click" CommandParameter="Rename"/>
+
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Snapshot" 
+                                            Tag="&#xE964;" ToolTip="Cria zip do projeto para backup" Width="200" Click="OpenTool_Click" CommandParameter="Snapshot"/>
+
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Divisor Imagens" 
+                                            Tag="&#xE91B;" ToolTip="Divide imagens em grid" Width="200" Click="OpenTool_Click" CommandParameter="ImageSplitter"/>
+
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Conversor UTF-8" 
+                                            Tag="&#xE8C5;" ToolTip="Corrige encoding de arquivos" Width="200" Click="OpenTool_Click" CommandParameter="Utf8Convert"/>
+
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Busca Texto" 
+                                            Tag="&#xE721;" ToolTip="Grep rápido em arquivos" Width="200" Click="OpenTool_Click" CommandParameter="SearchText"/>
+
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Migrations" 
+                                            Tag="&#xE7F8;" ToolTip="Helper para EF Core Migrations" Width="200" Click="OpenTool_Click" CommandParameter="Migrations"/>
+                                    
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Harvest" 
+                                            Tag="&#xE896;" ToolTip="Copia arquivos filtrados para output" Width="200" Click="OpenTool_Click" CommandParameter="Harvest"/>
+
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Túnel SSH" 
+                                            Tag="&#xE753;" ToolTip="Gerenciador de túneis SSH" Width="200" Click="OpenTool_Click" CommandParameter="SSHTunnel"/>
+
+                                </WrapPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <!-- Tab: Jobs -->
+                    <TabItem x:Name="TabJobs">
+                        <DockPanel LastChildFill="True">
+                            <TextBlock DockPanel.Dock="Top" Text="Centro de Execuções" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
+
+                            <!-- Detalhes / Logs (Bottom) -->
+                            <Expander DockPanel.Dock="Bottom" Header="Detalhes / Logs" Margin="0,10,0,0" IsExpanded="True" BorderBrush="{StaticResource BorderColor}">
+                                <TextBox Text="{Binding SelectedItem.Logs, ElementName=JobsDataGrid, Mode=OneWay}" 
+                                         Height="150" 
+                                         Background="#1E1E1E" 
+                                         Foreground="#D4D4D4"
+                                         FontFamily="Consolas"
+                                         IsReadOnly="True"
+                                         VerticalScrollBarVisibility="Auto"
+                                         BorderThickness="0"
+                                         Padding="5"/>
+                            </Expander>
+
+                            <!-- Lista de Jobs (Fill) -->
+                            <DataGrid x:Name="JobsDataGrid" 
+                                      AutoGenerateColumns="False" 
+                                      IsReadOnly="True" 
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="Horizontal"
+                                      RowBackground="Transparent"
+                                      Foreground="#CCCCCC">
+                                <DataGrid.Resources>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="#2D2D30"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="Padding" Value="10,5"/>
+                                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                        <Setter Property="BorderBrush" Value="#3F3F46"/>
+                                    </Style>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="Padding" Value="10"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="DataGridCell">
+                                                    <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                                        <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="#3E3E42"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.Resources>
+
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Tarefa" Binding="{Binding Name}" Width="2*"/>
+                                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
+                                    <DataGridTemplateColumn Header="Progresso" Width="1.5*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <ProgressBar Value="{Binding ProgressPercent}" Maximum="100" Height="4" VerticalAlignment="Center" Background="#333333" BorderThickness="0" Foreground="{StaticResource AccentColor}"/>
+                                                    <TextBlock Text="{Binding ProgressPercent, StringFormat={}{0}%}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="White" Margin="0,-15,0,0"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Mensagem" Binding="{Binding Message}" Width="3*"/>
+                                    <DataGridTextColumn Header="Início" Binding="{Binding StartedAt, StringFormat=HH:mm:ss}" Width="80"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </TabItem>
+
+                    <!-- Tab: Settings -->
+                    <TabItem x:Name="TabSettings">
+                        <Grid>
+                            <!-- Lista de Configurações (Cards) -->
+                            <StackPanel x:Name="SettingsListPanel" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,10">
+                                <TextBlock Text="Configurações do Projeto" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
+                                <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
+                                    <!-- Card: SSH -->
+                                    <Button Style="{StaticResource ToolCardStyle}" Tag="&#xE753;" Content="Túnel SSH" 
+                                            ToolTip="Gerenciar perfis e chaves SSH" Width="200" Click="OpenSshSettings_Click"/>
+
+                                    <!-- Card: Harvest -->
+                                    <Button Style="{StaticResource ToolCardStyle}" Tag="&#xE896;" Content="Harvest" 
+                                            ToolTip="Configurar regras de extração e IA" Width="200" Click="OpenHarvestSettings_Click"/>
+
+                                    <!-- Card: Organizer -->
+                                    <Button Style="{StaticResource ToolCardStyle}" Tag="&#xE8B7;" Content="Organizer" 
+                                            ToolTip="Categorias e regras de organização" Width="200" Click="OpenOrganizerSettings_Click"/>
+                                    
+                                    <!-- Card: Migrations -->
+                                    <Button Style="{StaticResource ToolCardStyle}" Tag="&#xE7F8;" Content="Migrations" 
+                                            ToolTip="Caminhos e contextos do EF Core" Width="200" Click="OpenMigrationsSettings_Click"/>
+
+                                    <!-- Card: Ngrok -->
+                                    <Button Style="{StaticResource ToolCardStyle}" Tag="&#xE91B;" Content="Ngrok" 
+                                            ToolTip="Caminho do executável e token" Width="200" Click="OpenNgrokSettings_Click"/>
+                                </WrapPanel>
+                            </StackPanel>
+
+                            <!-- Painel: Configuração SSH -->
+                            <Grid x:Name="SshSettingsPanel" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Header com Voltar -->
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                    <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
+                                            Foreground="White" Background="Transparent" BorderThickness="0"
+                                            Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Configuração: Túnel SSH" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- Conteúdo SSH -->
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="250"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Lista de Perfis -->
+                                    <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,1,0" Padding="0,0,10,0">
+                                        <DockPanel>
+                                            <Button DockPanel.Dock="Bottom" Content="+ Novo Perfil" Style="{StaticResource SecondaryButtonStyle}" 
+                                                    Height="35" Margin="0,10,0,0" Click="AddSshProfile_Click"/>
+                                            <ListBox x:Name="SshProfilesList" Background="Transparent" BorderThickness="0" 
+                                                     Foreground="White" DisplayMemberPath="Name" SelectionChanged="SshProfile_SelectionChanged">
+                                                <ListBox.ItemContainerStyle>
+                                                    <Style TargetType="ListBoxItem">
+                                                        <Setter Property="Padding" Value="10,8"/>
+                                                        <Setter Property="Margin" Value="0,0,0,2"/>
+                                                        <Setter Property="Background" Value="#2D2D30"/>
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="ListBoxItem">
+                                                                    <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                                        <ContentPresenter/>
+                                                                    </Border>
+                                                                    <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsSelected" Value="True">
+                                                                            <Setter Property="Background" Value="{StaticResource AccentColor}"/>
+                                                                        </Trigger>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter Property="Cursor" Value="Hand"/>
+                                                                            <Setter Property="Background" Value="#3E3E42"/>
+                                                                        </Trigger>
+                                                                    </ControlTemplate.Triggers>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </ListBox.ItemContainerStyle>
+                                            </ListBox>
+                                        </DockPanel>
+                                    </Border>
+
+                                    <!-- Formulário de Edição -->
+                                    <ScrollViewer Grid.Column="1" Margin="20,0,0,0" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
+                                        <StackPanel x:Name="SshEditForm" Visibility="Collapsed">
+                                            <TextBlock Text="Dados de Conexão (SSH)" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,0,0,10"/>
+                                            
+                                            <Label Content="Nome do Perfil" Foreground="#CCCCCC"/>
+                                            <TextBox x:Name="SshProfileName" Style="{StaticResource InputStyle}"/>
+
+                                            <Grid Margin="0,10,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="3*"/>
+                                                    <ColumnDefinition Width="1*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Margin="0,0,10,0">
+                                                    <Label Content="Host SSH (Servidor)" Foreground="#CCCCCC"/>
+                                                    <TextBox x:Name="SshHost" Style="{StaticResource InputStyle}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1">
+                                                    <Label Content="Porta" Foreground="#CCCCCC"/>
+                                                    <TextBox x:Name="SshPort" Style="{StaticResource InputStyle}"/>
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <Label Content="Usuário SSH" Foreground="#CCCCCC" Margin="0,10,0,0"/>
+                                            <TextBox x:Name="SshUser" Style="{StaticResource InputStyle}"/>
+
+                                            <Label Content="Caminho da Chave Privada (Private Key) - .pem/.ppk" Foreground="#CCCCCC" Margin="0,10,0,0"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox x:Name="SshKeyFile" Style="{StaticResource InputStyle}"/>
+                                                <Button Grid.Column="1" Content="..." Width="30" Height="30" Margin="5,0,0,0" Style="{StaticResource SecondaryButtonStyle}" Click="BrowseSshKey_Click"/>
+                                            </Grid>
+
+                                            <TextBlock Text="Mapeamento do Túnel" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,20,0,10"/>
+
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="20"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <!-- Local -->
+                                                <StackPanel>
+                                                    <Label Content="Bind Local (IP)" Foreground="#CCCCCC"/>
+                                                    <TextBox x:Name="LocalBind" Style="{StaticResource InputStyle}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                                    <Label Content="Porta Local" Foreground="#CCCCCC"/>
+                                                    <TextBox x:Name="LocalPort" Style="{StaticResource InputStyle}" Width="80"/>
+                                                </StackPanel>
+
+                                                <TextBlock Grid.Column="2" Text="→" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#666" FontSize="16" Margin="0,20,0,0"/>
+
+                                                <!-- Remoto -->
+                                                <StackPanel Grid.Column="3">
+                                                    <Label Content="Host Remoto (Destino)" Foreground="#CCCCCC"/>
+                                                    <TextBox x:Name="RemoteHost" Style="{StaticResource InputStyle}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="4" Margin="5,0,0,0">
+                                                    <Label Content="Porta Remota" Foreground="#CCCCCC"/>
+                                                    <TextBox x:Name="RemotePort" Style="{StaticResource InputStyle}" Width="80"/>
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                                                <Button Content="Remover Perfil" Click="DeleteSshProfile_Click" Background="Transparent" Foreground="#E81123" BorderThickness="0" Margin="0,0,10,0"/>
+                                                <Button Content="Salvar Alterações" Click="SaveSshProfile_Click" Style="{StaticResource PrimaryButtonStyle}" Width="150"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Grid>
+
+                            <!-- Painel: Configuração Harvest -->
+                            <Grid x:Name="HarvestSettingsPanel" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                    <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
+                                            Foreground="White" Background="Transparent" BorderThickness="0"
+                                            Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Configuração: Harvest" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                    <StackPanel Margin="0,0,20,0">
+                                        <TextBlock Text="Regras de Filtragem" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,0,0,10"/>
+                                        
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <StackPanel>
+                                                <Label Content="Extensões Permitidas (separadas por vírgula)" Foreground="#CCCCCC"/>
+                                                <TextBox x:Name="HarvestExtensions" Style="{StaticResource ModernTextBoxStyle}" 
+                                                         Height="100" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Column="2">
+                                                <Label Content="Pastas Ignoradas (separadas por vírgula)" Foreground="#CCCCCC"/>
+                                                <TextBox x:Name="HarvestExcludeDirs" Style="{StaticResource ModernTextBoxStyle}" 
+                                                         Height="100" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Grid Margin="0,10,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <Label Content="Tamanho Máximo de Arquivo (KB)" Foreground="#CCCCCC"/>
+                                                <TextBox x:Name="HarvestMaxFileSizeInput" Style="{StaticResource InputStyle}"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <TextBlock Text="Limites Padrão" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,20,0,10"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <Label Content="Score Mínimo (0-100)" Foreground="#CCCCCC"/>
+                                                <TextBox x:Name="HarvestMinScore" Style="{StaticResource InputStyle}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <Label Content="Top Arquivos (Qtd)" Foreground="#CCCCCC"/>
+                                                <TextBox x:Name="HarvestTopDefault" Style="{StaticResource InputStyle}"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <TextBlock Text="Pesos de Relevância (IA)" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,20,0,10"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <StackPanel>
+                                                <Label Content="Fan-In (Dependências Entrando)" Foreground="#CCCCCC"/>
+                                                <TextBox x:Name="HarvestWeightFanIn" Style="{StaticResource InputStyle}"/>
+                                                
+                                                <Label Content="Densidade de Keywords" Foreground="#CCCCCC" Margin="0,10,0,0"/>
+                                                <TextBox x:Name="HarvestWeightDensity" Style="{StaticResource InputStyle}"/>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Column="2">
+                                                <Label Content="Fan-Out (Dependências Saindo)" Foreground="#CCCCCC"/>
+                                                <TextBox x:Name="HarvestWeightFanOut" Style="{StaticResource InputStyle}"/>
+
+                                                <Label Content="Penalidade de Código Morto" Foreground="#CCCCCC" Margin="0,10,0,0"/>
+                                                <TextBox x:Name="HarvestWeightDeadCode" Style="{StaticResource InputStyle}"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                                            <Button Content="Salvar Alterações" Click="SaveHarvestSettings_Click" Style="{StaticResource PrimaryButtonStyle}" Width="150"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Grid>
+
+                            <!-- Painel: Configuração Organizer -->
+                            <Grid x:Name="OrganizerSettingsPanel" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                    <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
+                                            Foreground="White" Background="Transparent" BorderThickness="0"
+                                            Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Configuração: Organizer" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="250"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Lista de Categorias -->
+                                    <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,1,0" Padding="0,0,10,0">
+                                        <DockPanel>
+                                            <Button DockPanel.Dock="Bottom" Content="+ Nova Categoria" Style="{StaticResource SecondaryButtonStyle}" 
+                                                    Height="35" Margin="0,10,0,0" Click="AddOrganizerCategory_Click"/>
+                                            <ListBox x:Name="OrganizerCategoriesList" Background="Transparent" BorderThickness="0" 
+                                                     Foreground="White" DisplayMemberPath="Name" SelectionChanged="OrganizerCategory_SelectionChanged">
+                                                <ListBox.ItemContainerStyle>
+                                                    <Style TargetType="ListBoxItem">
+                                                        <Setter Property="Padding" Value="10,8"/>
+                                                        <Setter Property="Margin" Value="0,0,0,2"/>
+                                                        <Setter Property="Background" Value="#2D2D30"/>
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="ListBoxItem">
+                                                                    <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                                        <ContentPresenter/>
+                                                                    </Border>
+                                                                    <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsSelected" Value="True">
+                                                                            <Setter Property="Background" Value="{StaticResource AccentColor}"/>
+                                                                        </Trigger>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter Property="Cursor" Value="Hand"/>
+                                                                            <Setter Property="Background" Value="#3E3E42"/>
+                                                                        </Trigger>
+                                                                    </ControlTemplate.Triggers>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </ListBox.ItemContainerStyle>
+                                            </ListBox>
+                                        </DockPanel>
+                                    </Border>
+
+                                    <!-- Form Organizer -->
+                                    <ScrollViewer Grid.Column="1" Margin="20,0,0,0" VerticalScrollBarVisibility="Auto">
+                                        <StackPanel x:Name="OrganizerEditForm" Visibility="Collapsed">
+                                            <TextBlock Text="Detalhes da Categoria" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,0,0,10"/>
+                                            
+                                            <Label Content="Nome da Categoria" Foreground="#CCCCCC"/>
+                                            <TextBox x:Name="OrgCatName" Style="{StaticResource InputStyle}"/>
+
+                                            <Label Content="Nome da Pasta Destino" Foreground="#CCCCCC" Margin="0,10,0,0"/>
+                                            <TextBox x:Name="OrgCatFolder" Style="{StaticResource InputStyle}"/>
+
+                                            <Label Content="Palavras-Chave (separadas por vírgula)" Foreground="#CCCCCC" Margin="0,10,0,0"/>
+                                            <TextBox x:Name="OrgCatKeywords" Style="{StaticResource ModernTextBoxStyle}" 
+                                                     Height="80" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
+
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                                                <Button Content="Remover" Click="DeleteOrganizerCategory_Click" Background="Transparent" Foreground="#E81123" BorderThickness="0" Margin="0,0,10,0"/>
+                                                <Button Content="Salvar Alterações" Click="SaveOrganizerCategory_Click" Style="{StaticResource PrimaryButtonStyle}" Width="150"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Grid>
+
+                            <!-- Painel: Configuração Migrations -->
+                            <Grid x:Name="MigrationsSettingsPanel" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                    <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
+                                            Foreground="White" Background="Transparent" BorderThickness="0"
+                                            Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Configuração: EF Core Migrations" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                    <StackPanel Margin="0,0,20,0" MaxWidth="600" HorizontalAlignment="Left">
+                                        <TextBlock Text="Caminhos do Projeto" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,0,0,10"/>
+                                        
+                                        <Label Content="Caminho Raiz do Projeto (Root Path)" Foreground="#CCCCCC"/>
+                                        <TextBox x:Name="MigRootPathInput" Style="{StaticResource InputStyle}"/>
+                                        
+                                        <Label Content="Caminho do Projeto de Startup (Startup Project)" Foreground="#CCCCCC" Margin="0,10,0,0"/>
+                                        <TextBox x:Name="MigStartupPathInput" Style="{StaticResource InputStyle}"/>
+
+                                        <TextBlock Text="Configuração do Contexto" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,30,0,10"/>
+
+                                        <Label Content="Nome Completo do DbContext" Foreground="#CCCCCC"/>
+                                        <TextBox x:Name="MigContextInput" Style="{StaticResource InputStyle}" FontFamily="Consolas"/>
+
+                                        <Label Content="Argumentos Adicionais (dotnet ef ...)" Foreground="#CCCCCC" Margin="0,10,0,0"/>
+                                        <TextBox x:Name="MigArgsInput" Style="{StaticResource InputStyle}" FontFamily="Consolas"/>
+
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                                            <Button Content="Salvar Alterações" Click="SaveMigrationsSettings_Click" Style="{StaticResource PrimaryButtonStyle}" Width="150"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Grid>
+
+                            <!-- Painel: Configuração Ngrok -->
+                            <Grid x:Name="NgrokSettingsPanel" Visibility="Collapsed">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                    <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
+                                            Foreground="White" Background="Transparent" BorderThickness="0"
+                                            Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Configuração: Ngrok" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                    <StackPanel Margin="0,0,20,0" MaxWidth="600" HorizontalAlignment="Left">
+                                        <TextBlock Text="Execução Local" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,0,0,10"/>
+                                        
+                                        <Label Content="Caminho do Executável (ngrok.exe)" Foreground="#CCCCCC"/>
+                                        <TextBox x:Name="NgrokExePathInput" Style="{StaticResource InputStyle}"/>
+                                        
+                                        <TextBlock Text="Autenticação e Argumentos" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,30,0,10"/>
+
+                                        <Label Content="Auth Token (Opcional - via --authtoken)" Foreground="#CCCCCC"/>
+                                        <TextBox x:Name="NgrokAuthTokenInput" Style="{StaticResource InputStyle}" FontFamily="Consolas"/>
+
+                                        <Label Content="Argumentos Adicionais" Foreground="#CCCCCC" Margin="0,10,0,0"/>
+                                        <TextBox x:Name="NgrokArgsInput" Style="{StaticResource InputStyle}" FontFamily="Consolas"/>
+
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                                            <Button Content="Salvar Alterações" Click="SaveNgrokSettings_Click" Style="{StaticResource PrimaryButtonStyle}" Width="150"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Grid>
+                        </Grid>
+                    </TabItem>
+
+                </TabControl>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

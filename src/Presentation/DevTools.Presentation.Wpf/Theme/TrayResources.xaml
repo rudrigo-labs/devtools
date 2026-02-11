@@ -1,0 +1,44 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<!-- Estilo base opcional -->
+	<Style TargetType="MenuItem">
+		<Setter Property="FontSize" Value="13"/>
+		<Setter Property="Padding" Value="10,6"/>
+	</Style>
+
+	<ContextMenu x:Key="TrayContextMenu">
+
+		<!-- Acesso Principal -->
+		<MenuItem Header="Abrir Painel (Dashboard)" FontWeight="Bold" Tag="Dashboard"/>
+		<Separator/>
+
+		<!-- Topo: status / título (opcional) -->
+		<MenuItem Header="DevTools" IsEnabled="False"/>
+		<Separator/>
+
+		<!-- Grupo: Execuções -->
+		<MenuItem Header="Centro de Execuções (Jobs)" Tag="Jobs"/>
+		<Separator/>
+
+		<!-- Grupo: Ferramentas -->
+		<MenuItem Header="Notas Rápidas" Tag="Notes"/>
+		<MenuItem Header="Organizador de Arquivos" Tag="Organizer"/>
+		<MenuItem Header="Divisor de Imagens" Tag="ImageSplitter"/>
+		<MenuItem Header="Renomeador em Massa" Tag="Rename"/>
+		<MenuItem Header="Conversor UTF-8" Tag="Utf8Convert"/>
+		<MenuItem Header="Snapshot de Projeto" Tag="Snapshot"/>
+		<MenuItem Header="Túnel SSH" Tag="SSHTunnel"/>
+		<MenuItem Header="Ngrok Controller" Tag="Ngrok"/>
+		<MenuItem Header="Harvest (Scanner)" Tag="Harvest"/>
+		<MenuItem Header="Busca de Texto" Tag="SearchText"/>
+		<MenuItem Header="Migrations Helper" Tag="Migrations"/>
+
+		<Separator/>
+
+		<!-- Grupo: saída -->
+		<MenuItem Header="Logs do Sistema" Tag="Logs"/>
+		<MenuItem Header="Sair" Tag="Exit"/>
+
+	</ContextMenu>
+</ResourceDictionary>
