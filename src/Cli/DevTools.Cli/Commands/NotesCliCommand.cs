@@ -2,7 +2,6 @@ using DevTools.Cli.Ui;
 using DevTools.Cli.Logging;
 using DevTools.Notes.Engine;
 using DevTools.Notes.Models;
-using DevTools.Notes.Cloud;
 
 namespace DevTools.Cli.Commands;
 
@@ -31,13 +30,8 @@ public sealed class NotesCliCommand : ICliCommand
         _ui.WriteLine("3) Criar nota");
         _ui.WriteLine("4) Exportar backup (ZIP)");
         _ui.WriteLine("5) Importar backup (ZIP)");
-        _ui.WriteLine("6) Conectar Google Drive");
-        _ui.WriteLine("7) Conectar OneDrive");
-        _ui.WriteLine("8) Sincronizar Agora");
-        _ui.WriteLine("9) Status Cloud");
-        _ui.WriteLine("10) Desconectar Cloud");
 
-        var choice = _input.ReadInt("Escolha", 1, 10);
+        var choice = _input.ReadInt("Escolha", 1, 5);
         var action = choice switch
         {
             1 => NotesAction.ListItems,
@@ -45,35 +39,8 @@ public sealed class NotesCliCommand : ICliCommand
             3 => NotesAction.CreateItem,
             4 => NotesAction.ExportZip,
             5 => NotesAction.ImportZip,
-            6 => NotesAction.ConnectGoogle,
-            7 => NotesAction.ConnectOneDrive,
-            8 => NotesAction.SyncCloud,
-            9 => NotesAction.GetCloudStatus,
-            10 => NotesAction.DisconnectCloud,
             _ => NotesAction.ListItems
         };
-
-        // Load CLI settings
-        var settings = CliNotesSettings.Load();
-
-        // Auto-connect for Sync/Status if needed
-        if (action == NotesAction.SyncCloud || action == NotesAction.GetCloudStatus || action == NotesAction.DisconnectCloud)
-        {
-            if (!string.IsNullOrEmpty(settings.LastCloudProvider) && 
-                Enum.TryParse<CloudProviderType>(settings.LastCloudProvider, out var lastProvider))
-            {
-                // Silent connect attempt with default secrets handled by Engine
-                var connectReq = new NotesRequest(
-                    Action: lastProvider == CloudProviderType.GoogleDrive ? NotesAction.ConnectGoogle : NotesAction.ConnectOneDrive,
-                    NotesRootPath: null,
-                    CloudProvider: lastProvider,
-                    CloudConfig: null // Use defaults in Engine
-                );
-
-                // We ignore the result of auto-connect; if it fails, the subsequent action will report "Not connected"
-                await _engine.ExecuteAsync(connectReq, ct: ct).ConfigureAwait(false);
-            }
-        }
 
         string? noteKey = null;
         string? notesRoot = null;
@@ -82,13 +49,8 @@ public sealed class NotesCliCommand : ICliCommand
         string? outputPath = null;
         string? zipPath = null;
         bool overwrite = true;
-        CloudProviderType cloudProvider = CloudProviderType.None;
 
-        // Common input for most actions
-        if (action != NotesAction.GetCloudStatus && action != NotesAction.DisconnectCloud && action != NotesAction.ConnectGoogle && action != NotesAction.ConnectOneDrive)
-        {
-            notesRoot = _input.ReadOptional("Pasta das notas (opcional)", "enter = padrao");
-        }
+        notesRoot = _input.ReadOptional("Pasta das notas (opcional)", "enter = padrao");
 
         switch (action)
         {
@@ -113,24 +75,7 @@ public sealed class NotesCliCommand : ICliCommand
                 zipPath = _input.ReadRequired("Caminho do ZIP origem", "ex: C:\\Downloads\\notes.zip");
                 overwrite = _input.ReadYesNo("Sobrescrever existentes", false);
                 break;
-
-            case NotesAction.ConnectGoogle:
-                cloudProvider = CloudProviderType.GoogleDrive;
-                break;
-
-            case NotesAction.ConnectOneDrive:
-                cloudProvider = CloudProviderType.OneDrive;
-                break;
         }
-
-        // Use settings for config
-        var cloudConfig = new CloudConfiguration
-        {
-            // Use persisted overrides if available, otherwise Engine uses CloudSecrets
-            GoogleClientId = settings.GoogleClientId,
-            GoogleClientSecret = settings.GoogleClientSecret,
-            OneDriveClientId = settings.OneDriveClientId
-        };
 
         var request = new NotesRequest(
             Action: action,
@@ -143,9 +88,7 @@ public sealed class NotesCliCommand : ICliCommand
             OutputPath: outputPath,
             ZipPath: zipPath,
             CreateDateFolder: true, // Defaulting to organized folders
-            UseMarkdown: true,
-            CloudProvider: cloudProvider,
-            CloudConfig: cloudConfig
+            UseMarkdown: true
         );
 
         using var progress = new CliProgressReporter(_ui.Theme);
@@ -159,26 +102,6 @@ public sealed class NotesCliCommand : ICliCommand
         }
 
         var response = result.Value;
-        
-        // Save settings on successful connect or disconnect
-        if (result.IsSuccess)
-        {
-            if (action == NotesAction.ConnectGoogle)
-            {
-                settings.LastCloudProvider = CloudProviderType.GoogleDrive.ToString();
-                settings.Save();
-            }
-            else if (action == NotesAction.ConnectOneDrive)
-            {
-                settings.LastCloudProvider = CloudProviderType.OneDrive.ToString();
-                settings.Save();
-            }
-            else if (action == NotesAction.DisconnectCloud)
-            {
-                settings.LastCloudProvider = null;
-                settings.Save();
-            }
-        }
 
         _ui.Section("Resultado");
 
@@ -195,24 +118,6 @@ public sealed class NotesCliCommand : ICliCommand
             _ui.Section("Nota Carregada");
             _ui.WriteLine(response.ReadResult.Content ?? "(Vazio)");
         }
-        else if (action == NotesAction.SyncCloud && response.SyncResult != null)
-        {
-             var sync = response.SyncResult;
-             _ui.WriteLine($"Enviados: {sync.Uploaded}");
-             _ui.WriteLine($"Baixados: {sync.Downloaded}");
-             _ui.WriteLine($"Conflitos: {sync.Conflicts}");
-             _ui.WriteLine($"Erros: {sync.Errors}");
-             if (sync.Messages.Any())
-             {
-                 _ui.Section("Detalhes");
-                 foreach(var msg in sync.Messages) _ui.WriteLine(msg);
-             }
-        }
-        else if (action == NotesAction.GetCloudStatus)
-        {
-            _ui.WriteLine($"Status: {(response.IsConnected ? "Conectado" : "Desconectado")}");
-            _ui.WriteLine($"Usuario: {response.CloudUser ?? "N/A"}");
-        }
         else
         {
             if (action == NotesAction.CreateItem) 
@@ -221,10 +126,6 @@ public sealed class NotesCliCommand : ICliCommand
                 _ui.WriteLine($"Backup exportado para: {outputPath ?? "destino"}");
             else if (action == NotesAction.ImportZip) 
                 _ui.WriteLine("Importacao concluida com sucesso.");
-            else if (action == NotesAction.ConnectGoogle || action == NotesAction.ConnectOneDrive)
-                _ui.WriteLine("Conectado com sucesso!");
-            else if (action == NotesAction.DisconnectCloud)
-                _ui.WriteLine("Desconectado com sucesso!");
             else 
                 _ui.WriteLine("Operacao realizada com sucesso.");
         }
@@ -241,45 +142,6 @@ public sealed class NotesCliCommand : ICliCommand
             _ui.WriteError($"{error.Code}: {error.Message}");
             if (!string.IsNullOrWhiteSpace(error.Details))
                 _ui.WriteDim(error.Details);
-        }
-    }
-
-    private class CliNotesSettings
-    {
-        public string? GoogleClientId { get; set; }
-        public string? GoogleClientSecret { get; set; }
-        public string? OneDriveClientId { get; set; }
-        public string? LastCloudProvider { get; set; }
-
-        private static string FilePath => Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "DevTools", "cli_notes_settings.json");
-
-        public static CliNotesSettings Load()
-        {
-            try
-            {
-                if (File.Exists(FilePath))
-                {
-                    var json = File.ReadAllText(FilePath);
-                    return System.Text.Json.JsonSerializer.Deserialize<CliNotesSettings>(json) ?? new CliNotesSettings();
-                }
-            }
-            catch { }
-            return new CliNotesSettings();
-        }
-
-        public void Save()
-        {
-            try
-            {
-                var dir = Path.GetDirectoryName(FilePath);
-                if (!Directory.Exists(dir) && dir != null) Directory.CreateDirectory(dir);
-                
-                var json = System.Text.Json.JsonSerializer.Serialize(this);
-                File.WriteAllText(FilePath, json);
-            }
-            catch { }
         }
     }
 }

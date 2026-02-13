@@ -13,13 +13,6 @@ public class AppSettings
     public double? NotesWindowHeight { get; set; }
     public string? NotesStoragePath { get; set; }
 
-    // Cloud Keys (User provided)
-    public string? GoogleClientId { get; set; }
-    public string? GoogleClientSecret { get; set; }
-    public string? OneDriveClientId { get; set; }
-    public string? LastCloudProvider { get; set; }
-    public DateTime? LastSyncTime { get; set; }
-
     // SshTunnel Persistence
     public string? LastImageSplitInputPath { get; set; }
     public string? LastImageSplitOutputDir { get; set; }

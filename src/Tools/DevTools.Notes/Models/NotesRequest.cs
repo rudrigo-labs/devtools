@@ -14,8 +14,4 @@ public sealed record NotesRequest(
     string? OutputPath = null,
     string? ZipPath = null,
     bool UseMarkdown = true,
-    bool CreateDateFolder = true,
-
-    // Cloud
-    DevTools.Notes.Cloud.CloudProviderType CloudProvider = DevTools.Notes.Cloud.CloudProviderType.None,
-    DevTools.Notes.Cloud.CloudConfiguration? CloudConfig = null);
+    bool CreateDateFolder = true);

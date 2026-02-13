@@ -6,7 +6,6 @@ using DevTools.Notes.Abstractions;
 using DevTools.Notes.Models;
 using DevTools.Notes.Providers;
 using DevTools.Notes.Validation;
-using DevTools.Notes.Cloud;
 
 namespace DevTools.Notes.Engine;
 
@@ -15,15 +14,12 @@ public sealed class NotesEngine : IDevToolEngine<NotesRequest, NotesResponse>
     private readonly INotesStore? _store;
     private readonly NotesSimpleStore _simpleStore;
     private readonly NotesBackupStore _backupStore;
-    private readonly ITokenStore _tokenStore;
-    private ICloudProvider? _cloudProvider;
 
     public NotesEngine(INotesStore? store = null)
     {
         _store = store;
         _simpleStore = new NotesSimpleStore();
         _backupStore = new NotesBackupStore();
-        _tokenStore = new SecureTokenStore("DevTools");
     }
 
     public async Task<RunResult<NotesResponse>> ExecuteAsync(
@@ -54,21 +50,6 @@ public sealed class NotesEngine : IDevToolEngine<NotesRequest, NotesResponse>
 
             case NotesAction.ImportZip:
                 return await HandleImportZipAsync(request, progress, ct).ConfigureAwait(false);
-
-            case NotesAction.ConnectGoogle:
-                return await HandleConnectCloudAsync(request, CloudProviderType.GoogleDrive, ct).ConfigureAwait(false);
-
-            case NotesAction.ConnectOneDrive:
-                return await HandleConnectCloudAsync(request, CloudProviderType.OneDrive, ct).ConfigureAwait(false);
-
-            case NotesAction.DisconnectCloud:
-                return await HandleDisconnectCloudAsync(request, ct).ConfigureAwait(false);
-
-            case NotesAction.SyncCloud:
-                return await HandleSyncCloudAsync(request, ct).ConfigureAwait(false);
-
-            case NotesAction.GetCloudStatus:
-                return await HandleGetCloudStatusAsync(request, ct).ConfigureAwait(false);
 
             default:
                 return RunResult<NotesResponse>.Fail(new ErrorDetail("notes.action.invalid", "Action is invalid."));
@@ -321,93 +302,4 @@ public sealed class NotesEngine : IDevToolEngine<NotesRequest, NotesResponse>
 
     private INotesStore ResolveStore(string? rootPath)
         => _store ?? new SystemNotesStore(rootPath ?? string.Empty);
-
-    private async Task<RunResult<NotesResponse>> HandleConnectCloudAsync(
-        NotesRequest request,
-        CloudProviderType type,
-        CancellationToken ct)
-    {
-        try
-        {
-            // Use provided config or fall back to embedded secrets (Standard App behavior)
-            var googleId = !string.IsNullOrEmpty(request.CloudConfig?.GoogleClientId) 
-                ? request.CloudConfig!.GoogleClientId 
-                : CloudSecrets.GoogleClientId;
-
-            var googleSecret = !string.IsNullOrEmpty(request.CloudConfig?.GoogleClientSecret) 
-                ? request.CloudConfig!.GoogleClientSecret 
-                : CloudSecrets.GoogleClientSecret;
-
-            var oneDriveId = !string.IsNullOrEmpty(request.CloudConfig?.OneDriveClientId) 
-                ? request.CloudConfig!.OneDriveClientId 
-                : CloudSecrets.OneDriveClientId;
-
-            ICloudProvider provider;
-            
-            if (type == CloudProviderType.GoogleDrive)
-            {
-                if (string.IsNullOrEmpty(googleId) || googleId.Contains("YOUR_GOOGLE_CLIENT_ID"))
-                    return RunResult<NotesResponse>.Fail(new ErrorDetail("cloud.config.missing", "Google Client ID not configured in source code (CloudSecrets.cs)."));
-                
-                provider = new GoogleDriveProvider(_tokenStore, googleId, googleSecret);
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(oneDriveId) || oneDriveId.Contains("YOUR_ONEDRIVE_CLIENT_ID"))
-                     return RunResult<NotesResponse>.Fail(new ErrorDetail("cloud.config.missing", "OneDrive Client ID not configured in source code (CloudSecrets.cs)."));
-
-                provider = new OneDriveProvider(_tokenStore, oneDriveId);
-            }
-
-            var result = await provider.ConnectAsync(ct).ConfigureAwait(false);
-            if (!result)
-                return RunResult<NotesResponse>.Fail(new ErrorDetail("cloud.connect.failed", "Authentication failed."));
-
-            _cloudProvider = provider;
-
-            return RunResult<NotesResponse>.Success(new NotesResponse(
-                request.Action,
-                IsConnected: true,
-                CloudUser: provider.UserDisplayName ?? "Unknown"));
-        }
-        catch (Exception ex)
-        {
-            return RunResult<NotesResponse>.Fail(new ErrorDetail("cloud.connect.failed", ex.Message, ex.ToString()));
-        }
-    }
-
-    private async Task<RunResult<NotesResponse>> HandleDisconnectCloudAsync(NotesRequest request, CancellationToken ct)
-    {
-        if (_cloudProvider != null)
-        {
-            await _cloudProvider.DisconnectAsync(ct).ConfigureAwait(false);
-            _cloudProvider = null;
-        }
-        return RunResult<NotesResponse>.Success(new NotesResponse(request.Action, IsConnected: false));
-    }
-
-    private async Task<RunResult<NotesResponse>> HandleSyncCloudAsync(NotesRequest request, CancellationToken ct)
-    {
-        if (_cloudProvider == null || !_cloudProvider.IsConnected)
-            return RunResult<NotesResponse>.Fail(new ErrorDetail("cloud.not.connected", "Cloud provider is not connected."));
-
-        var syncEngine = new SyncEngine(_cloudProvider, request.NotesRootPath!);
-        var result = await syncEngine.SyncAsync(ct).ConfigureAwait(false);
-
-        // SyncResult doesn't have IsSuccess, it just has counts and errors
-        return RunResult<NotesResponse>.Success(new NotesResponse(
-            request.Action,
-            SyncResult: result));
-    }
-
-    private Task<RunResult<NotesResponse>> HandleGetCloudStatusAsync(NotesRequest request, CancellationToken ct)
-    {
-        if (_cloudProvider == null || !_cloudProvider.IsConnected)
-            return Task.FromResult(RunResult<NotesResponse>.Success(new NotesResponse(request.Action, IsConnected: false)));
-
-        return Task.FromResult(RunResult<NotesResponse>.Success(new NotesResponse(
-            request.Action,
-            IsConnected: true,
-            CloudUser: _cloudProvider.UserDisplayName)));
-    }
 }

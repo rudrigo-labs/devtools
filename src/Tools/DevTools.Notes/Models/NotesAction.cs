@@ -9,12 +9,5 @@ public enum NotesAction
     CreateItem = 10,
     ListItems = 11,
     ExportZip = 12,
-    ImportZip = 13,
-
-    // Cloud
-    ConnectGoogle = 20,
-    ConnectOneDrive = 21,
-    DisconnectCloud = 22,
-    SyncCloud = 23,
-    GetCloudStatus = 24
+    ImportZip = 13
 }

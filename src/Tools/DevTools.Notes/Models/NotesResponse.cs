@@ -10,9 +10,4 @@ public sealed record NotesResponse(
     NoteCreateResult? CreateResult = null,
     NoteListResult? ListResult = null,
     NotesBackupReport? BackupReport = null,
-    string? ExportedZipPath = null,
-
-    // Cloud
-    DevTools.Notes.Cloud.SyncResult? SyncResult = null,
-    bool IsConnected = false,
-    string? CloudUser = null);
+    string? ExportedZipPath = null);

@@ -8,7 +8,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using DevTools.Notes.Engine;
 using DevTools.Notes.Models;
-using DevTools.Notes.Cloud;
 using DevTools.Presentation.Wpf.Services;
 using Microsoft.Win32;
 
@@ -18,7 +17,7 @@ namespace DevTools.Presentation.Wpf.Views
     {
         private readonly SettingsService _settings;
         private readonly NotesEngine _engine;
-        private string? _currentNoteKey; // Changed from FileName to NoteKey to match API
+        private string? _currentNoteKey; 
 
         public NotesWindow(SettingsService settings)
         {
@@ -32,18 +31,6 @@ namespace DevTools.Presentation.Wpf.Views
         private async void OnLoaded(object sender, RoutedEventArgs e)
         {
             await LoadList();
-
-            // Auto-connect if provider was selected
-            if (!string.IsNullOrEmpty(_settings.Settings.LastCloudProvider) &&
-                Enum.TryParse<CloudProviderType>(_settings.Settings.LastCloudProvider, out var provider))
-            {
-                var action = provider == CloudProviderType.GoogleDrive ? NotesAction.ConnectGoogle : NotesAction.ConnectOneDrive;
-                await RunCloudAction(action, provider, silent: true);
-            }
-            else
-            {
-                UpdateCloudStatusUI(false, null);
-            }
         }
 
         private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -59,7 +46,7 @@ namespace DevTools.Presentation.Wpf.Views
         private async Task LoadList()
         {
             var request = new NotesRequest(
-                Action: NotesAction.ListItems, // Fixed Enum
+                Action: NotesAction.ListItems, 
                 NotesRootPath: _settings.Settings.NotesStoragePath
             );
 
@@ -70,7 +57,6 @@ namespace DevTools.Presentation.Wpf.Views
             }
             else
             {
-                // Handle empty or error
                 NotesList.ItemsSource = new List<NoteListItem>();
             }
         }
@@ -87,20 +73,17 @@ namespace DevTools.Presentation.Wpf.Views
         {
             if (NotesList.SelectedItem is NoteListItem item)
             {
-                _currentNoteKey = item.FileName; // NoteKey is typically the FileName/Path
+                _currentNoteKey = item.FileName; 
                 
                 var request = new NotesRequest(
-                    Action: NotesAction.LoadNote, // Fixed Enum
+                    Action: NotesAction.LoadNote, 
                     NotesRootPath: _settings.Settings.NotesStoragePath,
-                    NoteKey: item.FileName // Fixed Param
+                    NoteKey: item.FileName 
                 );
 
                 var result = await _engine.ExecuteAsync(request);
-                if (result.IsSuccess && result.Value?.ReadResult != null) // Fixed Property
+                if (result.IsSuccess && result.Value?.ReadResult != null) 
                 {
-                    // ReadResult doesn't return Title, so we use the one from the list item
-                    // or we could parse it from content if we wanted to be fancy.
-                    // For now, relying on the list item's title is safer/simpler.
                     NoteTitle.Text = item.Title; 
                     NotesContent.Text = result.Value.ReadResult.Content;
                     ShowEditMode(true);
@@ -121,14 +104,14 @@ namespace DevTools.Presentation.Wpf.Views
                 return;
             }
 
-            var action = _currentNoteKey == null ? NotesAction.CreateItem : NotesAction.SaveNote; // Fixed Enums
+            var action = _currentNoteKey == null ? NotesAction.CreateItem : NotesAction.SaveNote; 
             
             var request = new NotesRequest(
                 Action: action,
                 NotesRootPath: _settings.Settings.NotesStoragePath,
                 Title: NoteTitle.Text,
                 Content: NotesContent.Text,
-                NoteKey: _currentNoteKey // Fixed Param
+                NoteKey: _currentNoteKey 
             );
 
             var result = await _engine.ExecuteAsync(request);
@@ -154,9 +137,9 @@ namespace DevTools.Presentation.Wpf.Views
             if (dialog.ShowDialog() == true)
             {
                 var request = new NotesRequest(
-                    Action: NotesAction.ExportZip, // Fixed Enum
+                    Action: NotesAction.ExportZip, 
                     NotesRootPath: _settings.Settings.NotesStoragePath,
-                    OutputPath: dialog.FileName // Fixed Param (Export uses OutputPath)
+                    OutputPath: dialog.FileName 
                 );
 
                 var result = await _engine.ExecuteAsync(request);
@@ -181,9 +164,9 @@ namespace DevTools.Presentation.Wpf.Views
             if (dialog.ShowDialog() == true)
             {
                 var request = new NotesRequest(
-                    Action: NotesAction.ImportZip, // Fixed Enum
+                    Action: NotesAction.ImportZip, 
                     NotesRootPath: _settings.Settings.NotesStoragePath,
-                    ZipPath: dialog.FileName // Fixed Param (Import uses ZipPath)
+                    ZipPath: dialog.FileName 
                 );
 
                 var result = await _engine.ExecuteAsync(request);
@@ -208,132 +191,6 @@ namespace DevTools.Presentation.Wpf.Views
         {
             ListGrid.Visibility = edit ? Visibility.Collapsed : Visibility.Visible;
             EditGrid.Visibility = edit ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        // Cloud Handlers
-
-        private void CloudButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (CloudButton.ContextMenu != null)
-                CloudButton.ContextMenu.IsOpen = true;
-        }
-
-        private async void SyncCloud_Click(object sender, RoutedEventArgs e)
-        {
-            await RunCloudAction(NotesAction.SyncCloud, CloudProviderType.None);
-        }
-
-        private async void ConnectGoogle_Click(object sender, RoutedEventArgs e)
-        {
-            await RunCloudAction(NotesAction.ConnectGoogle, CloudProviderType.GoogleDrive);
-        }
-
-        private async void ConnectOneDrive_Click(object sender, RoutedEventArgs e)
-        {
-            await RunCloudAction(NotesAction.ConnectOneDrive, CloudProviderType.OneDrive);
-        }
-
-        private async void DisconnectCloud_Click(object sender, RoutedEventArgs e)
-        {
-            await RunCloudAction(NotesAction.DisconnectCloud, CloudProviderType.None);
-            _settings.Settings.LastCloudProvider = null;
-            _settings.Save();
-        }
-
-        private async void StatusCloud_Click(object sender, RoutedEventArgs e)
-        {
-            await RunCloudAction(NotesAction.GetCloudStatus, CloudProviderType.None);
-        }
-
-        private async Task<bool> RunCloudAction(NotesAction action, CloudProviderType provider, bool silent = false)
-        {
-            var request = new NotesRequest(
-                Action: action,
-                NotesRootPath: _settings.Settings.NotesStoragePath,
-                CloudProvider: provider,
-                CloudConfig: GetCloudConfig());
-
-            var result = await _engine.ExecuteAsync(request);
-            
-            if (result.IsSuccess)
-            {
-                if (action == NotesAction.ConnectGoogle || action == NotesAction.ConnectOneDrive)
-                {
-                    if (result.Value?.IsConnected ?? false)
-                    {
-                        _settings.Settings.LastCloudProvider = provider.ToString();
-                        _settings.Save();
-                        UpdateCloudStatusUI(true, provider.ToString());
-                        if (!silent)
-                            MessageBox.Show($"Conectado com sucesso ao {provider}!", "Cloud", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                }
-                else if (action == NotesAction.SyncCloud && result.Value?.SyncResult != null)
-                {
-                    _settings.Settings.LastSyncTime = DateTime.Now;
-                    _settings.Save();
-                    
-                    var sync = result.Value.SyncResult;
-                    var msg = $"Sincronização concluída!\nEnviados: {sync.Uploaded}\nBaixados: {sync.Downloaded}\nConflitos: {sync.Conflicts}\nErros: {sync.Errors}";
-                    
-                    UpdateCloudStatusUI(true, _settings.Settings.LastCloudProvider);
-
-                    if (sync.Messages.Count > 0)
-                    {
-                        msg += "\n\nDetalhes:\n" + string.Join("\n", sync.Messages.Take(5));
-                        if (sync.Messages.Count > 5) msg += "\n...";
-                    }
-                    if (!silent)
-                        MessageBox.Show(msg, "Sync", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else if (action == NotesAction.GetCloudStatus)
-                {
-                    var status = result.Value?.IsConnected ?? false;
-                    var user = result.Value?.CloudUser ?? "Desconhecido";
-                    var lastSync = _settings.Settings.LastSyncTime?.ToString("g") ?? "Nunca";
-                    MessageBox.Show($"Status: {(status ? "Conectado" : "Desconectado")}\nUsuário: {user}\nÚltima Sync: {lastSync}", "Cloud Status", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else if (action == NotesAction.DisconnectCloud)
-                {
-                     UpdateCloudStatusUI(false, null);
-                     if (!silent)
-                        MessageBox.Show("Desconectado.", "Cloud", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-
-                return true;
-            }
-            else
-            {
-                if (!silent)
-                    MessageBox.Show($"Erro na operação Cloud: {result.Errors.FirstOrDefault()?.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-        }
-
-        private void UpdateCloudStatusUI(bool connected, string? provider)
-        {
-            if (connected)
-            {
-                var lastSync = _settings.Settings.LastSyncTime?.ToString("HH:mm") ?? "N/A";
-                CloudButton.ToolTip = $"Conectado ({provider})\nÚltima Sync: {lastSync}";
-                // Optional: Change icon color or opacity to indicate connection
-                CloudButton.Opacity = 1.0;
-            }
-            else
-            {
-                CloudButton.ToolTip = "Nuvem / Sync (Desconectado)";
-                CloudButton.Opacity = 0.7;
-            }
-        }
-
-        private CloudConfiguration GetCloudConfig()
-        {
-            return new CloudConfiguration
-            {
-                GoogleClientId = _settings.Settings.GoogleClientId,
-                GoogleClientSecret = _settings.Settings.GoogleClientSecret,
-                OneDriveClientId = _settings.Settings.OneDriveClientId
-            };
         }
     }
 }
