@@ -1,153 +1,104 @@
 # 🚀 DevTools
 
-> Ecossistema modular de ferramentas .NET com foco em reutilização de engines e integração com Presentation Framework (WPF / WWPF).
+> **Sua suíte de produtividade para engenharia de software.**
+> Um ecossistema modular de ferramentas .NET projetado para automatizar tarefas, organizar arquivos e acelerar o desenvolvimento.
+
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Platform](https://img.shields.io/badge/platform-windows-lightgrey.svg)
+![.NET](https://img.shields.io/badge/.NET-10.0-purple.svg)
 
 ---
 
-## 📌 Status Atual do Projeto
+## 📋 Visão Geral
 
-O DevTools está em evolução.
+O **DevTools** é uma coleção de utilitários essenciais para desenvolvedores, acessíveis via **Linha de Comando (CLI)** ou **Interface Gráfica (WPF/Tray)**.
 
-Atualmente:
+O projeto segue uma arquitetura limpa onde cada ferramenta é uma biblioteca isolada (*Engine*), garantindo que a lógica de negócio seja desacoplada da apresentação.
 
-* ✅ As libraries (engines) são o núcleo estável do projeto
-* ⚙️ A WPF (WWPF / Tray) está em expansão
-* 🚧 O Console ainda não está completo
+### ✨ Principais Funcionalidades
 
-A prioridade atual é consolidar a **WPF como launcher inteligente**, mantendo as engines independentes.
-
----
-
-## 🧠 Conceito Central
-
-O DevTools é composto exclusivamente por **class libraries**.
-
-Essas libraries contêm apenas:
-
-* Engines
-* Modelos
-* Validações
-* IO
-* Regras internas da ferramenta
-
-Elas **não contêm**:
-
-* Console
-* UI
-* Código de apresentação
-
-A interface (WPF, CLI, Web, etc.) apenas consome as engines.
+| Ferramenta | Descrição |
+| :--- | :--- |
+| **📝 Notes** | Gerenciador de notas rápido, 100% local (Markdown), com backup ZIP e foco em privacidade. |
+| **🌾 Harvest** | Coletor de código-fonte para análise ou backup, com filtros inteligentes. |
+| **📂 Organizer** | Organiza arquivos em pastas automaticamente baseado em regras (extensão, data, etc). |
+| **🏷️ Rename** | Renomeação em massa avançada com suporte a Regex e preview. |
+| **🔍 SearchText** | Busca textual rápida em diretórios (Grep-like) otimizada para dev. |
+| **📸 Snapshot** | Gera "fotos" da estrutura de diretórios em JSON, HTML ou Árvore de Texto. |
+| **🔣 Utf8Convert** | Detecta e converte codificação de arquivos para UTF-8 em lote. |
+| **🖼️ Image** | Utilitários de imagem, incluindo fatiamento (split) para datasets/web. |
+| **🔒 SSHTunnel** | Gerenciador de túneis SSH para port forwarding local/remoto. |
+| **🌐 Ngrok** | Wrapper para gerenciamento fácil de túneis HTTP/TCP via Ngrok. |
+| **🗄️ Migrations** | Auxiliar para comandos do Entity Framework Core. |
 
 ---
 
-## 🖥️ WPF (Presentation Framework – WWPF)
+## 🚀 Como Usar
 
-A WPF é a camada gráfica do DevTools.
+### Pré-requisitos
+*   Windows 10 ou 11
+*   .NET SDK 10.0+
 
-Ela:
+### Instalação e Build
 
-* Atua como launcher
-* Organiza fluxos complexos
-* Reduz fricção de uso
-* Permite cenários visuais (preview, seleção, acompanhamento de execução)
+Clone o repositório e compile o projeto:
 
-A WPF **não contém regra de negócio**.
-Ela apenas orquestra chamadas às engines.
-
-Arquiteturalmente:
-
-```
-WPF (WWPF / Tray)
-        ↓
-DevTools.* (Engines)
-        ↓
-DevTools.Core
+```powershell
+git clone https://github.com/seu-usuario/devtools.git
+cd devtools
+dotnet build
 ```
 
----
+### 🖥️ Interface Gráfica (WPF)
+A maneira mais fácil de usar. O aplicativo fica na bandeja do sistema (Tray Icon).
 
-## 🏗️ Estrutura da Solution
+Execute:
+`.\src\Presentation\DevTools.Presentation.Wpf\bin\Debug\net10.0\DevTools.Presentation.Wpf.exe`
 
-```
-DevTools.slnx
+*   **Clique duplo** no ícone da bandeja para abrir o Dashboard.
+*   **Clique direito** para acesso rápido às ferramentas.
 
-DevTools.Core
-DevTools.Snapshot
-DevTools.Organizer
-DevTools.Ngrok
-DevTools.SSHTunnel
-DevTools.Harvest
-DevTools.Notes
-DevTools.Rename
-DevTools.SearchText
-DevTools.Migrations
-DevTools.Utf8Convert
-DevTools.Image
-```
+### ⌨️ Linha de Comando (CLI)
+Para automação e scripts.
 
-### Regra obrigatória
+Execute:
+`.\src\Cli\DevTools.Cli\bin\Debug\net10.0\DevTools.Cli.exe [comando]`
 
-> Toda tool referencia **DevTools.Core**.
+Exemplos:
+```powershell
+# Criar uma nota
+devcli notes
 
----
-
-## 🔹 DevTools.Core
-
-Contém apenas:
-
-* Contratos globais
-* Result models (RunResult, ErrorDetail)
-* Interfaces compartilhadas
-* Estruturas neutras
-
-Core é mínimo. Nada de lógica específica de ferramenta.
-
----
-
-## 🔹 Engines
-
-Cada tool possui:
-
-* Uma classe principal (Engine)
-* Um método padrão de execução
-* Resultado padronizado
-
-Exemplo:
-
-```csharp
-public class SnapshotEngine
-{
-    public async Task<RunResult> ExecuteAsync(SnapshotOptions options)
-    {
-        // lógica da tool
-    }
-}
+# Converter arquivos para UTF-8
+devcli utf8convert --path "C:\Projetos\Legacy" --pattern "*.cs"
 ```
 
 ---
 
-## 🎯 Direção do Projeto
+## 🏗️ Arquitetura
 
-* Engines como base sólida
-* WPF como interface principal
-* Console como interface secundária (em construção)
-* Host agnóstico
-* Expansão incremental por ferramenta
+O projeto é estruturado em camadas para máxima reutilização:
+
+1.  **Core (`DevTools.Core`)**: Contratos, interfaces e utilitários base.
+2.  **Tools (`DevTools.*`)**: Bibliotecas independentes contendo a lógica de cada ferramenta (Engines).
+3.  **Presentation**:
+    *   **CLI (`DevTools.Cli`)**: Interface de terminal.
+    *   **WPF (`DevTools.Presentation.Wpf`)**: Interface gráfica moderna.
 
 ---
 
-## 📌 Decisão para o GitHub
+## 📚 Documentação
 
-Este repositório será mantido como:
-
-> **Monorepo de engines (libraries-only)**.
-
-A WPF e outras camadas de apresentação podem evoluir separadamente, mas sempre consumindo estas libraries.
-
-O foco do GitHub é consolidar o núcleo reutilizável do DevTools.
+Para detalhes completos de cada ferramenta, consulte o [Manual do Usuário](MANUAL.md).
 
 ---
 
 ## 📄 Licença
 
-Definir conforme estratégia futura do projeto.
+Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+---
+
+<p align="center">
+  Desenvolvido com ❤️ por <b>Rudrigo Labs</b>
+</p>
