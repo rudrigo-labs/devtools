@@ -1,5 +1,6 @@
 using DevTools.Cli.Ui;
 using DevTools.Cli.Logging;
+using DevTools.Cli.App;
 using DevTools.SearchText.Engine;
 using DevTools.SearchText.Models;
 
@@ -22,33 +23,112 @@ public sealed class SearchTextCliCommand : ICliCommand
     public string Name => "Search Text";
     public string Description => "Busca texto ou regex em arquivos com filtros.";
 
-    public async Task<int> ExecuteAsync(CancellationToken ct)
+    public async Task<int> ExecuteAsync(CliLaunchOptions options, CancellationToken ct)
     {
-        var root = _input.ReadRequired("Pasta raiz", "ex: C:\\Projetos\\MeuApp");
-        var pattern = _input.ReadRequired("Texto ou regex");
-        var useRegex = _input.ReadYesNo("Usar regex", false);
-        var caseSensitive = _input.ReadYesNo("Diferenciar maiusculas", false);
-        var wholeWord = _input.ReadYesNo("Palavra inteira", false);
+        // 1. Resolve Parameters
+        var root = options.GetOption("root") ?? options.GetOption("path");
+        var pattern = options.GetOption("pattern") ?? options.GetOption("text");
+        var regexStr = options.GetOption("regex");
+        var caseSensitiveStr = options.GetOption("case-sensitive") ?? options.GetOption("case");
+        var wholeWordStr = options.GetOption("whole-word") ?? options.GetOption("word");
+        var includeStr = options.GetOption("include");
+        var excludeStr = options.GetOption("exclude");
+        var maxSizeStr = options.GetOption("max-size") ?? options.GetOption("size");
+        var skipBinaryStr = options.GetOption("skip-binary") ?? options.GetOption("binary");
+        var maxPerFileStr = options.GetOption("max-per-file");
+        var showLinesStr = options.GetOption("show-lines") ?? options.GetOption("lines");
 
-        var include = _input.ReadCsv("Includes (globs)", "ex: src/**/*.cs, **/*.md");
-        var exclude = _input.ReadCsv("Excludes (globs)", "ex: bin/**, obj/**");
-        var maxSize = _input.ReadOptionalInt("Max KB por arquivo", "enter para ignorar");
-        var skipBinary = _input.ReadYesNo("Ignorar binarios", true);
-        var maxPerFile = _input.ReadOptionalInt("Max matches por arquivo", "0 = sem limite") ?? 0;
-        var returnLines = _input.ReadYesNo("Mostrar linhas", true);
+        bool? regex = regexStr != null ? (regexStr == "true") : null;
+        bool? caseSensitive = caseSensitiveStr != null ? (caseSensitiveStr == "true") : null;
+        bool? wholeWord = wholeWordStr != null ? (wholeWordStr == "true") : null;
+        bool? skipBinary = skipBinaryStr != null ? (skipBinaryStr == "true") : null;
+        bool? showLines = showLinesStr != null ? (showLinesStr == "true") : null;
+        int? maxSize = int.TryParse(maxSizeStr, out var s) ? s : null;
+        int? maxPerFile = int.TryParse(maxPerFileStr, out var m) ? m : null;
+
+        // Interactive Fallback
+        if (!options.IsNonInteractive)
+        {
+            if (string.IsNullOrWhiteSpace(root))
+                root = _input.ReadRequired("Pasta raiz", "ex: C:\\Projetos\\MeuApp");
+            
+            if (string.IsNullOrWhiteSpace(pattern))
+                pattern = _input.ReadRequired("Texto ou regex");
+            
+            if (regex == null)
+                regex = _input.ReadYesNo("Usar regex", false);
+            
+            if (caseSensitive == null)
+                caseSensitive = _input.ReadYesNo("Diferenciar maiusculas", false);
+            
+            if (wholeWord == null)
+                wholeWord = _input.ReadYesNo("Palavra inteira", false);
+
+            if (string.IsNullOrWhiteSpace(includeStr))
+            {
+                var list = _input.ReadCsv("Includes (globs)", "ex: src/**/*.cs, **/*.md");
+                if (list.Count > 0) includeStr = string.Join(",", list);
+            }
+            
+            if (string.IsNullOrWhiteSpace(excludeStr))
+            {
+                var list = _input.ReadCsv("Excludes (globs)", "ex: bin/**, obj/**");
+                if (list.Count > 0) excludeStr = string.Join(",", list);
+            }
+
+            if (maxSize == null)
+                maxSize = _input.ReadOptionalInt("Max KB por arquivo", "enter para ignorar");
+            
+            if (skipBinary == null)
+                skipBinary = _input.ReadYesNo("Ignorar binarios", true);
+            
+            if (maxPerFile == null)
+                maxPerFile = _input.ReadOptionalInt("Max matches por arquivo", "0 = sem limite") ?? 0;
+            
+            if (showLines == null)
+                showLines = _input.ReadYesNo("Mostrar linhas", true);
+        }
+
+        // Defaults
+        regex ??= false;
+        caseSensitive ??= false;
+        wholeWord ??= false;
+        skipBinary ??= true;
+        maxPerFile ??= 0;
+        showLines ??= true;
+
+        // Validation
+        if (string.IsNullOrWhiteSpace(root))
+        {
+            _ui.WriteError("Root path required (--root).");
+            return 1;
+        }
+        if (string.IsNullOrWhiteSpace(pattern))
+        {
+            _ui.WriteError("Pattern required (--pattern).");
+            return 1;
+        }
+
+        var includeList = !string.IsNullOrWhiteSpace(includeStr)
+            ? includeStr.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList()
+            : null;
+        
+        var excludeList = !string.IsNullOrWhiteSpace(excludeStr)
+            ? excludeStr.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList()
+            : null;
 
         var request = new SearchTextRequest(
             root,
             pattern,
-            useRegex,
-            caseSensitive,
-            wholeWord,
-            include.Count == 0 ? null : include,
-            exclude.Count == 0 ? null : exclude,
+            regex.Value,
+            caseSensitive.Value,
+            wholeWord.Value,
+            includeList,
+            excludeList,
             maxSize,
-            skipBinary,
-            maxPerFile,
-            returnLines);
+            skipBinary.Value,
+            maxPerFile.Value,
+            showLines.Value);
 
         using var progress = new CliProgressReporter(_ui.Theme);
         var result = await _engine.ExecuteAsync(request, progress, ct).ConfigureAwait(false);
@@ -61,31 +141,54 @@ public sealed class SearchTextCliCommand : ICliCommand
         }
 
         var response = result.Value;
-        _ui.Section("Resumo");
-        _ui.WriteKeyValue("Arquivos", response.TotalFilesScanned.ToString());
-        _ui.WriteKeyValue("Com match", response.TotalFilesWithMatches.ToString());
-        _ui.WriteKeyValue("Ocorrencias", response.TotalOccurrences.ToString());
-
-        if (response.TotalFilesWithMatches == 0)
-            return 0;
-
-        var showDetails = _input.ReadYesNo("Mostrar detalhes", true);
-        if (!showDetails)
-            return 0;
-
-        _ui.Section("Resultados");
-        foreach (var file in response.Files.OrderBy(f => f.RelativePath))
+        
+        if (!options.IsNonInteractive)
         {
-            _ui.WriteLine($"{file.RelativePath} | {file.Occurrences}");
-            if (!returnLines)
-                continue;
+            _ui.Section("Resumo");
+            _ui.WriteKeyValue("Arquivos", response.TotalFilesScanned.ToString());
+            _ui.WriteKeyValue("Com match", response.TotalFilesWithMatches.ToString());
+            _ui.WriteKeyValue("Ocorrencias", response.TotalOccurrences.ToString());
 
-            foreach (var line in file.Lines)
+            if (response.TotalFilesWithMatches > 0)
             {
-                var cols = string.Join(",", line.Columns);
-                _ui.WriteDim($"  {line.LineNumber}:{cols}  {line.LineText}");
+                var showDetails = _input.ReadYesNo("Mostrar detalhes", true);
+                if (showDetails)
+                {
+                    _ui.Section("Resultados");
+                    foreach (var file in response.Files.OrderBy(f => f.RelativePath))
+                    {
+                        _ui.WriteLine($"{file.RelativePath} | {file.Occurrences}");
+                        if (!showLines.Value)
+                            continue;
+
+                        foreach (var line in file.Lines)
+                        {
+                            var cols = string.Join(",", line.Columns);
+                            _ui.WriteDim($"  {line.LineNumber}:{cols}  {line.LineText}");
+                        }
+                        _ui.WriteLine();
+                    }
+                }
             }
-            _ui.WriteLine();
+        }
+        else
+        {
+            // In non-interactive mode, output results if matches found
+             if (response.TotalFilesWithMatches > 0)
+            {
+                foreach (var file in response.Files.OrderBy(f => f.RelativePath))
+                {
+                    Console.WriteLine($"{file.RelativePath}:{file.Occurrences}"); // Simple format for piping
+                    if (showLines.Value)
+                    {
+                        foreach (var line in file.Lines)
+                        {
+                            var cols = string.Join(",", line.Columns);
+                            Console.WriteLine($"  {line.LineNumber}:{cols}  {line.LineText}");
+                        }
+                    }
+                }
+            }
         }
 
         return 0;

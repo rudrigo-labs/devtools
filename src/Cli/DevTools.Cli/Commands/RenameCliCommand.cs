@@ -2,6 +2,7 @@ using DevTools.Cli.Ui;
 using DevTools.Cli.Logging;
 using DevTools.Rename.Engine;
 using DevTools.Rename.Models;
+using DevTools.Cli.App;
 
 namespace DevTools.Cli.Commands;
 
@@ -22,35 +23,122 @@ public sealed class RenameCliCommand : ICliCommand
     public string Name => "Rename";
     public string Description => "Renomeia identificadores/arquivos C# com backup e undo.";
 
-    public async Task<int> ExecuteAsync(CancellationToken ct)
+    public async Task<int> ExecuteAsync(CliLaunchOptions options, CancellationToken ct)
     {
-        var root = _input.ReadRequired("Pasta raiz", "ex: C:\\Projetos\\MeuApp");
-        var oldText = _input.ReadRequired("Texto antigo");
-        var newText = _input.ReadRequired("Texto novo");
+        // 1. Resolve Parameters
+        var root = options.GetOption("root") ?? options.GetOption("source");
+        var oldText = options.GetOption("old-text") ?? options.GetOption("old") ?? options.GetOption("from");
+        var newText = options.GetOption("new-text") ?? options.GetOption("new") ?? options.GetOption("to");
+        
+        var modeStr = options.GetOption("mode");
+        RenameMode? mode = null;
+        if (modeStr != null)
+        {
+            if (modeStr.Equals("namespace", StringComparison.OrdinalIgnoreCase) || modeStr == "2")
+                mode = RenameMode.NamespaceOnly;
+            else
+                mode = RenameMode.General;
+        }
 
-        _ui.Section("Modo");
-        _ui.WriteLine("1) Geral (identificadores C#)");
-        _ui.WriteLine("2) Apenas namespace");
-        var modeChoice = _input.ReadInt("Escolha", 1, 2);
-        var mode = modeChoice == 2 ? RenameMode.NamespaceOnly : RenameMode.General;
+        var dryRunStr = options.GetOption("dry-run") ?? options.GetOption("dry");
+        bool? dryRun = dryRunStr != null ? (dryRunStr == "true") : null;
 
-        var dryRun = _input.ReadYesNo("Dry-run", true);
-        var backup = _input.ReadYesNo("Criar backup", true);
-        var undoLog = _input.ReadYesNo("Gerar undo log", true);
+        var backupStr = options.GetOption("backup");
+        bool? backup = backupStr != null ? (backupStr == "true") : null;
 
-        var include = _input.ReadCsv("Includes (globs)", "ex: src/**/*.cs");
-        var exclude = _input.ReadCsv("Excludes (globs)", "ex: bin/**, obj/**");
+        var undoLogStr = options.GetOption("undo-log") ?? options.GetOption("undo");
+        bool? undoLog = undoLogStr != null ? (undoLogStr == "true") : null;
+
+        var includeStr = options.GetOption("include") ?? options.GetOption("inc");
+        var excludeStr = options.GetOption("exclude") ?? options.GetOption("exc");
+
+        List<string>? include = null;
+        if (!string.IsNullOrWhiteSpace(includeStr))
+        {
+            include = includeStr.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+        }
+
+        List<string>? exclude = null;
+        if (!string.IsNullOrWhiteSpace(excludeStr))
+        {
+            exclude = excludeStr.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+        }
+
+        // Interactive Fallback
+        if (!options.IsNonInteractive)
+        {
+            if (string.IsNullOrWhiteSpace(root))
+                root = _input.ReadRequired("Pasta raiz", "ex: C:\\Projetos\\MeuApp");
+            
+            if (string.IsNullOrWhiteSpace(oldText))
+                oldText = _input.ReadRequired("Texto antigo");
+            
+            if (string.IsNullOrWhiteSpace(newText))
+                newText = _input.ReadRequired("Texto novo");
+
+            if (mode == null)
+            {
+                _ui.Section("Modo");
+                _ui.WriteLine("1) Geral (identificadores C#)");
+                _ui.WriteLine("2) Apenas namespace");
+                var modeChoice = _input.ReadInt("Escolha", 1, 2);
+                mode = modeChoice == 2 ? RenameMode.NamespaceOnly : RenameMode.General;
+            }
+
+            if (dryRun == null)
+                dryRun = _input.ReadYesNo("Dry-run", true);
+            
+            if (backup == null)
+                backup = _input.ReadYesNo("Criar backup", true);
+            
+            if (undoLog == null)
+                undoLog = _input.ReadYesNo("Gerar undo log", true);
+
+            if (include == null)
+            {
+                var list = _input.ReadCsv("Includes (globs)", "ex: src/**/*.cs");
+                if (list.Count > 0) include = list.ToList();
+            }
+
+            if (exclude == null)
+            {
+                var list = _input.ReadCsv("Excludes (globs)", "ex: bin/**, obj/**");
+                if (list.Count > 0) exclude = list.ToList();
+            }
+        }
+
+        // Final Validation / Defaults
+        if (string.IsNullOrWhiteSpace(root))
+        {
+            _ui.WriteError("Root path is required (--root).");
+            return 1;
+        }
+        if (string.IsNullOrWhiteSpace(oldText))
+        {
+            _ui.WriteError("Old text is required (--old).");
+            return 1;
+        }
+        if (string.IsNullOrWhiteSpace(newText))
+        {
+            _ui.WriteError("New text is required (--new).");
+            return 1;
+        }
+
+        mode ??= RenameMode.General;
+        dryRun ??= true;
+        backup ??= true;
+        undoLog ??= true;
 
         var request = new RenameRequest(
             root,
             oldText,
             newText,
-            mode,
-            dryRun,
-            include.Count == 0 ? null : include,
-            exclude.Count == 0 ? null : exclude,
-            backup,
-            undoLog,
+            mode.Value,
+            dryRun.Value,
+            include?.Count > 0 ? include : null,
+            exclude?.Count > 0 ? exclude : null,
+            backup.Value,
+            undoLog.Value,
             null,
             null,
             200);
@@ -68,29 +156,42 @@ public sealed class RenameCliCommand : ICliCommand
         var response = result.Value;
         var summary = response.Summary;
 
-        _ui.Section("Resumo");
-        _ui.WriteKeyValue("Arquivos", summary.FilesScanned.ToString());
-        _ui.WriteKeyValue("Pastas", summary.DirectoriesScanned.ToString());
-        _ui.WriteKeyValue("Atualizados", summary.FilesUpdated.ToString());
-        _ui.WriteKeyValue("Renomeados", summary.FilesRenamed.ToString());
-        _ui.WriteKeyValue("Dirs ren.", summary.DirectoriesRenamed.ToString());
-        _ui.WriteKeyValue("Erros", summary.Errors.ToString());
-
-        if (!string.IsNullOrWhiteSpace(response.ReportPath))
-            _ui.WriteKeyValue("Relatorio", response.ReportPath);
-        if (!string.IsNullOrWhiteSpace(response.UndoLogPath))
-            _ui.WriteKeyValue("Undo", response.UndoLogPath);
-
-        if (response.Changes.Count > 0)
+        if (!options.IsNonInteractive)
         {
-            var show = _input.ReadYesNo("Mostrar primeiras alteracoes", false);
-            if (show)
+            _ui.Section("Resumo");
+            _ui.WriteKeyValue("Arquivos", summary.FilesScanned.ToString());
+            _ui.WriteKeyValue("Pastas", summary.DirectoriesScanned.ToString());
+            _ui.WriteKeyValue("Atualizados", summary.FilesUpdated.ToString());
+            _ui.WriteKeyValue("Renomeados", summary.FilesRenamed.ToString());
+            _ui.WriteKeyValue("Dirs ren.", summary.DirectoriesRenamed.ToString());
+            _ui.WriteKeyValue("Erros", summary.Errors.ToString());
+
+            if (!string.IsNullOrWhiteSpace(response.ReportPath))
+                _ui.WriteKeyValue("Relatorio", response.ReportPath);
+            if (!string.IsNullOrWhiteSpace(response.UndoLogPath))
+                _ui.WriteKeyValue("Undo", response.UndoLogPath);
+
+            if (response.Changes.Count > 0)
             {
-                var limit = _input.ReadOptionalInt("Limite", "enter para 20") ?? 20;
-                _ui.Section("Alteracoes");
-                foreach (var change in response.Changes.Take(limit))
-                    _ui.WriteLine($"{change.Type}: {change.Path}");
+                var show = _input.ReadYesNo("Mostrar primeiras alteracoes", false);
+                if (show)
+                {
+                    var limit = _input.ReadOptionalInt("Limite", "enter para 20") ?? 20;
+                    _ui.Section("Alteracoes");
+                    foreach (var change in response.Changes.Take(limit))
+                        _ui.WriteLine($"{change.Type}: {change.Path}");
+                }
             }
+        }
+        else
+        {
+            // Non-interactive output
+            // Output summary as key=value lines or similar?
+            _ui.WriteLine($"FilesScanned={summary.FilesScanned}");
+            _ui.WriteLine($"FilesUpdated={summary.FilesUpdated}");
+            _ui.WriteLine($"Errors={summary.Errors}");
+            if (!string.IsNullOrWhiteSpace(response.ReportPath))
+                _ui.WriteLine($"Report={response.ReportPath}");
         }
 
         return summary.Errors == 0 ? 0 : 1;

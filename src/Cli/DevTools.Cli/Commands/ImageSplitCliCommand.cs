@@ -1,5 +1,6 @@
 using DevTools.Cli.Ui;
 using DevTools.Cli.Logging;
+using DevTools.Cli.App;
 using DevTools.Image.Engine;
 using DevTools.Image.Models;
 
@@ -22,28 +23,69 @@ public sealed class ImageSplitCliCommand : ICliCommand
     public string Name => "Image Split";
     public string Description => "Recorta componentes/sprites de imagem com transparencia.";
 
-    public async Task<int> ExecuteAsync(CancellationToken ct)
+    public async Task<int> ExecuteAsync(CliLaunchOptions options, CancellationToken ct)
     {
-        var inputPath = _input.ReadRequired("Arquivo de imagem", "ex: C:\\Projetos\\icone.png");
-        var outputDir = _input.ReadOptional("Pasta de saida (opcional)", "enter para usar a pasta da imagem");
-        var baseName = _input.ReadOptional("Base do nome (opcional)");
-        var extension = _input.ReadOptional("Extensao (opcional)", "ex: .png");
+        // 1. Resolve Parameters
+        var inputPath = options.GetOption("input") ?? options.GetOption("file");
+        var outputDir = options.GetOption("output") ?? options.GetOption("out");
+        var baseName = options.GetOption("base-name") ?? options.GetOption("name");
+        var extension = options.GetOption("extension") ?? options.GetOption("ext");
+        var alphaStr = options.GetOption("alpha") ?? options.GetOption("threshold");
+        var startIndexStr = options.GetOption("start-index") ?? options.GetOption("start");
+        var overwriteStr = options.GetOption("overwrite");
+        var minWStr = options.GetOption("min-w") ?? options.GetOption("width");
+        var minHStr = options.GetOption("min-h") ?? options.GetOption("height");
 
-        var advanced = _input.ReadYesNo("Configurar opcoes avancadas", false);
-        byte alpha = 10;
-        int startIndex = 1;
-        bool overwrite = false;
-        int minW = 3;
-        int minH = 3;
+        byte? alpha = byte.TryParse(alphaStr, out var a) ? a : null;
+        int? startIndex = int.TryParse(startIndexStr, out var s) ? s : null;
+        bool? overwrite = overwriteStr != null ? (overwriteStr == "true") : null;
+        int? minW = int.TryParse(minWStr, out var w) ? w : null;
+        int? minH = int.TryParse(minHStr, out var h) ? h : null;
 
-        if (advanced)
+        // Interactive Fallback
+        if (!options.IsNonInteractive)
         {
-            var alphaInt = _input.ReadOptionalInt("Alpha threshold", "0-255, enter=10") ?? 10;
-            alpha = (byte)Math.Clamp(alphaInt, 0, 255);
-            startIndex = _input.ReadOptionalInt("Start index", "enter=1") ?? 1;
-            overwrite = _input.ReadYesNo("Sobrescrever", false);
-            minW = _input.ReadOptionalInt("Min largura", "enter=3") ?? 3;
-            minH = _input.ReadOptionalInt("Min altura", "enter=3") ?? 3;
+            if (string.IsNullOrWhiteSpace(inputPath))
+                inputPath = _input.ReadRequired("Arquivo de imagem", "ex: C:\\Projetos\\icone.png");
+            
+            if (string.IsNullOrWhiteSpace(outputDir))
+                outputDir = _input.ReadOptional("Pasta de saida (opcional)", "enter para usar a pasta da imagem");
+            
+            if (string.IsNullOrWhiteSpace(baseName))
+                baseName = _input.ReadOptional("Base do nome (opcional)");
+            
+            if (string.IsNullOrWhiteSpace(extension))
+                extension = _input.ReadOptional("Extensao (opcional)", "ex: .png");
+
+            // Advanced options usually asked together
+            bool askAdvanced = alpha == null && startIndex == null && overwrite == null && minW == null && minH == null;
+            if (askAdvanced)
+            {
+                var advanced = _input.ReadYesNo("Configurar opcoes avancadas", false);
+                if (advanced)
+                {
+                    var alphaInt = _input.ReadOptionalInt("Alpha threshold", "0-255, enter=10") ?? 10;
+                    alpha = (byte)Math.Clamp(alphaInt, 0, 255);
+                    startIndex = _input.ReadOptionalInt("Start index", "enter=1") ?? 1;
+                    overwrite = _input.ReadYesNo("Sobrescrever", false);
+                    minW = _input.ReadOptionalInt("Min largura", "enter=3") ?? 3;
+                    minH = _input.ReadOptionalInt("Min altura", "enter=3") ?? 3;
+                }
+            }
+        }
+
+        // Defaults
+        alpha ??= 10;
+        startIndex ??= 1;
+        overwrite ??= false;
+        minW ??= 3;
+        minH ??= 3;
+
+        // Validation
+        if (string.IsNullOrWhiteSpace(inputPath))
+        {
+            _ui.WriteError("Input file required (--input).");
+            return 1;
         }
 
         var request = new ImageSplitRequest(
@@ -51,11 +93,11 @@ public sealed class ImageSplitCliCommand : ICliCommand
             string.IsNullOrWhiteSpace(outputDir) ? null : outputDir,
             string.IsNullOrWhiteSpace(baseName) ? null : baseName,
             string.IsNullOrWhiteSpace(extension) ? null : extension,
-            alpha,
-            startIndex,
-            overwrite,
-            minW,
-            minH);
+            alpha.Value,
+            startIndex.Value,
+            overwrite.Value,
+            minW.Value,
+            minH.Value);
 
         using var progress = new CliProgressReporter(_ui.Theme);
         var result = await _engine.ExecuteAsync(request, progress, ct).ConfigureAwait(false);
@@ -68,19 +110,23 @@ public sealed class ImageSplitCliCommand : ICliCommand
         }
 
         var response = result.Value;
-        _ui.Section("Resumo");
-        _ui.WriteKeyValue("Entrada", response.InputPath);
-        _ui.WriteKeyValue("Saida", response.OutputDirectory);
-        _ui.WriteKeyValue("Total", response.TotalComponents.ToString());
-
-        if (response.Outputs.Count > 0)
+        
+        if (!options.IsNonInteractive)
         {
-            var show = _input.ReadYesNo("Mostrar arquivos gerados", false);
-            if (show)
+            _ui.Section("Resumo");
+            _ui.WriteKeyValue("Entrada", response.InputPath);
+            _ui.WriteKeyValue("Saida", response.OutputDirectory);
+            _ui.WriteKeyValue("Total", response.TotalComponents.ToString());
+
+            if (response.Outputs.Count > 0)
             {
-                _ui.Section("Arquivos");
-                foreach (var item in response.Outputs)
-                    _ui.WriteLine($"{item.Index}: {item.Path}");
+                var show = _input.ReadYesNo("Mostrar arquivos gerados", false);
+                if (show)
+                {
+                    _ui.Section("Arquivos");
+                    foreach (var item in response.Outputs)
+                        _ui.WriteLine($"{item.Index}: {item.Path}");
+                }
             }
         }
 

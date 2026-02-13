@@ -25,6 +25,15 @@ public partial class HarvestWindow : Window
             
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastHarvestOutputPath))
             OutputPathSelector.SelectedPath = _settingsService.Settings.LastHarvestOutputPath;
+
+        if (!string.IsNullOrEmpty(_settingsService.Settings.LastHarvestConfigPath))
+            ConfigPathSelector.SelectedPath = _settingsService.Settings.LastHarvestConfigPath;
+
+        if (_settingsService.Settings.LastHarvestMinScore.HasValue)
+            MinScoreBox.Text = _settingsService.Settings.LastHarvestMinScore.Value.ToString();
+
+        if (_settingsService.Settings.LastHarvestCopyFiles.HasValue)
+            CopyFilesCheck.IsChecked = _settingsService.Settings.LastHarvestCopyFiles.Value;
         
         // Posicionar no canto inferior direito e fechar ao perder foco
         /* Position handled by TrayService
@@ -62,15 +71,26 @@ public partial class HarvestWindow : Window
             return;
         }
 
-        // Salvar configurações
-        _settingsService.Settings.LastHarvestSourcePath = SourcePathSelector.SelectedPath;
-        _settingsService.Settings.LastHarvestOutputPath = OutputPathSelector.SelectedPath;
-        _settingsService.Save();
+        // Salvar configurações apenas se opt-in
+        if (RememberSettingsCheck.IsChecked == true)
+        {
+            _settingsService.Settings.LastHarvestSourcePath = SourcePathSelector.SelectedPath;
+            _settingsService.Settings.LastHarvestOutputPath = OutputPathSelector.SelectedPath;
+            _settingsService.Settings.LastHarvestConfigPath = ConfigPathSelector.SelectedPath;
+            
+            if (int.TryParse(MinScoreBox.Text, out var minScore))
+                 _settingsService.Settings.LastHarvestMinScore = minScore;
+    
+            _settingsService.Settings.LastHarvestCopyFiles = CopyFilesCheck.IsChecked;
+            _settingsService.Save();
+        }
 
         Result = new HarvestRequest(
             RootPath: SourcePathSelector.SelectedPath,
             OutputPath: OutputPathSelector.SelectedPath,
-            CopyFiles: true
+            ConfigPath: ConfigPathSelector.SelectedPath,
+            MinScore: int.TryParse(MinScoreBox.Text, out var ms) ? ms : 0,
+            CopyFiles: CopyFilesCheck.IsChecked ?? true
         );
 
         Close();

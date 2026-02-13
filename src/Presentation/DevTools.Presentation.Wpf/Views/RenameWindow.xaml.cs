@@ -23,6 +23,15 @@ public partial class RenameWindow : Window
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastRenameRootPath))
             RootPathBox.Text = _settingsService.Settings.LastRenameRootPath;
 
+        if (!string.IsNullOrEmpty(_settingsService.Settings.LastRenameInclude))
+            IncludeBox.Text = _settingsService.Settings.LastRenameInclude;
+            
+        if (!string.IsNullOrEmpty(_settingsService.Settings.LastRenameExclude))
+            ExcludeBox.Text = _settingsService.Settings.LastRenameExclude;
+
+        if (_settingsService.Settings.LastRenameDryRun.HasValue)
+            DryRunCheck.IsChecked = _settingsService.Settings.LastRenameDryRun.Value;
+
         /* Position handled by TrayService
         if (_settingsService.Settings.RenameWindowTop.HasValue)
         {
@@ -64,8 +73,7 @@ public partial class RenameWindow : Window
         if (dlg.ShowDialog() == true)
         {
             RootPathBox.Text = dlg.FolderName;
-            _settingsService.Settings.LastRenameRootPath = dlg.FolderName;
-            _settingsService.Save();
+            // Removed auto-save from here to respect explicit opt-in
         }
     }
 
@@ -84,6 +92,18 @@ public partial class RenameWindow : Window
         var mode = ModeCombo.SelectedIndex == 1 ? RenameMode.NamespaceOnly : RenameMode.General;
         var backup = BackupCheck.IsChecked ?? true;
         var undo = UndoLogCheck.IsChecked ?? true;
+        var dryRun = DryRunCheck.IsChecked ?? false;
+        var include = IncludeBox.Text;
+        var exclude = ExcludeBox.Text;
+
+        if (RememberSettingsCheck.IsChecked == true)
+        {
+            _settingsService.Settings.LastRenameRootPath = root;
+            _settingsService.Settings.LastRenameInclude = include;
+            _settingsService.Settings.LastRenameExclude = exclude;
+            _settingsService.Settings.LastRenameDryRun = dryRun;
+            _settingsService.Save();
+        }
 
         Close();
 
@@ -95,6 +115,9 @@ public partial class RenameWindow : Window
                 OldText: oldText,
                 NewText: newText ?? "",
                 Mode: mode,
+                DryRun: dryRun,
+                IncludeGlobs: string.IsNullOrWhiteSpace(include) ? null : include.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
+                ExcludeGlobs: string.IsNullOrWhiteSpace(exclude) ? null : exclude.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
                 BackupEnabled: backup,
                 WriteUndoLog: undo
             );

@@ -47,6 +47,19 @@
                 
                 <c:PathSelector x:Name="OutputPathSelector" Title="Diretório de Destino (Local de Backup)" 
                                 IsFolderPicker="True"/>
+
+                <c:PathSelector x:Name="ConfigPathSelector" Title="Arquivo de Configuração (Opcional)" 
+                                IsFolderPicker="False" Margin="0,20,0,0"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                     <StackPanel Margin="0,0,20,0">
+                        <TextBlock Text="Pontuação Mínima" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                        <TextBox x:Name="MinScoreBox" Text="0" Width="100" Style="{StaticResource ModernTextBoxStyle}"/>
+                     </StackPanel>
+                     
+                     <CheckBox x:Name="CopyFilesCheck" Content="Copiar Arquivos" IsChecked="True" VerticalAlignment="Bottom" Margin="0,0,20,5" Foreground="#DDDDDD"/>
+                     <CheckBox x:Name="RememberSettingsCheck" Content="Lembrar configurações" IsChecked="False" VerticalAlignment="Bottom" Margin="0,0,0,5" Foreground="#DDDDDD"/>
+                </StackPanel>
                                 
                 <TextBlock Text="Esta ferramenta analisará o diretório de origem em busca de classes auxiliares e utilitários (Helpers, Utils), pontuando-os com base em regras predefinidas, e copiará os arquivos úteis para o diretório de destino." 
                            TextWrapping="Wrap" Foreground="{StaticResource SecondaryTextBrush}" FontSize="12" Margin="0,20,0,0" LineHeight="18"/>

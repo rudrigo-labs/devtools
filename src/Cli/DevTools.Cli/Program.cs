@@ -33,5 +33,6 @@ state.MenuItems = orderedCommands
     .Select((cmd, index) => $"{index + 1} - {cmd.Key.ToLowerInvariant()}")
     .ToList();
 
+var options = ArgParser.Parse(args);
 var app = new CliApp(ui, menu, input, orderedCommands);
-return await app.RunAsync(CancellationToken.None);
+return await app.RunAsync(options, CancellationToken.None);
