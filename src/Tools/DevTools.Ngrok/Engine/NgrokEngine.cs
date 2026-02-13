@@ -81,7 +81,7 @@ public sealed class NgrokEngine : IDevToolEngine<NgrokRequest, NgrokResponse>
         }
         catch (NgrokApiException ex)
         {
-            return RunResult<NgrokResponse>.Fail(new ErrorDetail(ex.Code, ex.Message, ex.Details, ex));
+            return RunResult<NgrokResponse>.Fail(new ErrorDetail(ex.Code, ex.Message, Details: ex.Details, Exception: ex));
         }
     }
 

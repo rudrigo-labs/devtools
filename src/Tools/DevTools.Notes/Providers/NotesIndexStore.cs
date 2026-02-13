@@ -33,8 +33,8 @@ public sealed class NotesIndexStore
             return RunResult<NotesIndex>.Fail(new ErrorDetail(
                 "notes.index.load.failed",
                 "Failed to load index.",
-                path,
-                ex));
+                Cause: path,
+                Exception: ex));
         }
     }
 
@@ -56,8 +56,8 @@ public sealed class NotesIndexStore
             return RunResult<bool>.Fail(new ErrorDetail(
                 "notes.index.save.failed",
                 "Failed to save index.",
-                path,
-                ex));
+                Cause: path,
+                Exception: ex));
         }
     }
 

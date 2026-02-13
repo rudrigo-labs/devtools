@@ -1,8 +1,8 @@
 using DevTools.Cli.Ui;
 using DevTools.Cli.Logging;
+using DevTools.Cli.App;
 using DevTools.Notes.Engine;
 using DevTools.Notes.Models;
-using DevTools.Notes.Cloud;
 
 namespace DevTools.Cli.Commands;
 
@@ -23,263 +23,187 @@ public sealed class NotesCliCommand : ICliCommand
     public string Name => "Notes";
     public string Description => "Le e salva notas (local).";
 
-    public async Task<int> ExecuteAsync(CancellationToken ct)
+    public async Task<int> ExecuteAsync(CliLaunchOptions options, CancellationToken ct)
     {
-        _ui.Section("Acoes");
-        _ui.WriteLine("1) Listar notas");
-        _ui.WriteLine("2) Ler nota");
-        _ui.WriteLine("3) Criar nota");
-        _ui.WriteLine("4) Exportar backup (ZIP)");
-        _ui.WriteLine("5) Importar backup (ZIP)");
-        _ui.WriteLine("6) Conectar Google Drive");
-        _ui.WriteLine("7) Conectar OneDrive");
-        _ui.WriteLine("8) Sincronizar Agora");
-        _ui.WriteLine("9) Status Cloud");
-        _ui.WriteLine("10) Desconectar Cloud");
-
-        var choice = _input.ReadInt("Escolha", 1, 10);
-        var action = choice switch
+        // 1. Resolve Action
+        var actionStr = options.GetOption("action");
+        NotesAction? action = null;
+        if (actionStr != null)
         {
-            1 => NotesAction.ListItems,
-            2 => NotesAction.LoadNote,
-            3 => NotesAction.CreateItem,
-            4 => NotesAction.ExportZip,
-            5 => NotesAction.ImportZip,
-            6 => NotesAction.ConnectGoogle,
-            7 => NotesAction.ConnectOneDrive,
-            8 => NotesAction.SyncCloud,
-            9 => NotesAction.GetCloudStatus,
-            10 => NotesAction.DisconnectCloud,
-            _ => NotesAction.ListItems
-        };
+            if (Enum.TryParse<NotesAction>(actionStr, true, out var a)) action = a;
+            else if (actionStr.Equals("list", StringComparison.OrdinalIgnoreCase)) action = NotesAction.ListItems;
+            else if (actionStr.Equals("read", StringComparison.OrdinalIgnoreCase)) action = NotesAction.LoadNote;
+            else if (actionStr.Equals("create", StringComparison.OrdinalIgnoreCase)) action = NotesAction.CreateItem;
+            else if (actionStr.Equals("export", StringComparison.OrdinalIgnoreCase)) action = NotesAction.ExportZip;
+            else if (actionStr.Equals("import", StringComparison.OrdinalIgnoreCase)) action = NotesAction.ImportZip;
+        }
 
-        // Load CLI settings
-        var settings = CliNotesSettings.Load();
-
-        // Auto-connect for Sync/Status if needed
-        if (action == NotesAction.SyncCloud || action == NotesAction.GetCloudStatus || action == NotesAction.DisconnectCloud)
+        if (action == null && !options.IsNonInteractive)
         {
-            if (!string.IsNullOrEmpty(settings.LastCloudProvider) && 
-                Enum.TryParse<CloudProviderType>(settings.LastCloudProvider, out var lastProvider))
+            _ui.Section("Acoes");
+            _ui.WriteLine("1) Listar notas");
+            _ui.WriteLine("2) Ler nota");
+            _ui.WriteLine("3) Criar nota");
+            _ui.WriteLine("4) Exportar backup (ZIP)");
+            _ui.WriteLine("5) Importar backup (ZIP)");
+
+            var choice = _input.ReadInt("Escolha", 1, 5);
+            action = choice switch
             {
-                // Silent connect attempt with default secrets handled by Engine
-                var connectReq = new NotesRequest(
-                    Action: lastProvider == CloudProviderType.GoogleDrive ? NotesAction.ConnectGoogle : NotesAction.ConnectOneDrive,
-                    NotesRootPath: null,
-                    CloudProvider: lastProvider,
-                    CloudConfig: null // Use defaults in Engine
-                );
+                1 => NotesAction.ListItems,
+                2 => NotesAction.LoadNote,
+                3 => NotesAction.CreateItem,
+                4 => NotesAction.ExportZip,
+                5 => NotesAction.ImportZip,
+                _ => NotesAction.ListItems
+            };
+        }
 
-                // We ignore the result of auto-connect; if it fails, the subsequent action will report "Not connected"
-                await _engine.ExecuteAsync(connectReq, ct: ct).ConfigureAwait(false);
+        if (action == null)
+        {
+            _ui.WriteError("Action required (--action list|read|create|export|import).");
+            return 1;
+        }
+
+        // 2. Resolve Parameters
+        var root = options.GetOption("root") ?? options.GetOption("path");
+        var key = options.GetOption("key") ?? options.GetOption("note");
+        var title = options.GetOption("title");
+        var content = options.GetOption("content");
+        var output = options.GetOption("output") ?? options.GetOption("out");
+        var zip = options.GetOption("zip") ?? options.GetOption("source");
+        var overwriteStr = options.GetOption("overwrite");
+        bool? overwrite = overwriteStr != null ? (overwriteStr == "true") : null;
+
+        // Interactive Fallback
+        if (!options.IsNonInteractive)
+        {
+            if (string.IsNullOrWhiteSpace(root))
+                root = _input.ReadOptional("Pasta das notas (opcional)", "enter = padrao");
+
+            switch (action)
+            {
+                case NotesAction.LoadNote:
+                    if (string.IsNullOrWhiteSpace(key))
+                        key = _input.ReadRequired("Caminho/Nome da nota", "ex: 2023/10/minha-nota.md");
+                    break;
+                case NotesAction.CreateItem:
+                    if (string.IsNullOrWhiteSpace(title))
+                        title = _input.ReadRequired("Titulo da nota", "ex: Reuniao Daily");
+                    if (string.IsNullOrWhiteSpace(content))
+                        content = _input.ReadMultiline("Conteudo da nota", "linha a linha", ".");
+                    break;
+                case NotesAction.ExportZip:
+                    if (string.IsNullOrWhiteSpace(output))
+                        output = _input.ReadRequired("Caminho para salvar o ZIP", "ex: C:\\Backup\\notes.zip");
+                    break;
+                case NotesAction.ImportZip:
+                    if (string.IsNullOrWhiteSpace(zip))
+                        zip = _input.ReadRequired("Caminho do ZIP origem", "ex: C:\\Downloads\\notes.zip");
+                    if (overwrite == null)
+                        overwrite = _input.ReadYesNo("Sobrescrever existentes", false);
+                    break;
             }
         }
 
-        string? noteKey = null;
-        string? notesRoot = null;
-        string? content = null;
-        string? title = null;
-        string? outputPath = null;
-        string? zipPath = null;
-        bool overwrite = true;
-        CloudProviderType cloudProvider = CloudProviderType.None;
+        // Defaults
+        overwrite ??= false;
 
-        // Common input for most actions
-        if (action != NotesAction.GetCloudStatus && action != NotesAction.DisconnectCloud && action != NotesAction.ConnectGoogle && action != NotesAction.ConnectOneDrive)
+        // Validation
+        if (action == NotesAction.LoadNote && string.IsNullOrWhiteSpace(key))
         {
-            notesRoot = _input.ReadOptional("Pasta das notas (opcional)", "enter = padrao");
+            _ui.WriteError("Key/Path required for read action (--key).");
+            return 1;
         }
-
-        switch (action)
+        if (action == NotesAction.CreateItem && string.IsNullOrWhiteSpace(title))
         {
-            case NotesAction.ListItems:
-                // No extra params needed
-                break;
-
-            case NotesAction.LoadNote:
-                noteKey = _input.ReadRequired("Caminho/Nome da nota", "ex: 2023/10/minha-nota.md");
-                break;
-
-            case NotesAction.CreateItem:
-                title = _input.ReadRequired("Titulo da nota", "ex: Reuniao Daily");
-                content = _input.ReadMultiline("Conteudo da nota", "linha a linha", ".");
-                break;
-
-            case NotesAction.ExportZip:
-                outputPath = _input.ReadRequired("Caminho para salvar o ZIP", "ex: C:\\Backup\\notes.zip");
-                break;
-
-            case NotesAction.ImportZip:
-                zipPath = _input.ReadRequired("Caminho do ZIP origem", "ex: C:\\Downloads\\notes.zip");
-                overwrite = _input.ReadYesNo("Sobrescrever existentes", false);
-                break;
-
-            case NotesAction.ConnectGoogle:
-                cloudProvider = CloudProviderType.GoogleDrive;
-                break;
-
-            case NotesAction.ConnectOneDrive:
-                cloudProvider = CloudProviderType.OneDrive;
-                break;
+            _ui.WriteError("Title required for create action (--title).");
+            return 1;
         }
-
-        // Use settings for config
-        var cloudConfig = new CloudConfiguration
+        if (action == NotesAction.ExportZip && string.IsNullOrWhiteSpace(output))
         {
-            // Use persisted overrides if available, otherwise Engine uses CloudSecrets
-            GoogleClientId = settings.GoogleClientId,
-            GoogleClientSecret = settings.GoogleClientSecret,
-            OneDriveClientId = settings.OneDriveClientId
-        };
+            _ui.WriteError("Output path required for export action (--output).");
+            return 1;
+        }
+        if (action == NotesAction.ImportZip && string.IsNullOrWhiteSpace(zip))
+        {
+            _ui.WriteError("Zip path required for import action (--zip).");
+            return 1;
+        }
 
         var request = new NotesRequest(
-            Action: action,
-            NoteKey: noteKey,
+            Action: action.Value,
+            NoteKey: key,
             Content: content,
-            NotesRootPath: string.IsNullOrWhiteSpace(notesRoot) ? null : notesRoot,
+            NotesRootPath: string.IsNullOrWhiteSpace(root) ? null : root,
             ConfigPath: null,
-            Overwrite: overwrite,
+            Overwrite: overwrite.Value,
             Title: title,
-            OutputPath: outputPath,
-            ZipPath: zipPath,
-            CreateDateFolder: true, // Defaulting to organized folders
-            UseMarkdown: true,
-            CloudProvider: cloudProvider,
-            CloudConfig: cloudConfig
+            OutputPath: output,
+            ZipPath: zip,
+            CreateDateFolder: true,
+            UseMarkdown: true
         );
 
         using var progress = new CliProgressReporter(_ui.Theme);
         var result = await _engine.ExecuteAsync(request, progress, ct).ConfigureAwait(false);
         progress.Finish();
 
-        if (!result.IsSuccess || result.Value is null)
+        if (result.IsSuccess && result.Value != null)
         {
-            WriteErrors(result.Errors);
-            return 1;
-        }
+            var response = result.Value;
 
-        var response = result.Value;
-        
-        // Save settings on successful connect or disconnect
-        if (result.IsSuccess)
+        if (!options.IsNonInteractive)
         {
-            if (action == NotesAction.ConnectGoogle)
-            {
-                settings.LastCloudProvider = CloudProviderType.GoogleDrive.ToString();
-                settings.Save();
-            }
-            else if (action == NotesAction.ConnectOneDrive)
-            {
-                settings.LastCloudProvider = CloudProviderType.OneDrive.ToString();
-                settings.Save();
-            }
-            else if (action == NotesAction.DisconnectCloud)
-            {
-                settings.LastCloudProvider = null;
-                settings.Save();
-            }
-        }
+            _ui.Section("Resultado");
 
-        _ui.Section("Resultado");
-
-        if (action == NotesAction.ListItems && response.ListResult != null)
-        {
-            _ui.WriteLine($"Total de notas: {response.ListResult.Items.Count}");
-            foreach (var item in response.ListResult.Items)
+            if (action == NotesAction.ListItems && response.ListResult != null)
             {
-                _ui.WriteLine($"- {item.FileName} ({item.UpdatedUtc})");
+                _ui.WriteLine($"Total de notas: {response.ListResult.Items.Count}");
+                foreach (var item in response.ListResult.Items)
+                {
+                    _ui.WriteLine($"- {item.FileName} ({item.UpdatedUtc})");
+                }
             }
-        }
-        else if (action == NotesAction.LoadNote && response.ReadResult != null)
-        {
-            _ui.Section("Nota Carregada");
-            _ui.WriteLine(response.ReadResult.Content ?? "(Vazio)");
-        }
-        else if (action == NotesAction.SyncCloud && response.SyncResult != null)
-        {
-             var sync = response.SyncResult;
-             _ui.WriteLine($"Enviados: {sync.Uploaded}");
-             _ui.WriteLine($"Baixados: {sync.Downloaded}");
-             _ui.WriteLine($"Conflitos: {sync.Conflicts}");
-             _ui.WriteLine($"Erros: {sync.Errors}");
-             if (sync.Messages.Any())
-             {
-                 _ui.Section("Detalhes");
-                 foreach(var msg in sync.Messages) _ui.WriteLine(msg);
-             }
-        }
-        else if (action == NotesAction.GetCloudStatus)
-        {
-            _ui.WriteLine($"Status: {(response.IsConnected ? "Conectado" : "Desconectado")}");
-            _ui.WriteLine($"Usuario: {response.CloudUser ?? "N/A"}");
+            else if (action == NotesAction.LoadNote && response.ReadResult != null)
+            {
+                _ui.Section("Nota Carregada");
+                _ui.WriteLine(response.ReadResult.Content ?? "(Vazio)");
+            }
+            else
+            {
+                if (action == NotesAction.CreateItem)
+                    _ui.WriteLine("Nota criada com sucesso!");
+                else if (action == NotesAction.ExportZip)
+                    _ui.WriteLine($"Backup exportado para: {output ?? "destino"}");
+                else if (action == NotesAction.ImportZip)
+                    _ui.WriteLine("Importacao concluida com sucesso.");
+                else
+                    _ui.WriteLine("Operacao realizada com sucesso.");
+            }
         }
         else
         {
-            if (action == NotesAction.CreateItem) 
-                _ui.WriteLine("Nota criada com sucesso!");
-            else if (action == NotesAction.ExportZip) 
-                _ui.WriteLine($"Backup exportado para: {outputPath ?? "destino"}");
-            else if (action == NotesAction.ImportZip) 
-                _ui.WriteLine("Importacao concluida com sucesso.");
-            else if (action == NotesAction.ConnectGoogle || action == NotesAction.ConnectOneDrive)
-                _ui.WriteLine("Conectado com sucesso!");
-            else if (action == NotesAction.DisconnectCloud)
-                _ui.WriteLine("Desconectado com sucesso!");
-            else 
-                _ui.WriteLine("Operacao realizada com sucesso.");
-        }
-
-        return 0;
-    }
-
-    private void WriteErrors(IReadOnlyList<DevTools.Core.Results.ErrorDetail> errors)
-    {
-        CliErrorLogger.LogErrors(Key, errors);
-        _ui.Section("Erros");
-        foreach (var error in errors)
-        {
-            _ui.WriteError($"{error.Code}: {error.Message}");
-            if (!string.IsNullOrWhiteSpace(error.Details))
-                _ui.WriteDim(error.Details);
-        }
-    }
-
-    private class CliNotesSettings
-    {
-        public string? GoogleClientId { get; set; }
-        public string? GoogleClientSecret { get; set; }
-        public string? OneDriveClientId { get; set; }
-        public string? LastCloudProvider { get; set; }
-
-        private static string FilePath => Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "DevTools", "cli_notes_settings.json");
-
-        public static CliNotesSettings Load()
-        {
-            try
+            // Non-interactive output
+            if (action == NotesAction.ListItems && response.ListResult != null)
             {
-                if (File.Exists(FilePath))
+                foreach (var item in response.ListResult.Items)
                 {
-                    var json = File.ReadAllText(FilePath);
-                    return System.Text.Json.JsonSerializer.Deserialize<CliNotesSettings>(json) ?? new CliNotesSettings();
+                    _ui.WriteLine($"{item.FileName}\t{item.UpdatedUtc}");
                 }
             }
-            catch { }
-            return new CliNotesSettings();
+            else if (action == NotesAction.LoadNote && response.ReadResult != null)
+            {
+                _ui.WriteLine(response.ReadResult.Content ?? "");
+            }
+            else if (action == NotesAction.ExportZip)
+            {
+                _ui.WriteLine(output ?? "Exported");
+            }
+        }
         }
 
-        public void Save()
-        {
-            try
-            {
-                var dir = Path.GetDirectoryName(FilePath);
-                if (!Directory.Exists(dir) && dir != null) Directory.CreateDirectory(dir);
-                
-                var json = System.Text.Json.JsonSerializer.Serialize(this);
-                File.WriteAllText(FilePath, json);
-            }
-            catch { }
-        }
+        _ui.PrintRunResult(result);
+        return result.IsSuccess && result.Summary.Failed == 0 ? 0 : 1;
     }
 }

@@ -115,21 +115,6 @@
                             <TextBlock Text="&#xE8B5;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                         </Button>
                         
-                        <Button x:Name="CloudButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Nuvem / Sync" Click="CloudButton_Click" Margin="0,0,10,0">
-                            <TextBlock Text="&#xE753;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
-                            <Button.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="Sincronizar Agora" Click="SyncCloud_Click"/>
-                                    <Separator/>
-                                    <MenuItem Header="Conectar Google Drive" Click="ConnectGoogle_Click"/>
-                                    <MenuItem Header="Conectar OneDrive" Click="ConnectOneDrive_Click"/>
-                                    <Separator/>
-                                    <MenuItem Header="Desconectar Tudo" Click="DisconnectCloud_Click"/>
-                                    <MenuItem Header="Status" Click="StatusCloud_Click"/>
-                                </ContextMenu>
-                            </Button.ContextMenu>
-                        </Button>
-
                         <Button x:Name="CloseButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Fechar" Click="CloseButton_Click">
                             <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                         </Button>

@@ -25,6 +25,7 @@ public sealed class RenameEngine : IDevToolEngine<RenameRequest, RenameResponse>
         IProgressReporter? progress = null,
         CancellationToken ct = default)
     {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
         var validationErrors = RenameRequestValidator.Validate(request);
         if (validationErrors.Count > 0)
             return RunResult<RenameResponse>.Fail(validationErrors);
@@ -71,7 +72,7 @@ public sealed class RenameEngine : IDevToolEngine<RenameRequest, RenameResponse>
             }
             catch (Exception ex)
             {
-                errors.Add(new ErrorDetail("rename.file.failed", "Failed to process file.", file, ex));
+                errors.Add(new ErrorDetail("rename.file.failed", "Failed to process file.", Cause: relative, Exception: ex));
             }
         }
 
@@ -98,29 +99,41 @@ public sealed class RenameEngine : IDevToolEngine<RenameRequest, RenameResponse>
                 {
                     if (request.DryRun)
                     {
-                        changes.Add(new RenameChange(RenameChangeType.DirectoryRenamed, dir, newPath));
+                        changes.Add(new RenameChange(
+                            RenameChangeType.DirectoryRenamed,
+                            dir,
+                            newPath));
                         directoriesRenamed++;
-                    }
-                    else if (_fs.DirectoryExists(newPath))
-                    {
-                        changes.Add(new RenameChange(RenameChangeType.SkippedExists, dir, newPath));
-                        skippedExists++;
                     }
                     else
                     {
-                        _fs.MoveDirectory(dir, newPath);
-                        changes.Add(new RenameChange(RenameChangeType.DirectoryRenamed, dir, newPath));
-                        directoriesRenamed++;
+                        if (_fs.DirectoryExists(newPath))
+                        {
+                            skippedExists++;
+                            errors.Add(new ErrorDetail("rename.dir.exists", "Target directory exists.", Cause: newPath));
+                        }
+                        else
+                        {
+                            _fs.MoveDirectory(dir, newPath);
+                            changes.Add(new RenameChange(
+                                RenameChangeType.DirectoryRenamed,
+                                dir,
+                                newPath));
+                            directoriesRenamed++;
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                errors.Add(new ErrorDetail("rename.directory.failed", "Failed to process directory.", dir, ex));
+                errors.Add(new ErrorDetail("rename.dir.failed", "Failed to rename directory.", Cause: relative, Exception: ex));
             }
         }
 
-        var summary = new RenameSummary(
+        progress?.Report(new ProgressEvent("Done", 100, "done"));
+        sw.Stop();
+
+        var summaryOld = new RenameSummary(
             filesScanned,
             directoriesScanned,
             filesUpdated,
@@ -145,7 +158,7 @@ public sealed class RenameEngine : IDevToolEngine<RenameRequest, RenameResponse>
             }
             catch (Exception ex)
             {
-                errors.Add(new ErrorDetail("rename.undo.failed", "Failed to write undo log.", undoLogPath, ex));
+                errors.Add(new ErrorDetail("rename.undo.failed", "Failed to write undo log.", Cause: undoLogPath, Exception: ex));
             }
         }
 
@@ -158,7 +171,7 @@ public sealed class RenameEngine : IDevToolEngine<RenameRequest, RenameResponse>
                 var report = new RenameReport(
                     DateTimeOffset.UtcNow,
                     request,
-                    summary,
+                    summaryOld,
                     changes,
                     diffs,
                     errors.Select(e => new RenameReportError(e.Code, e.Message, e.Details)).ToList(),
@@ -168,23 +181,26 @@ public sealed class RenameEngine : IDevToolEngine<RenameRequest, RenameResponse>
             }
             catch (Exception ex)
             {
-                errors.Add(new ErrorDetail("rename.report.failed", "Failed to write report.", reportPath, ex));
+                errors.Add(new ErrorDetail("rename.report.failed", "Failed to write report.", Cause: reportPath, Exception: ex));
             }
         }
 
-        var response = new RenameResponse(summary, changes, diffs, reportPath, undoLogPath);
+        var response = new RenameResponse(summaryOld, changes, diffs, reportPath, undoLogPath);
 
-        if (errors.Count > 0)
-        {
-            return new RunResult<RenameResponse>
-            {
-                IsSuccess = false,
-                Errors = errors.ToArray(),
-                Value = response
-            };
-        }
+        var summary = new RunSummary(
+            ToolName: "Rename",
+            Mode: request.DryRun ? "DryRun" : "Real",
+            MainInput: request.RootPath,
+            OutputLocation: null, // In-place
+            Processed: filesScanned + directoriesScanned,
+            Changed: filesUpdated + filesRenamed + directoriesRenamed,
+            Ignored: skippedBinary + skippedExists,
+            Failed: errors.Count,
+            Duration: sw.Elapsed
+        );
 
-        return RunResult<RenameResponse>.Success(response);
+        return RunResult<RenameResponse>.Success(response)
+            .WithSummary(summary);
     }
 
     private async Task<FileProcessStats> ProcessFileAsync(

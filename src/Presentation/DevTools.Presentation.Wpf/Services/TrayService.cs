@@ -7,6 +7,7 @@ using H.NotifyIcon;
 using System.Drawing; // SystemIcons fallback
 using DevTools.Presentation.Wpf.Views;
 using DevTools.Presentation.Wpf.Utilities;
+using DevTools.Core.Configuration;
 
 namespace DevTools.Presentation.Wpf.Services;
 
@@ -15,6 +16,7 @@ public class TrayService : IDisposable
     private readonly JobManager _jobManager;
     private readonly SettingsService _settingsService;
     private readonly ConfigService _configService;
+    private readonly ProfileManager _profileManager;
 
     private TaskbarIcon _taskbarIcon = null!;
     private Window? _jobCenterWindow;
@@ -122,11 +124,12 @@ public class TrayService : IDisposable
         }
     }
 
-    public TrayService(JobManager jobManager, SettingsService settingsService, ConfigService configService)
+    public TrayService(JobManager jobManager, SettingsService settingsService, ConfigService configService, ProfileManager profileManager)
     {
         _jobManager = jobManager;
         _settingsService = settingsService;
         _configService = configService;
+        _profileManager = profileManager;
         _jobManager.OnJobCompleted += OnJobCompleted;
     }
 

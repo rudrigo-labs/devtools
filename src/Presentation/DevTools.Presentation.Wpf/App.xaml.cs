@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows;
+using DevTools.Core.Configuration;
 using DevTools.Presentation.Wpf.Services;
 
 namespace DevTools.Presentation.Wpf;
@@ -10,6 +11,7 @@ public partial class App : Application
     private JobManager _jobManager = null!;
     private SettingsService _settingsService = null!;
     private ConfigService _configService = null!;
+    private ProfileManager _profileManager = null!;
     private TrayService _trayService = null!;
 
     public App()
@@ -26,7 +28,8 @@ public partial class App : Application
         _jobManager = new JobManager();
         _settingsService = new SettingsService();
         _configService = new ConfigService();
-        _trayService = new TrayService(_jobManager, _settingsService, _configService);
+        _profileManager = new ProfileManager();
+        _trayService = new TrayService(_jobManager, _settingsService, _configService, _profileManager);
 
         // Instancia Dashboard (Hub)
         var dashboard = new DevTools.Presentation.Wpf.Views.DashboardWindow(_trayService, _jobManager, _configService);

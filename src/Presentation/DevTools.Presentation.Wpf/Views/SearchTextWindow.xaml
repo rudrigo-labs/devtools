@@ -45,6 +45,8 @@
             <ScrollViewer Grid.Row="1" Margin="15,0,15,10">
                 <StackPanel>
                     
+                    <components:ProfileSelector x:Name="ProfileSelector" ToolName="searchtext" Margin="0,0,0,15"/>
+
                     <!-- Caminho -->
                     <components:PathSelector x:Name="PathSelector" 
                                          Title="Diretório de Busca"

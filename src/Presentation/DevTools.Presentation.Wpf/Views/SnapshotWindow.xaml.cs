@@ -2,9 +2,11 @@ using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Collections.Generic;
 using DevTools.Presentation.Wpf.Services;
 using DevTools.Snapshot.Engine;
 using DevTools.Snapshot.Models;
+using DevTools.Core.Models;
 using Microsoft.Win32;
 
 namespace DevTools.Presentation.Wpf.Views;
@@ -19,6 +21,9 @@ public partial class SnapshotWindow : Window
         InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
+
+        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
+        ProfileSelector.ProfileLoaded += LoadProfile;
 
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastSnapshotRootPath))
             RootPathBox.Text = _settingsService.Settings.LastSnapshotRootPath;
@@ -49,6 +54,34 @@ public partial class SnapshotWindow : Window
             _settingsService.Save();
         };
         */
+    }
+
+    private Dictionary<string, string> GetCurrentOptions()
+    {
+        var options = new Dictionary<string, string>();
+        options["root"] = RootPathBox.Text;
+        options["text"] = (TextCheck.IsChecked ?? true).ToString().ToLowerInvariant();
+        options["html"] = (HtmlCheck.IsChecked ?? false).ToString().ToLowerInvariant();
+        options["json-nested"] = (JsonNestedCheck.IsChecked ?? false).ToString().ToLowerInvariant();
+        options["json-recursive"] = (JsonRecursiveCheck.IsChecked ?? false).ToString().ToLowerInvariant();
+        return options;
+    }
+
+    private void LoadProfile(ToolProfile profile)
+    {
+        if (profile.Options.TryGetValue("root", out var root)) RootPathBox.Text = root;
+        
+        if (profile.Options.TryGetValue("text", out var text)) 
+            TextCheck.IsChecked = bool.TryParse(text, out var t) ? t : true;
+            
+        if (profile.Options.TryGetValue("html", out var html)) 
+            HtmlCheck.IsChecked = bool.TryParse(html, out var h) ? h : false;
+            
+        if (profile.Options.TryGetValue("json-nested", out var jn)) 
+            JsonNestedCheck.IsChecked = bool.TryParse(jn, out var n) ? n : false;
+            
+        if (profile.Options.TryGetValue("json-recursive", out var jr)) 
+            JsonRecursiveCheck.IsChecked = bool.TryParse(jr, out var r) ? r : false;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

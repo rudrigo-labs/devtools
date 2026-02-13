@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Ngrok Controller" Height="400" Width="500"
         WindowStyle="None"
@@ -38,20 +39,24 @@
 
         <!-- New Tunnel Form -->
         <Border Grid.Row="1" Background="#252526" Padding="20" Margin="0,0,0,1">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="10"/>
-                    <ColumnDefinition Width="150"/>
-                </Grid.ColumnDefinitions>
+            <StackPanel>
+                <c:ProfileSelector x:Name="ProfileSelector" ToolName="ngrok" Margin="0,0,0,15"/>
                 
-                <StackPanel Grid.Column="0">
-                    <TextBlock Text="Porta Local (ex: 5000)" Margin="0,0,0,5" Foreground="{StaticResource PrimaryTextBrush}"/>
-                    <TextBox x:Name="PortInput" Text="5000" PreviewTextInput="NumberValidationTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
-                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="150"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Porta Local (ex: 5000)" Margin="0,0,0,5" Foreground="{StaticResource PrimaryTextBrush}"/>
+                        <TextBox x:Name="PortInput" Text="5000" PreviewTextInput="NumberValidationTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
+                    </StackPanel>
 
-                <Button Grid.Column="2" x:Name="StartButton" Content="Expor Porta" Click="StartButton_Click" VerticalAlignment="Bottom" Style="{StaticResource PrimaryButtonStyle}" Padding="0,8"/>
-            </Grid>
+                    <Button Grid.Column="2" x:Name="StartButton" Content="Expor Porta" Click="StartButton_Click" VerticalAlignment="Bottom" Style="{StaticResource PrimaryButtonStyle}" Padding="0,8"/>
+                </Grid>
+            </StackPanel>
         </Border>
 
         <!-- Tunnels List -->
