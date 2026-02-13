@@ -1,4 +1,5 @@
 using System.Text;
+using DevTools.Core.Results;
 
 namespace DevTools.Cli.Ui;
 
@@ -27,6 +28,65 @@ public sealed class CliConsole
         {
             // ignore
         }
+    }
+
+    public void PrintRunResult(RunResult result)
+    {
+        WriteLine();
+        
+        var s = result.Summary;
+        // Check if summary is empty (default struct/record check might be needed)
+        // RunSummary.Empty uses default values.
+        if (s != null && !string.IsNullOrEmpty(s.ToolName))
+        {
+            var width = 60;
+            var line = new string('-', width);
+            
+            WriteDim(line);
+            WriteAccent($"RESUMO DA EXECUÇÃO: {s.ToolName}");
+            WriteDim(line);
+            
+            WriteKeyValue("Modo", s.Mode);
+            WriteKeyValue("Input", s.MainInput);
+            if (!string.IsNullOrWhiteSpace(s.OutputLocation))
+                WriteKeyValue("Output", s.OutputLocation);
+                
+            WriteKeyValue("Processados", s.Processed.ToString());
+            WriteKeyValue("Alterados", s.Changed.ToString());
+            WriteKeyValue("Ignorados", s.Ignored.ToString());
+            WriteKeyValue("Falhas", s.Failed.ToString());
+            WriteKeyValue("Duração", s.Duration.ToString(@"hh\:mm\:ss\.fff"));
+            
+            WriteDim(line);
+            WriteLine();
+        }
+        
+        if (result.Errors.Count > 0)
+        {
+            WriteError($"Encontrados {result.Errors.Count} erros:");
+            foreach (var err in result.Errors)
+            {
+                WriteLine();
+                WriteError($"[x] {err.Message}");
+                if (!string.IsNullOrWhiteSpace(err.Cause))
+                    WriteDim($"    Causa: {err.Cause}");
+                if (!string.IsNullOrWhiteSpace(err.Action))
+                    WriteInfo($"    Sugestão: {err.Action}");
+                if (!string.IsNullOrWhiteSpace(err.Details))
+                     WriteDim($"    Detalhe Técnico: {err.Details}");
+            }
+            WriteLine();
+        }
+        
+        if (result.IsSuccess)
+        {
+             WriteSuccess("✅ Concluído");
+        }
+        else
+        {
+             WriteError("❌ Falhou");
+        }
+        WriteLine();
     }
 
     public void Header(string title, string? subtitle = null)

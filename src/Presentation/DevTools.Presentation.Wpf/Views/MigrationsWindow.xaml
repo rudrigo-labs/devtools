@@ -45,6 +45,8 @@
             <ScrollViewer Grid.Row="1" x:Name="MainContent" Margin="15,0,15,10">
                 <StackPanel>
                     
+                    <components:ProfileSelector x:Name="ProfileSelector" ToolName="migrations" Margin="0,0,0,15"/>
+
                     <!-- Caminhos -->
                     <components:PathSelector x:Name="ProjectSelector" 
                                          Title="Pasta Raiz do Projeto (Onde está o .csproj)"

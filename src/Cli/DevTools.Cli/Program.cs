@@ -2,6 +2,8 @@ using DevTools.Cli.App;
 using DevTools.Cli.Commands;
 using DevTools.Cli.Ui;
 
+using DevTools.Core.Configuration;
+
 CliConsole.ConfigureEncoding();
 
 var theme = new CliTheme();
@@ -9,6 +11,7 @@ var state = new CliState();
 var ui = new CliConsole(theme, state);
 var input = new CliInput(ui);
 var menu = new CliMenu(ui, input);
+var profileManager = new ProfileManager();
 
 var commands = new List<ICliCommand>
 {
@@ -33,5 +36,6 @@ state.MenuItems = orderedCommands
     .Select((cmd, index) => $"{index + 1} - {cmd.Key.ToLowerInvariant()}")
     .ToList();
 
-var app = new CliApp(ui, menu, input, orderedCommands);
-return await app.RunAsync(CancellationToken.None);
+var options = ArgParser.Parse(args);
+var app = new CliApp(ui, menu, input, orderedCommands, profileManager);
+return await app.RunAsync(options, CancellationToken.None);

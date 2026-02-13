@@ -4,6 +4,9 @@ public class AppSettings
 {
     public string? LastHarvestSourcePath { get; set; }
     public string? LastHarvestOutputPath { get; set; }
+    public int? LastHarvestMinScore { get; set; }
+    public bool? LastHarvestCopyFiles { get; set; }
+    public string? LastHarvestConfigPath { get; set; }
     public string? LastOrganizerInputPath { get; set; }
     
     // Notes Window Persistence
@@ -21,6 +24,9 @@ public class AppSettings
 
     // Rename Persistence
     public string? LastRenameRootPath { get; set; }
+    public string? LastRenameInclude { get; set; }
+    public string? LastRenameExclude { get; set; }
+    public bool? LastRenameDryRun { get; set; }
     public double? RenameWindowTop { get; set; }
     public double? RenameWindowLeft { get; set; }
 

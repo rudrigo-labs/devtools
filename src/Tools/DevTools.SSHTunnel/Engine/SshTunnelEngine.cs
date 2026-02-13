@@ -61,11 +61,11 @@ public sealed class SshTunnelEngine : IDevToolEngine<SshTunnelRequest, SshTunnel
         }
         catch (SshTunnelConfigException ex)
         {
-            return RunResult<SshTunnelResponse>.Fail(new ErrorDetail(ex.Code, ex.Message, ex.Details, ex));
+            return RunResult<SshTunnelResponse>.Fail(new ErrorDetail(ex.Code, ex.Message, Details: ex.Details, Exception: ex));
         }
         catch (SshTunnelConnectionException ex)
         {
-            return RunResult<SshTunnelResponse>.Fail(new ErrorDetail(ex.Code, ex.Message, ex.Details, ex));
+            return RunResult<SshTunnelResponse>.Fail(new ErrorDetail(ex.Code, ex.Message, Details: ex.Details, Exception: ex));
         }
     }
 

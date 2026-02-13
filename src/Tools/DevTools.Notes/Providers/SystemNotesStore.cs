@@ -40,8 +40,8 @@ public sealed class SystemNotesStore : INotesStore
             return RunResult<NoteReadResult>.Fail(new ErrorDetail(
                 "notes.read.failed",
                 "Failed to read note.",
-                ex.Message,
-                ex));
+                Cause: ex.Message,
+                Exception: ex));
         }
     }
 
@@ -74,8 +74,8 @@ public sealed class SystemNotesStore : INotesStore
             return RunResult<NoteWriteResult>.Fail(new ErrorDetail(
                 "notes.write.failed",
                 "Failed to write note.",
-                ex.Message,
-                ex));
+                Cause: ex.Message,
+                Exception: ex));
         }
     }
 

@@ -2,9 +2,11 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Collections.Generic;
 using DevTools.Presentation.Wpf.Services;
 using DevTools.SearchText.Engine;
 using DevTools.SearchText.Models;
+using DevTools.Core.Models;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -18,6 +20,9 @@ public partial class SearchTextWindow : Window
         InitializeComponent();
         _jobManager = jobManager;
         _settings = settings;
+
+        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
+        ProfileSelector.ProfileLoaded += LoadProfile;
 
         Loaded += OnLoaded;
         Closing += OnClosing;
@@ -53,6 +58,33 @@ public partial class SearchTextWindow : Window
         _settings.Settings.LastSearchTextInclude = IncludePatternInput.Text;
         _settings.Settings.LastSearchTextExclude = ExcludePatternInput.Text;
         _settings.Save();
+    }
+
+    private Dictionary<string, string> GetCurrentOptions()
+    {
+        var options = new Dictionary<string, string>();
+        options["root"] = PathSelector.SelectedPath;
+        options["pattern"] = SearchTextInput.Text;
+        options["regex"] = (UseRegexCheck.IsChecked ?? false).ToString().ToLowerInvariant();
+        options["case-sensitive"] = (CaseSensitiveCheck.IsChecked ?? false).ToString().ToLowerInvariant();
+        options["include"] = IncludePatternInput.Text;
+        options["exclude"] = ExcludePatternInput.Text;
+        return options;
+    }
+
+    private void LoadProfile(ToolProfile profile)
+    {
+        if (profile.Options.TryGetValue("root", out var root)) PathSelector.SelectedPath = root;
+        if (profile.Options.TryGetValue("pattern", out var pattern)) SearchTextInput.Text = pattern;
+        
+        if (profile.Options.TryGetValue("regex", out var regex))
+             UseRegexCheck.IsChecked = bool.TryParse(regex, out var r) ? r : false;
+             
+        if (profile.Options.TryGetValue("case-sensitive", out var cs))
+             CaseSensitiveCheck.IsChecked = bool.TryParse(cs, out var c) ? c : false;
+             
+        if (profile.Options.TryGetValue("include", out var inc)) IncludePatternInput.Text = inc;
+        if (profile.Options.TryGetValue("exclude", out var exc)) ExcludePatternInput.Text = exc;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

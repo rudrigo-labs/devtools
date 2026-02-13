@@ -18,15 +18,15 @@ public static class HarvestRequestValidator
 
         if (string.IsNullOrWhiteSpace(request.RootPath))
         {
-            errors.Add(new ErrorDetail("harvest.root.required", "RootPath is required."));
+            errors.Add(new ErrorDetail("harvest.root.required", "RootPath is required.", Action: "Please provide a valid source directory path."));
         }
         else if (!fs.DirectoryExists(request.RootPath))
         {
-            errors.Add(new ErrorDetail("harvest.root.not_found", "RootPath not found.", request.RootPath));
+            errors.Add(new ErrorDetail("harvest.root.not_found", "RootPath not found.", Cause: request.RootPath, Action: "Ensure the directory exists and the path is correct."));
         }
 
         if (request.MinScore.HasValue && request.MinScore.Value < 0)
-            errors.Add(new ErrorDetail("harvest.min_score.invalid", "MinScore cannot be negative."));
+            errors.Add(new ErrorDetail("harvest.min_score.invalid", "MinScore cannot be negative.", Action: "Set MinScore to 0 or higher."));
 
         return errors;
     }
