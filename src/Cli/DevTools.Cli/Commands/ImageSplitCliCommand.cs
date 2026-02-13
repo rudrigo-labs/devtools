@@ -46,16 +46,28 @@ public sealed class ImageSplitCliCommand : ICliCommand
         if (!options.IsNonInteractive)
         {
             if (string.IsNullOrWhiteSpace(inputPath))
+            {
                 inputPath = _input.ReadRequired("Arquivo de imagem", "ex: C:\\Projetos\\icone.png");
+                options.Options["input"] = inputPath;
+            }
             
             if (string.IsNullOrWhiteSpace(outputDir))
+            {
                 outputDir = _input.ReadOptional("Pasta de saida (opcional)", "enter para usar a pasta da imagem");
+                if (!string.IsNullOrWhiteSpace(outputDir)) options.Options["output"] = outputDir;
+            }
             
             if (string.IsNullOrWhiteSpace(baseName))
+            {
                 baseName = _input.ReadOptional("Base do nome (opcional)");
+                if (!string.IsNullOrWhiteSpace(baseName)) options.Options["base-name"] = baseName;
+            }
             
             if (string.IsNullOrWhiteSpace(extension))
+            {
                 extension = _input.ReadOptional("Extensao (opcional)", "ex: .png");
+                if (!string.IsNullOrWhiteSpace(extension)) options.Options["extension"] = extension;
+            }
 
             // Advanced options usually asked together
             bool askAdvanced = alpha == null && startIndex == null && overwrite == null && minW == null && minH == null;
@@ -66,10 +78,19 @@ public sealed class ImageSplitCliCommand : ICliCommand
                 {
                     var alphaInt = _input.ReadOptionalInt("Alpha threshold", "0-255, enter=10") ?? 10;
                     alpha = (byte)Math.Clamp(alphaInt, 0, 255);
+                    options.Options["alpha"] = alpha.Value.ToString();
+
                     startIndex = _input.ReadOptionalInt("Start index", "enter=1") ?? 1;
+                    options.Options["start-index"] = startIndex.Value.ToString();
+
                     overwrite = _input.ReadYesNo("Sobrescrever", false);
+                    options.Options["overwrite"] = overwrite.Value.ToString().ToLowerInvariant();
+
                     minW = _input.ReadOptionalInt("Min largura", "enter=3") ?? 3;
+                    options.Options["min-w"] = minW.Value.ToString();
+
                     minH = _input.ReadOptionalInt("Min altura", "enter=3") ?? 3;
+                    options.Options["min-h"] = minH.Value.ToString();
                 }
             }
         }

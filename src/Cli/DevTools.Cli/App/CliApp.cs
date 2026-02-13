@@ -1,6 +1,8 @@
 using DevTools.Cli.Commands;
 using DevTools.Cli.Logging;
 using DevTools.Cli.Ui;
+using DevTools.Core.Configuration;
+using DevTools.Core.Models;
 
 namespace DevTools.Cli.App;
 
@@ -10,13 +12,15 @@ public sealed class CliApp
     private readonly CliMenu _menu;
     private readonly CliInput _input;
     private readonly IReadOnlyList<ICliCommand> _commands;
+    private readonly ProfileManager _profileManager;
 
-    public CliApp(CliConsole ui, CliMenu menu, CliInput input, IReadOnlyList<ICliCommand> commands)
+    public CliApp(CliConsole ui, CliMenu menu, CliInput input, IReadOnlyList<ICliCommand> commands, ProfileManager profileManager)
     {
         _ui = ui;
         _menu = menu;
         _input = input;
         _commands = commands;
+        _profileManager = profileManager;
     }
 
     public async Task<int> RunAsync(CliLaunchOptions options, CancellationToken ct)
@@ -70,19 +74,89 @@ public sealed class CliApp
             {
                 // Pass options only on first run, otherwise empty options for repeated runs
                 var runOptions = isFirstRun ? options : new CliLaunchOptions();
+                
+                // --- Profile Logic Start ---
+                
+                // 1. Load Profile from Args (only on first run)
+                if (isFirstRun && runOptions.GetOption("profile") is string profileArg)
+                {
+                    var profile = _profileManager.GetProfile(command.Key, profileArg);
+                    if (profile != null)
+                    {
+                        _ui.WriteSuccess($"Perfil '{profile.Name}' carregado.");
+                        foreach (var kvp in profile.Options)
+                        {
+                            if (!runOptions.Options.ContainsKey(kvp.Key))
+                            {
+                                runOptions.Options[kvp.Key] = kvp.Value;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _ui.WriteWarning($"Perfil '{profileArg}' nao encontrado para a ferramenta '{command.Key}'.");
+                        if (options.IsNonInteractive) return 1;
+                    }
+                }
+                else if (!options.IsNonInteractive)
+                {
+                    // 2. Interactive Profile Selection
+                    var profiles = _profileManager.LoadProfiles(command.Key);
+                    if (profiles.Count > 0)
+                    {
+                        var useProfile = _input.ReadYesNo($"Existem {profiles.Count} perfis salvos. Carregar?", false);
+                        if (useProfile)
+                        {
+                             var profileNames = profiles.Select(p => p.Name).ToList();
+                             var selectedIndex = _menu.ShowOptions("Selecione o perfil", profileNames);
+                             if (selectedIndex >= 0)
+                             {
+                                 var profile = profiles[selectedIndex];
+                                 _ui.WriteSuccess($"Perfil '{profile.Name}' carregado.");
+                                 foreach (var kvp in profile.Options)
+                                 {
+                                     if (!runOptions.Options.ContainsKey(kvp.Key))
+                                     {
+                                         runOptions.Options[kvp.Key] = kvp.Value;
+                                     }
+                                 }
+                             }
+                        }
+                    }
+                }
+                
+                // --- Profile Logic End ---
+                
                 lastResult = await command.ExecuteAsync(runOptions, ct).ConfigureAwait(false);
                 
-                if (!options.IsNonInteractive)
+                // --- Save Profile Logic ---
+                if (lastResult == 0) // Only save on success
                 {
-                    _ui.WriteLine();
-                    _ui.Section("Resumo final");
-                    if (lastResult == 0)
-                        _ui.WriteSuccess("Concluido.");
-                    else
-                        _ui.WriteWarning("Concluido com avisos/erros.");
+                    var optionsToSave = SanitizeOptions(runOptions.Options);
+
+                    if (isFirstRun && runOptions.GetOption("save-profile") is string saveName)
+                    {
+                        // Save requested via args
+                        var profile = new ToolProfile { Name = saveName, Options = optionsToSave, UpdatedUtc = DateTime.UtcNow };
+                        _profileManager.SaveProfile(command.Key, profile);
+                        _ui.WriteSuccess($"Perfil '{saveName}' salvo com sucesso.");
+                    }
+                    else if (!options.IsNonInteractive)
+                    {
+                        // Interactive save prompt
+                        var save = _input.ReadYesNo("Salvar configuracao atual como perfil?", false);
+                        if (save)
+                        {
+                            var name = _input.ReadRequired("Nome do perfil");
+                            var profile = new ToolProfile { Name = name, Options = optionsToSave, UpdatedUtc = DateTime.UtcNow };
+                            _profileManager.SaveProfile(command.Key, profile);
+                            _ui.WriteSuccess($"Perfil '{name}' salvo com sucesso.");
+                        }
+                    }
                 }
             }
             catch (CliAbortException)
+
             {
                 _ui.WriteWarning("Operacao cancelada.");
                 if (options.IsNonInteractive) return 1;
@@ -106,35 +180,53 @@ public sealed class CliApp
             }
             catch (CliAbortException)
             {
-                continue;
+                return 0;
             }
+
             if (next == NextAction.Exit)
                 return 0;
-            if (next == NextAction.Repeat)
-                pending = command;
+            
+            if (next == NextAction.MainMenu)
+            {
+                pending = null; // Loop will show menu
+            }
+            else if (next == NextAction.Repeat)
+            {
+                pending = command; // Loop will execute same command
+            }
         }
     }
 
-    private NextAction PromptNextAction(ICliCommand command)
+    private Dictionary<string, string> SanitizeOptions(Dictionary<string, string> options)
     {
-        _ui.Section("Proximo passo");
-        _ui.WriteLine("1) Voltar ao menu");
-        _ui.WriteLine("2) Repetir esta ferramenta");
-        _ui.WriteLine("0) Sair");
-
-        var choice = _input.ReadInt("Escolha", 0, 2);
-        return choice switch
-        {
-            2 => NextAction.Repeat,
-            0 => NextAction.Exit,
-            _ => NextAction.Menu
-        };
+        var clean = new Dictionary<string, string>(options);
+        clean.Remove("profile");
+        clean.Remove("save-profile");
+        clean.Remove("non-interactive");
+        return clean;
     }
 
     private enum NextAction
     {
-        Menu = 0,
-        Repeat = 1,
-        Exit = 2
+        Exit,
+        MainMenu,
+        Repeat
+    }
+
+    private NextAction PromptNextAction(ICliCommand command)
+    {
+        _ui.WriteLine("");
+        _ui.Section("O que fazer agora?");
+        _ui.WriteLine("1) Repetir comando");
+        _ui.WriteLine("2) Menu principal");
+        _ui.WriteLine("3) Sair");
+        
+        var choice = _input.ReadInt("Escolha", 1, 3);
+        return choice switch
+        {
+            1 => NextAction.Repeat,
+            2 => NextAction.MainMenu,
+            _ => NextAction.Exit
+        };
     }
 }

@@ -27,33 +27,113 @@ public sealed class NotesEngine : IDevToolEngine<NotesRequest, NotesResponse>
         IProgressReporter? progress = null,
         CancellationToken ct = default)
     {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
         var errors = NotesRequestValidator.Validate(request);
         if (errors.Count > 0)
             return RunResult<NotesResponse>.Fail(errors);
 
-        switch (request.Action)
+        RunResult<NotesResponse> result;
+
+        try
         {
-            case NotesAction.LoadNote:
-                return await HandleLoadAsync(request, progress, ct).ConfigureAwait(false);
+            switch (request.Action)
+            {
+                case NotesAction.LoadNote:
+                    result = await HandleLoadAsync(request, progress, ct).ConfigureAwait(false);
+                    break;
 
-            case NotesAction.SaveNote:
-                return await HandleSaveAsync(request, progress, ct).ConfigureAwait(false);
+                case NotesAction.SaveNote:
+                    result = await HandleSaveAsync(request, progress, ct).ConfigureAwait(false);
+                    break;
 
-            case NotesAction.CreateItem:
-                return await HandleCreateItemAsync(request, progress, ct).ConfigureAwait(false);
+                case NotesAction.CreateItem:
+                    result = await HandleCreateItemAsync(request, progress, ct).ConfigureAwait(false);
+                    break;
 
-            case NotesAction.ListItems:
-                return await HandleListItemsAsync(request, progress, ct).ConfigureAwait(false);
+                case NotesAction.ListItems:
+                    result = await HandleListItemsAsync(request, progress, ct).ConfigureAwait(false);
+                    break;
 
-            case NotesAction.ExportZip:
-                return HandleExportZip(request, progress);
+                case NotesAction.ExportZip:
+                    result = HandleExportZip(request, progress);
+                    break;
 
-            case NotesAction.ImportZip:
-                return await HandleImportZipAsync(request, progress, ct).ConfigureAwait(false);
+                case NotesAction.ImportZip:
+                    result = await HandleImportZipAsync(request, progress, ct).ConfigureAwait(false);
+                    break;
 
-            default:
-                return RunResult<NotesResponse>.Fail(new ErrorDetail("notes.action.invalid", "Action is invalid."));
+                default:
+                    result = RunResult<NotesResponse>.Fail(new ErrorDetail("notes.action.invalid", "Action is invalid."));
+                    break;
+            }
         }
+        catch (Exception ex)
+        {
+            result = RunResult<NotesResponse>.Fail(new ErrorDetail("notes.engine.crash", "Unexpected error.", Exception: ex));
+        }
+
+        sw.Stop();
+
+        var summary = BuildSummary(request, result, sw.Elapsed);
+        return result.WithSummary(summary);
+    }
+
+    private static RunSummary BuildSummary(NotesRequest request, RunResult<NotesResponse> result, TimeSpan duration)
+    {
+        int processed = 0;
+        int changed = 0;
+        int ignored = 0;
+        string? output = null;
+
+        if (result.IsSuccess && result.Value is not null)
+        {
+            var val = result.Value;
+            if (val.ListResult != null)
+            {
+                processed = val.ListResult.Items.Count;
+            }
+            else if (val.ReadResult != null)
+            {
+                processed = 1;
+                output = val.ReadResult.Path;
+            }
+            else if (val.WriteResult != null)
+            {
+                processed = 1;
+                changed = 1;
+                output = val.WriteResult.Path;
+            }
+            else if (val.CreateResult != null)
+            {
+                processed = 1;
+                changed = 1;
+                output = val.CreateResult.Path;
+            }
+            else if (val.ExportedZipPath != null)
+            {
+                processed = 1;
+                changed = 1;
+                output = val.ExportedZipPath;
+            }
+            else if (val.BackupReport != null)
+            {
+                processed = val.BackupReport.ImportedCount + val.BackupReport.SkippedCount + val.BackupReport.ConflictCount;
+                changed = val.BackupReport.ImportedCount + val.BackupReport.ConflictCount;
+                ignored = val.BackupReport.SkippedCount;
+            }
+        }
+
+        return new RunSummary(
+            ToolName: "Notes",
+            Mode: request.Action.ToString(),
+            MainInput: request.NoteKey ?? request.ZipPath ?? request.NotesRootPath ?? "Default",
+            OutputLocation: output,
+            Processed: processed,
+            Changed: changed,
+            Ignored: ignored,
+            Failed: result.Errors.Count,
+            Duration: duration
+        );
     }
 
     private async Task<RunResult<NotesResponse>> HandleCreateItemAsync(
@@ -241,8 +321,7 @@ public sealed class NotesEngine : IDevToolEngine<NotesRequest, NotesResponse>
             return RunResult<NotesBackupReport>.Fail(new ErrorDetail(
                 "notes.backup.import.merge.failed",
                 "Failed to merge imported notes.",
-                ex.Message,
-                ex));
+                Exception: ex));
         }
     }
 

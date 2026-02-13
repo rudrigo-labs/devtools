@@ -50,43 +50,78 @@ public sealed class SearchTextCliCommand : ICliCommand
         if (!options.IsNonInteractive)
         {
             if (string.IsNullOrWhiteSpace(root))
+            {
                 root = _input.ReadRequired("Pasta raiz", "ex: C:\\Projetos\\MeuApp");
+                options.Options["root"] = root;
+            }
             
             if (string.IsNullOrWhiteSpace(pattern))
+            {
                 pattern = _input.ReadRequired("Texto ou regex");
+                options.Options["pattern"] = pattern;
+            }
             
             if (regex == null)
+            {
                 regex = _input.ReadYesNo("Usar regex", false);
+                options.Options["regex"] = regex.Value.ToString().ToLower();
+            }
             
             if (caseSensitive == null)
+            {
                 caseSensitive = _input.ReadYesNo("Diferenciar maiusculas", false);
+                options.Options["case-sensitive"] = caseSensitive.Value.ToString().ToLower();
+            }
             
             if (wholeWord == null)
+            {
                 wholeWord = _input.ReadYesNo("Palavra inteira", false);
+                options.Options["whole-word"] = wholeWord.Value.ToString().ToLower();
+            }
 
             if (string.IsNullOrWhiteSpace(includeStr))
             {
                 var list = _input.ReadCsv("Includes (globs)", "ex: src/**/*.cs, **/*.md");
-                if (list.Count > 0) includeStr = string.Join(",", list);
+                if (list.Count > 0) 
+                {
+                    includeStr = string.Join(",", list);
+                    options.Options["include"] = includeStr;
+                }
             }
             
             if (string.IsNullOrWhiteSpace(excludeStr))
             {
                 var list = _input.ReadCsv("Excludes (globs)", "ex: bin/**, obj/**");
-                if (list.Count > 0) excludeStr = string.Join(",", list);
+                if (list.Count > 0) 
+                {
+                    excludeStr = string.Join(",", list);
+                    options.Options["exclude"] = excludeStr;
+                }
             }
 
             if (maxSize == null)
+            {
                 maxSize = _input.ReadOptionalInt("Max KB por arquivo", "enter para ignorar");
+                if (maxSize.HasValue) options.Options["max-size"] = maxSize.Value.ToString();
+            }
             
             if (skipBinary == null)
+            {
                 skipBinary = _input.ReadYesNo("Ignorar binarios", true);
+                options.Options["skip-binary"] = skipBinary.Value.ToString().ToLower();
+            }
             
             if (maxPerFile == null)
+            {
                 maxPerFile = _input.ReadOptionalInt("Max matches por arquivo", "0 = sem limite") ?? 0;
+                options.Options["max-per-file"] = maxPerFile.Value.ToString();
+            }
             
             if (showLines == null)
+            {
                 showLines = _input.ReadYesNo("Mostrar linhas", true);
+                options.Options["show-lines"] = showLines.Value.ToString().ToLower();
+            }
         }
 
         // Defaults

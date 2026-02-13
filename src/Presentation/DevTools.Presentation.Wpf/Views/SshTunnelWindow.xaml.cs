@@ -1,13 +1,12 @@
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
+using DevTools.Core.Configuration;
+using DevTools.Core.Models;
 using DevTools.Presentation.Wpf.Services;
 using DevTools.SSHTunnel.Engine;
 using DevTools.SSHTunnel.Models;
 using DevTools.SSHTunnel.Providers;
-using Microsoft.Win32;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -18,10 +17,6 @@ public partial class SshTunnelWindow : Window
     private readonly ConfigService _configService;
     private readonly TunnelService _tunnelService;
     
-    private SshConfigSection _sshConfig = new();
-    private TunnelProfile? _selectedProfile;
-    private bool _isDirty;
-
     public SshTunnelWindow(JobManager jobManager, SettingsService settingsService, ConfigService configService)
     {
         InitializeComponent();
@@ -30,10 +25,11 @@ public partial class SshTunnelWindow : Window
         _configService = configService;
         
         // Inicializa serviços do SSH Tunnel
-        // ConfigStore removido em favor do ConfigService
         _tunnelService = new TunnelService(new SystemProcessRunner());
 
-        LoadConfig();
+        // Configura ProfileSelector
+        ProfileSelector.ProfileLoaded += LoadProfile;
+        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
         
         // Monitora fechamento para salvar posição
         Closing += (s, e) => SavePosition();
@@ -45,133 +41,34 @@ public partial class SshTunnelWindow : Window
         timer.Start();
     }
 
-    private void LoadConfig()
+    private void LoadProfile(ToolProfile profile)
     {
-        _sshConfig = _configService.GetSection<SshConfigSection>("Ssh");
-        RefreshProfileList();
-        
-        if (_sshConfig.Profiles.Count > 0)
-        {
-            ProfilesList.SelectedIndex = 0;
-        }
+        if (profile.Options.TryGetValue("ssh-host", out var sshHost)) SshHostInput.Text = sshHost;
+        if (profile.Options.TryGetValue("ssh-port", out var sshPort)) SshPortInput.Text = sshPort;
+        if (profile.Options.TryGetValue("ssh-user", out var sshUser)) SshUserInput.Text = sshUser;
+        if (profile.Options.TryGetValue("identity-file", out var identityFile)) IdentityFileInput.Text = identityFile;
+        if (profile.Options.TryGetValue("local-bind", out var localBind)) LocalBindInput.Text = localBind;
+        if (profile.Options.TryGetValue("local-port", out var localPort)) LocalPortInput.Text = localPort;
+        if (profile.Options.TryGetValue("remote-host", out var remoteHost)) RemoteHostInput.Text = remoteHost;
+        if (profile.Options.TryGetValue("remote-port", out var remotePort)) RemotePortInput.Text = remotePort;
     }
 
-    private void RefreshProfileList()
+    private Dictionary<string, string> GetCurrentOptions()
     {
-        ProfilesList.ItemsSource = null;
-        ProfilesList.ItemsSource = _sshConfig.Profiles;
-    }
-
-    private void ProfilesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (ProfilesList.SelectedItem is TunnelProfile profile)
-        {
-            _selectedProfile = profile;
-            PopulateForm(profile);
-            _isDirty = false;
-            UpdateStatusUI();
-        }
-    }
-
-    private void PopulateForm(TunnelProfile p)
-    {
-        ProfileNameInput.Text = p.Name;
-        SshHostInput.Text = p.SshHost;
-        SshPortInput.Text = p.SshPort.ToString();
-        SshUserInput.Text = p.SshUser;
-        IdentityFileInput.Text = p.IdentityFile ?? "";
-        LocalBindInput.Text = p.LocalBindHost;
-        LocalPortInput.Text = p.LocalPort.ToString();
-        RemoteHostInput.Text = p.RemoteHost;
-        RemotePortInput.Text = p.RemotePort.ToString();
-    }
-
-    private void UpdateModelFromForm()
-    {
-        if (_selectedProfile == null) return;
-
-        _selectedProfile.Name = ProfileNameInput.Text;
-        _selectedProfile.SshHost = SshHostInput.Text;
-        int.TryParse(SshPortInput.Text, out int sshPort);
-        _selectedProfile.SshPort = sshPort > 0 ? sshPort : 22;
-        _selectedProfile.SshUser = SshUserInput.Text;
-        _selectedProfile.IdentityFile = IdentityFileInput.Text;
-        _selectedProfile.LocalBindHost = LocalBindInput.Text;
-        int.TryParse(LocalPortInput.Text, out int localPort);
-        _selectedProfile.LocalPort = localPort;
-        _selectedProfile.RemoteHost = RemoteHostInput.Text;
-        int.TryParse(RemotePortInput.Text, out int remotePort);
-        _selectedProfile.RemotePort = remotePort;
-    }
-
-    private void Input_Changed(object sender, TextChangedEventArgs e)
-    {
-        _isDirty = true;
-    }
-
-    private void SaveButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (_selectedProfile != null)
-        {
-            UpdateModelFromForm();
-            _configService.SaveSection("Ssh", _sshConfig);
-            _isDirty = false;
-            RefreshProfileList();
-            ProfilesList.SelectedItem = _selectedProfile; // Mantém seleção
-            MessageBox.Show("Configurações salvas!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-    }
-
-    private void AddProfile_Click(object sender, RoutedEventArgs e)
-    {
-        var newProfile = new TunnelProfile
-        {
-            Name = "Novo Perfil",
-            SshHost = "hostname",
-            SshUser = "user",
-            IdentityFile = ""
-        };
-        _sshConfig.Profiles.Add(newProfile);
-        _configService.SaveSection("Ssh", _sshConfig); // Save immediately
-        RefreshProfileList();
-        ProfilesList.SelectedItem = newProfile;
-    }
-
-    private void RemoveProfile_Click(object sender, RoutedEventArgs e)
-    {
-        if (_selectedProfile != null)
-        {
-            if (MessageBox.Show($"Tem certeza que deseja remover o perfil '{_selectedProfile.Name}'?", "Confirmar", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
-            {
-                _sshConfig.Profiles.Remove(_selectedProfile);
-                _configService.SaveSection("Ssh", _sshConfig);
-                RefreshProfileList();
-                if (_sshConfig.Profiles.Count > 0)
-                    ProfilesList.SelectedIndex = 0;
-                else
-                    ClearForm();
-            }
-        }
-    }
-
-    private void ClearForm()
-    {
-        ProfileNameInput.Text = "";
-        SshHostInput.Text = "";
-        SshPortInput.Text = "";
-        SshUserInput.Text = "";
-        IdentityFileInput.Text = "";
-        LocalBindInput.Text = "";
-        LocalPortInput.Text = "";
-        RemoteHostInput.Text = "";
-        RemotePortInput.Text = "";
-        _selectedProfile = null;
+        var options = new Dictionary<string, string>();
+        options["ssh-host"] = SshHostInput.Text;
+        options["ssh-port"] = SshPortInput.Text;
+        options["ssh-user"] = SshUserInput.Text;
+        options["identity-file"] = IdentityFileInput.Text;
+        options["local-bind"] = LocalBindInput.Text;
+        options["local-port"] = LocalPortInput.Text;
+        options["remote-host"] = RemoteHostInput.Text;
+        options["remote-port"] = RemotePortInput.Text;
+        return options;
     }
 
     private async void ToggleTunnel_Click(object sender, RoutedEventArgs e)
     {
-        if (_selectedProfile == null) return;
-
         if (_tunnelService.IsOn)
         {
             // Stop
@@ -184,12 +81,11 @@ public partial class SshTunnelWindow : Window
         else
         {
             // Start
-            // Primeiro salva se houver mudanças
-            if (_isDirty)
+            var profile = BuildProfileFromUi();
+            if (string.IsNullOrWhiteSpace(profile.SshHost))
             {
-                UpdateModelFromForm();
-                _configService.SaveSection("Ssh", _sshConfig);
-                _isDirty = false;
+                MessageBox.Show("Host SSH é obrigatório.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
 
             ToggleTunnelButton.IsEnabled = false;
@@ -197,75 +93,86 @@ public partial class SshTunnelWindow : Window
             
             try
             {
-                await _tunnelService.StartAsync(_selectedProfile);
+                await _tunnelService.StartAsync(profile);
             }
             catch (Exception ex)
             {
-                AppLogger.Error("Error starting SSH tunnel", ex);
-                MessageBox.Show($"Erro ao conectar:\n{ex.Message}\n\nDetalhes:\n{_tunnelService.LastError}", "Erro de Conexão", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao iniciar túnel: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
-                UpdateStatusUI();
                 ToggleTunnelButton.IsEnabled = true;
+                UpdateStatusUI();
             }
         }
+    }
+
+    private TunnelProfile BuildProfileFromUi()
+    {
+        int.TryParse(SshPortInput.Text, out int sshPort);
+        int.TryParse(LocalPortInput.Text, out int localPort);
+        int.TryParse(RemotePortInput.Text, out int remotePort);
+
+        return new TunnelProfile
+        {
+            Name = ProfileSelector.SelectedProfile?.Name ?? "Manual",
+            SshHost = SshHostInput.Text,
+            SshPort = sshPort > 0 ? sshPort : 22,
+            SshUser = SshUserInput.Text,
+            IdentityFile = IdentityFileInput.Text,
+            LocalBindHost = LocalBindInput.Text,
+            LocalPort = localPort,
+            RemoteHost = RemoteHostInput.Text,
+            RemotePort = remotePort
+        };
     }
 
     private void UpdateStatusUI()
     {
         if (_tunnelService.IsOn)
         {
-            StatusIndicator.Fill = new SolidColorBrush(Colors.LightGreen);
-            StatusText.Text = $"Conectado (PID: {_tunnelService.ProcessId})";
+            StatusIndicator.Fill = Brushes.Green;
+            StatusText.Text = "Conectado";
             ToggleTunnelButton.Content = "Desconectar";
-            ToggleTunnelButton.Background = new SolidColorBrush(Color.FromRgb(220, 53, 69)); // Red
+            ToggleTunnelButton.Style = (Style)FindResource("SecondaryButtonStyle"); // Use secondary style for disconnect
         }
         else
         {
-            StatusIndicator.Fill = new SolidColorBrush(Colors.Gray);
-            StatusText.Text = "Desconectado";
+            StatusIndicator.Fill = Brushes.Gray;
+            StatusText.Text = "Parado";
             ToggleTunnelButton.Content = "Conectar";
-            ToggleTunnelButton.Background = new SolidColorBrush(Color.FromRgb(40, 167, 69)); // Green
-            
-            if (_tunnelService.State == TunnelState.Error)
-            {
-                StatusIndicator.Fill = new SolidColorBrush(Colors.Red);
-                StatusText.Text = "Erro (Verifique logs)";
-            }
+            ToggleTunnelButton.Style = (Style)FindResource("PrimaryButtonStyle");
         }
     }
 
     private void BrowseKey_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new OpenFileDialog
+        var dialog = new Microsoft.Win32.OpenFileDialog
         {
-            Filter = "Key Files (*.pem;*.ppk;*.key)|*.pem;*.ppk;*.key|All files (*.*)|*.*",
-            Title = "Selecione a chave privada"
+            Filter = "Key Files|*.pem;*.key;*.ppk|All Files|*.*",
+            Title = "Selecione o arquivo de chave privada"
         };
-        if (dlg.ShowDialog() == true)
+        if (dialog.ShowDialog() == true)
         {
-            IdentityFileInput.Text = dlg.FileName;
+            IdentityFileInput.Text = dialog.FileName;
         }
     }
 
-    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private void SavePosition()
     {
-        // DragMove();
+        // Implementar persistência de posição da janela se necessário
+    }
+
+    private void Header_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (e.ButtonState == System.Windows.Input.MouseButtonState.Pressed)
+        {
+            DragMove();
+        }
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
         Close();
-    }
-
-    private void SavePosition()
-    {
-        _settingsService.Settings.SshWindowTop = Top;
-        _settingsService.Settings.SshWindowLeft = Left;
-        _settingsService.Save();
-        
-        // Stop tunnel on close
-        _tunnelService.Dispose();
     }
 }

@@ -59,10 +59,16 @@ public sealed class SnapshotCliCommand : ICliCommand
         if (!options.IsNonInteractive)
         {
             if (string.IsNullOrWhiteSpace(root))
+            {
                 root = _input.ReadRequired("Pasta raiz", "ex: C:\\Projetos\\MeuApp");
+                options.Options["root"] = root;
+            }
             
             if (string.IsNullOrWhiteSpace(outputBase))
+            {
                 outputBase = _input.ReadOptional("Saida base (opcional)", "enter para padrao");
+                if (!string.IsNullOrWhiteSpace(outputBase)) options.Options["output"] = outputBase;
+            }
 
             if (genText == null && genJsonNested == null && genJsonRecursive == null && genHtml == null)
             {
@@ -78,15 +84,33 @@ public sealed class SnapshotCliCommand : ICliCommand
                 genJsonNested = choice is 2 or 5;
                 genJsonRecursive = choice is 3 or 5;
                 genHtml = choice is 4 or 5;
+
+                string formatVal = choice switch
+                {
+                    1 => "txt",
+                    2 => "json",
+                    3 => "json-recursive",
+                    4 => "html",
+                    5 => "all",
+                    _ => "txt"
+                };
+                options.Options["format"] = formatVal;
             }
 
             if (maxSize == null)
+            {
                 maxSize = _input.ReadOptionalInt("Max KB por arquivo", "enter para ignorar");
+                if (maxSize.HasValue) options.Options["max-size"] = maxSize.Value.ToString();
+            }
             
             if (ignored == null)
             {
                 var list = _input.ReadCsv("Ignorar pastas", "ex: bin, obj, node_modules");
-                if (list.Count > 0) ignored = list.ToList();
+                if (list.Count > 0) 
+                {
+                    ignored = list.ToList();
+                    options.Options["ignored"] = string.Join(",", ignored);
+                }
             }
         }
 

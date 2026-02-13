@@ -72,37 +72,60 @@ public sealed class NgrokCliCommand : ICliCommand
                     4 => NgrokAction.KillAll,
                     _ => NgrokAction.Status
                 };
+                options.Options["action"] = action.ToString()!.ToLower();
             }
 
             if (string.IsNullOrWhiteSpace(baseUrl))
+            {
                 baseUrl = _input.ReadOptional("BaseUrl API (opcional)", "enter = http://127.0.0.1:4040/");
+                if (!string.IsNullOrWhiteSpace(baseUrl)) options.Options["base-url"] = baseUrl;
+            }
             
             if (timeout == null)
+            {
                 timeout = _input.ReadOptionalInt("Timeout (segundos)", "enter = 5") ?? 5;
+                options.Options["timeout"] = timeout.Value.ToString();
+            }
             
             if (retry == null)
+            {
                 retry = _input.ReadOptionalInt("Retry count", "enter = 1") ?? 1;
+                options.Options["retry"] = retry.Value.ToString();
+            }
 
             if (action == NgrokAction.CloseTunnel && string.IsNullOrWhiteSpace(tunnelName))
             {
                 tunnelName = _input.ReadRequired("Nome do tunel");
+                options.Options["tunnel-name"] = tunnelName;
             }
             else if (action == NgrokAction.StartHttp)
             {
                 if (string.IsNullOrWhiteSpace(protocol))
+                {
                     protocol = _input.ReadOptional("Protocolo", "http/https (enter = http)");
+                    if (!string.IsNullOrWhiteSpace(protocol)) options.Options["protocol"] = protocol;
+                }
                 
                 if (port == null)
+                {
                     port = _input.ReadOptionalInt("Porta", "enter = 80") ?? 80;
+                    options.Options["port"] = port.Value.ToString();
+                }
                 
                 if (string.IsNullOrWhiteSpace(ngrokPath))
+                {
                     ngrokPath = _input.ReadOptional("Caminho do ngrok (opcional)", "enter = default");
+                    if (!string.IsNullOrWhiteSpace(ngrokPath)) options.Options["ngrok-path"] = ngrokPath;
+                }
                 
                 if (string.IsNullOrWhiteSpace(extraArgsStr))
                 {
                     var extraList = _input.ReadCsv("Args extras (opcional)", "ex: --region=sa");
                     if (extraList.Count > 0)
+                    {
                         extraArgsStr = string.Join(",", extraList);
+                        options.Options["extra-args"] = extraArgsStr;
+                    }
                 }
             }
         }
@@ -153,13 +176,9 @@ public sealed class NgrokCliCommand : ICliCommand
         var result = await _engine.ExecuteAsync(request, progress, ct).ConfigureAwait(false);
         progress.Finish();
 
-        if (!result.IsSuccess || result.Value is null)
+        if (result.IsSuccess && result.Value != null)
         {
-            WriteErrors(result.Errors);
-            return 1;
-        }
-
-        var response = result.Value;
+            var response = result.Value;
         
         if (!options.IsNonInteractive || action == NgrokAction.ListTunnels || action == NgrokAction.Status)
         {
@@ -190,19 +209,9 @@ public sealed class NgrokCliCommand : ICliCommand
                 _ui.WriteLine(response.HasAny == true ? "Ngrok esta em execucao." : "Ngrok nao encontrado.");
             }
         }
-
-        return 0;
-    }
-
-    private void WriteErrors(IReadOnlyList<DevTools.Core.Results.ErrorDetail> errors)
-    {
-        CliErrorLogger.LogErrors(Key, errors);
-        _ui.Section("Erros");
-        foreach (var error in errors)
-        {
-            _ui.WriteError($"{error.Code}: {error.Message}");
-            if (!string.IsNullOrWhiteSpace(error.Details))
-                _ui.WriteDim(error.Details);
         }
+
+        _ui.PrintRunResult(result);
+        return result.IsSuccess && result.Summary.Failed == 0 ? 0 : 1;
     }
 }

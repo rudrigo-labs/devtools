@@ -52,6 +52,7 @@ public sealed class SshTunnelCliCommand : ICliCommand
                 2 => SshTunnelAction.Stop,
                 _ => SshTunnelAction.Status
             };
+            options.Options["action"] = action.ToString()!.ToLower();
         }
 
         if (action == null)
@@ -73,13 +74,9 @@ public sealed class SshTunnelCliCommand : ICliCommand
         var result = await _engine.ExecuteAsync(request, progress, ct).ConfigureAwait(false);
         progress.Finish();
 
-        if (!result.IsSuccess || result.Value is null)
+        if (result.IsSuccess && result.Value != null)
         {
-            WriteErrors(result.Errors);
-            return 1;
-        }
-
-        var response = result.Value;
+            var response = result.Value;
         
         if (!options.IsNonInteractive || action == SshTunnelAction.Status)
         {
@@ -93,8 +90,10 @@ public sealed class SshTunnelCliCommand : ICliCommand
             if (!string.IsNullOrWhiteSpace(response.LastError))
                 _ui.WriteWarning(response.LastError);
         }
+        }
 
-        return response.IsRunning || action != SshTunnelAction.Start ? 0 : 1;
+        _ui.PrintRunResult(result);
+        return result.IsSuccess && result.Summary.Failed == 0 ? 0 : 1;
     }
 
     private TunnelProfile ResolveProfile(CliLaunchOptions options)
@@ -130,31 +129,58 @@ public sealed class SshTunnelCliCommand : ICliCommand
         if (!options.IsNonInteractive)
         {
             if (string.IsNullOrWhiteSpace(name))
+            {
                 name = _input.ReadOptional("Nome do perfil", "enter = default");
+                if (!string.IsNullOrWhiteSpace(name)) options.Options["profile"] = name;
+            }
             
             if (string.IsNullOrWhiteSpace(sshHost))
+            {
                 sshHost = _input.ReadRequired("Host SSH", "ex: 10.0.0.10");
+                options.Options["ssh-host"] = sshHost;
+            }
             
             if (sshPort == null)
+            {
                 sshPort = _input.ReadOptionalInt("Porta SSH", "enter = 22") ?? 22;
+                options.Options["ssh-port"] = sshPort.Value.ToString();
+            }
             
             if (string.IsNullOrWhiteSpace(sshUser))
+            {
                 sshUser = _input.ReadRequired("Usuario SSH", "ex: dev");
+                options.Options["ssh-user"] = sshUser;
+            }
 
             if (string.IsNullOrWhiteSpace(localBind))
+            {
                 localBind = _input.ReadOptional("Bind local", "enter = 127.0.0.1");
+                if (!string.IsNullOrWhiteSpace(localBind)) options.Options["local-bind"] = localBind;
+            }
             
             if (localPort == null)
+            {
                 localPort = _input.ReadOptionalInt("Porta local", "enter = 14331") ?? 14331;
+                options.Options["local-port"] = localPort.Value.ToString();
+            }
             
             if (string.IsNullOrWhiteSpace(remoteHost))
+            {
                 remoteHost = _input.ReadOptional("Host remoto", "enter = 127.0.0.1");
+                if (!string.IsNullOrWhiteSpace(remoteHost)) options.Options["remote-host"] = remoteHost;
+            }
             
             if (remotePort == null)
+            {
                 remotePort = _input.ReadOptionalInt("Porta remota", "enter = 1433") ?? 1433;
+                options.Options["remote-port"] = remotePort.Value.ToString();
+            }
 
             if (string.IsNullOrWhiteSpace(identity))
+            {
                 identity = _input.ReadOptional("Identity file (opcional)", "enter = padrao");
+                if (!string.IsNullOrWhiteSpace(identity)) options.Options["identity"] = identity;
+            }
 
             if (strictStr == null)
             {
@@ -171,10 +197,20 @@ public sealed class SshTunnelCliCommand : ICliCommand
                     4 => SshStrictHostKeyChecking.AcceptNew,
                     _ => SshStrictHostKeyChecking.Default
                 };
+                string strictVal = strict switch {
+                    SshStrictHostKeyChecking.Yes => "yes",
+                    SshStrictHostKeyChecking.No => "no",
+                    SshStrictHostKeyChecking.AcceptNew => "accept-new",
+                    _ => "default"
+                };
+                options.Options["strict-host-key"] = strictVal;
             }
 
             if (timeout == null)
+            {
                 timeout = _input.ReadOptionalInt("Timeout conexao (segundos)", "enter = 10");
+                if (timeout.HasValue) options.Options["timeout"] = timeout.Value.ToString();
+            }
         }
 
         // Defaults for required fields if missing in non-interactive (though strict check below will catch them)
@@ -200,17 +236,5 @@ public sealed class SshTunnelCliCommand : ICliCommand
             StrictHostKeyChecking = strict,
             ConnectTimeoutSeconds = timeout
         };
-    }
-
-    private void WriteErrors(IReadOnlyList<DevTools.Core.Results.ErrorDetail> errors)
-    {
-        CliErrorLogger.LogErrors(Key, errors);
-        _ui.Section("Erros");
-        foreach (var error in errors)
-        {
-            _ui.WriteError($"{error.Code}: {error.Message}");
-            if (!string.IsNullOrWhiteSpace(error.Details))
-                _ui.WriteDim(error.Details);
-        }
     }
 }

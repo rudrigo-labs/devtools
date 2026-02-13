@@ -65,6 +65,7 @@ public sealed class MigrationsCliCommand : ICliCommand
                 _ui.WriteLine("2) Update database");
                 var actionChoice = _input.ReadInt("Escolha", 1, 2);
                 action = actionChoice == 1 ? MigrationsAction.AddMigration : MigrationsAction.UpdateDatabase;
+                options.Options["action"] = action == MigrationsAction.AddMigration ? "add" : "update";
             }
 
             if (provider == null)
@@ -74,31 +75,56 @@ public sealed class MigrationsCliCommand : ICliCommand
                 _ui.WriteLine("2) Sqlite");
                 var providerChoice = _input.ReadInt("Escolha", 1, 2);
                 provider = providerChoice == 2 ? DatabaseProvider.Sqlite : DatabaseProvider.SqlServer;
+                options.Options["provider"] = provider == DatabaseProvider.Sqlite ? "sqlite" : "sqlserver";
             }
 
             if (string.IsNullOrWhiteSpace(root))
+            {
                 root = _input.ReadRequired("Root do projeto", "ex: C:\\Projetos\\MeuApp");
+                options.Options["root"] = root;
+            }
             
             if (string.IsNullOrWhiteSpace(startup))
+            {
                 startup = _input.ReadRequired("Projeto startup (.csproj)", "ex: C:\\Projetos\\MeuApp\\Api.csproj");
+                options.Options["startup"] = startup;
+            }
             
             if (string.IsNullOrWhiteSpace(dbContext))
+            {
                 dbContext = _input.ReadRequired("DbContext (namespace completo)", "ex: MeuApp.Data.AppDbContext");
+                options.Options["db-context"] = dbContext;
+            }
             
             if (string.IsNullOrWhiteSpace(migrationsProject))
+            {
                 migrationsProject = _input.ReadRequired("Projeto migrations (.csproj)", "ex: C:\\Projetos\\MeuApp\\Data.csproj");
+                options.Options["migrations-project"] = migrationsProject;
+            }
             
             if (string.IsNullOrWhiteSpace(additionalArgs))
+            {
                 additionalArgs = _input.ReadOptional("Args adicionais (opcional)");
+                if (!string.IsNullOrWhiteSpace(additionalArgs)) options.Options["args"] = additionalArgs;
+            }
 
             if (action == MigrationsAction.AddMigration && string.IsNullOrWhiteSpace(migrationName))
+            {
                 migrationName = _input.ReadRequired("Nome da migration");
+                options.Options["migration-name"] = migrationName;
+            }
             
             if (dryRun == null)
+            {
                 dryRun = _input.ReadYesNo("Dry-run", true);
+                options.Options["dry-run"] = dryRun.Value.ToString().ToLower();
+            }
             
             if (string.IsNullOrWhiteSpace(workingDir))
+            {
                 workingDir = _input.ReadOptional("Working directory (opcional)", "enter = usar root");
+                if (!string.IsNullOrWhiteSpace(workingDir)) options.Options["working-dir"] = workingDir;
+            }
         }
 
         // Defaults

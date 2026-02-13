@@ -56,8 +56,7 @@ public sealed class NotesBackupStore
             return RunResult<string>.Fail(new ErrorDetail(
                 "notes.backup.export.failed",
                 "Failed to export notes zip.",
-                ex.Message,
-                ex));
+                Exception: ex));
         }
     }
 
@@ -86,8 +85,7 @@ public sealed class NotesBackupStore
             return RunResult<(string, List<string>, bool)>.Fail(new ErrorDetail(
                 "notes.backup.import.extract.failed",
                 "Failed to extract zip.",
-                ex.Message,
-                ex));
+                Exception: ex));
         }
     }
 }

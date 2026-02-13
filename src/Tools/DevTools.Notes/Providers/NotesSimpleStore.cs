@@ -87,8 +87,8 @@ public sealed class NotesSimpleStore
             return RunResult<NoteCreateResult>.Fail(new ErrorDetail(
                 "notes.simple.create.failed",
                 "Failed to create note.",
-                path,
-                ex));
+                Cause: path,
+                Exception: ex));
         }
     }
 

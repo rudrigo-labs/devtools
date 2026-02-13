@@ -149,13 +149,9 @@ public sealed class NotesCliCommand : ICliCommand
         var result = await _engine.ExecuteAsync(request, progress, ct).ConfigureAwait(false);
         progress.Finish();
 
-        if (!result.IsSuccess || result.Value is null)
+        if (result.IsSuccess && result.Value != null)
         {
-            WriteErrors(result.Errors);
-            return 1;
-        }
-
-        var response = result.Value;
+            var response = result.Value;
 
         if (!options.IsNonInteractive)
         {
@@ -205,19 +201,9 @@ public sealed class NotesCliCommand : ICliCommand
                 _ui.WriteLine(output ?? "Exported");
             }
         }
-
-        return 0;
-    }
-
-    private void WriteErrors(IReadOnlyList<DevTools.Core.Results.ErrorDetail> errors)
-    {
-        CliErrorLogger.LogErrors(Key, errors);
-        _ui.Section("Erros");
-        foreach (var error in errors)
-        {
-            _ui.WriteError($"{error.Code}: {error.Message}");
-            if (!string.IsNullOrWhiteSpace(error.Details))
-                _ui.WriteDim(error.Details);
         }
+
+        _ui.PrintRunResult(result);
+        return result.IsSuccess && result.Summary.Failed == 0 ? 0 : 1;
     }
 }

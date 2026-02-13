@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Divisor de Imagens" Height="450" Width="600"
         WindowStyle="None"
@@ -40,6 +41,8 @@
             <!-- Content -->
             <StackPanel Grid.Row="1" Margin="0,20,0,0">
                 
+                <c:ProfileSelector x:Name="ProfileSelector" ToolName="imagesplit" Margin="0,0,0,15"/>
+
                 <!-- Input File -->
                 <Label Content="Imagem de Entrada:" Foreground="{StaticResource PrimaryTextBrush}"/>
                 <Grid>

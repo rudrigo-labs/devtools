@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Gerenciador de Túneis SSH" Height="500" Width="700"
         WindowStyle="None"
@@ -55,42 +56,17 @@
         </Border>
 
         <!-- Content -->
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <Grid Grid.Row="1" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-            <!-- Sidebar: Profiles List -->
-            <Border Grid.Column="0" Background="#252526" BorderBrush="#3F3F46" BorderThickness="0,0,1,0">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    
-                    <ListBox x:Name="ProfilesList" Grid.Row="0" SelectionChanged="ProfilesList_SelectionChanged" DisplayMemberPath="Name"/>
-                    
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10">
-                        <Button Content="+" Width="30" Click="AddProfile_Click" Margin="0,0,5,0" ToolTip="Novo Perfil" Style="{StaticResource SecondaryButtonStyle}" Padding="0"/>
-                        <Button Content="-" Width="30" Click="RemoveProfile_Click" ToolTip="Remover Perfil" Style="{StaticResource SecondaryButtonStyle}" Padding="0" Background="#CC3333" BorderBrush="#CC3333"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
+            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <c:ProfileSelector x:Name="ProfileSelector" ToolName="sshtunnel" Margin="0,0,0,15"/>
 
-            <!-- Main Area: Form & Actions -->
-            <Grid Grid.Column="1" Margin="20">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <TextBlock Text="Nome do Perfil" Margin="0,0,0,5" Foreground="{StaticResource PrimaryTextBrush}"/>
-                        <TextBox x:Name="ProfileNameInput" TextChanged="Input_Changed" Style="{StaticResource ModernTextBoxStyle}"/>
-
-                        <Grid Margin="0,10,0,0">
+                    <Grid Margin="0,10,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="10"/>
@@ -98,16 +74,16 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="Host SSH (Bastion)" Margin="0,0,0,5" Foreground="{StaticResource PrimaryTextBrush}"/>
-                                <TextBox x:Name="SshHostInput" TextChanged="Input_Changed" Style="{StaticResource ModernTextBoxStyle}"/>
+                                <TextBox x:Name="SshHostInput" Style="{StaticResource ModernTextBoxStyle}"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Porta" Margin="0,0,0,5" Foreground="{StaticResource PrimaryTextBrush}"/>
-                                <TextBox x:Name="SshPortInput" TextChanged="Input_Changed" Style="{StaticResource ModernTextBoxStyle}"/>
+                                <TextBox x:Name="SshPortInput" Style="{StaticResource ModernTextBoxStyle}"/>
                             </StackPanel>
                         </Grid>
 
                         <TextBlock Text="Usuário SSH" Margin="0,0,0,5" Foreground="{StaticResource PrimaryTextBrush}"/>
-                        <TextBox x:Name="SshUserInput" TextChanged="Input_Changed" Style="{StaticResource ModernTextBoxStyle}"/>
+                        <TextBox x:Name="SshUserInput" Style="{StaticResource ModernTextBoxStyle}"/>
 
                         <TextBlock Text="Arquivo de Identidade (Chave Privada)" Margin="0,0,0,5" Foreground="{StaticResource PrimaryTextBrush}"/>
                         <Grid>
@@ -116,7 +92,7 @@
                                 <ColumnDefinition Width="10"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" x:Name="IdentityFileInput" TextChanged="Input_Changed" Style="{StaticResource ModernTextBoxStyle}"/>
+                            <TextBox Grid.Column="0" x:Name="IdentityFileInput" Style="{StaticResource ModernTextBoxStyle}"/>
                             <Button Grid.Column="2" Content="..." Click="BrowseKey_Click" Width="40" VerticalAlignment="Top" Style="{StaticResource SecondaryButtonStyle}" Padding="0"/>
                         </Grid>
 
@@ -134,18 +110,18 @@
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="Local (Sua Máquina)" FontWeight="Bold" Margin="0,0,0,10" Foreground="{StaticResource PrimaryTextBrush}"/>
                                 <TextBlock Text="Host Local (Bind)" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <TextBox x:Name="LocalBindInput" TextChanged="Input_Changed" Style="{StaticResource ModernTextBoxStyle}"/>
+                                <TextBox x:Name="LocalBindInput" Style="{StaticResource ModernTextBoxStyle}"/>
                                 <TextBlock Text="Porta Local" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <TextBox x:Name="LocalPortInput" TextChanged="Input_Changed" Style="{StaticResource ModernTextBoxStyle}"/>
+                                <TextBox x:Name="LocalPortInput" Style="{StaticResource ModernTextBoxStyle}"/>
                             </StackPanel>
 
                             <!-- Remote -->
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Remoto (Destino)" FontWeight="Bold" Margin="0,0,0,10" Foreground="{StaticResource PrimaryTextBrush}"/>
                                 <TextBlock Text="Host Remoto" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <TextBox x:Name="RemoteHostInput" TextChanged="Input_Changed" Style="{StaticResource ModernTextBoxStyle}"/>
+                                <TextBox x:Name="RemoteHostInput" Style="{StaticResource ModernTextBoxStyle}"/>
                                 <TextBlock Text="Porta Remota" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
-                                <TextBox x:Name="RemotePortInput" TextChanged="Input_Changed" Style="{StaticResource ModernTextBoxStyle}"/>
+                                <TextBox x:Name="RemotePortInput" Style="{StaticResource ModernTextBoxStyle}"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -164,12 +140,10 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Button x:Name="SaveButton" Content="Salvar" Click="SaveButton_Click" Margin="0,0,10,0" Style="{StaticResource SecondaryButtonStyle}"/>
                         <Button x:Name="ToggleTunnelButton" Content="Conectar" Click="ToggleTunnel_Click" Style="{StaticResource PrimaryButtonStyle}"/>
                     </StackPanel>
                 </Grid>
             </Grid>
-        </Grid>
         </Grid>
     </Border>
 </Window>

@@ -21,7 +21,8 @@ public static class HarvestConfigLoader
                 return RunResult<HarvestConfig>.Fail(new ErrorDetail(
                     "harvest.config.not_found",
                     "Config file not found.",
-                    configPath));
+                    Cause: configPath,
+                    Action: "Provide a valid path to a JSON configuration file."));
             }
 
             try
@@ -35,8 +36,9 @@ public static class HarvestConfigLoader
                 return RunResult<HarvestConfig>.Fail(new ErrorDetail(
                     "harvest.config.invalid",
                     "Failed to read or parse config file.",
-                    configPath,
-                    ex));
+                    Cause: configPath,
+                    Action: "Check file format and permissions.",
+                    Exception: ex));
             }
         }
 
@@ -53,8 +55,8 @@ public static class HarvestConfigLoader
                 return RunResult<HarvestConfig>.Fail(new ErrorDetail(
                     "harvest.config.embedded_invalid",
                     "Failed to parse embedded config.",
-                    EmbeddedConfigName,
-                    ex));
+                    Cause: EmbeddedConfigName,
+                    Exception: ex));
             }
         }
 

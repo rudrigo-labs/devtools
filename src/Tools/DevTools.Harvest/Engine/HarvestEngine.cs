@@ -42,6 +42,7 @@ public sealed class HarvestEngine : IDevToolEngine<HarvestRequest, HarvestRespon
         IProgressReporter? progress = null,
         CancellationToken ct = default)
     {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
         var errors = HarvestRequestValidator.Validate(request, _fs);
         if (errors.Count > 0)
             return RunResult<HarvestResponse>.Fail(errors);
@@ -60,6 +61,7 @@ public sealed class HarvestEngine : IDevToolEngine<HarvestRequest, HarvestRespon
         progress?.Report(new ProgressEvent("Enumerating files", 5, "scan"));
 
         var filePaths = EnumerateFiles(request.RootPath, config.Rules, ct).ToList();
+        var totalFiles = filePaths.Count;
 
         progress?.Report(new ProgressEvent("Reading files", 15, "scan"));
 
@@ -92,13 +94,19 @@ public sealed class HarvestEngine : IDevToolEngine<HarvestRequest, HarvestRespon
             .ThenBy(h => h.File, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
+        var initialIssuesCount = issues.Count;
         if (request.CopyFiles && !string.IsNullOrWhiteSpace(request.OutputPath))
         {
             progress?.Report(new ProgressEvent("Copying files", 90, "copy"));
             CopyFiles(ordered, request.RootPath, request.OutputPath, issues);
         }
+        var copyErrors = issues.Count - initialIssuesCount;
+        var changed = (request.CopyFiles && !string.IsNullOrWhiteSpace(request.OutputPath)) 
+            ? ordered.Count - copyErrors 
+            : 0;
 
         progress?.Report(new ProgressEvent("Done", 100, "done"));
+        sw.Stop();
 
         var report = new HarvestReport(
             request.RootPath,
@@ -107,7 +115,19 @@ public sealed class HarvestEngine : IDevToolEngine<HarvestRequest, HarvestRespon
             ordered,
             issues);
 
-        return RunResult<HarvestResponse>.Success(new HarvestResponse(report));
+        var summary = new RunSummary(
+            ToolName: "Harvest",
+            Mode: request.CopyFiles ? "Real" : "DryRun",
+            MainInput: request.RootPath,
+            OutputLocation: request.OutputPath,
+            Processed: totalFiles,
+            Changed: changed,
+            Ignored: totalFiles - hits.Count, // Ignored = Total - Hits (approx)
+            Failed: issues.Count,
+            Duration: sw.Elapsed
+        );
+
+        return RunResult<HarvestResponse>.Success(new HarvestResponse(report)).WithSummary(summary);
     }
 
     private List<FileNode> BuildFileNodes(
@@ -140,7 +160,7 @@ public sealed class HarvestEngine : IDevToolEngine<HarvestRequest, HarvestRespon
                 }
                 catch (Exception ex)
                 {
-                    issues.Add(new ErrorDetail("harvest.file.size_error", "Failed to read file size.", fullPath, ex));
+                    issues.Add(new ErrorDetail("harvest.file.size_error", "Failed to read file size.", Cause: fullPath, Exception: ex));
                     continue;
                 }
             }
@@ -181,7 +201,7 @@ public sealed class HarvestEngine : IDevToolEngine<HarvestRequest, HarvestRespon
             }
             catch (Exception ex)
             {
-                issues.Add(new ErrorDetail("harvest.file.read_error", "Failed to read file.", fullPath, ex));
+                issues.Add(new ErrorDetail("harvest.file.read_error", "Failed to read file.", Cause: fullPath, Exception: ex));
             }
         }
 
@@ -564,7 +584,7 @@ public sealed class HarvestEngine : IDevToolEngine<HarvestRequest, HarvestRespon
             }
             catch (Exception ex)
             {
-                issues.Add(new ErrorDetail("harvest.copy.create_dir_error", "Failed to create output directory.", outputPath, ex));
+                issues.Add(new ErrorDetail("harvest.copy.create_dir_error", "Failed to create output directory.", Cause: outputPath, Action: "Check permissions or path validity", Exception: ex));
                 return;
             }
         }
@@ -586,7 +606,7 @@ public sealed class HarvestEngine : IDevToolEngine<HarvestRequest, HarvestRespon
             }
             catch (Exception ex)
             {
-                issues.Add(new ErrorDetail("harvest.copy.file_error", "Failed to copy file.", hit.File, ex));
+                issues.Add(new ErrorDetail("harvest.copy.file_error", "Failed to copy file.", Cause: hit.File, Action: "Check file access or disk space", Exception: ex));
             }
         }
     }

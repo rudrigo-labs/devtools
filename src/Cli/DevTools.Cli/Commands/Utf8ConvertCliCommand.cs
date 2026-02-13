@@ -43,30 +43,53 @@ public sealed class Utf8ConvertCliCommand : ICliCommand
         if (!options.IsNonInteractive)
         {
             if (string.IsNullOrWhiteSpace(root))
+            {
                 root = _input.ReadRequired("Pasta raiz", "ex: C:\\Projetos\\MeuApp");
+                options.Options["root"] = root;
+            }
             
             if (recursive == null)
+            {
                 recursive = _input.ReadYesNo("Recursivo", true);
+                options.Options["recursive"] = recursive.Value.ToString().ToLower();
+            }
             
             if (dryRun == null)
+            {
                 dryRun = _input.ReadYesNo("Dry-run", true);
+                options.Options["dry-run"] = dryRun.Value.ToString().ToLower();
+            }
             
             if (backup == null)
+            {
                 backup = _input.ReadYesNo("Criar backup", true);
+                options.Options["backup"] = backup.Value.ToString().ToLower();
+            }
             
             if (outputBom == null)
+            {
                 outputBom = _input.ReadYesNo("Gerar BOM", true);
+                options.Options["output-bom"] = outputBom.Value.ToString().ToLower();
+            }
 
             if (string.IsNullOrWhiteSpace(includeStr))
             {
                 var list = _input.ReadCsv("Includes (globs)", "ex: **/*.cs, **/*.md");
-                if (list.Count > 0) includeStr = string.Join(",", list);
+                if (list.Count > 0) 
+                {
+                    includeStr = string.Join(",", list);
+                    options.Options["include"] = includeStr;
+                }
             }
             
             if (string.IsNullOrWhiteSpace(excludeStr))
             {
                 var list = _input.ReadCsv("Excludes (globs)", "ex: bin/**, obj/**");
-                if (list.Count > 0) excludeStr = string.Join(",", list);
+                if (list.Count > 0) 
+                {
+                    excludeStr = string.Join(",", list);
+                    options.Options["exclude"] = excludeStr;
+                }
             }
         }
 

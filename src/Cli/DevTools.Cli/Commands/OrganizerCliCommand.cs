@@ -40,19 +40,34 @@ public sealed class OrganizerCliCommand : ICliCommand
         if (!options.IsNonInteractive)
         {
             if (string.IsNullOrWhiteSpace(inbox))
+            {
                 inbox = _input.ReadRequired("Pasta de entrada", "ex: C:\\Projetos\\Inbox");
+                options.Options["inbox"] = inbox;
+            }
             
             if (string.IsNullOrWhiteSpace(output))
+            {
                 output = _input.ReadRequired("Pasta de saida", "ex: C:\\Projetos\\Organizado");
+                options.Options["output"] = output;
+            }
             
             if (string.IsNullOrWhiteSpace(config))
+            {
                 config = _input.ReadOptional("Config (opcional)", "enter para padrao");
+                if (!string.IsNullOrWhiteSpace(config)) options.Options["config"] = config;
+            }
             
             if (minScore == null)
+            {
                 minScore = _input.ReadOptionalInt("MinScore (opcional)");
+                if (minScore.HasValue) options.Options["min-score"] = minScore.Value.ToString();
+            }
             
             if (apply == null)
+            {
                 apply = _input.ReadYesNo("Aplicar mudancas", false);
+                options.Options["apply"] = apply.Value.ToString().ToLowerInvariant();
+            }
         }
 
         // Final Validation / Defaults
