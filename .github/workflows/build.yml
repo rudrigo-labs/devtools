@@ -1,4 +1,4 @@
-name: Build
+name: Build and Test
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main, dev ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: windows-latest
 
     steps:
@@ -24,3 +24,6 @@ jobs:
 
       - name: Build
         run: dotnet build ./src/DevTools.slnx --no-restore -c Release
+
+      - name: Test
+        run: dotnet test ./src/DevTools.slnx --no-build -c Release --verbosity normal
