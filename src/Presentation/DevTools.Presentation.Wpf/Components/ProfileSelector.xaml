@@ -5,29 +5,22 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="400">
-    <Grid Margin="0,5">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
-        
-        <Label Content="Perfil:" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,5,0"/>
-        
-        <ComboBox Grid.Column="1" x:Name="ProfileCombo" 
-                  IsEditable="True"
-                  SelectionChanged="ProfileCombo_SelectionChanged"
-                  Height="30"
-                  Background="{DynamicResource ControlBackgroundColor}"
-                  Foreground="{DynamicResource PrimaryTextColor}"
-                  BorderBrush="{DynamicResource BorderBrush}">
-        </ComboBox>
-                  
-        <Button Grid.Column="2" Content="Salvar" Click="SaveButton_Click" 
-                Style="{DynamicResource SecondaryButtonStyle}" Margin="5,0,0,0" Width="60"/>
-                
-        <Button Grid.Column="3" Content="🗑" Click="DeleteButton_Click" 
-                Style="{DynamicResource IconButtonStyle}" Margin="5,0,0,0" ToolTip="Excluir Perfil"/>
-    </Grid>
+    <StackPanel Margin="0,5,0,15">
+        <TextBlock Text="Perfil" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ComboBox Grid.Column="0" x:Name="ProfileCombo" 
+                      IsEditable="True"
+                      SelectionChanged="ProfileCombo_SelectionChanged"
+                      MinHeight="32" />
+            <Button Grid.Column="1" Content="Salvar" Click="SaveButton_Click" 
+                    Style="{DynamicResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
+            <Button Grid.Column="2" Content="🗑" Click="DeleteButton_Click" 
+                    Style="{DynamicResource IconButtonStyle}" Margin="8,0,0,0" ToolTip="Excluir Perfil"/>
+        </Grid>
+    </StackPanel>
 </UserControl>

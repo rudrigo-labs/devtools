@@ -97,9 +97,9 @@
                 </Expander>
                 
                 <!-- Output Location Link -->
-                 <TextBlock Margin="0,10,0,0" Visibility="{Binding OutputLocation, Converter={StaticResource BoolToVis}}">
+                <TextBlock Margin="0,10,0,0" Visibility="{Binding OutputLocation, Converter={StaticResource BoolToVis}, Mode=OneWay}">
                     <Run Text="Saída em: " Foreground="#888888"/>
-                    <Run Text="{Binding OutputLocation}" Foreground="#569CD6" TextDecorations="Underline" Cursor="Hand"/> <!-- Click handler logic would be in code behind -->
+                    <Run Text="{Binding OutputLocation, Mode=OneWay}" Foreground="#569CD6" TextDecorations="Underline" Cursor="Hand"/> <!-- Click handler logic would be in code behind -->
                 </TextBlock>
             </StackPanel>
         </Border>

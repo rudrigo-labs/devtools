@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:components="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Migrations Helper" Height="500" Width="600"
+        Title="EF Core Migrations" Height="640" Width="900" WindowStartupLocation="CenterScreen"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="CanResizeWithGrip">
 
@@ -25,16 +25,22 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="15,10">
-                    <TextBlock Text="Migrations Helper" 
+                    <TextBlock Text="EF Core Migrations" 
                                FontSize="16" 
                                FontWeight="SemiBold" 
                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                 </StackPanel>
 
-                <Button Grid.Column="1" Click="Close_Click" 
+                <Button Grid.Column="1" 
+                        Style="{DynamicResource IconButtonStyle}" 
+                        Content="?" 
+                        ToolTip="Cria/aplica migrations para contextos EF Core específicos."
+                        Margin="0,0,5,0"/>
+                <Button Grid.Column="2" Click="Close_Click" 
                         Style="{DynamicResource IconButtonStyle}" 
                         Content="&#xE8BB;" 
                         FontFamily="Segoe MDL2 Assets"
@@ -114,10 +120,15 @@
 
             <!-- Footer -->
             <Border Grid.Row="2" x:Name="FooterPanel" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="15">
-                <Button Content="Executar Comando" 
-                        Click="Execute_Click" 
-                        Style="{DynamicResource PrimaryButtonStyle}"
-                        HorizontalAlignment="Right"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancelar" 
+                            Click="Close_Click" 
+                            Style="{DynamicResource SecondaryButtonStyle}"
+                            Margin="0,0,10,0"/>
+                    <Button Content="Executar Comando" 
+                            Click="Execute_Click" 
+                            Style="{DynamicResource PrimaryButtonStyle}"/>
+                </StackPanel>
             </Border>
         </Grid>
     </Border>

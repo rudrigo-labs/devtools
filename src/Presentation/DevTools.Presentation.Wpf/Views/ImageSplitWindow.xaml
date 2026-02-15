@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Divisor de Imagens" Height="450" Width="600"
+        Title="Dividir Imagens" Height="640" Width="900" WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -30,12 +30,14 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="✂" FontSize="16" Foreground="{StaticResource AccentBrush}" Margin="0,0,10,0"/>
-                    <TextBlock Text="Divisor de Imagens" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                    <TextBlock Text="Dividir Imagens" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
                 </StackPanel>
-                <Button Grid.Column="1" Content="✕" Click="CloseButton_Click" Style="{StaticResource IconButtonStyle}" FontSize="14"/>
+                <Button Grid.Column="1" Content="?" ToolTip="Divide imagens em grade configurável." Style="{StaticResource IconButtonStyle}" FontSize="14" Margin="0,0,5,0"/>
+                <Button Grid.Column="2" Content="✕" Click="CloseButton_Click" Style="{StaticResource IconButtonStyle}" FontSize="14"/>
             </Grid>
 
             <!-- Content -->
@@ -44,25 +46,25 @@
                 <c:ProfileSelector x:Name="ProfileSelector" ToolName="imagesplit" Margin="0,0,0,15"/>
 
                 <!-- Input File -->
-                <Label Content="Imagem de Entrada:" Foreground="{StaticResource PrimaryTextBrush}"/>
+                <Label Content="Imagem de Entrada:"/>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBox x:Name="InputPathBox" IsReadOnly="True" Cursor="Arrow" Style="{StaticResource ModernTextBoxStyle}"/>
-                    <Button Grid.Column="1" Content="..." Width="40" Margin="5,0,0,0" Click="BrowseInput_Click" Style="{StaticResource SecondaryButtonStyle}" Padding="0"/>
+                    <Button Grid.Column="1" Content="Procurar" Margin="5,0,0,0" Click="BrowseInput_Click" Style="{StaticResource SecondaryButtonStyle}"/>
                 </Grid>
 
                 <!-- Output Directory -->
-                <Label Content="Pasta de Saída (Opcional - Padrão: Mesma da Entrada):" Foreground="{StaticResource PrimaryTextBrush}"/>
+                <Label Content="Pasta de Saída (Opcional - Padrão: Mesma da Entrada):"/>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBox x:Name="OutputPathBox" IsReadOnly="True" Cursor="Arrow" Style="{StaticResource ModernTextBoxStyle}"/>
-                    <Button Grid.Column="1" Content="..." Width="40" Margin="5,0,0,0" Click="BrowseOutput_Click" Style="{StaticResource SecondaryButtonStyle}" Padding="0"/>
+                    <Button Grid.Column="1" Content="Procurar" Margin="5,0,0,0" Click="BrowseOutput_Click" Style="{StaticResource SecondaryButtonStyle}"/>
                 </Grid>
 
                 <!-- Settings -->
@@ -74,7 +76,7 @@
 
                     <!-- Alpha Threshold -->
                     <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                        <Label Content="Limiar Alpha (0-255):" Foreground="{StaticResource PrimaryTextBrush}"/>
+                        <Label Content="Limiar Alpha (0-255):"/>
                         <TextBox x:Name="AlphaBox" Text="10" PreviewTextInput="NumberValidationTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
                         <TextBlock Text="Transparência para considerar fundo." 
                                    FontSize="10" Foreground="#888888" Margin="0,2,0,0"/>
@@ -82,7 +84,7 @@
 
                     <!-- Min Region Size -->
                     <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                        <Label Content="Tamanho Mínimo (Px):" Foreground="{StaticResource PrimaryTextBrush}"/>
+                        <Label Content="Tamanho Mínimo (Px):"/>
                         <TextBox x:Name="MinSizeBox" Text="3" PreviewTextInput="NumberValidationTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
                         <TextBlock Text="Largura/Altura mínima para recortar." 
                                    FontSize="10" Foreground="#888888" Margin="0,2,0,0"/>

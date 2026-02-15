@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Gerenciador de Túneis SSH" Height="500" Width="700"
+        Title="Gerenciador de Túneis SSH" Height="640" Width="900" WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="#1E1E1E"
         ResizeMode="CanResizeWithGrip"
-        WindowStartupLocation="Manual">
+        >
 
     <Window.Resources>
         <Style TargetType="ListBox">
@@ -50,8 +50,14 @@
         <!-- Header -->
         <Border Grid.Row="0" Background="#2D2D30" MouseLeftButtonDown="Header_MouseLeftButtonDown">
             <Grid>
-                <TextBlock Text="Gerenciador de Túneis SSH" VerticalAlignment="Center" Margin="15,0,0,0" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource PrimaryTextBrush}"/>
-                <Button Content="✕" Click="CloseButton_Click" HorizontalAlignment="Right" Style="{StaticResource IconButtonStyle}" FontSize="14"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Túnel SSH" VerticalAlignment="Center" Margin="15,0,0,0" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource PrimaryTextBrush}"/>
+                <Button Grid.Column="1" Content="?" ToolTip="Faz port‑forward local para um destino remoto via bastion." HorizontalAlignment="Right" Style="{StaticResource IconButtonStyle}" FontSize="14" Margin="0,0,5,0"/>
+                <Button Grid.Column="2" Content="✕" Click="CloseButton_Click" HorizontalAlignment="Right" Style="{StaticResource IconButtonStyle}" FontSize="14"/>
             </Grid>
         </Border>
 
@@ -73,19 +79,19 @@
                                 <ColumnDefinition Width="80"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Host SSH (Bastion)" Margin="0,0,0,5" Foreground="{StaticResource PrimaryTextBrush}"/>
+                                <TextBlock Text="Host SSH (Bastion)" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
                                 <TextBox x:Name="SshHostInput" Style="{StaticResource ModernTextBoxStyle}"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Porta" Margin="0,0,0,5" Foreground="{StaticResource PrimaryTextBrush}"/>
+                                <TextBlock Text="Porta" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
                                 <TextBox x:Name="SshPortInput" Style="{StaticResource ModernTextBoxStyle}"/>
                             </StackPanel>
                         </Grid>
 
-                        <TextBlock Text="Usuário SSH" Margin="0,0,0,5" Foreground="{StaticResource PrimaryTextBrush}"/>
+                        <TextBlock Text="Usuário SSH" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
                         <TextBox x:Name="SshUserInput" Style="{StaticResource ModernTextBoxStyle}"/>
 
-                        <TextBlock Text="Arquivo de Identidade (Chave Privada)" Margin="0,0,0,5" Foreground="{StaticResource PrimaryTextBrush}"/>
+                        <TextBlock Text="Arquivo de Identidade (Chave Privada)" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -93,7 +99,7 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBox Grid.Column="0" x:Name="IdentityFileInput" Style="{StaticResource ModernTextBoxStyle}"/>
-                            <Button Grid.Column="2" Content="..." Click="BrowseKey_Click" Width="40" VerticalAlignment="Top" Style="{StaticResource SecondaryButtonStyle}" Padding="0"/>
+                            <Button Grid.Column="2" Content="Procurar" Click="BrowseKey_Click" VerticalAlignment="Top" Style="{StaticResource SecondaryButtonStyle}" />
                         </Grid>
 
                         <Separator Background="#3F3F46" Margin="0,15"/>
@@ -140,6 +146,7 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Content="Cancelar" Click="CloseButton_Click" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
                         <Button x:Name="ToggleTunnelButton" Content="Conectar" Click="ToggleTunnel_Click" Style="{StaticResource PrimaryButtonStyle}"/>
                     </StackPanel>
                 </Grid>

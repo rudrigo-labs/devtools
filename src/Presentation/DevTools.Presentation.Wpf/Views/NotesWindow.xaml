@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Notes" Height="500" Width="350"
+        Title="Notes" Height="720" Width="420"
         WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
         AllowsTransparency="True"
@@ -131,14 +131,14 @@
                 </Grid.RowDefinitions>
 
                 <TextBox x:Name="NoteTitle" Grid.Row="0" Margin="15,0,15,10"
-                         Background="Transparent" Foreground="{StaticResource PhoneForegroundBrush}"
+                         Background="{StaticResource PhoneBackgroundBrush}" Foreground="{StaticResource PhoneForegroundBrush}"
                          CaretBrush="{StaticResource PhoneForegroundBrush}"
-                         BorderThickness="0,0,0,1" BorderBrush="#333333"
+                         BorderThickness="0,0,0,1" BorderBrush="#333333" Height="Auto"
                          FontSize="18" FontFamily="Segoe UI" FontWeight="SemiBold"
                          Padding="0,5"/>
 
                 <TextBox x:Name="NotesContent" Grid.Row="1"
-                         Background="Transparent"
+                         Background="{StaticResource PhoneBackgroundBrush}" Height="Auto"
                          Foreground="{StaticResource PhoneForegroundBrush}"
                          CaretBrush="{StaticResource PhoneForegroundBrush}"
                          BorderThickness="0"
