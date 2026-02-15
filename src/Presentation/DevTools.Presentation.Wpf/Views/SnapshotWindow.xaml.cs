@@ -93,11 +93,17 @@ public partial class SnapshotWindow : Window
 
     private void BrowseRoot_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new OpenFolderDialog { Title = "Selecione a Pasta do Projeto" };
-        if (dlg.ShowDialog() == true)
+        using var dlg = new System.Windows.Forms.FolderBrowserDialog
         {
-            RootPathBox.Text = dlg.FolderName;
-            _settingsService.Settings.LastSnapshotRootPath = dlg.FolderName;
+            Description = "Selecione a Pasta do Projeto",
+            UseDescriptionForTitle = true,
+            ShowNewFolderButton = true
+        };
+
+        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dlg.SelectedPath))
+        {
+            RootPathBox.Text = dlg.SelectedPath;
+            _settingsService.Settings.LastSnapshotRootPath = dlg.SelectedPath;
             _settingsService.Save();
         }
     }
@@ -107,7 +113,7 @@ public partial class SnapshotWindow : Window
         var root = RootPathBox.Text;
         if (string.IsNullOrWhiteSpace(root))
         {
-            MessageBox.Show("Pasta do Projeto é obrigatória.", "Dados Incompletos", MessageBoxButton.OK, MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show("Pasta do Projeto é obrigatória.", "Dados Incompletos", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 

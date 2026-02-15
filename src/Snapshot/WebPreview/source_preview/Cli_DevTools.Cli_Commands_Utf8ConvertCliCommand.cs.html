@@ -1,0 +1,180 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Cli.Ui;
+using DevTools.Cli.Logging;
+using DevTools.Cli.App;
+using DevTools.Utf8Convert.Engine;
+using DevTools.Utf8Convert.Models;
+
+namespace DevTools.Cli.Commands;
+
+public sealed class Utf8ConvertCliCommand : ICliCommand
+{
+    private readonly CliConsole _ui;
+    private readonly CliInput _input;
+    private readonly Utf8ConvertEngine _engine;
+
+    public Utf8ConvertCliCommand(CliConsole ui, CliInput input)
+    {
+        _ui = ui;
+        _input = input;
+        _engine = new Utf8ConvertEngine();
+    }
+
+    public string Key =&gt; &quot;utf8&quot;;
+    public string Name =&gt; &quot;Utf8 Convert&quot;;
+    public string Description =&gt; &quot;Converte textos para UTF-8 com backup e dry-run.&quot;;
+
+    public async Task&lt;int&gt; ExecuteAsync(CliLaunchOptions options, CancellationToken ct)
+    {
+        // 1. Resolve Parameters
+        var root = options.GetOption(&quot;root&quot;) ?? options.GetOption(&quot;path&quot;);
+        var recursiveStr = options.GetOption(&quot;recursive&quot;);
+        var dryRunStr = options.GetOption(&quot;dry-run&quot;);
+        var backupStr = options.GetOption(&quot;backup&quot;);
+        var outputBomStr = options.GetOption(&quot;output-bom&quot;) ?? options.GetOption(&quot;bom&quot;);
+        var includeStr = options.GetOption(&quot;include&quot;);
+        var excludeStr = options.GetOption(&quot;exclude&quot;);
+
+        bool? recursive = recursiveStr != null ? (recursiveStr == &quot;true&quot;) : null;
+        bool? dryRun = dryRunStr != null ? (dryRunStr == &quot;true&quot;) : null;
+        bool? backup = backupStr != null ? (backupStr == &quot;true&quot;) : null;
+        bool? outputBom = outputBomStr != null ? (outputBomStr == &quot;true&quot;) : null;
+
+        // Interactive Fallback
+        if (!options.IsNonInteractive)
+        {
+            if (string.IsNullOrWhiteSpace(root))
+            {
+                root = _input.ReadRequired(&quot;Pasta raiz&quot;, &quot;ex: C:\\Projetos\\MeuApp&quot;);
+                options.Options[&quot;root&quot;] = root;
+            }
+            
+            if (recursive == null)
+            {
+                recursive = _input.ReadYesNo(&quot;Recursivo&quot;, true);
+                options.Options[&quot;recursive&quot;] = recursive.Value.ToString().ToLower();
+            }
+            
+            if (dryRun == null)
+            {
+                dryRun = _input.ReadYesNo(&quot;Dry-run&quot;, true);
+                options.Options[&quot;dry-run&quot;] = dryRun.Value.ToString().ToLower();
+            }
+            
+            if (backup == null)
+            {
+                backup = _input.ReadYesNo(&quot;Criar backup&quot;, true);
+                options.Options[&quot;backup&quot;] = backup.Value.ToString().ToLower();
+            }
+            
+            if (outputBom == null)
+            {
+                outputBom = _input.ReadYesNo(&quot;Gerar BOM&quot;, true);
+                options.Options[&quot;output-bom&quot;] = outputBom.Value.ToString().ToLower();
+            }
+
+            if (string.IsNullOrWhiteSpace(includeStr))
+            {
+                var list = _input.ReadCsv(&quot;Includes (globs)&quot;, &quot;ex: **/*.cs, **/*.md&quot;);
+                if (list.Count &gt; 0) 
+                {
+                    includeStr = string.Join(&quot;,&quot;, list);
+                    options.Options[&quot;include&quot;] = includeStr;
+                }
+            }
+            
+            if (string.IsNullOrWhiteSpace(excludeStr))
+            {
+                var list = _input.ReadCsv(&quot;Excludes (globs)&quot;, &quot;ex: bin/**, obj/**&quot;);
+                if (list.Count &gt; 0) 
+                {
+                    excludeStr = string.Join(&quot;,&quot;, list);
+                    options.Options[&quot;exclude&quot;] = excludeStr;
+                }
+            }
+        }
+
+        // Defaults
+        recursive ??= true;
+        dryRun ??= true;
+        backup ??= true;
+        outputBom ??= true;
+
+        // Validation
+        if (string.IsNullOrWhiteSpace(root))
+        {
+            _ui.WriteError(&quot;Root path required (--root).&quot;);
+            return 1;
+        }
+
+        var includeList = !string.IsNullOrWhiteSpace(includeStr)
+            ? includeStr.Split(&#39;,&#39;, StringSplitOptions.RemoveEmptyEntries).Select(s =&gt; s.Trim()).ToList()
+            : null;
+        
+        var excludeList = !string.IsNullOrWhiteSpace(excludeStr)
+            ? excludeStr.Split(&#39;,&#39;, StringSplitOptions.RemoveEmptyEntries).Select(s =&gt; s.Trim()).ToList()
+            : null;
+
+        var request = new Utf8ConvertRequest(
+            root,
+            recursive.Value,
+            dryRun.Value,
+            backup.Value,
+            outputBom.Value,
+            includeList,
+            excludeList);
+
+        using var progress = new CliProgressReporter(_ui.Theme);
+        var result = await _engine.ExecuteAsync(request, progress, ct).ConfigureAwait(false);
+        progress.Finish();
+
+        if (!result.IsSuccess || result.Value is null)
+        {
+            WriteErrors(result.Errors);
+            return 1;
+        }
+
+        var summary = result.Value.Summary;
+        
+        if (!options.IsNonInteractive)
+        {
+            _ui.Section(&quot;Resumo&quot;);
+            _ui.WriteKeyValue(&quot;Arquivos&quot;, summary.FilesScanned.ToString());
+            _ui.WriteKeyValue(&quot;Convertidos&quot;, summary.Converted.ToString());
+            _ui.WriteKeyValue(&quot;Ja UTF8&quot;, summary.AlreadyUtf8.ToString());
+            _ui.WriteKeyValue(&quot;Binarios&quot;, summary.SkippedBinary.ToString());
+            _ui.WriteKeyValue(&quot;Excluidos&quot;, summary.SkippedExcluded.ToString());
+            _ui.WriteKeyValue(&quot;Erros&quot;, summary.Errors.ToString());
+        }
+
+        return summary.Errors == 0 ? 0 : 1;
+    }
+
+    private void WriteErrors(IReadOnlyList&lt;DevTools.Core.Results.ErrorDetail&gt; errors)
+    {
+        CliErrorLogger.LogErrors(Key, errors);
+        _ui.Section(&quot;Erros&quot;);
+        foreach (var error in errors)
+        {
+            _ui.WriteError($&quot;{error.Code}: {error.Message}&quot;);
+            if (!string.IsNullOrWhiteSpace(error.Details))
+                _ui.WriteDim(error.Details);
+        }
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

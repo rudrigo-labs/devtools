@@ -107,7 +107,7 @@ public partial class ImageSplitWindow : Window
 
     private void BrowseInput_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new OpenFileDialog
+        var dlg = new Microsoft.Win32.OpenFileDialog
         {
             Filter = "Imagens (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp|Todos os Arquivos (*.*)|*.*",
             Title = "Selecione a Imagem para Recortar"
@@ -123,15 +123,17 @@ public partial class ImageSplitWindow : Window
 
     private void BrowseOutput_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new OpenFolderDialog
+        using var dlg = new System.Windows.Forms.FolderBrowserDialog
         {
-            Title = "Selecione a Pasta de Saída"
+            Description = "Selecione a Pasta de Saída",
+            UseDescriptionForTitle = true,
+            ShowNewFolderButton = true
         };
 
-        if (dlg.ShowDialog() == true)
+        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dlg.SelectedPath))
         {
-            OutputPathBox.Text = dlg.FolderName;
-            _settingsService.Settings.LastImageSplitOutputDir = dlg.FolderName;
+            OutputPathBox.Text = dlg.SelectedPath;
+            _settingsService.Settings.LastImageSplitOutputDir = dlg.SelectedPath;
             _settingsService.Save();
         }
     }
@@ -153,7 +155,7 @@ public partial class ImageSplitWindow : Window
         
         if (string.IsNullOrWhiteSpace(inputPath))
         {
-            MessageBox.Show("Por favor, selecione uma imagem de entrada.", "Campo Obrigatório", MessageBoxButton.OK, MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show("Por favor, selecione uma imagem de entrada.", "Campo Obrigatório", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -178,9 +180,19 @@ public partial class ImageSplitWindow : Window
 
             var result = await engine.ExecuteAsync(request, reporter, ct);
 
-            return result.IsSuccess
-                ? $"Recorte concluído! {result.Value?.TotalComponents ?? 0} partes geradas."
-                : $"Falha no recorte: {string.Join(", ", result.Errors.Select(e => e.Message))}";
+            if (result.IsSuccess && result.Value is not null)
+            {
+                var total = result.Value.TotalComponents;
+                var saved = result.Value.Outputs.Count;
+                var dir = result.Value.OutputDirectory;
+                
+                if (saved > 0)
+                    return $"Recorte concluído! {saved} parte(s) salva(s) em: {dir}";
+                
+                return $"Nenhuma parte salva. Detectadas {total}. Dica: habilite 'Sobrescrever' ou ajuste Alpha/Tamanho/StartIndex. Pasta: {dir}";
+            }
+            
+            return $"Falha no recorte: {string.Join(", ", result.Errors.Select(e => e.Message))}";
         });
     }
 }

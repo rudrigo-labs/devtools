@@ -1,0 +1,158 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>namespace DevTools.Cli.Ui;
+
+public sealed class CliInput
+{
+    private readonly CliConsole _ui;
+
+    public CliInput(CliConsole ui)
+    {
+        _ui = ui;
+    }
+
+    public string ReadRequired(string label, string? hint = null)
+    {
+        while (true)
+        {
+            _ui.WritePromptLabel(label, hint);
+            _ui.WriteInputBoxPrefix();
+            var value = ReadLine();
+
+            if (IsCancel(value))
+                throw new CliAbortException();
+
+            value = (value ?? string.Empty).Trim().Trim(&#39;&quot;&#39;);
+            if (!string.IsNullOrWhiteSpace(value))
+                return value;
+
+            _ui.WriteWarning(&quot;Campo obrigatorio. Tente novamente.&quot;);
+        }
+    }
+
+    public string ReadOptional(string label, string? hint = null)
+    {
+        _ui.WritePromptLabel(label, hint);
+        _ui.WriteInputBoxPrefix();
+        var value = ReadLine();
+
+        if (IsCancel(value))
+            throw new CliAbortException();
+
+        return (value ?? string.Empty).Trim().Trim(&#39;&quot;&#39;);
+    }
+
+    public int? ReadOptionalInt(string label, string? hint = null)
+    {
+        while (true)
+        {
+            var raw = ReadOptional(label, hint);
+            if (string.IsNullOrWhiteSpace(raw))
+                return null;
+
+            if (int.TryParse(raw, out var value))
+                return value;
+
+            _ui.WriteWarning(&quot;Numero invalido. Tente novamente.&quot;);
+        }
+    }
+
+    public int ReadInt(string label, int min, int max, string? hint = null)
+    {
+        while (true)
+        {
+            var raw = ReadRequired(label, hint);
+            if (int.TryParse(raw, out var value) &amp;&amp; value &gt;= min &amp;&amp; value &lt;= max)
+                return value;
+
+            _ui.WriteWarning($&quot;Digite um numero entre {min} e {max}.&quot;);
+        }
+    }
+
+    public bool ReadYesNo(string label, bool defaultValue = false, string? hint = null)
+    {
+        var suffix = defaultValue ? &quot;S/n&quot; : &quot;s/N&quot;;
+        while (true)
+        {
+            var value = ReadOptional(label, CombineHint(hint, suffix));
+            if (string.IsNullOrWhiteSpace(value))
+                return defaultValue;
+
+            value = value.Trim().ToLowerInvariant();
+            if (value is &quot;s&quot; or &quot;sim&quot; or &quot;y&quot; or &quot;yes&quot;)
+                return true;
+            if (value is &quot;n&quot; or &quot;nao&quot; or &quot;no&quot;)
+                return false;
+
+            _ui.WriteWarning(&quot;Resposta invalida. Use s/n.&quot;);
+        }
+    }
+
+    public IReadOnlyList&lt;string&gt; ReadCsv(string label, string? hint = null)
+    {
+        var raw = ReadOptional(label, hint);
+        if (string.IsNullOrWhiteSpace(raw))
+            return Array.Empty&lt;string&gt;();
+
+        return raw.Split([&#39;,&#39;, &#39;;&#39;], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(s =&gt; !string.IsNullOrWhiteSpace(s))
+            .ToList();
+    }
+
+    public string ReadMultiline(string label, string? hint = null, string terminator = &quot;.&quot;)
+    {
+        _ui.WritePromptLabel(label, CombineHint(hint, $&quot;finalize com &#39;{terminator}&#39;&quot;));
+        var lines = new List&lt;string&gt;();
+        while (true)
+        {
+            _ui.WriteInputBoxPrefix();
+            var line = ReadLine();
+            if (line is null)
+                break;
+
+            if (IsCancel(line))
+                throw new CliAbortException();
+
+            if (line.Trim() == terminator)
+                break;
+
+            lines.Add(line);
+        }
+
+        return string.Join(Environment.NewLine, lines);
+    }
+
+    public string? ReadLine() =&gt; Console.ReadLine();
+
+    private static bool IsCancel(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        value = value.Trim().ToLowerInvariant();
+        return value is &quot;c&quot; or &quot;cancelar&quot; or &quot;cancel&quot; or &quot;q&quot; or &quot;sair&quot; or &quot;exit&quot;;
+    }
+
+    private static string? CombineHint(string? hint, string suffix)
+    {
+        if (string.IsNullOrWhiteSpace(hint))
+            return suffix;
+
+        return $&quot;{hint} | {suffix}&quot;;
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

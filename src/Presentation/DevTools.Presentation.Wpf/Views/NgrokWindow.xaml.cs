@@ -106,7 +106,7 @@ public partial class NgrokWindow : Window
                     
                     if (!result.IsSuccess)
                     {
-                        MessageBox.Show($"Falha ao iniciar: {string.Join(", ", result.Errors.Select(x => x.Message))}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        System.Windows.MessageBox.Show($"Falha ao iniciar: {string.Join(", ", result.Errors.Select(x => x.Message))}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                     else
                     {
@@ -118,13 +118,13 @@ public partial class NgrokWindow : Window
         }
         else
         {
-            MessageBox.Show("Porta inválida!", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show("Porta inválida!", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 
     private async void KillAll_Click(object sender, RoutedEventArgs e)
     {
-        if (MessageBox.Show("Isso fechará TODOS os túneis Ngrok abertos. Continuar?", "Confirmar", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+        if (System.Windows.MessageBox.Show("Isso fechará TODOS os túneis Ngrok abertos. Continuar?", "Confirmar", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
         {
             var request = new NgrokRequest(NgrokAction.KillAll);
             await _engine.ExecuteAsync(request);
@@ -139,9 +139,9 @@ public partial class NgrokWindow : Window
 
     private void CopyUrl_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is string url)
+        if (sender is System.Windows.Controls.Button btn && btn.Tag is string url)
         {
-            Clipboard.SetText(url);
+            System.Windows.Clipboard.SetText(url);
             // Feedback visual rápido seria legal, mas tooltip serve
         }
     }

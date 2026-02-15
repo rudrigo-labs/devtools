@@ -61,7 +61,7 @@ public partial class LogsWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Não foi possível limpar o arquivo de log: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            System.Windows.MessageBox.Show($"Não foi possível limpar o arquivo de log: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -81,7 +81,7 @@ public partial class LogsWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Erro ao abrir pasta: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            System.Windows.MessageBox.Show($"Erro ao abrir pasta: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 

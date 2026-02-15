@@ -1,0 +1,71 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Diagnostics;
+using DevTools.Ngrok.Models;
+
+namespace DevTools.Ngrok.Engine;
+
+public sealed class NgrokProcessService
+{
+    public int? StartHttp(NgrokStartOptions options)
+    {
+        if (options is null)
+            throw new ArgumentNullException(nameof(options));
+
+        var proto = string.IsNullOrWhiteSpace(options.Protocol) ? &quot;http&quot; : options.Protocol;
+        var target = proto.Equals(&quot;https&quot;, StringComparison.OrdinalIgnoreCase)
+            ? $&quot;https://localhost:{options.Port}&quot;
+            : $&quot;http://localhost:{options.Port}&quot;;
+
+        var fileName = string.IsNullOrWhiteSpace(options.ExecutablePath) ? &quot;ngrok&quot; : options.ExecutablePath;
+        var args = new List&lt;string&gt; { &quot;http&quot;, target };
+
+        if (options.ExtraArgs is { Count: &gt; 0 })
+            args.AddRange(options.ExtraArgs);
+
+        var psi = new ProcessStartInfo
+        {
+            FileName = fileName,
+            Arguments = string.Join(&quot; &quot;, args.Select(QuoteIfNeeded)),
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        var proc = Process.Start(psi);
+        return proc?.Id;
+    }
+
+    public int KillAll(string processName = &quot;ngrok&quot;)
+    {
+        var procs = Process.GetProcessesByName(processName);
+        var killed = 0;
+
+        foreach (var p in procs)
+        {
+            try { p.Kill(); killed++; } catch { }
+        }
+
+        return killed;
+    }
+
+    public bool HasAny(string processName = &quot;ngrok&quot;)
+        =&gt; Process.GetProcessesByName(processName).Length &gt; 0;
+
+    private static string QuoteIfNeeded(string arg)
+        =&gt; arg.Contains(&#39; &#39;) ? $&quot;\&quot;{arg}\&quot;&quot; : arg;
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

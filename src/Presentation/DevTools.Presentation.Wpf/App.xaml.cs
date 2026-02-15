@@ -6,7 +6,7 @@ using DevTools.Presentation.Wpf.Services;
 
 namespace DevTools.Presentation.Wpf;
 
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
     private JobManager _jobManager = null!;
     private SettingsService _settingsService = null!;

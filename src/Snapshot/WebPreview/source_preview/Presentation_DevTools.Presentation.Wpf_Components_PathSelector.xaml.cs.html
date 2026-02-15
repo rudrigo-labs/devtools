@@ -1,0 +1,80 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Windows;
+using System.Windows.Controls;
+using Microsoft.Win32;
+
+namespace DevTools.Presentation.Wpf.Components;
+
+public partial class PathSelector : System.Windows.Controls.UserControl
+{
+    public static readonly DependencyProperty TitleProperty =
+        DependencyProperty.Register(&quot;Title&quot;, typeof(string), typeof(PathSelector), new PropertyMetadata(&quot;Path&quot;));
+
+    public static readonly DependencyProperty SelectedPathProperty =
+        DependencyProperty.Register(&quot;SelectedPath&quot;, typeof(string), typeof(PathSelector), new PropertyMetadata(string.Empty));
+
+    public static readonly DependencyProperty IsFolderPickerProperty =
+        DependencyProperty.Register(&quot;IsFolderPicker&quot;, typeof(bool), typeof(PathSelector), new PropertyMetadata(true));
+
+    public string Title
+    {
+        get =&gt; (string)GetValue(TitleProperty);
+        set =&gt; SetValue(TitleProperty, value);
+    }
+
+    public string SelectedPath
+    {
+        get =&gt; (string)GetValue(SelectedPathProperty);
+        set =&gt; SetValue(SelectedPathProperty, value);
+    }
+
+    public bool IsFolderPicker
+    {
+        get =&gt; (bool)GetValue(IsFolderPickerProperty);
+        set =&gt; SetValue(IsFolderPickerProperty, value);
+    }
+
+    public PathSelector()
+    {
+        InitializeComponent();
+        TitleBlock.DataContext = this;
+        PathInput.DataContext = this;
+    }
+
+    private void Browse_Click(object sender, RoutedEventArgs e)
+    {
+        if (IsFolderPicker)
+        {
+            var dialog = new OpenFolderDialog();
+            if (dialog.ShowDialog() == true)
+            {
+                SelectedPath = dialog.FolderName;
+                PathInput.Text = SelectedPath;
+            }
+        }
+        else
+        {
+            var dialog = new OpenFileDialog();
+            if (dialog.ShowDialog() == true)
+            {
+                SelectedPath = dialog.FileName;
+                PathInput.Text = SelectedPath;
+            }
+        }
+    }
+}</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

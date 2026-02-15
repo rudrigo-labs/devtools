@@ -1,0 +1,53 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>namespace DevTools.Core.Utilities;
+
+public sealed class PathFilter
+{
+    private readonly IReadOnlyList&lt;GlobMatcher&gt; _includes;
+    private readonly IReadOnlyList&lt;GlobMatcher&gt; _excludes;
+
+    public PathFilter(IReadOnlyList&lt;string&gt;? includeGlobs, IReadOnlyList&lt;string&gt;? excludeGlobs)
+    {
+        _includes = (includeGlobs ?? Array.Empty&lt;string&gt;())
+            .Where(s =&gt; !string.IsNullOrWhiteSpace(s))
+            .Select(s =&gt; new GlobMatcher(s.Trim()))
+            .ToList();
+
+        _excludes = (excludeGlobs ?? Array.Empty&lt;string&gt;())
+            .Where(s =&gt; !string.IsNullOrWhiteSpace(s))
+            .Select(s =&gt; new GlobMatcher(s.Trim()))
+            .ToList();
+    }
+
+    public bool IsExcluded(string relativePath)
+    {
+        if (_excludes.Count == 0)
+            return false;
+
+        return _excludes.Any(m =&gt; m.IsMatch(relativePath));
+    }
+
+    public bool IsIncluded(string relativePath)
+    {
+        if (_includes.Count == 0)
+            return true;
+
+        return _includes.Any(m =&gt; m.IsMatch(relativePath));
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

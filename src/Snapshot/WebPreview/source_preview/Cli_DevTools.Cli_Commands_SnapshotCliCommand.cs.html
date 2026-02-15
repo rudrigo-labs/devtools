@@ -1,0 +1,214 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Cli.Ui;
+using DevTools.Cli.Logging;
+using DevTools.Cli.App;
+using DevTools.Snapshot.Engine;
+using DevTools.Snapshot.Models;
+
+namespace DevTools.Cli.Commands;
+
+public sealed class SnapshotCliCommand : ICliCommand
+{
+    private readonly CliConsole _ui;
+    private readonly CliInput _input;
+    private readonly SnapshotEngine _engine;
+
+    public SnapshotCliCommand(CliConsole ui, CliInput input)
+    {
+        _ui = ui;
+        _input = input;
+        _engine = new SnapshotEngine();
+    }
+
+    public string Key =&gt; &quot;snapshot&quot;;
+    public string Name =&gt; &quot;Snapshot&quot;;
+    public string Description =&gt; &quot;Gera inventario de uma pasta em TXT/JSON/HTML.&quot;;
+
+    public async Task&lt;int&gt; ExecuteAsync(CliLaunchOptions options, CancellationToken ct)
+    {
+        // 1. Resolve Parameters
+        var root = options.GetOption(&quot;root&quot;) ?? options.GetOption(&quot;source&quot;);
+        var outputBase = options.GetOption(&quot;output&quot;) ?? options.GetOption(&quot;out&quot;);
+        
+        // Formats: txt, json-nested, json-recursive, html, all
+        var formatStr = options.GetOption(&quot;format&quot;) ?? options.GetOption(&quot;formats&quot;);
+        bool? genText = null;
+        bool? genJsonNested = null;
+        bool? genJsonRecursive = null;
+        bool? genHtml = null;
+
+        if (formatStr != null)
+        {
+            var formats = formatStr.Split(&#39;,&#39;, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            genText = formats.Contains(&quot;txt&quot;) || formats.Contains(&quot;all&quot;);
+            genJsonNested = formats.Contains(&quot;json&quot;) || formats.Contains(&quot;json-nested&quot;) || formats.Contains(&quot;all&quot;);
+            genJsonRecursive = formats.Contains(&quot;json-recursive&quot;) || formats.Contains(&quot;all&quot;);
+            genHtml = formats.Contains(&quot;html&quot;) || formats.Contains(&quot;all&quot;);
+        }
+
+        var maxSizeStr = options.GetOption(&quot;max-size&quot;) ?? options.GetOption(&quot;max&quot;);
+        int? maxSize = int.TryParse(maxSizeStr, out var s) ? s : null;
+
+        var ignoredStr = options.GetOption(&quot;ignored&quot;) ?? options.GetOption(&quot;ignore&quot;);
+        List&lt;string&gt;? ignored = null;
+        if (!string.IsNullOrWhiteSpace(ignoredStr))
+        {
+            ignored = ignoredStr.Split(new[] { &#39;,&#39;, &#39;;&#39; }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+        }
+
+        // Interactive Fallback
+        if (!options.IsNonInteractive)
+        {
+            if (string.IsNullOrWhiteSpace(root))
+            {
+                root = _input.ReadRequired(&quot;Pasta raiz&quot;, &quot;ex: C:\\Projetos\\MeuApp&quot;);
+                options.Options[&quot;root&quot;] = root;
+            }
+            
+            if (string.IsNullOrWhiteSpace(outputBase))
+            {
+                outputBase = _input.ReadOptional(&quot;Saida base (opcional)&quot;, &quot;enter para padrao&quot;);
+                if (!string.IsNullOrWhiteSpace(outputBase)) options.Options[&quot;output&quot;] = outputBase;
+            }
+
+            if (genText == null &amp;&amp; genJsonNested == null &amp;&amp; genJsonRecursive == null &amp;&amp; genHtml == null)
+            {
+                _ui.Section(&quot;Formatos&quot;);
+                _ui.WriteLine(&quot;1) TXT&quot;);
+                _ui.WriteLine(&quot;2) JSON (achatado)&quot;);
+                _ui.WriteLine(&quot;3) JSON (recursivo)&quot;);
+                _ui.WriteLine(&quot;4) HTML (preview)&quot;);
+                _ui.WriteLine(&quot;5) Todos&quot;);
+
+                var choice = _input.ReadInt(&quot;Escolha&quot;, 1, 5);
+                genText = choice is 1 or 5;
+                genJsonNested = choice is 2 or 5;
+                genJsonRecursive = choice is 3 or 5;
+                genHtml = choice is 4 or 5;
+
+                string formatVal = choice switch
+                {
+                    1 =&gt; &quot;txt&quot;,
+                    2 =&gt; &quot;json&quot;,
+                    3 =&gt; &quot;json-recursive&quot;,
+                    4 =&gt; &quot;html&quot;,
+                    5 =&gt; &quot;all&quot;,
+                    _ =&gt; &quot;txt&quot;
+                };
+                options.Options[&quot;format&quot;] = formatVal;
+            }
+
+            if (maxSize == null)
+            {
+                maxSize = _input.ReadOptionalInt(&quot;Max KB por arquivo&quot;, &quot;enter para ignorar&quot;);
+                if (maxSize.HasValue) options.Options[&quot;max-size&quot;] = maxSize.Value.ToString();
+            }
+            
+            if (ignored == null)
+            {
+                var list = _input.ReadCsv(&quot;Ignorar pastas&quot;, &quot;ex: bin, obj, node_modules&quot;);
+                if (list.Count &gt; 0) 
+                {
+                    ignored = list.ToList();
+                    options.Options[&quot;ignored&quot;] = string.Join(&quot;,&quot;, ignored);
+                }
+            }
+        }
+
+        // Final Validation / Defaults
+        if (string.IsNullOrWhiteSpace(root))
+        {
+            _ui.WriteError(&quot;Root path is required (--root).&quot;);
+            return 1;
+        }
+
+        // Default to TXT if nothing selected
+        if (genText != true &amp;&amp; genJsonNested != true &amp;&amp; genJsonRecursive != true &amp;&amp; genHtml != true)
+        {
+            genText = true;
+        }
+        
+        genText ??= false;
+        genJsonNested ??= false;
+        genJsonRecursive ??= false;
+        genHtml ??= false;
+
+        var request = new SnapshotRequest(
+            root,
+            string.IsNullOrWhiteSpace(outputBase) ? null : outputBase,
+            genText.Value,
+            genJsonNested.Value,
+            genJsonRecursive.Value,
+            genHtml.Value,
+            ignored,
+            maxSize);
+
+        using var progress = new CliProgressReporter(_ui.Theme);
+        var result = await _engine.ExecuteAsync(request, progress, ct).ConfigureAwait(false);
+        progress.Finish();
+
+        if (!result.IsSuccess || result.Value is null)
+        {
+            WriteErrors(result.Errors);
+            return 1;
+        }
+
+        var response = result.Value;
+
+        if (!options.IsNonInteractive)
+        {
+            _ui.Section(&quot;Resumo&quot;);
+            _ui.WriteKeyValue(&quot;Arquivos&quot;, response.Stats.TotalFiles.ToString());
+            _ui.WriteKeyValue(&quot;Pastas&quot;, response.Stats.TotalDirectories.ToString());
+            _ui.WriteKeyValue(&quot;Saida&quot;, response.OutputBasePath);
+
+            if (response.Artifacts.Count &gt; 0)
+            {
+                _ui.Section(&quot;Artefatos&quot;);
+                foreach (var item in response.Artifacts)
+                    _ui.WriteLine($&quot;- {item.Kind}: {item.Path}&quot;);
+            }
+        }
+        else
+        {
+            // Non-interactive output
+            _ui.WriteLine($&quot;TotalFiles={response.Stats.TotalFiles}&quot;);
+            _ui.WriteLine($&quot;TotalDirectories={response.Stats.TotalDirectories}&quot;);
+            _ui.WriteLine($&quot;OutputBasePath={response.OutputBasePath}&quot;);
+            foreach (var item in response.Artifacts)
+            {
+                _ui.WriteLine($&quot;Artifact:{item.Kind}={item.Path}&quot;);
+            }
+        }
+
+        return 0;
+    }
+
+    private void WriteErrors(IReadOnlyList&lt;DevTools.Core.Results.ErrorDetail&gt; errors)
+    {
+        CliErrorLogger.LogErrors(Key, errors);
+        _ui.Section(&quot;Erros&quot;);
+        foreach (var error in errors)
+        {
+            _ui.WriteError($&quot;{error.Code}: {error.Message}&quot;);
+            if (!string.IsNullOrWhiteSpace(error.Details))
+                _ui.WriteDim(error.Details);
+        }
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

@@ -1,0 +1,46 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-markdown'># AGENT_DEVTOOLS_RULES (MANDATORY — Project Extension)
+
+This file extends AGENT_EXECUTION_RULES.md for the DevTools ecosystem.
+If there is any conflict, these DevTools rules win over the base rules.
+
+---
+
+## 1) Project folder rule (MANDATORY)
+
+Every new project MUST be created inside a folder with the SAME name as the project.
+
+Example:
+- Project name: `DevTools.Snapshot.Core`
+- Required folder path: `DevTools.Snapshot.Core/`
+- The project MUST be created inside that folder.
+
+No exceptions unless explicitly instructed.
+
+---
+
+## 2) Target framework rule (MANDATORY)
+
+All projects MUST target **.NET 10**.
+
+- Use `net10.0` for non-Windows projects.
+- Do not use older target frameworks.
+- Do not change the target unless explicitly instructed.
+
+This is mandatory for all new projects and any adjustments requested by the user.
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

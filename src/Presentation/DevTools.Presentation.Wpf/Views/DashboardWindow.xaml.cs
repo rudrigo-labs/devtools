@@ -41,6 +41,7 @@ public partial class DashboardWindow : Window
         JobsDataGrid.ItemsSource = _jobManager.Jobs;
 
         this.Loaded += DashboardWindow_Loaded;
+        this.Closing += DashboardWindow_Closing;
     }
 
     private void DashboardWindow_Loaded(object sender, RoutedEventArgs e)
@@ -59,7 +60,7 @@ public partial class DashboardWindow : Window
 
     private void NavButton_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is string tag)
+        if (sender is System.Windows.Controls.Button btn && btn.Tag is string tag)
         {
             switch (tag)
             {
@@ -78,7 +79,7 @@ public partial class DashboardWindow : Window
 
     private void OpenTool_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.CommandParameter is string toolTag)
+        if (sender is System.Windows.Controls.Button btn && btn.CommandParameter is string toolTag)
         {
             _trayService.OpenTool(toolTag);
         }
@@ -86,12 +87,19 @@ public partial class DashboardWindow : Window
 
     private void Shutdown_Click(object sender, RoutedEventArgs e)
     {
-        Application.Current.Shutdown();
+        System.Windows.Application.Current.Shutdown();
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
         Hide(); // Apenas esconde, não fecha a aplicação
+    }
+
+    private void DashboardWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        // Impede que o fechamento encerre a aplicação; apenas oculta na bandeja
+        e.Cancel = true;
+        Hide();
     }
 
     // --- Settings Navigation Logic ---
@@ -188,14 +196,14 @@ public partial class DashboardWindow : Window
 
         _configService.SaveSection("Ssh", _currentSshConfig);
         SshProfilesList.Items.Refresh();
-        MessageBox.Show("Configuração salva com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        System.Windows.MessageBox.Show("Configuração salva com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void DeleteSshProfile_Click(object sender, RoutedEventArgs e)
     {
         if (_selectedProfile == null) return;
 
-        if (MessageBox.Show($"Tem certeza que deseja excluir o perfil '{_selectedProfile.Name}'?", "Confirmar Exclusão", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+        if (System.Windows.MessageBox.Show($"Tem certeza que deseja excluir o perfil '{_selectedProfile.Name}'?", "Confirmar Exclusão", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
         {
             _currentSshConfig.Profiles.Remove(_selectedProfile);
             _configService.SaveSection("Ssh", _currentSshConfig);
@@ -279,12 +287,12 @@ public partial class DashboardWindow : Window
             double.TryParse(HarvestWeightDensity.Text, out double density); _currentHarvestConfig.Weights.KeywordDensityWeight = density;
             double.TryParse(HarvestWeightDeadCode.Text, out double deadCode); _currentHarvestConfig.Weights.DeadCodePenalty = deadCode;
 
-            _configService.SaveSection("Harvest", _currentHarvestConfig);
-            MessageBox.Show("Configuração do Harvest salva com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        _configService.SaveSection("Harvest", _currentHarvestConfig);
+        System.Windows.MessageBox.Show("Configuração do Harvest salva com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Erro ao salvar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            System.Windows.MessageBox.Show($"Erro ao salvar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -348,14 +356,14 @@ public partial class DashboardWindow : Window
 
         _configService.SaveSection("Organizer", _currentOrganizerConfig);
         OrganizerCategoriesList.Items.Refresh();
-        MessageBox.Show("Categoria salva!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        System.Windows.MessageBox.Show("Categoria salva!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void DeleteOrganizerCategory_Click(object sender, RoutedEventArgs e)
     {
         if (_selectedCategory == null) return;
         
-        if (MessageBox.Show($"Excluir categoria '{_selectedCategory.Name}'?", "Confirmar", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+        if (System.Windows.MessageBox.Show($"Excluir categoria '{_selectedCategory.Name}'?", "Confirmar", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
         {
             _currentOrganizerConfig.Categories.Remove(_selectedCategory);
             _configService.SaveSection("Organizer", _currentOrganizerConfig);
@@ -392,7 +400,7 @@ public partial class DashboardWindow : Window
         _currentMigrationsConfig.AdditionalArgs = MigArgsInput.Text;
 
         _configService.SaveSection("Migrations", _currentMigrationsConfig);
-        MessageBox.Show("Configurações do Migrations salvas!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        System.Windows.MessageBox.Show("Configurações do Migrations salvas!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     // --- Ngrok Settings ---
@@ -421,6 +429,6 @@ public partial class DashboardWindow : Window
         _currentNgrokConfig.AdditionalArgs = NgrokArgsInput.Text;
 
         _configService.SaveSection("Ngrok", _currentNgrokConfig);
-        MessageBox.Show("Configurações do Ngrok salvas!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        System.Windows.MessageBox.Show("Configurações do Ngrok salvas!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 }

@@ -1,0 +1,102 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Cli.Commands;
+
+namespace DevTools.Cli.Ui;
+
+public sealed class CliMenu
+{
+    private readonly CliConsole _ui;
+    private readonly CliInput _input;
+
+    public CliMenu(CliConsole ui, CliInput input)
+    {
+        _ui = ui;
+        _input = input;
+    }
+
+    public ICliCommand? Show(IReadOnlyList&lt;ICliCommand&gt; commands)
+    {
+        while (true)
+        {
+            _ui.Header(&quot;Menu Principal&quot;, &quot;Selecione a ferramenta que deseja executar.&quot;);
+            RenderMenu();
+
+            var raw = _input.ReadOptional(&quot;Escolha uma opcao&quot;, &quot;ex: 01 ou harvest&quot;);
+            if (string.IsNullOrWhiteSpace(raw))
+                continue;
+
+            raw = raw.Trim();
+            if (raw.Equals(&quot;sair&quot;, StringComparison.OrdinalIgnoreCase) ||
+                raw.Equals(&quot;exit&quot;, StringComparison.OrdinalIgnoreCase) ||
+                raw.Equals(&quot;q&quot;, StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            var byKey = commands.FirstOrDefault(c =&gt; c.Key.Equals(raw, StringComparison.OrdinalIgnoreCase));
+            if (byKey is not null)
+                return byKey;
+
+            if (int.TryParse(raw, out var index))
+            {
+                if (index &gt;= 1 &amp;&amp; index &lt;= commands.Count)
+                    return commands[index - 1];
+            }
+
+            _ui.WriteWarning(&quot;Opcao invalida. Tente novamente.&quot;);
+        }
+    }
+
+    public int ShowOptions(string title, IReadOnlyList&lt;string&gt; options)
+    {
+        while (true)
+        {
+            _ui.Section(title);
+            for (int i = 0; i &lt; options.Count; i++)
+            {
+                _ui.WriteLine($&quot;{i + 1}) {options[i]}&quot;);
+            }
+
+            var raw = _input.ReadOptional(&quot;Escolha uma opcao&quot;, $&quot;1-{options.Count} ou cancelar&quot;);
+            if (string.IsNullOrWhiteSpace(raw))
+                continue;
+
+            if (IsCancel(raw))
+                return -1;
+
+            if (int.TryParse(raw, out var index))
+            {
+                if (index &gt;= 1 &amp;&amp; index &lt;= options.Count)
+                    return index - 1;
+            }
+
+            _ui.WriteWarning(&quot;Opcao invalida.&quot;);
+        }
+    }
+
+    private static bool IsCancel(string value)
+    {
+        return value.Equals(&quot;c&quot;, StringComparison.OrdinalIgnoreCase) ||
+               value.Equals(&quot;cancelar&quot;, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void RenderMenu()
+    {
+        _ui.Section(&quot;Selecao&quot;);
+        _ui.WriteDim(&quot;Digite o numero ou comando. Para sair, digite &#39;sair&#39;.&quot;);
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

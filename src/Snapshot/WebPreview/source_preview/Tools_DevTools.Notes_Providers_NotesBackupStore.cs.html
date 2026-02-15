@@ -1,0 +1,108 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.IO.Compression;
+using DevTools.Core.Abstractions;
+using DevTools.Core.Providers;
+using DevTools.Core.Results;
+
+namespace DevTools.Notes.Providers;
+
+public sealed class NotesBackupStore
+{
+    private readonly IFileSystem _fs;
+
+    public NotesBackupStore(IFileSystem? fileSystem = null)
+    {
+        _fs = fileSystem ?? new SystemFileSystem();
+    }
+
+    public RunResult&lt;string&gt; ExportZip(string rootPath, string? outputPath)
+    {
+        try
+        {
+            var root = NotesPaths.ResolveRoot(rootPath);
+            var itemsDir = NotesPaths.ItemsDir(root);
+            var indexPath = NotesPaths.IndexPath(root);
+
+            _fs.CreateDirectory(itemsDir);
+
+            var targetDir = string.IsNullOrWhiteSpace(outputPath)
+                ? NotesPaths.ExportsDir(root)
+                : Path.GetFullPath(outputPath);
+
+            _fs.CreateDirectory(targetDir);
+            var zipName = $&quot;DevToolsNotes_{DateTime.Now:yyyyMMdd-HHmmss}.zip&quot;;
+            var zipPath = Path.Combine(targetDir, zipName);
+
+            if (File.Exists(zipPath))
+                File.Delete(zipPath);
+
+            using var zip = ZipFile.Open(zipPath, ZipArchiveMode.Create);
+
+            if (Directory.Exists(itemsDir))
+            {
+                foreach (var file in Directory.EnumerateFiles(itemsDir, &quot;*&quot;, SearchOption.AllDirectories))
+                {
+                    var rel = Path.GetRelativePath(root, file).Replace(&#39;\\&#39;, &#39;/&#39;);
+                    zip.CreateEntryFromFile(file, rel, CompressionLevel.Optimal);
+                }
+            }
+
+            if (_fs.FileExists(indexPath))
+                zip.CreateEntryFromFile(indexPath, &quot;index.json&quot;, CompressionLevel.Optimal);
+
+            return RunResult&lt;string&gt;.Success(zipPath);
+        }
+        catch (Exception ex)
+        {
+            return RunResult&lt;string&gt;.Fail(new ErrorDetail(
+                &quot;notes.backup.export.failed&quot;,
+                &quot;Failed to export notes zip.&quot;,
+                Exception: ex));
+        }
+    }
+
+    public RunResult&lt;(string TempDir, List&lt;string&gt; ItemFiles, bool HasIndex)&gt; ExtractZip(string zipPath)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(zipPath) || !File.Exists(zipPath))
+                return RunResult&lt;(string, List&lt;string&gt;, bool)&gt;.Fail(new ErrorDetail(&quot;notes.backup.zip.missing&quot;, &quot;ZIP not found.&quot;, zipPath));
+
+            var tempDir = Path.Combine(Path.GetTempPath(), &quot;DevToolsNotes&quot;, Guid.NewGuid().ToString(&quot;N&quot;));
+            Directory.CreateDirectory(tempDir);
+
+            ZipFile.ExtractToDirectory(zipPath, tempDir, true);
+
+            var itemsDir = Path.Combine(tempDir, &quot;items&quot;);
+            var itemFiles = Directory.Exists(itemsDir)
+                ? Directory.EnumerateFiles(itemsDir, &quot;*&quot;, SearchOption.AllDirectories).ToList()
+                : new List&lt;string&gt;();
+
+            var hasIndex = File.Exists(Path.Combine(tempDir, &quot;index.json&quot;));
+            return RunResult&lt;(string, List&lt;string&gt;, bool)&gt;.Success((tempDir, itemFiles, hasIndex));
+        }
+        catch (Exception ex)
+        {
+            return RunResult&lt;(string, List&lt;string&gt;, bool)&gt;.Fail(new ErrorDetail(
+                &quot;notes.backup.import.extract.failed&quot;,
+                &quot;Failed to extract zip.&quot;,
+                Exception: ex));
+        }
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

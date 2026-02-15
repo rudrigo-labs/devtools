@@ -1,0 +1,178 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Collections.Generic;
+using DevTools.Presentation.Wpf.Services;
+using DevTools.SearchText.Engine;
+using DevTools.SearchText.Models;
+using DevTools.Core.Models;
+
+namespace DevTools.Presentation.Wpf.Views;
+
+public partial class SearchTextWindow : Window
+{
+    private readonly JobManager _jobManager;
+    private readonly SettingsService _settings;
+
+    public SearchTextWindow(JobManager jobManager, SettingsService settings)
+    {
+        InitializeComponent();
+        _jobManager = jobManager;
+        _settings = settings;
+
+        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
+        ProfileSelector.ProfileLoaded += LoadProfile;
+
+        Loaded += OnLoaded;
+        Closing += OnClosing;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        // Restore Position disabled to enforce TrayService placement
+        /*
+        if (_settings.Settings.SearchTextWindowTop.HasValue)
+        {
+            Top = _settings.Settings.SearchTextWindowTop.Value;
+            Left = _settings.Settings.SearchTextWindowLeft.Value;
+        }
+        */
+
+        // Restore Inputs
+        if (!string.IsNullOrEmpty(_settings.Settings.LastSearchTextRootPath))
+            PathSelector.SelectedPath = _settings.Settings.LastSearchTextRootPath;
+
+        if (!string.IsNullOrEmpty(_settings.Settings.LastSearchTextInclude))
+            IncludePatternInput.Text = _settings.Settings.LastSearchTextInclude;
+
+        if (!string.IsNullOrEmpty(_settings.Settings.LastSearchTextExclude))
+            ExcludePatternInput.Text = _settings.Settings.LastSearchTextExclude;
+    }
+
+    private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        _settings.Settings.SearchTextWindowTop = Top;
+        _settings.Settings.SearchTextWindowLeft = Left;
+        _settings.Settings.LastSearchTextRootPath = PathSelector.SelectedPath;
+        _settings.Settings.LastSearchTextInclude = IncludePatternInput.Text;
+        _settings.Settings.LastSearchTextExclude = ExcludePatternInput.Text;
+        _settings.Save();
+    }
+
+    private Dictionary&lt;string, string&gt; GetCurrentOptions()
+    {
+        var options = new Dictionary&lt;string, string&gt;();
+        options[&quot;root&quot;] = PathSelector.SelectedPath;
+        options[&quot;pattern&quot;] = SearchTextInput.Text;
+        options[&quot;regex&quot;] = (UseRegexCheck.IsChecked ?? false).ToString().ToLowerInvariant();
+        options[&quot;case-sensitive&quot;] = (CaseSensitiveCheck.IsChecked ?? false).ToString().ToLowerInvariant();
+        options[&quot;include&quot;] = IncludePatternInput.Text;
+        options[&quot;exclude&quot;] = ExcludePatternInput.Text;
+        return options;
+    }
+
+    private void LoadProfile(ToolProfile profile)
+    {
+        if (profile.Options.TryGetValue(&quot;root&quot;, out var root)) PathSelector.SelectedPath = root;
+        if (profile.Options.TryGetValue(&quot;pattern&quot;, out var pattern)) SearchTextInput.Text = pattern;
+        
+        if (profile.Options.TryGetValue(&quot;regex&quot;, out var regex))
+             UseRegexCheck.IsChecked = bool.TryParse(regex, out var r) ? r : false;
+             
+        if (profile.Options.TryGetValue(&quot;case-sensitive&quot;, out var cs))
+             CaseSensitiveCheck.IsChecked = bool.TryParse(cs, out var c) ? c : false;
+             
+        if (profile.Options.TryGetValue(&quot;include&quot;, out var inc)) IncludePatternInput.Text = inc;
+        if (profile.Options.TryGetValue(&quot;exclude&quot;, out var exc)) ExcludePatternInput.Text = exc;
+    }
+
+    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        // if (e.ButtonState == MouseButtonState.Pressed) DragMove();
+    }
+
+    private void Close_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    private void Execute_Click(object sender, RoutedEventArgs e)
+    {
+        var root = PathSelector.SelectedPath;
+        var text = SearchTextInput.Text;
+        
+        if (string.IsNullOrWhiteSpace(root))
+        {
+            MessageBox.Show(&quot;Selecione o diret&#243;rio de busca.&quot;, &quot;Aten&#231;&#227;o&quot;, MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            MessageBox.Show(&quot;Informe o texto a ser pesquisado.&quot;, &quot;Aten&#231;&#227;o&quot;, MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var request = new SearchTextRequest(
+            RootPath: root,
+            Pattern: text,
+            UseRegex: UseRegexCheck.IsChecked == true,
+            CaseSensitive: CaseSensitiveCheck.IsChecked == true,
+            IncludeGlobs: ParsePatterns(IncludePatternInput.Text),
+            ExcludeGlobs: ParsePatterns(ExcludePatternInput.Text)
+        );
+
+        OutputText.Text = &quot;Buscando...&quot;;
+
+        _jobManager.StartJob(&quot;Busca de Texto&quot;, async (progress, ct) =&gt;
+        {
+            var engine = new SearchTextEngine();
+            var result = await engine.ExecuteAsync(request, progress, ct);
+
+            if (result.IsSuccess &amp;&amp; result.Value != null)
+            {
+                var count = result.Value.TotalOccurrences;
+                var fileCount = result.Value.TotalFilesWithMatches;
+
+                Dispatcher.Invoke(() =&gt;
+                {
+                    OutputText.Text = $&quot;Encontrados {count} resultados em {fileCount} arquivos.\n\n&quot; + 
+                                      string.Join(&quot;\n&quot;, result.Value.Files.SelectMany(f =&gt; f.Lines.Select(m =&gt; $&quot;{f.FullPath}:{m.LineNumber} -&gt; {m.LineText.Trim()}&quot;)));
+                });
+                return $&quot;Busca conclu&#237;da: {count} ocorr&#234;ncias.&quot;;
+            }
+            else
+            {
+                Dispatcher.Invoke(() =&gt;
+                {
+                    OutputText.Text = $&quot;ERRO:\n{string.Join(&quot;\n&quot;, result.Errors.Select(e =&gt; e.Message))}&quot;;
+                });
+                return &quot;Falha na busca.&quot;;
+            }
+        });
+    }
+
+    private string[] ParsePatterns(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return Array.Empty&lt;string&gt;();
+        return input.Split(new[] { &#39;,&#39;, &#39;;&#39; }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

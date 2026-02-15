@@ -1,0 +1,137 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Core.Abstractions;
+using DevTools.Core.Models;
+using DevTools.Core.Results;
+using DevTools.Migrations.Models;
+using DevTools.Migrations.Providers;
+using DevTools.Core.Providers;
+using DevTools.Migrations.Validation;
+
+namespace DevTools.Migrations.Engine;
+
+public sealed class MigrationsEngine : IDevToolEngine&lt;MigrationsRequest, MigrationsResponse&gt;
+{
+    private readonly IFileSystem _fs;
+    private readonly IProcessRunner _processRunner;
+
+    public MigrationsEngine(IFileSystem? fileSystem = null, IProcessRunner? processRunner = null)
+    {
+        _fs = fileSystem ?? new SystemFileSystem();
+        _processRunner = processRunner ?? new SystemProcessRunner();
+    }
+
+    public async Task&lt;RunResult&lt;MigrationsResponse&gt;&gt; ExecuteAsync(
+        MigrationsRequest request,
+        IProgressReporter? progress = null,
+        CancellationToken ct = default)
+    {
+        var errors = MigrationsRequestValidator.Validate(request, _fs);
+        if (errors.Count &gt; 0)
+            return RunResult&lt;MigrationsResponse&gt;.Fail(errors);
+
+        var settings = request.Settings;
+        var args = request.Action switch
+        {
+            MigrationsAction.AddMigration =&gt; EfCommandBuilder.BuildAddMigration(settings, request.Provider, request.MigrationName!),
+            MigrationsAction.UpdateDatabase =&gt; EfCommandBuilder.BuildUpdateDatabase(settings, request.Provider),
+            _ =&gt; throw new InvalidOperationException(&quot;Invalid migration action.&quot;)
+        };
+
+        var workingDirectory = !string.IsNullOrWhiteSpace(request.WorkingDirectory)
+            ? request.WorkingDirectory!
+            : settings.RootPath;
+
+        var command = $&quot;dotnet {args}&quot;;
+
+        if (request.DryRun)
+        {
+            var dryResponse = new MigrationsResponse(request.Action, request.Provider, command, null, null, null, true);
+            return RunResult&lt;MigrationsResponse&gt;.Success(dryResponse);
+        }
+
+        progress?.Report(new ProgressEvent(&quot;Running dotnet ef&quot;, 10, &quot;run&quot;));
+
+        try
+        {
+            var result = await _processRunner.RunAsync(&quot;dotnet&quot;, args, workingDirectory, null, ct).ConfigureAwait(false);
+
+            var response = new MigrationsResponse(
+                request.Action,
+                request.Provider,
+                command,
+                result.ExitCode,
+                result.StdOut,
+                result.StdErr,
+                false);
+
+            if (result.ExitCode != 0)
+            {
+                var error = BuildProcessError(result);
+                return new RunResult&lt;MigrationsResponse&gt;
+                {
+                    IsSuccess = false,
+                    Errors = new[] { error },
+                    Value = response
+                };
+            }
+
+            progress?.Report(new ProgressEvent(&quot;Done&quot;, 100, &quot;done&quot;));
+            return RunResult&lt;MigrationsResponse&gt;.Success(response);
+        }
+        catch (OperationCanceledException ex)
+        {
+            return RunResult&lt;MigrationsResponse&gt;.FromException(
+                &quot;migrations.cancelled&quot;,
+                &quot;Operation cancelled.&quot;,
+                ex);
+        }
+        catch (Exception ex)
+        {
+            return RunResult&lt;MigrationsResponse&gt;.FromException(
+                &quot;migrations.process.failed&quot;,
+                &quot;Failed to execute dotnet ef.&quot;,
+                ex,
+                ex.Message);
+        }
+    }
+
+    private static ErrorDetail BuildProcessError(ProcessResult result)
+    {
+        var stderr = result.StdErr?.Trim();
+        var stdout = result.StdOut?.Trim();
+
+        if (!string.IsNullOrWhiteSpace(stderr))
+        {
+            if (stderr.Contains(&quot;dotnet-ef&quot;, StringComparison.OrdinalIgnoreCase) &amp;&amp;
+                stderr.Contains(&quot;No executable found&quot;, StringComparison.OrdinalIgnoreCase))
+            {
+                return new ErrorDetail(&quot;migrations.dotnet_ef.missing&quot;, &quot;dotnet-ef is not installed.&quot;, stderr);
+            }
+
+            if (stderr.Contains(&quot;was not found&quot;, StringComparison.OrdinalIgnoreCase) &amp;&amp;
+                stderr.Contains(&quot;dotnet-ef&quot;, StringComparison.OrdinalIgnoreCase))
+            {
+                return new ErrorDetail(&quot;migrations.dotnet_ef.missing&quot;, &quot;dotnet-ef is not installed.&quot;, stderr);
+            }
+        }
+
+        var details = string.Join(&quot;\n\n&quot;, new[] { stdout, stderr }.Where(s =&gt; !string.IsNullOrWhiteSpace(s)));
+        return new ErrorDetail(&quot;migrations.dotnet_ef.failed&quot;, &quot;dotnet ef command failed.&quot;, details);
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

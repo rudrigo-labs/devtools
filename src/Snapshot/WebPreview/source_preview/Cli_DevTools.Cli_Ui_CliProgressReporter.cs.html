@@ -1,0 +1,127 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Core.Abstractions;
+using DevTools.Core.Models;
+
+namespace DevTools.Cli.Ui;
+
+public sealed class CliProgressReporter : IProgressReporter, IDisposable
+{
+    private readonly object _lock = new();
+    private readonly CliTheme _theme;
+    private int _lastWidth;
+    private bool _isFinished;
+    private int _spinnerIndex;
+    private static readonly char[] Spinner = [&#39;|&#39;, &#39;/&#39;, &#39;-&#39;, &#39;\\&#39;];
+
+    public CliProgressReporter(CliTheme theme)
+    {
+        _theme = theme;
+    }
+
+    public void Report(ProgressEvent ev)
+    {
+        if (_isFinished)
+            return;
+
+        var message = ev.Message ?? string.Empty;
+        var (prefix, body) = BuildLine(ev.Percent, message);
+        var maxWidth = GetMaxWidth();
+        var available = Math.Max(0, maxWidth - prefix.Length);
+        if (body.Length &gt; available)
+            body = body[..available];
+
+        lock (_lock)
+        {
+            Console.Write(&#39;\r&#39;);
+
+            var prev = Console.ForegroundColor;
+            try
+            {
+                Console.ForegroundColor = _theme.AccentColor;
+                Console.Write(prefix);
+
+                Console.ForegroundColor = _theme.DimColor;
+                Console.Write(body);
+
+                var totalLen = prefix.Length + body.Length;
+                if (totalLen &lt; _lastWidth)
+                    Console.Write(new string(&#39; &#39;, _lastWidth - totalLen));
+
+                _lastWidth = Math.Max(_lastWidth, totalLen);
+            }
+            finally
+            {
+                Console.ForegroundColor = prev;
+            }
+        }
+    }
+
+    public void Finish()
+    {
+        if (_isFinished)
+            return;
+
+        _isFinished = true;
+        Console.WriteLine();
+    }
+
+    public void Dispose() =&gt; Finish();
+
+    private (string Prefix, string Body) BuildLine(int? percent, string message)
+    {
+        if (!percent.HasValue)
+        {
+            var spinner = Spinner[_spinnerIndex++ % Spinner.Length];
+            return ($&quot;{spinner} &quot;, message);
+        }
+
+        var pct = Math.Clamp(percent.Value, 0, 100);
+        var width = GetBarWidth();
+        var filled = (int)Math.Round(width * (pct / 100.0));
+        if (filled &lt; 0) filled = 0;
+        if (filled &gt; width) filled = width;
+
+        var bar = new string(&#39;#&#39;, filled) + new string(&#39;-&#39;, width - filled);
+        return ($&quot;[{bar}] {pct,3}% &quot;, message);
+    }
+
+    private static int GetMaxWidth()
+    {
+        try
+        {
+            if (!Console.IsOutputRedirected)
+                return Math.Max(40, Console.WindowWidth - 1);
+        }
+        catch
+        {
+            // ignore
+        }
+
+        return 80;
+    }
+
+    private static int GetBarWidth()
+    {
+        var maxWidth = GetMaxWidth();
+        var width = maxWidth - 20;
+        if (width &lt; 10) width = 10;
+        if (width &gt; 36) width = 36;
+        return width;
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

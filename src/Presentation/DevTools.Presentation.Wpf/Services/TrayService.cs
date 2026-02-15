@@ -46,7 +46,7 @@ public class TrayService : IDisposable
     // Helper to enforce Single Instance and Bottom-Right Positioning
     private void ShowWindow<T>(Func<T?> getWindow, Action<T?> setWindow, Func<T> factory) where T : Window
     {
-        Application.Current.Dispatcher.Invoke(() =>
+        System.Windows.Application.Current.Dispatcher.Invoke(() =>
         {
             var window = getWindow();
 
@@ -158,7 +158,7 @@ public class TrayService : IDisposable
         {
             // 1) Tenta carregar via pack URI relativo ao assembly atual (robusto após publish)
             var uriSimple = new Uri("pack://application:,,,/Assets/app.ico");
-            var streamInfo = Application.GetResourceStream(uriSimple);
+            var streamInfo = System.Windows.Application.GetResourceStream(uriSimple);
             if (streamInfo != null)
             {
                 _taskbarIcon.Icon = new Icon(streamInfo.Stream);
@@ -167,7 +167,7 @@ public class TrayService : IDisposable
 
             // 2) Fallback: tenta via assembly qualificado (alguns ambientes preferem o formato antigo)
             var uriQualified = new Uri("pack://application:,,,/DevTools.Presentation.Wpf;component/Assets/app.ico");
-            var streamInfo2 = Application.GetResourceStream(uriQualified);
+            var streamInfo2 = System.Windows.Application.GetResourceStream(uriQualified);
             if (streamInfo2 != null)
             {
                 _taskbarIcon.Icon = new Icon(streamInfo2.Stream);
@@ -192,14 +192,14 @@ public class TrayService : IDisposable
         }
     }
 
-    private ContextMenu CreateContextMenu()
+    private System.Windows.Controls.ContextMenu CreateContextMenu()
     {
         // Carrega o menu estilizado dos recursos (TrayResources.xaml)
-        if (Application.Current.FindResource("TrayContextMenu") is ContextMenu menu)
+        if (System.Windows.Application.Current.FindResource("TrayContextMenu") is System.Windows.Controls.ContextMenu menu)
         {
             foreach (var item in menu.Items)
             {
-                if (item is MenuItem menuItem && menuItem.Tag is string tag)
+                if (item is System.Windows.Controls.MenuItem menuItem && menuItem.Tag is string tag)
                 {
                     switch (tag)
                     {
@@ -260,7 +260,7 @@ public class TrayService : IDisposable
                             break;
 
                         case "Exit":
-                            menuItem.Click += (s, e) => Application.Current.Shutdown();
+                            menuItem.Click += (s, e) => System.Windows.Application.Current.Shutdown();
                             break;
                     }
                 }
@@ -270,14 +270,14 @@ public class TrayService : IDisposable
         }
 
         // Fallback básico caso o recurso não seja encontrado
-        var fallbackMenu = new ContextMenu();
+        var fallbackMenu = new System.Windows.Controls.ContextMenu();
 
-        var jobs = new MenuItem { Header = "Jobs (Fallback)" };
+        var jobs = new System.Windows.Controls.MenuItem { Header = "Jobs (Fallback)" };
         jobs.Click += (s, e) => ShowJobCenter();
         fallbackMenu.Items.Add(jobs);
 
-        var itemExit = new MenuItem { Header = "Sair (Fallback)" };
-        itemExit.Click += (s, e) => Application.Current.Shutdown();
+        var itemExit = new System.Windows.Controls.MenuItem { Header = "Sair (Fallback)" };
+        itemExit.Click += (s, e) => System.Windows.Application.Current.Shutdown();
         fallbackMenu.Items.Add(itemExit);
 
         return fallbackMenu;
@@ -314,7 +314,7 @@ public class TrayService : IDisposable
 
     private void OnJobCompleted(string message, bool success)
     {
-        Application.Current.Dispatcher.Invoke(() =>
+        System.Windows.Application.Current.Dispatcher.Invoke(() =>
         {
             try 
             {
@@ -323,7 +323,7 @@ public class TrayService : IDisposable
                
                if (!success)
                {
-                   MessageBox.Show(message, "Erro DevTools", MessageBoxButton.OK, MessageBoxImage.Error);
+                   System.Windows.MessageBox.Show(message, "Erro DevTools", MessageBoxButton.OK, MessageBoxImage.Error);
                }
                else
                {

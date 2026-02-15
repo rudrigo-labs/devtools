@@ -1,0 +1,170 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Cli.Ui;
+using DevTools.Cli.Logging;
+using DevTools.Cli.App;
+using DevTools.Organizer.Engine;
+using DevTools.Organizer.Models;
+
+namespace DevTools.Cli.Commands;
+
+public sealed class OrganizerCliCommand : ICliCommand
+{
+    private readonly CliConsole _ui;
+    private readonly CliInput _input;
+    private readonly OrganizerEngine _engine;
+
+    public OrganizerCliCommand(CliConsole ui, CliInput input)
+    {
+        _ui = ui;
+        _input = input;
+        _engine = new OrganizerEngine();
+    }
+
+    public string Key =&gt; &quot;organizer&quot;;
+    public string Name =&gt; &quot;Organizer&quot;;
+    public string Description =&gt; &quot;Classifica documentos por assunto, deduplica e move.&quot;;
+
+    public async Task&lt;int&gt; ExecuteAsync(CliLaunchOptions options, CancellationToken ct)
+    {
+        // 1. Resolve Parameters
+        var inbox = options.GetOption(&quot;inbox&quot;) ?? options.GetOption(&quot;input&quot;) ?? options.GetOption(&quot;source&quot;);
+        var output = options.GetOption(&quot;output&quot;) ?? options.GetOption(&quot;out&quot;) ?? options.GetOption(&quot;target&quot;);
+        var config = options.GetOption(&quot;config&quot;);
+        
+        var minScoreStr = options.GetOption(&quot;min-score&quot;) ?? options.GetOption(&quot;min&quot;);
+        int? minScore = int.TryParse(minScoreStr, out var s) ? s : null;
+
+        var applyStr = options.GetOption(&quot;apply&quot;);
+        bool? apply = applyStr != null ? (applyStr == &quot;true&quot;) : null;
+
+        // Interactive Fallback
+        if (!options.IsNonInteractive)
+        {
+            if (string.IsNullOrWhiteSpace(inbox))
+            {
+                inbox = _input.ReadRequired(&quot;Pasta de entrada&quot;, &quot;ex: C:\\Projetos\\Inbox&quot;);
+                options.Options[&quot;inbox&quot;] = inbox;
+            }
+            
+            if (string.IsNullOrWhiteSpace(output))
+            {
+                output = _input.ReadRequired(&quot;Pasta de saida&quot;, &quot;ex: C:\\Projetos\\Organizado&quot;);
+                options.Options[&quot;output&quot;] = output;
+            }
+            
+            if (string.IsNullOrWhiteSpace(config))
+            {
+                config = _input.ReadOptional(&quot;Config (opcional)&quot;, &quot;enter para padrao&quot;);
+                if (!string.IsNullOrWhiteSpace(config)) options.Options[&quot;config&quot;] = config;
+            }
+            
+            if (minScore == null)
+            {
+                minScore = _input.ReadOptionalInt(&quot;MinScore (opcional)&quot;);
+                if (minScore.HasValue) options.Options[&quot;min-score&quot;] = minScore.Value.ToString();
+            }
+            
+            if (apply == null)
+            {
+                apply = _input.ReadYesNo(&quot;Aplicar mudancas&quot;, false);
+                options.Options[&quot;apply&quot;] = apply.Value.ToString().ToLowerInvariant();
+            }
+        }
+
+        // Final Validation / Defaults
+        if (string.IsNullOrWhiteSpace(inbox))
+        {
+            _ui.WriteError(&quot;Inbox path is required (--inbox).&quot;);
+            return 1;
+        }
+        if (string.IsNullOrWhiteSpace(output))
+        {
+            _ui.WriteError(&quot;Output path is required (--output).&quot;);
+            return 1;
+        }
+
+        apply ??= false;
+
+        var request = new OrganizerRequest(
+            inbox,
+            output,
+            string.IsNullOrWhiteSpace(config) ? null : config,
+            minScore,
+            apply.Value);
+
+        using var progress = new CliProgressReporter(_ui.Theme);
+        var result = await _engine.ExecuteAsync(request, progress, ct).ConfigureAwait(false);
+        progress.Finish();
+
+        if (!result.IsSuccess || result.Value is null)
+        {
+            WriteErrors(result.Errors);
+            return 1;
+        }
+
+        var response = result.Value;
+
+        if (!options.IsNonInteractive)
+        {
+            _ui.Section(&quot;Resumo&quot;);
+            var eligible = Math.Max(0, response.Stats.TotalFiles - response.Stats.Ignored);
+            _ui.WriteKeyValue(&quot;Total&quot;, response.Stats.TotalFiles.ToString());
+            _ui.WriteKeyValue(&quot;Elegiveis&quot;, eligible.ToString());
+            _ui.WriteKeyValue(&quot;Mover&quot;, response.Stats.WouldMove.ToString());
+            _ui.WriteKeyValue(&quot;Duplicados&quot;, response.Stats.Duplicates.ToString());
+            _ui.WriteKeyValue(&quot;Ignorados&quot;, response.Stats.Ignored.ToString());
+            _ui.WriteKeyValue(&quot;Erros&quot;, response.Stats.Errors.ToString());
+            _ui.WriteKeyValue(&quot;Saida&quot;, response.OutputPath);
+            if (eligible == 0)
+                _ui.WriteWarning(&quot;Nenhum arquivo com extensoes suportadas foi encontrado.&quot;);
+
+            var show = _input.ReadYesNo(&quot;Mostrar primeiros itens&quot;, false);
+            if (show)
+            {
+                var limit = _input.ReadOptionalInt(&quot;Limite&quot;, &quot;enter para 20&quot;) ?? 20;
+                _ui.Section(&quot;Plano&quot;);
+                foreach (var item in response.Plan.Take(limit))
+                    _ui.WriteLine($&quot;{item.Action}: {item.Source} -&gt; {item.Target}&quot;);
+            }
+        }
+        else
+        {
+            // Non-interactive output
+            _ui.WriteLine($&quot;TotalFiles={response.Stats.TotalFiles}&quot;);
+            _ui.WriteLine($&quot;WouldMove={response.Stats.WouldMove}&quot;);
+            _ui.WriteLine($&quot;Duplicates={response.Stats.Duplicates}&quot;);
+            _ui.WriteLine($&quot;Errors={response.Stats.Errors}&quot;);
+            _ui.WriteLine($&quot;OutputPath={response.OutputPath}&quot;);
+        }
+
+        return response.Stats.Errors == 0 ? 0 : 1;
+    }
+
+    private void WriteErrors(IReadOnlyList&lt;DevTools.Core.Results.ErrorDetail&gt; errors)
+    {
+        CliErrorLogger.LogErrors(Key, errors);
+        _ui.Section(&quot;Erros&quot;);
+        foreach (var error in errors)
+        {
+            _ui.WriteError($&quot;{error.Code}: {error.Message}&quot;);
+            if (!string.IsNullOrWhiteSpace(error.Details))
+                _ui.WriteDim(error.Details);
+        }
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

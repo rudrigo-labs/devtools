@@ -1,0 +1,93 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System;
+using System.IO;
+
+namespace DevTools.Presentation.Wpf.Services;
+
+internal static class AppLogger
+{
+    private static readonly object _lock = new();
+    private static readonly string LogDirectory = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        &quot;DevTools&quot;,
+        &quot;logs&quot;);
+
+    public static readonly string LogFilePath = Path.Combine(LogDirectory, &quot;DevTools.Presentation.Wpf.log&quot;);
+
+    public static void Info(string message)
+    {
+        Write(&quot;INFO&quot;, message, null);
+    }
+
+    public static void Error(string message, Exception? ex = null)
+    {
+        Write(&quot;ERROR&quot;, message, ex);
+    }
+
+    private static void Write(string level, string message, Exception? ex)
+    {
+        try
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append($&quot;{DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss.fff zzz} [{level}] {message}&quot;);
+
+            if (ex != null)
+            {
+                sb.AppendLine();
+                sb.Append(FormatException(ex));
+            }
+
+            lock (_lock)
+            {
+                Directory.CreateDirectory(LogDirectory);
+                File.AppendAllText(LogFilePath, sb.ToString() + Environment.NewLine);
+            }
+        }
+        catch
+        {
+            // Avoid throwing from logger.
+        }
+    }
+
+    private static string FormatException(Exception ex)
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($&quot;Type: {ex.GetType().FullName}&quot;);
+        sb.AppendLine($&quot;Message: {ex.Message}&quot;);
+        sb.AppendLine($&quot;Source: {ex.Source}&quot;);
+        sb.AppendLine($&quot;StackTrace:&quot;);
+        sb.AppendLine(ex.StackTrace);
+
+        if (ex is AggregateException agg)
+        {
+            foreach (var inner in agg.Flatten().InnerExceptions)
+            {
+                sb.AppendLine(&quot;--- Inner Exception (Aggregate) ---&quot;);
+                sb.Append(FormatException(inner));
+            }
+        }
+        else if (ex.InnerException != null)
+        {
+            sb.AppendLine(&quot;--- Inner Exception ---&quot;);
+            sb.Append(FormatException(ex.InnerException));
+        }
+
+        return sb.ToString();
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

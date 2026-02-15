@@ -1,0 +1,92 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System;
+using System.Threading.Tasks;
+using System.Windows;
+using DevTools.Core.Configuration;
+using DevTools.Presentation.Wpf.Services;
+
+namespace DevTools.Presentation.Wpf;
+
+public partial class App : Application
+{
+    private JobManager _jobManager = null!;
+    private SettingsService _settingsService = null!;
+    private ConfigService _configService = null!;
+    private ProfileManager _profileManager = null!;
+    private TrayService _trayService = null!;
+
+    public App()
+    {
+        SetupExceptionHandling();
+    }
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        AppLogger.Info(&quot;=== Application Started ===&quot;);
+        base.OnStartup(e);
+
+        // Bootstrap manual (Pure DI)
+        _jobManager = new JobManager();
+        _settingsService = new SettingsService();
+        _configService = new ConfigService();
+        _profileManager = new ProfileManager();
+        _trayService = new TrayService(_jobManager, _settingsService, _configService, _profileManager);
+
+        // Instancia Dashboard (Hub)
+        var dashboard = new DevTools.Presentation.Wpf.Views.DashboardWindow(_trayService, _jobManager, _configService);
+        _trayService.SetDashboardWindow(dashboard);
+
+        _trayService.Initialize();
+        
+        // Iniciar com a Dashboard aberta
+        _trayService.ShowDashboard();
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        AppLogger.Info(&quot;=== Application Exiting ===&quot;);
+        _trayService?.Dispose();
+        base.OnExit(e);
+    }
+
+    private void SetupExceptionHandling()
+    {
+        // UI Thread Exceptions
+        DispatcherUnhandledException += (s, e) =&gt;
+        {
+            AppLogger.Error(&quot;Unhandled UI Exception&quot;, e.Exception);
+            // Optional: Prevent crash? 
+            // e.Handled = true; 
+            // For now, let&#39;s just log. If user wants to prevent crash, we can add that.
+        };
+
+        // Background Task Exceptions
+        TaskScheduler.UnobservedTaskException += (s, e) =&gt;
+        {
+            AppLogger.Error(&quot;Unobserved Task Exception&quot;, e.Exception);
+            e.SetObserved(); // Prevent crash
+        };
+
+        // Current Domain Exceptions (Final backstop)
+        AppDomain.CurrentDomain.UnhandledException += (s, e) =&gt;
+        {
+            var ex = e.ExceptionObject as Exception;
+            AppLogger.Error($&quot;AppDomain Unhandled Exception (Terminating: {e.IsTerminating})&quot;, ex);
+        };
+    }
+}</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

@@ -143,7 +143,7 @@ public partial class MigrationsWindow : Window
         
         if (string.IsNullOrWhiteSpace(root) || string.IsNullOrWhiteSpace(startup))
         {
-            MessageBox.Show("Selecione os diretórios do Projeto e do Startup Project.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show("Selecione os diretórios do Projeto e do Startup Project.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -161,7 +161,7 @@ public partial class MigrationsWindow : Window
         var migrationName = MigrationNameInput.Text;
         if (action == MigrationsAction.AddMigration && string.IsNullOrWhiteSpace(migrationName))
         {
-            MessageBox.Show("Informe o nome da Migration.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show("Informe o nome da Migration.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 

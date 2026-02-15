@@ -104,13 +104,13 @@ public partial class SearchTextWindow : Window
         
         if (string.IsNullOrWhiteSpace(root))
         {
-            MessageBox.Show("Selecione o diretório de busca.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show("Selecione o diretório de busca.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            MessageBox.Show("Informe o texto a ser pesquisado.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show("Informe o texto a ser pesquisado.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 

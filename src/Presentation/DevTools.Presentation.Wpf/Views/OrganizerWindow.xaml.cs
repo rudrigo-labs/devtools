@@ -85,7 +85,7 @@ public partial class OrganizerWindow : Window
 
         if (string.IsNullOrWhiteSpace(inputPath))
         {
-            MessageBox.Show("Por favor, selecione uma pasta de entrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show("Por favor, selecione uma pasta de entrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 

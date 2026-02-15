@@ -1,0 +1,124 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Core.Abstractions;
+using DevTools.Core.Models;
+using DevTools.Core.Results;
+using DevTools.Ngrok.Models;
+using DevTools.Ngrok.Validation;
+
+namespace DevTools.Ngrok.Engine;
+
+public sealed class NgrokEngine : IDevToolEngine&lt;NgrokRequest, NgrokResponse&gt;
+{
+    private readonly HttpClient _httpClient;
+    private readonly NgrokProcessService _processService;
+
+    public NgrokEngine(HttpClient? httpClient = null, NgrokProcessService? processService = null)
+    {
+        _httpClient = httpClient ?? new HttpClient();
+        _processService = processService ?? new NgrokProcessService();
+    }
+
+    public async Task&lt;RunResult&lt;NgrokResponse&gt;&gt; ExecuteAsync(
+        NgrokRequest request,
+        IProgressReporter? progress = null,
+        CancellationToken ct = default)
+    {
+        var errors = NgrokRequestValidator.Validate(request);
+        if (errors.Count &gt; 0)
+            return RunResult&lt;NgrokResponse&gt;.Fail(errors);
+
+        var baseUrl = NormalizeBaseUrl(request.BaseUrl);
+        var timeout = TimeSpan.FromSeconds(request.TimeoutSeconds &lt;= 0 ? 5 : request.TimeoutSeconds);
+        var retry = Math.Max(0, request.RetryCount);
+
+        try
+        {
+            switch (request.Action)
+            {
+                case NgrokAction.ListTunnels:
+                {
+                    progress?.Report(new ProgressEvent(&quot;Fetching tunnels&quot;, 20, &quot;api&quot;));
+                    var client = new NgrokApiClient(_httpClient, new Uri(baseUrl));
+                    var tunnels = await client.GetTunnelsAsync(timeout, retry, ct).ConfigureAwait(false);
+                    var groups = TunnelGrouping.GroupByBaseName(tunnels);
+                    progress?.Report(new ProgressEvent(&quot;Tunnels fetched&quot;, 100, &quot;done&quot;));
+                    return RunResult&lt;NgrokResponse&gt;.Success(new NgrokResponse(request.Action, baseUrl, tunnels, groups));
+                }
+                case NgrokAction.CloseTunnel:
+                {
+                    progress?.Report(new ProgressEvent(&quot;Closing tunnel&quot;, 40, &quot;api&quot;));
+                    var client = new NgrokApiClient(_httpClient, new Uri(baseUrl));
+                    var closed = await client.CloseTunnelAsync(request.TunnelName!, timeout, retry, ct).ConfigureAwait(false);
+                    progress?.Report(new ProgressEvent(&quot;Tunnel closed&quot;, 100, &quot;done&quot;));
+                    return RunResult&lt;NgrokResponse&gt;.Success(new NgrokResponse(request.Action, baseUrl, Closed: closed));
+                }
+                case NgrokAction.StartHttp:
+                {
+                    progress?.Report(new ProgressEvent(&quot;Starting ngrok&quot;, 20, &quot;start&quot;));
+                    var options = request.StartOptions!;
+                    var normalized = new NgrokStartOptions(
+                        NormalizeProtocol(options.Protocol),
+                        options.Port,
+                        options.ExecutablePath,
+                        options.ExtraArgs);
+
+                    var pid = _processService.StartHttp(normalized);
+                    progress?.Report(new ProgressEvent(&quot;Ngrok started&quot;, 100, &quot;done&quot;));
+                    return RunResult&lt;NgrokResponse&gt;.Success(new NgrokResponse(request.Action, baseUrl, ProcessId: pid));
+                }
+                case NgrokAction.KillAll:
+                {
+                    var killed = _processService.KillAll();
+                    return RunResult&lt;NgrokResponse&gt;.Success(new NgrokResponse(request.Action, baseUrl, Killed: killed));
+                }
+                case NgrokAction.Status:
+                {
+                    var hasAny = _processService.HasAny();
+                    return RunResult&lt;NgrokResponse&gt;.Success(new NgrokResponse(request.Action, baseUrl, HasAny: hasAny));
+                }
+                default:
+                    return RunResult&lt;NgrokResponse&gt;.Fail(new ErrorDetail(&quot;ngrok.action.invalid&quot;, &quot;Action is invalid.&quot;));
+            }
+        }
+        catch (NgrokApiException ex)
+        {
+            return RunResult&lt;NgrokResponse&gt;.Fail(new ErrorDetail(ex.Code, ex.Message, Details: ex.Details, Exception: ex));
+        }
+    }
+
+    private static string NormalizeBaseUrl(string? baseUrl)
+    {
+        var url = string.IsNullOrWhiteSpace(baseUrl)
+            ? &quot;http://127.0.0.1:4040/&quot;
+            : baseUrl.Trim();
+
+        if (!url.EndsWith(&quot;/&quot;, StringComparison.Ordinal))
+            url += &quot;/&quot;;
+
+        return url;
+    }
+
+    private static string NormalizeProtocol(string? protocol)
+    {
+        if (string.IsNullOrWhiteSpace(protocol))
+            return &quot;http&quot;;
+
+        return protocol.Equals(&quot;https&quot;, StringComparison.OrdinalIgnoreCase) ? &quot;https&quot; : &quot;http&quot;;
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

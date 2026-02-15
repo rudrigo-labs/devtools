@@ -84,7 +84,7 @@ public partial class SshTunnelWindow : Window
             var profile = BuildProfileFromUi();
             if (string.IsNullOrWhiteSpace(profile.SshHost))
             {
-                MessageBox.Show("Host SSH é obrigatório.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show("Host SSH é obrigatório.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -97,7 +97,7 @@ public partial class SshTunnelWindow : Window
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao iniciar túnel: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show($"Erro ao iniciar túnel: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -131,14 +131,14 @@ public partial class SshTunnelWindow : Window
     {
         if (_tunnelService.IsOn)
         {
-            StatusIndicator.Fill = Brushes.Green;
+            StatusIndicator.Fill = System.Windows.Media.Brushes.Green;
             StatusText.Text = "Conectado";
             ToggleTunnelButton.Content = "Desconectar";
             ToggleTunnelButton.Style = (Style)FindResource("SecondaryButtonStyle"); // Use secondary style for disconnect
         }
         else
         {
-            StatusIndicator.Fill = Brushes.Gray;
+            StatusIndicator.Fill = System.Windows.Media.Brushes.Gray;
             StatusText.Text = "Parado";
             ToggleTunnelButton.Content = "Conectar";
             ToggleTunnelButton.Style = (Style)FindResource("PrimaryButtonStyle");

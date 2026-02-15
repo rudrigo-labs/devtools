@@ -1,0 +1,401 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Core.Abstractions;
+using DevTools.Core.Models;
+using DevTools.Core.Results;
+using DevTools.Core.Providers;
+using DevTools.Notes.Abstractions;
+using DevTools.Notes.Models;
+using DevTools.Notes.Providers;
+using DevTools.Notes.Validation;
+
+namespace DevTools.Notes.Engine;
+
+public sealed class NotesEngine : IDevToolEngine&lt;NotesRequest, NotesResponse&gt;
+{
+    private readonly INotesStore? _store;
+    private readonly NotesSimpleStore _simpleStore;
+    private readonly NotesBackupStore _backupStore;
+
+    public NotesEngine(INotesStore? store = null)
+    {
+        _store = store;
+        _simpleStore = new NotesSimpleStore();
+        _backupStore = new NotesBackupStore();
+    }
+
+    public async Task&lt;RunResult&lt;NotesResponse&gt;&gt; ExecuteAsync(
+        NotesRequest request,
+        IProgressReporter? progress = null,
+        CancellationToken ct = default)
+    {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var errors = NotesRequestValidator.Validate(request);
+        if (errors.Count &gt; 0)
+            return RunResult&lt;NotesResponse&gt;.Fail(errors);
+
+        RunResult&lt;NotesResponse&gt; result;
+
+        try
+        {
+            switch (request.Action)
+            {
+                case NotesAction.LoadNote:
+                    result = await HandleLoadAsync(request, progress, ct).ConfigureAwait(false);
+                    break;
+
+                case NotesAction.SaveNote:
+                    result = await HandleSaveAsync(request, progress, ct).ConfigureAwait(false);
+                    break;
+
+                case NotesAction.CreateItem:
+                    result = await HandleCreateItemAsync(request, progress, ct).ConfigureAwait(false);
+                    break;
+
+                case NotesAction.ListItems:
+                    result = await HandleListItemsAsync(request, progress, ct).ConfigureAwait(false);
+                    break;
+
+                case NotesAction.ExportZip:
+                    result = HandleExportZip(request, progress);
+                    break;
+
+                case NotesAction.ImportZip:
+                    result = await HandleImportZipAsync(request, progress, ct).ConfigureAwait(false);
+                    break;
+
+                default:
+                    result = RunResult&lt;NotesResponse&gt;.Fail(new ErrorDetail(&quot;notes.action.invalid&quot;, &quot;Action is invalid.&quot;));
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            result = RunResult&lt;NotesResponse&gt;.Fail(new ErrorDetail(&quot;notes.engine.crash&quot;, &quot;Unexpected error.&quot;, Exception: ex));
+        }
+
+        sw.Stop();
+
+        var summary = BuildSummary(request, result, sw.Elapsed);
+        return result.WithSummary(summary);
+    }
+
+    private static RunSummary BuildSummary(NotesRequest request, RunResult&lt;NotesResponse&gt; result, TimeSpan duration)
+    {
+        int processed = 0;
+        int changed = 0;
+        int ignored = 0;
+        string? output = null;
+
+        if (result.IsSuccess &amp;&amp; result.Value is not null)
+        {
+            var val = result.Value;
+            if (val.ListResult != null)
+            {
+                processed = val.ListResult.Items.Count;
+            }
+            else if (val.ReadResult != null)
+            {
+                processed = 1;
+                output = val.ReadResult.Path;
+            }
+            else if (val.WriteResult != null)
+            {
+                processed = 1;
+                changed = 1;
+                output = val.WriteResult.Path;
+            }
+            else if (val.CreateResult != null)
+            {
+                processed = 1;
+                changed = 1;
+                output = val.CreateResult.Path;
+            }
+            else if (val.ExportedZipPath != null)
+            {
+                processed = 1;
+                changed = 1;
+                output = val.ExportedZipPath;
+            }
+            else if (val.BackupReport != null)
+            {
+                processed = val.BackupReport.ImportedCount + val.BackupReport.SkippedCount + val.BackupReport.ConflictCount;
+                changed = val.BackupReport.ImportedCount + val.BackupReport.ConflictCount;
+                ignored = val.BackupReport.SkippedCount;
+            }
+        }
+
+        return new RunSummary(
+            ToolName: &quot;Notes&quot;,
+            Mode: request.Action.ToString(),
+            MainInput: request.NoteKey ?? request.ZipPath ?? request.NotesRootPath ?? &quot;Default&quot;,
+            OutputLocation: output,
+            Processed: processed,
+            Changed: changed,
+            Ignored: ignored,
+            Failed: result.Errors.Count,
+            Duration: duration
+        );
+    }
+
+    private async Task&lt;RunResult&lt;NotesResponse&gt;&gt; HandleCreateItemAsync(
+        NotesRequest request,
+        IProgressReporter? progress,
+        CancellationToken ct)
+    {
+        progress?.Report(new ProgressEvent(&quot;Creating note&quot;, 20, &quot;write&quot;));
+
+        var result = await _simpleStore.CreateAsync(
+            request.NotesRootPath,
+            request.Title!,
+            request.Content!,
+            request.LocalDate,
+            request.UseMarkdown,
+            request.CreateDateFolder,
+            ct).ConfigureAwait(false);
+
+        if (!result.IsSuccess || result.Value is null)
+            return RunResult&lt;NotesResponse&gt;.Fail(result.Errors);
+
+        progress?.Report(new ProgressEvent(&quot;Note created&quot;, 100, &quot;done&quot;));
+        return RunResult&lt;NotesResponse&gt;.Success(new NotesResponse(
+            request.Action,
+            CreateResult: result.Value));
+    }
+
+    private async Task&lt;RunResult&lt;NotesResponse&gt;&gt; HandleListItemsAsync(
+        NotesRequest request,
+        IProgressReporter? progress,
+        CancellationToken ct)
+    {
+        progress?.Report(new ProgressEvent(&quot;Loading index&quot;, 40, &quot;read&quot;));
+        var result = await _simpleStore.ListAsync(request.NotesRootPath, ct).ConfigureAwait(false);
+        if (!result.IsSuccess || result.Value is null)
+            return RunResult&lt;NotesResponse&gt;.Fail(result.Errors);
+
+        progress?.Report(new ProgressEvent(&quot;List ready&quot;, 100, &quot;done&quot;));
+        return RunResult&lt;NotesResponse&gt;.Success(new NotesResponse(
+            request.Action,
+            ListResult: result.Value));
+    }
+
+    private RunResult&lt;NotesResponse&gt; HandleExportZip(NotesRequest request, IProgressReporter? progress)
+    {
+        progress?.Report(new ProgressEvent(&quot;Exporting zip&quot;, 30, &quot;zip&quot;));
+
+        var root = NotesPaths.ResolveRoot(request.NotesRootPath);
+        var result = _backupStore.ExportZip(root, request.OutputPath);
+        if (!result.IsSuccess || result.Value is null)
+            return RunResult&lt;NotesResponse&gt;.Fail(result.Errors);
+
+        progress?.Report(new ProgressEvent(&quot;Exported&quot;, 100, &quot;done&quot;));
+        return RunResult&lt;NotesResponse&gt;.Success(new NotesResponse(
+            request.Action,
+            ExportedZipPath: result.Value));
+    }
+
+    private async Task&lt;RunResult&lt;NotesResponse&gt;&gt; HandleImportZipAsync(
+        NotesRequest request,
+        IProgressReporter? progress,
+        CancellationToken ct)
+    {
+        progress?.Report(new ProgressEvent(&quot;Extracting zip&quot;, 10, &quot;zip&quot;));
+
+        var root = NotesPaths.ResolveRoot(request.NotesRootPath);
+        var extract = _backupStore.ExtractZip(request.ZipPath!);
+        if (!extract.IsSuccess)
+            return RunResult&lt;NotesResponse&gt;.Fail(extract.Errors);
+
+        var (tempDir, itemFiles, _) = extract.Value;
+        try
+        {
+            var report = await MergeImportedAsync(root, tempDir, itemFiles, progress, ct).ConfigureAwait(false);
+            if (!report.IsSuccess || report.Value is null)
+                return RunResult&lt;NotesResponse&gt;.Fail(report.Errors);
+
+            progress?.Report(new ProgressEvent(&quot;Import finished&quot;, 100, &quot;done&quot;));
+            return RunResult&lt;NotesResponse&gt;.Success(new NotesResponse(
+                request.Action,
+                BackupReport: report.Value));
+        }
+        finally
+        {
+            try { Directory.Delete(tempDir, true); } catch { /* ignore */ }
+        }
+    }
+
+    private async Task&lt;RunResult&lt;NotesBackupReport&gt;&gt; MergeImportedAsync(
+        string root,
+        string tempDir,
+        List&lt;string&gt; itemFiles,
+        IProgressReporter? progress,
+        CancellationToken ct)
+    {
+        try
+        {
+            var fs = new SystemFileSystem();
+            var indexStore = new NotesIndexStore(fs);
+            var currentIndexResult = await indexStore.LoadAsync(root, ct).ConfigureAwait(false);
+            if (!currentIndexResult.IsSuccess || currentIndexResult.Value is null)
+                return RunResult&lt;NotesBackupReport&gt;.Fail(currentIndexResult.Errors);
+
+            var index = currentIndexResult.Value;
+            var rootItemsDir = NotesPaths.ItemsDir(root);
+            fs.CreateDirectory(rootItemsDir);
+
+            var imported = 0;
+            var skipped = 0;
+            var conflicts = new List&lt;string&gt;();
+
+            var total = Math.Max(1, itemFiles.Count);
+            for (var i = 0; i &lt; itemFiles.Count; i++)
+            {
+                ct.ThrowIfCancellationRequested();
+                var src = itemFiles[i];
+                var rel = Path.GetRelativePath(Path.Combine(tempDir, &quot;items&quot;), src).Replace(&#39;\\&#39;, &#39;/&#39;);
+                var dst = Path.Combine(rootItemsDir, rel.Replace(&#39;/&#39;, Path.DirectorySeparatorChar));
+
+                var dstDir = Path.GetDirectoryName(dst);
+                if (!string.IsNullOrWhiteSpace(dstDir))
+                    fs.CreateDirectory(dstDir);
+
+                var srcText = await File.ReadAllTextAsync(src, ct).ConfigureAwait(false);
+                var srcSha = NotesHash.Sha256Hex(srcText);
+
+                if (!fs.FileExists(dst))
+                {
+                    fs.CopyFile(src, dst, overwrite: true);
+                    imported++;
+                }
+                else
+                {
+                    var dstText = await fs.ReadAllTextAsync(dst, ct).ConfigureAwait(false);
+                    var dstSha = NotesHash.Sha256Hex(dstText);
+
+                    if (string.Equals(srcSha, dstSha, StringComparison.OrdinalIgnoreCase))
+                    {
+                        skipped++;
+                    }
+                    else
+                    {
+                        var conflictPath = BuildConflictPath(dst);
+                        fs.CopyFile(src, conflictPath, overwrite: true);
+                        conflicts.Add(Path.GetFileName(conflictPath));
+                    }
+                }
+
+                var pct = (int)Math.Round(((i + 1) / (double)total) * 80) + 10;
+                progress?.Report(new ProgressEvent(&quot;Importing notes&quot;, pct, &quot;merge&quot;));
+
+                // Upsert index entry by FileName
+                var existing = index.Items.FirstOrDefault(x =&gt; string.Equals(x.FileName, rel, StringComparison.OrdinalIgnoreCase));
+                if (existing is null)
+                {
+                    index.Items.Add(new NotesIndexEntry
+                    {
+                        Id = Guid.NewGuid().ToString(&quot;N&quot;),
+                        Title = InferTitleFromFileName(rel),
+                        FileName = rel,
+                        CreatedUtc = DateTime.UtcNow,
+                        UpdatedUtc = DateTime.UtcNow,
+                        Sha256 = srcSha
+                    });
+                }
+                else
+                {
+                    existing.UpdatedUtc = DateTime.UtcNow;
+                    existing.Sha256 = srcSha;
+                }
+            }
+
+            var save = await indexStore.SaveAsync(root, index, ct).ConfigureAwait(false);
+            if (!save.IsSuccess)
+                return RunResult&lt;NotesBackupReport&gt;.Fail(save.Errors);
+
+            return RunResult&lt;NotesBackupReport&gt;.Success(new NotesBackupReport(
+                imported,
+                skipped,
+                conflicts.Count,
+                conflicts));
+        }
+        catch (Exception ex)
+        {
+            return RunResult&lt;NotesBackupReport&gt;.Fail(new ErrorDetail(
+                &quot;notes.backup.import.merge.failed&quot;,
+                &quot;Failed to merge imported notes.&quot;,
+                Exception: ex));
+        }
+    }
+
+    private static string BuildConflictPath(string existingPath)
+    {
+        var dir = Path.GetDirectoryName(existingPath) ?? string.Empty;
+        var name = Path.GetFileNameWithoutExtension(existingPath);
+        var ext = Path.GetExtension(existingPath);
+        var stamp = DateTime.Now.ToString(&quot;yyyyMMdd-HHmmss&quot;);
+        return Path.Combine(dir, $&quot;{name} (conflict {stamp}){ext}&quot;);
+    }
+
+    private static string InferTitleFromFileName(string rel)
+    {
+        var file = Path.GetFileNameWithoutExtension(rel);
+        // expected: YYYY-MM-DD - title
+        var parts = file.Split(&quot; - &quot;, 2, StringSplitOptions.TrimEntries);
+        return parts.Length == 2 ? parts[1] : file;
+    }
+
+    private async Task&lt;RunResult&lt;NotesResponse&gt;&gt; HandleLoadAsync(
+        NotesRequest request,
+        IProgressReporter? progress,
+        CancellationToken ct)
+    {
+        var store = ResolveStore(request.NotesRootPath);
+        progress?.Report(new ProgressEvent(&quot;Loading note&quot;, 30, &quot;read&quot;));
+
+        var result = await store.ReadAsync(request.NoteKey!, ct).ConfigureAwait(false);
+        if (!result.IsSuccess)
+            return RunResult&lt;NotesResponse&gt;.Fail(result.Errors);
+
+        progress?.Report(new ProgressEvent(&quot;Note loaded&quot;, 100, &quot;done&quot;));
+        return RunResult&lt;NotesResponse&gt;.Success(new NotesResponse(
+            request.Action,
+            ReadResult: result.Value));
+    }
+
+    private async Task&lt;RunResult&lt;NotesResponse&gt;&gt; HandleSaveAsync(
+        NotesRequest request,
+        IProgressReporter? progress,
+        CancellationToken ct)
+    {
+        var store = ResolveStore(request.NotesRootPath);
+        progress?.Report(new ProgressEvent(&quot;Saving note&quot;, 30, &quot;write&quot;));
+
+        var result = await store.WriteAsync(request.NoteKey!, request.Content!, request.Overwrite, ct)
+            .ConfigureAwait(false);
+        if (!result.IsSuccess)
+            return RunResult&lt;NotesResponse&gt;.Fail(result.Errors);
+
+        progress?.Report(new ProgressEvent(&quot;Note saved&quot;, 100, &quot;done&quot;));
+        return RunResult&lt;NotesResponse&gt;.Success(new NotesResponse(
+            request.Action,
+            WriteResult: result.Value));
+    }
+
+    private INotesStore ResolveStore(string? rootPath)
+        =&gt; _store ?? new SystemNotesStore(rootPath ?? string.Empty);
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

@@ -7,7 +7,6 @@ using DevTools.Rename.Engine;
 using DevTools.Rename.Models;
 using System.Collections.Generic;
 using DevTools.Core.Models;
-using Microsoft.Win32;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -112,11 +111,16 @@ public partial class RenameWindow : Window
 
     private void BrowseRoot_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new OpenFolderDialog { Title = "Selecione a Pasta Raiz" };
-        if (dlg.ShowDialog() == true)
+        using var dlg = new System.Windows.Forms.FolderBrowserDialog
         {
-            RootPathBox.Text = dlg.FolderName;
-            // Removed auto-save from here to respect explicit opt-in
+            Description = "Selecione a Pasta Raiz",
+            UseDescriptionForTitle = true,
+            ShowNewFolderButton = true
+        };
+
+        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dlg.SelectedPath))
+        {
+            RootPathBox.Text = dlg.SelectedPath;
         }
     }
 
@@ -128,7 +132,7 @@ public partial class RenameWindow : Window
 
         if (string.IsNullOrWhiteSpace(root) || string.IsNullOrEmpty(oldText))
         {
-            MessageBox.Show("Pasta Raiz e Texto Antigo são obrigatórios.", "Dados Incompletos", MessageBoxButton.OK, MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show("Pasta Raiz e Texto Antigo são obrigatórios.", "Dados Incompletos", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -174,7 +178,7 @@ public partial class RenameWindow : Window
         }
         catch (Exception ex)
         {
-             MessageBox.Show($"Erro crítico ao executar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+             System.Windows.MessageBox.Show($"Erro crítico ao executar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {

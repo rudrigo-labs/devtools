@@ -1,0 +1,129 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Text;
+using DevTools.Core.Abstractions;
+using DevTools.Core.Results;
+using DevTools.Notes.Abstractions;
+using DevTools.Notes.Models;
+using DevTools.Core.Providers;
+
+namespace DevTools.Notes.Providers;
+
+public sealed class SystemNotesStore : INotesStore
+{
+    private readonly IFileSystem _fs;
+
+    public string RootPath { get; }
+
+    public SystemNotesStore(string rootPath, IFileSystem? fileSystem = null)
+    {
+        _fs = fileSystem ?? new SystemFileSystem();
+        RootPath = ResolveRootPath(rootPath);
+        _fs.CreateDirectory(RootPath);
+    }
+
+    public async Task&lt;RunResult&lt;NoteReadResult&gt;&gt; ReadAsync(string key, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            return RunResult&lt;NoteReadResult&gt;.Fail(new ErrorDetail(&quot;notes.key.required&quot;, &quot;Note key is required.&quot;));
+
+        var path = ResolveNotePath(key);
+
+        try
+        {
+            if (!_fs.FileExists(path))
+                return RunResult&lt;NoteReadResult&gt;.Success(new NoteReadResult(key, path, null, false));
+
+            var content = await _fs.ReadAllTextAsync(path, ct).ConfigureAwait(false);
+            return RunResult&lt;NoteReadResult&gt;.Success(new NoteReadResult(key, path, content, true));
+        }
+        catch (Exception ex)
+        {
+            return RunResult&lt;NoteReadResult&gt;.Fail(new ErrorDetail(
+                &quot;notes.read.failed&quot;,
+                &quot;Failed to read note.&quot;,
+                Cause: ex.Message,
+                Exception: ex));
+        }
+    }
+
+    public async Task&lt;RunResult&lt;NoteWriteResult&gt;&gt; WriteAsync(string key, string content, bool overwrite = true, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            return RunResult&lt;NoteWriteResult&gt;.Fail(new ErrorDetail(&quot;notes.key.required&quot;, &quot;Note key is required.&quot;));
+
+        if (content is null)
+            return RunResult&lt;NoteWriteResult&gt;.Fail(new ErrorDetail(&quot;notes.content.required&quot;, &quot;Note content is required.&quot;));
+
+        var path = ResolveNotePath(key);
+        var exists = _fs.FileExists(path);
+
+        if (exists &amp;&amp; !overwrite)
+            return RunResult&lt;NoteWriteResult&gt;.Fail(new ErrorDetail(&quot;notes.write.exists&quot;, &quot;Note already exists.&quot;, path));
+
+        try
+        {
+            var dir = Path.GetDirectoryName(path);
+            if (!string.IsNullOrWhiteSpace(dir))
+                _fs.CreateDirectory(dir);
+
+            await _fs.WriteAllTextAsync(path, content, ct).ConfigureAwait(false);
+            var bytes = Encoding.UTF8.GetByteCount(content);
+            return RunResult&lt;NoteWriteResult&gt;.Success(new NoteWriteResult(key, path, bytes, exists));
+        }
+        catch (Exception ex)
+        {
+            return RunResult&lt;NoteWriteResult&gt;.Fail(new ErrorDetail(
+                &quot;notes.write.failed&quot;,
+                &quot;Failed to write note.&quot;,
+                Cause: ex.Message,
+                Exception: ex));
+        }
+    }
+
+    private string ResolveNotePath(string key)
+    {
+        var safeKey = SanitizeKey(key);
+        return Path.Combine(RootPath, $&quot;{safeKey}.txt&quot;);
+    }
+
+    private static string ResolveRootPath(string rootPath)
+    {
+        if (!string.IsNullOrWhiteSpace(rootPath))
+            return Path.GetFullPath(rootPath);
+
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var folder = Path.Combine(appData, &quot;DevTools&quot;, &quot;notes&quot;);
+        return folder;
+    }
+
+    private static string SanitizeKey(string key)
+    {
+        var trimmed = key.Trim();
+        if (trimmed.Length == 0)
+            return &quot;note&quot;;
+
+        var invalid = Path.GetInvalidFileNameChars();
+        var sb = new StringBuilder(trimmed.Length);
+
+        foreach (var ch in trimmed)
+            sb.Append(invalid.Contains(ch) ? &#39;_&#39; : ch);
+
+        return sb.Length == 0 ? &quot;note&quot; : sb.ToString();
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

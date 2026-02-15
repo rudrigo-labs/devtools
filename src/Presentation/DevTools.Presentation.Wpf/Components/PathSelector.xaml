@@ -5,13 +5,21 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="400">
     <StackPanel>
-        <TextBlock x:Name="TitleBlock" Text="{Binding Title}" Foreground="#AAAAAA" Margin="0,0,0,5" FontSize="12"/>
+        <TextBlock x:Name="TitleBlock"
+                   Text="{Binding Title}"
+                   Foreground="#AAAAAA"
+                   Margin="0,0,0,5"
+                   FontSize="12"/>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="PathInput" Text="{Binding SelectedPath}" Style="{StaticResource ModernTextBoxStyle}" IsReadOnly="True" Margin="0,0,10,0"/>
+            <TextBox x:Name="PathInput"
+                     Text="{Binding SelectedPath}"
+                     Style="{StaticResource ModernTextBoxStyle}"
+                     IsReadOnly="True"
+                     Margin="0,0,10,0"/>
             <Button Grid.Column="1" Content="Procurar" Style="{StaticResource SecondaryButtonStyle}" Click="Browse_Click" ToolTip="Selecionar pasta/arquivo"/>
         </Grid>
     </StackPanel>

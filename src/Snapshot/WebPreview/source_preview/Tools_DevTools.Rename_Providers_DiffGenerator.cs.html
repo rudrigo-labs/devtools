@@ -1,0 +1,49 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Rename.Models;
+
+namespace DevTools.Rename.Providers;
+
+public static class DiffGenerator
+{
+    public static FileDiffSummary Generate(string path, string oldContent, string newContent, int maxLines)
+    {
+        var oldLines = SplitLines(oldContent);
+        var newLines = SplitLines(newContent);
+        var max = Math.Max(oldLines.Length, newLines.Length);
+        var changes = new List&lt;LineChange&gt;();
+
+        for (var i = 0; i &lt; max; i++)
+        {
+            var oldLine = i &lt; oldLines.Length ? oldLines[i] : null;
+            var newLine = i &lt; newLines.Length ? newLines[i] : null;
+
+            if (string.Equals(oldLine, newLine, StringComparison.Ordinal))
+                continue;
+
+            changes.Add(new LineChange(i + 1, oldLine, newLine));
+            if (changes.Count &gt;= maxLines)
+                break;
+        }
+
+        return new FileDiffSummary(path, changes);
+    }
+
+    private static string[] SplitLines(string content)
+        =&gt; content.Replace(&quot;\r\n&quot;, &quot;\n&quot;).Replace(&quot;\r&quot;, &quot;\n&quot;).Split(&#39;\n&#39;);
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

@@ -7,7 +7,6 @@ using DevTools.Presentation.Wpf.Services;
 using DevTools.Utf8Convert.Engine;
 using DevTools.Utf8Convert.Models;
 using DevTools.Core.Models;
-using Microsoft.Win32;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -89,11 +88,17 @@ public partial class Utf8ConvertWindow : Window
 
     private void BrowseRoot_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new OpenFolderDialog { Title = "Selecione a Pasta Raiz" };
-        if (dlg.ShowDialog() == true)
+        using var dlg = new System.Windows.Forms.FolderBrowserDialog
         {
-            RootPathBox.Text = dlg.FolderName;
-            _settingsService.Settings.LastUtf8RootPath = dlg.FolderName;
+            Description = "Selecione a Pasta Raiz",
+            UseDescriptionForTitle = true,
+            ShowNewFolderButton = true
+        };
+
+        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dlg.SelectedPath))
+        {
+            RootPathBox.Text = dlg.SelectedPath;
+            _settingsService.Settings.LastUtf8RootPath = dlg.SelectedPath;
             _settingsService.Save();
         }
     }
@@ -103,7 +108,7 @@ public partial class Utf8ConvertWindow : Window
         var root = RootPathBox.Text;
         if (string.IsNullOrWhiteSpace(root))
         {
-            MessageBox.Show("Pasta Raiz é obrigatória.", "Dados Incompletos", MessageBoxButton.OK, MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show("Pasta Raiz é obrigatória.", "Dados Incompletos", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 

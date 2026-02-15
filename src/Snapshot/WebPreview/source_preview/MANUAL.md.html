@@ -1,0 +1,188 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-markdown'># Manual do Usu&#225;rio e Documenta&#231;&#227;o T&#233;cnica - DevTools
+
+Bem-vindo ao **DevTools**, uma su&#237;te de ferramentas de desenvolvimento projetada para aumentar a produtividade, automatizar tarefas repetitivas e fornecer utilit&#225;rios essenciais para o dia a dia de engenharia de software.
+
+## 1. Vis&#227;o Geral
+
+O projeto **DevTools** &#233; composto por uma cole&#231;&#227;o modular de ferramentas (Tools), acess&#237;veis atrav&#233;s de duas interfaces principais:
+1.  **CLI (Command Line Interface)**: Para automa&#231;&#227;o, scripts e uso r&#225;pido no terminal.
+2.  **WPF (Windows Presentation Foundation)**: Uma interface gr&#225;fica moderna para Windows, com suporte a bandeja do sistema (Tray Icon) e formul&#225;rios interativos.
+
+### Arquitetura
+O sistema segue uma arquitetura limpa e modular:
+-   **Core**: Cont&#233;m abstra&#231;&#245;es, modelos comuns e utilit&#225;rios compartilhados.
+-   **Tools**: Cada ferramenta &#233; um projeto independente (ex: `DevTools.Notes`, `DevTools.Ngrok`), garantindo isolamento e facilidade de manuten&#231;&#227;o.
+-   **Presentation**: As camadas de apresenta&#231;&#227;o (CLI e WPF) consomem as ferramentas atrav&#233;s de interfaces unificadas (`IDevToolEngine`).
+
+---
+
+## 2. Instala&#231;&#227;o e Configura&#231;&#227;o
+
+### Pr&#233;-requisitos
+-   Windows 10/11
+-   .NET SDK (vers&#227;o mais recente, compat&#237;vel com o projeto)
+
+### Compila&#231;&#227;o
+Para compilar todo o projeto, execute na raiz:
+
+```powershell
+dotnet build
+```
+
+### Executando a CLI
+A ferramenta de linha de comando pode ser executada diretamente ap&#243;s a compila&#231;&#227;o:
+
+```powershell
+# Exemplo de execu&#231;&#227;o
+.\src\Cli\DevTools.Cli\bin\Debug\net10.0\DevTools.Cli.exe [comando]
+```
+
+### Executando a Interface Gr&#225;fica (WPF)
+O aplicativo WPF pode ser iniciado e ficar&#225; residente na bandeja do sistema:
+
+```powershell
+.\src\Presentation\DevTools.Presentation.Wpf\bin\Debug\net10.0\DevTools.Presentation.Wpf.exe
+```
+
+---
+
+## 3. Ferramentas Dispon&#237;veis
+
+Abaixo est&#225; a documenta&#231;&#227;o detalhada de cada ferramenta inclu&#237;da na su&#237;te.
+
+### 3.1. Notes (Notas Locais)
+Gerenciador de notas r&#225;pido e 100% local. Focado em privacidade e simplicidade.
+-   **Funcionalidades**:
+    -   Criar, ler e listar notas em Markdown ou Texto.
+    -   Armazenamento em sistema de arquivos local (JSON index + arquivos).
+    -   **Backup**: Exporta&#231;&#227;o e Importa&#231;&#227;o via arquivos ZIP.
+    -   **Seguran&#231;a**: Sem depend&#234;ncias de nuvem ou OAuth.
+-   **Uso T&#237;pico**: Anota&#231;&#245;es r&#225;pidas durante reuni&#245;es, snippets de c&#243;digo, logs di&#225;rios.
+
+### 3.2. Harvest (Colheita de C&#243;digo)
+Ferramenta para coletar e consolidar arquivos de c&#243;digo fonte de um diret&#243;rio para an&#225;lise ou backup.
+-   **Funcionalidades**:
+    -   Escaneia um diret&#243;rio raiz.
+    -   Filtra arquivos baseados em regras (extens&#245;es, padr&#245;es).
+    -   Copia arquivos relevantes para uma pasta de sa&#237;da, mantendo ou achatando a estrutura.
+    -   Gera relat&#243;rios de &quot;colheita&quot;.
+
+### 3.3. Organizer (Organizador de Arquivos)
+Automatiza a organiza&#231;&#227;o de arquivos em uma pasta de entrada (Inbox).
+-   **Funcionalidades**:
+    -   Analisa arquivos em uma pasta de entrada.
+    -   Aplica regras de classifica&#231;&#227;o (por extens&#227;o, data, conte&#250;do ou palavras-chave).
+    -   Move arquivos para pastas de destino organizadas.
+    -   Suporte a modo &quot;Simula&#231;&#227;o&quot; (Dry Run) antes de aplicar as mudan&#231;as.
+
+### 3.4. Rename (Renomea&#231;&#227;o em Massa)
+Utilit&#225;rio avan&#231;ado para renomear arquivos e diret&#243;rios.
+-   **Funcionalidades**:
+    -   Renomea&#231;&#227;o baseada em padr&#245;es (Regex).
+    -   Substitui&#231;&#227;o de texto simples.
+    -   **Roslyn Support**: Capacidade de refatora&#231;&#227;o de s&#237;mbolos em c&#243;digo C# (se implementado/ativado).
+    -   Preview de altera&#231;&#245;es antes da execu&#231;&#227;o.
+
+### 3.5. SearchText (Busca Textual)
+Ferramenta de busca de texto em arquivos (similar ao Grep, mas otimizado para o fluxo do DevTools).
+-   **Funcionalidades**:
+    -   Busca recursiva em diret&#243;rios.
+    -   Suporte a Express&#245;es Regulares (Regex).
+    -   Filtros de inclus&#227;o/exclus&#227;o de arquivos.
+    -   Relat&#243;rio detalhado de ocorr&#234;ncias (arquivo, linha, trecho).
+
+### 3.6. Snapshot (Snapshot de Diret&#243;rio)
+Cria uma &quot;foto&quot; da estrutura de arquivos e pastas.
+-   **Funcionalidades**:
+    -   Gera uma representa&#231;&#227;o da &#225;rvore de diret&#243;rios.
+    -   Formatos de sa&#237;da: JSON (estruturado), HTML (visualiz&#225;vel), Texto (&#225;rvore ASCII).
+    -   &#218;til para documentar estrutura de projetos ou comparar estados de diret&#243;rios.
+
+### 3.7. Utf8Convert (Conversor de Encoding)
+Garante que arquivos de texto estejam na codifica&#231;&#227;o UTF-8.
+-   **Funcionalidades**:
+    -   Detecta a codifica&#231;&#227;o atual de arquivos.
+    -   Converte para UTF-8 (com ou sem BOM, configur&#225;vel).
+    -   Processamento em lote (batch) de diret&#243;rios inteiros.
+
+### 3.8. Image (Processamento de Imagem)
+Utilit&#225;rios para manipula&#231;&#227;o b&#225;sica de imagens.
+-   **Funcionalidades**:
+    -   **Split**: Divide imagens grandes em partes menores (fatiamento/tiling).
+    -   &#218;til para processamento de datasets ou otimiza&#231;&#227;o de assets web.
+
+### 3.9. SSHTunnel (T&#250;neis SSH)
+Gerenciador de t&#250;neis SSH para redirecionamento de portas.
+-   **Funcionalidades**:
+    -   Cria&#231;&#227;o e gerenciamento de processos SSH para port forwarding (Local/Remote).
+    -   Monitoramento de status da conex&#227;o.
+    -   Reconex&#227;o autom&#225;tica (dependendo da configura&#231;&#227;o).
+
+### 3.10. Ngrok (Gerenciador Ngrok)
+Wrapper para o utilit&#225;rio Ngrok, facilitando a exposi&#231;&#227;o de portas locais.
+-   **Funcionalidades**:
+    -   Inicia t&#250;neis HTTP/TCP via Ngrok.
+    -   Gerencia processos do Ngrok.
+    -   Visualiza&#231;&#227;o de URLs p&#250;blicas geradas.
+
+### 3.11. Migrations (EF Core Helper)
+Auxiliar para execu&#231;&#227;o de comandos do Entity Framework Core.
+-   **Funcionalidades**:
+    -   Facilita a gera&#231;&#227;o de comandos `dotnet ef`.
+    -   Gerenciamento de migra&#231;&#245;es de banco de dados.
+
+---
+
+## 4. Guia de Uso (Exemplos)
+
+### Exemplo 1: Criando uma nota r&#225;pida (CLI)
+```powershell
+DevTools.Cli.exe notes
+# Selecione a op&#231;&#227;o &quot;3) Criar nota&quot;
+# Digite o t&#237;tulo e o conte&#250;do
+```
+
+### Exemplo 2: Convertendo arquivos para UTF-8 (CLI)
+```powershell
+DevTools.Cli.exe utf8convert --path &quot;C:\MeusProjetos\LegacyApp&quot; --pattern &quot;*.cs&quot;
+```
+
+### Exemplo 3: Usando a Interface Gr&#225;fica
+1.  Abra o `DevTools.Presentation.Wpf.exe`.
+2.  O &#237;cone aparecer&#225; na bandeja do sistema (perto do rel&#243;gio).
+3.  Clique com o bot&#227;o direito para ver o menu r&#225;pido ou clique duas vezes para abrir o Dashboard.
+4.  No Dashboard, selecione a ferramenta desejada (ex: **Notes**, **Organizer**) para abrir sua janela de configura&#231;&#227;o e execu&#231;&#227;o.
+
+---
+
+## 5. Estrutura de Diret&#243;rios (Desenvolvimento)
+
+Para desenvolvedores que desejam estender o projeto:
+
+-   `src/Cli`: Ponto de entrada da aplica&#231;&#227;o Console.
+-   `src/Core`: Bibliotecas base.
+-   `src/Presentation`: Aplica&#231;&#227;o WPF.
+-   `src/Tools`:
+    -   Cada pasta aqui &#233; uma ferramenta aut&#244;noma.
+    -   Para adicionar uma nova ferramenta, crie um novo projeto Class Library em `src/Tools`, implemente `IDevToolEngine` e registre-o no CLI e WPF.
+
+---
+
+*Documenta&#231;&#227;o gerada automaticamente em 12/02/2026.*
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

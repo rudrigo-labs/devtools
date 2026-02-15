@@ -1,0 +1,89 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Text;
+
+namespace DevTools.Rename.Providers;
+
+public static class TextEncodingDetector
+{
+    public static DetectedText Detect(byte[] bytes)
+    {
+        if (bytes.Length == 0)
+            return new DetectedText(string.Empty, new UTF8Encoding(false), false, false);
+
+        if (HasUtf8Bom(bytes))
+            return new DetectedText(Encoding.UTF8.GetString(bytes, 3, bytes.Length - 3), new UTF8Encoding(true), true, false);
+
+        if (HasUtf32LeBom(bytes))
+            return new DetectedText(Encoding.UTF32.GetString(bytes, 4, bytes.Length - 4), new UTF32Encoding(false, true), true, false);
+
+        if (HasUtf32BeBom(bytes))
+            return new DetectedText(new UTF32Encoding(true, true).GetString(bytes, 4, bytes.Length - 4), new UTF32Encoding(true, true), true, false);
+
+        if (HasUtf16LeBom(bytes))
+            return new DetectedText(Encoding.Unicode.GetString(bytes, 2, bytes.Length - 2), new UnicodeEncoding(false, true), true, false);
+
+        if (HasUtf16BeBom(bytes))
+            return new DetectedText(Encoding.BigEndianUnicode.GetString(bytes, 2, bytes.Length - 2), new UnicodeEncoding(true, true), true, false);
+
+        if (bytes.Any(b =&gt; b == 0))
+            return new DetectedText(string.Empty, new UTF8Encoding(false), false, true);
+
+        if (TryDecodeUtf8(bytes, out var utf8))
+            return new DetectedText(utf8, new UTF8Encoding(false), false, false);
+
+        var fallback = Encoding.GetEncoding(1252);
+        return new DetectedText(fallback.GetString(bytes), fallback, false, false);
+    }
+
+    private static bool TryDecodeUtf8(byte[] bytes, out string content)
+    {
+        try
+        {
+            var utf8 = new UTF8Encoding(false, true);
+            content = utf8.GetString(bytes);
+            return true;
+        }
+        catch
+        {
+            content = string.Empty;
+            return false;
+        }
+    }
+
+    private static bool HasUtf8Bom(byte[] bytes)
+        =&gt; bytes.Length &gt;= 3 &amp;&amp; bytes[0] == 0xEF &amp;&amp; bytes[1] == 0xBB &amp;&amp; bytes[2] == 0xBF;
+
+    private static bool HasUtf16LeBom(byte[] bytes)
+        =&gt; bytes.Length &gt;= 2 &amp;&amp; bytes[0] == 0xFF &amp;&amp; bytes[1] == 0xFE;
+
+    private static bool HasUtf16BeBom(byte[] bytes)
+        =&gt; bytes.Length &gt;= 2 &amp;&amp; bytes[0] == 0xFE &amp;&amp; bytes[1] == 0xFF;
+
+    private static bool HasUtf32LeBom(byte[] bytes)
+        =&gt; bytes.Length &gt;= 4 &amp;&amp; bytes[0] == 0xFF &amp;&amp; bytes[1] == 0xFE &amp;&amp; bytes[2] == 0x00 &amp;&amp; bytes[3] == 0x00;
+
+    private static bool HasUtf32BeBom(byte[] bytes)
+        =&gt; bytes.Length &gt;= 4 &amp;&amp; bytes[0] == 0x00 &amp;&amp; bytes[1] == 0x00 &amp;&amp; bytes[2] == 0xFE &amp;&amp; bytes[3] == 0xFF;
+}
+
+public sealed record DetectedText(
+    string Content,
+    Encoding Encoding,
+    bool HasBom,
+    bool IsBinary);
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

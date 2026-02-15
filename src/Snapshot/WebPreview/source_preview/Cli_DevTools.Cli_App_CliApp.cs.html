@@ -1,0 +1,249 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Cli.Commands;
+using DevTools.Cli.Logging;
+using DevTools.Cli.Ui;
+using DevTools.Core.Configuration;
+using DevTools.Core.Models;
+
+namespace DevTools.Cli.App;
+
+public sealed class CliApp
+{
+    private readonly CliConsole _ui;
+    private readonly CliMenu _menu;
+    private readonly CliInput _input;
+    private readonly IReadOnlyList&lt;ICliCommand&gt; _commands;
+    private readonly ProfileManager _profileManager;
+
+    public CliApp(CliConsole ui, CliMenu menu, CliInput input, IReadOnlyList&lt;ICliCommand&gt; commands, ProfileManager profileManager)
+    {
+        _ui = ui;
+        _menu = menu;
+        _input = input;
+        _commands = commands;
+        _profileManager = profileManager;
+    }
+
+    public async Task&lt;int&gt; RunAsync(CliLaunchOptions options, CancellationToken ct)
+    {
+        ICliCommand? pending = null;
+        bool isFirstRun = true;
+
+        // Try to match initial command from args
+        if (options.CommandName != null)
+        {
+            pending = _commands.FirstOrDefault(c =&gt; c.Key.Equals(options.CommandName, StringComparison.OrdinalIgnoreCase));
+            if (pending == null)
+            {
+                _ui.WriteError($&quot;Comando &#39;{options.CommandName}&#39; nao encontrado.&quot;);
+                if (options.IsNonInteractive) return 1;
+            }
+        }
+
+        while (true)
+        {
+            ICliCommand? command = pending;
+            try
+            {
+                if (command == null)
+                {
+                    // If non-interactive and no command, exit
+                    if (options.IsNonInteractive &amp;&amp; isFirstRun)
+                    {
+                        _ui.WriteError(&quot;Nenhum comando especificado em modo non-interactive.&quot;);
+                        return 1;
+                    }
+                    command = _menu.Show(_commands);
+                }
+            }
+            catch (CliAbortException)
+            {
+                if (options.IsNonInteractive) return 1;
+                pending = null;
+                continue;
+            }
+
+            if (command is null)
+                return 0;
+
+            if (!options.IsNonInteractive)
+                _ui.Header(command.Name, command.Description);
+
+            pending = null;
+            var lastResult = 0;
+            try
+            {
+                // Pass options only on first run, otherwise empty options for repeated runs
+                var runOptions = isFirstRun ? options : new CliLaunchOptions();
+                
+                // --- Profile Logic Start ---
+                
+                // 1. Load Profile from Args (only on first run)
+                if (isFirstRun &amp;&amp; runOptions.GetOption(&quot;profile&quot;) is string profileArg)
+                {
+                    var profile = _profileManager.GetProfile(command.Key, profileArg);
+                    if (profile != null)
+                    {
+                        _ui.WriteSuccess($&quot;Perfil &#39;{profile.Name}&#39; carregado.&quot;);
+                        foreach (var kvp in profile.Options)
+                        {
+                            if (!runOptions.Options.ContainsKey(kvp.Key))
+                            {
+                                runOptions.Options[kvp.Key] = kvp.Value;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _ui.WriteWarning($&quot;Perfil &#39;{profileArg}&#39; nao encontrado para a ferramenta &#39;{command.Key}&#39;.&quot;);
+                        if (options.IsNonInteractive) return 1;
+                    }
+                }
+                else if (!options.IsNonInteractive)
+                {
+                    // 2. Interactive Profile Selection
+                    var profiles = _profileManager.LoadProfiles(command.Key);
+                    if (profiles.Count &gt; 0)
+                    {
+                        var useProfile = _input.ReadYesNo($&quot;Existem {profiles.Count} perfis salvos. Carregar?&quot;, false);
+                        if (useProfile)
+                        {
+                             var profileNames = profiles.Select(p =&gt; p.Name).ToList();
+                             var selectedIndex = _menu.ShowOptions(&quot;Selecione o perfil&quot;, profileNames);
+                             if (selectedIndex &gt;= 0)
+                             {
+                                 var profile = profiles[selectedIndex];
+                                 _ui.WriteSuccess($&quot;Perfil &#39;{profile.Name}&#39; carregado.&quot;);
+                                 foreach (var kvp in profile.Options)
+                                 {
+                                     if (!runOptions.Options.ContainsKey(kvp.Key))
+                                     {
+                                         runOptions.Options[kvp.Key] = kvp.Value;
+                                     }
+                                 }
+                             }
+                        }
+                    }
+                }
+                
+                // --- Profile Logic End ---
+                
+                lastResult = await command.ExecuteAsync(runOptions, ct).ConfigureAwait(false);
+                
+                // --- Save Profile Logic ---
+                if (lastResult == 0) // Only save on success
+                {
+                    var optionsToSave = SanitizeOptions(runOptions.Options);
+
+                    if (isFirstRun &amp;&amp; runOptions.GetOption(&quot;save-profile&quot;) is string saveName)
+                    {
+                        // Save requested via args
+                        var profile = new ToolProfile { Name = saveName, Options = optionsToSave, UpdatedUtc = DateTime.UtcNow };
+                        _profileManager.SaveProfile(command.Key, profile);
+                        _ui.WriteSuccess($&quot;Perfil &#39;{saveName}&#39; salvo com sucesso.&quot;);
+                    }
+                    else if (!options.IsNonInteractive)
+                    {
+                        // Interactive save prompt
+                        var save = _input.ReadYesNo(&quot;Salvar configuracao atual como perfil?&quot;, false);
+                        if (save)
+                        {
+                            var name = _input.ReadRequired(&quot;Nome do perfil&quot;);
+                            var profile = new ToolProfile { Name = name, Options = optionsToSave, UpdatedUtc = DateTime.UtcNow };
+                            _profileManager.SaveProfile(command.Key, profile);
+                            _ui.WriteSuccess($&quot;Perfil &#39;{name}&#39; salvo com sucesso.&quot;);
+                        }
+                    }
+                }
+            }
+            catch (CliAbortException)
+
+            {
+                _ui.WriteWarning(&quot;Operacao cancelada.&quot;);
+                if (options.IsNonInteractive) return 1;
+            }
+            catch (Exception ex)
+            {
+                _ui.WriteError($&quot;Erro inesperado: {ex.Message}&quot;);
+                CliErrorLogger.LogException(command?.Key ?? &quot;cli&quot;, ex);
+                if (options.IsNonInteractive) return 1;
+            }
+            
+            isFirstRun = false;
+
+            if (options.IsNonInteractive)
+                return lastResult;
+
+            NextAction next;
+            try
+            {
+                next = PromptNextAction(command!);
+            }
+            catch (CliAbortException)
+            {
+                return 0;
+            }
+
+            if (next == NextAction.Exit)
+                return 0;
+            
+            if (next == NextAction.MainMenu)
+            {
+                pending = null; // Loop will show menu
+            }
+            else if (next == NextAction.Repeat)
+            {
+                pending = command; // Loop will execute same command
+            }
+        }
+    }
+
+    private Dictionary&lt;string, string&gt; SanitizeOptions(Dictionary&lt;string, string&gt; options)
+    {
+        var clean = new Dictionary&lt;string, string&gt;(options);
+        clean.Remove(&quot;profile&quot;);
+        clean.Remove(&quot;save-profile&quot;);
+        clean.Remove(&quot;non-interactive&quot;);
+        return clean;
+    }
+
+    private enum NextAction
+    {
+        Exit,
+        MainMenu,
+        Repeat
+    }
+
+    private NextAction PromptNextAction(ICliCommand command)
+    {
+        _ui.WriteLine(&quot;&quot;);
+        _ui.Section(&quot;O que fazer agora?&quot;);
+        _ui.WriteLine(&quot;1) Repetir comando&quot;);
+        _ui.WriteLine(&quot;2) Menu principal&quot;);
+        _ui.WriteLine(&quot;3) Sair&quot;);
+        
+        var choice = _input.ReadInt(&quot;Escolha&quot;, 1, 3);
+        return choice switch
+        {
+            1 =&gt; NextAction.Repeat,
+            2 =&gt; NextAction.MainMenu,
+            _ =&gt; NextAction.Exit
+        };
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

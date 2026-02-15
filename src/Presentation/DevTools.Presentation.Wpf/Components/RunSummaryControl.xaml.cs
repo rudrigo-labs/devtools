@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace DevTools.Presentation.Wpf.Components;
 
-public partial class RunSummaryControl : UserControl, INotifyPropertyChanged
+public partial class RunSummaryControl : System.Windows.Controls.UserControl, INotifyPropertyChanged
 {
     public RunSummaryControl()
     {
@@ -35,9 +35,9 @@ public partial class RunSummaryControl : UserControl, INotifyPropertyChanged
     
     public string StatusText => _result?.IsSuccess == true ? "Execução Concluída" : "Falha na Execução";
     
-    public Brush StatusColor => _result?.IsSuccess == true 
-        ? new SolidColorBrush(Color.FromRgb(92, 184, 92)) // Green
-        : new SolidColorBrush(Color.FromRgb(217, 83, 79)); // Red
+    public System.Windows.Media.Brush StatusColor => _result?.IsSuccess == true 
+        ? new SolidColorBrush(System.Windows.Media.Color.FromRgb(92, 184, 92)) // Green
+        : new SolidColorBrush(System.Windows.Media.Color.FromRgb(217, 83, 79)); // Red
 
     public string Duration => _result?.Summary.Duration.ToString(@"hh\:mm\:ss") ?? "";
     
@@ -46,9 +46,9 @@ public partial class RunSummaryControl : UserControl, INotifyPropertyChanged
     public int IgnoredCount => _result?.Summary.Ignored ?? 0;
     public int FailedCount => _result?.Summary.Failed ?? 0;
     
-    public Brush FailedColor => FailedCount > 0 
-        ? new SolidColorBrush(Color.FromRgb(217, 83, 79)) // Red
-        : new SolidColorBrush(Colors.White);
+    public System.Windows.Media.Brush FailedColor => FailedCount > 0 
+        ? new SolidColorBrush(System.Windows.Media.Color.FromRgb(217, 83, 79)) // Red
+        : new SolidColorBrush(System.Windows.Media.Colors.White);
 
     public bool HasErrors => _result?.Errors.Count > 0;
     

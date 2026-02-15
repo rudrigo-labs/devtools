@@ -1,0 +1,195 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using DevTools.Core.Configuration;
+using DevTools.Core.Models;
+using DevTools.Presentation.Wpf.Services;
+using DevTools.SSHTunnel.Engine;
+using DevTools.SSHTunnel.Models;
+using DevTools.SSHTunnel.Providers;
+
+namespace DevTools.Presentation.Wpf.Views;
+
+public partial class SshTunnelWindow : Window
+{
+    private readonly JobManager _jobManager;
+    private readonly SettingsService _settingsService;
+    private readonly ConfigService _configService;
+    private readonly TunnelService _tunnelService;
+    
+    public SshTunnelWindow(JobManager jobManager, SettingsService settingsService, ConfigService configService)
+    {
+        InitializeComponent();
+        _jobManager = jobManager;
+        _settingsService = settingsService;
+        _configService = configService;
+        
+        // Inicializa servi&#231;os do SSH Tunnel
+        _tunnelService = new TunnelService(new SystemProcessRunner());
+
+        // Configura ProfileSelector
+        ProfileSelector.ProfileLoaded += LoadProfile;
+        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
+        
+        // Monitora fechamento para salvar posi&#231;&#227;o
+        Closing += (s, e) =&gt; SavePosition();
+        
+        // Timer para atualizar status UI (polling simples)
+        var timer = new System.Windows.Threading.DispatcherTimer();
+        timer.Tick += (s, e) =&gt; UpdateStatusUI();
+        timer.Interval = TimeSpan.FromSeconds(1);
+        timer.Start();
+    }
+
+    private void LoadProfile(ToolProfile profile)
+    {
+        if (profile.Options.TryGetValue(&quot;ssh-host&quot;, out var sshHost)) SshHostInput.Text = sshHost;
+        if (profile.Options.TryGetValue(&quot;ssh-port&quot;, out var sshPort)) SshPortInput.Text = sshPort;
+        if (profile.Options.TryGetValue(&quot;ssh-user&quot;, out var sshUser)) SshUserInput.Text = sshUser;
+        if (profile.Options.TryGetValue(&quot;identity-file&quot;, out var identityFile)) IdentityFileInput.Text = identityFile;
+        if (profile.Options.TryGetValue(&quot;local-bind&quot;, out var localBind)) LocalBindInput.Text = localBind;
+        if (profile.Options.TryGetValue(&quot;local-port&quot;, out var localPort)) LocalPortInput.Text = localPort;
+        if (profile.Options.TryGetValue(&quot;remote-host&quot;, out var remoteHost)) RemoteHostInput.Text = remoteHost;
+        if (profile.Options.TryGetValue(&quot;remote-port&quot;, out var remotePort)) RemotePortInput.Text = remotePort;
+    }
+
+    private Dictionary&lt;string, string&gt; GetCurrentOptions()
+    {
+        var options = new Dictionary&lt;string, string&gt;();
+        options[&quot;ssh-host&quot;] = SshHostInput.Text;
+        options[&quot;ssh-port&quot;] = SshPortInput.Text;
+        options[&quot;ssh-user&quot;] = SshUserInput.Text;
+        options[&quot;identity-file&quot;] = IdentityFileInput.Text;
+        options[&quot;local-bind&quot;] = LocalBindInput.Text;
+        options[&quot;local-port&quot;] = LocalPortInput.Text;
+        options[&quot;remote-host&quot;] = RemoteHostInput.Text;
+        options[&quot;remote-port&quot;] = RemotePortInput.Text;
+        return options;
+    }
+
+    private async void ToggleTunnel_Click(object sender, RoutedEventArgs e)
+    {
+        if (_tunnelService.IsOn)
+        {
+            // Stop
+            ToggleTunnelButton.IsEnabled = false;
+            ToggleTunnelButton.Content = &quot;Parando...&quot;;
+            await _tunnelService.StopAsync(TimeSpan.FromSeconds(5));
+            UpdateStatusUI();
+            ToggleTunnelButton.IsEnabled = true;
+        }
+        else
+        {
+            // Start
+            var profile = BuildProfileFromUi();
+            if (string.IsNullOrWhiteSpace(profile.SshHost))
+            {
+                MessageBox.Show(&quot;Host SSH &#233; obrigat&#243;rio.&quot;, &quot;Erro&quot;, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            ToggleTunnelButton.IsEnabled = false;
+            ToggleTunnelButton.Content = &quot;Conectando...&quot;;
+            
+            try
+            {
+                await _tunnelService.StartAsync(profile);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($&quot;Erro ao iniciar t&#250;nel: {ex.Message}&quot;, &quot;Erro&quot;, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                ToggleTunnelButton.IsEnabled = true;
+                UpdateStatusUI();
+            }
+        }
+    }
+
+    private TunnelProfile BuildProfileFromUi()
+    {
+        int.TryParse(SshPortInput.Text, out int sshPort);
+        int.TryParse(LocalPortInput.Text, out int localPort);
+        int.TryParse(RemotePortInput.Text, out int remotePort);
+
+        return new TunnelProfile
+        {
+            Name = ProfileSelector.SelectedProfile?.Name ?? &quot;Manual&quot;,
+            SshHost = SshHostInput.Text,
+            SshPort = sshPort &gt; 0 ? sshPort : 22,
+            SshUser = SshUserInput.Text,
+            IdentityFile = IdentityFileInput.Text,
+            LocalBindHost = LocalBindInput.Text,
+            LocalPort = localPort,
+            RemoteHost = RemoteHostInput.Text,
+            RemotePort = remotePort
+        };
+    }
+
+    private void UpdateStatusUI()
+    {
+        if (_tunnelService.IsOn)
+        {
+            StatusIndicator.Fill = Brushes.Green;
+            StatusText.Text = &quot;Conectado&quot;;
+            ToggleTunnelButton.Content = &quot;Desconectar&quot;;
+            ToggleTunnelButton.Style = (Style)FindResource(&quot;SecondaryButtonStyle&quot;); // Use secondary style for disconnect
+        }
+        else
+        {
+            StatusIndicator.Fill = Brushes.Gray;
+            StatusText.Text = &quot;Parado&quot;;
+            ToggleTunnelButton.Content = &quot;Conectar&quot;;
+            ToggleTunnelButton.Style = (Style)FindResource(&quot;PrimaryButtonStyle&quot;);
+        }
+    }
+
+    private void BrowseKey_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = &quot;Key Files|*.pem;*.key;*.ppk|All Files|*.*&quot;,
+            Title = &quot;Selecione o arquivo de chave privada&quot;
+        };
+        if (dialog.ShowDialog() == true)
+        {
+            IdentityFileInput.Text = dialog.FileName;
+        }
+    }
+
+    private void SavePosition()
+    {
+        // Implementar persist&#234;ncia de posi&#231;&#227;o da janela se necess&#225;rio
+    }
+
+    private void Header_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (e.ButtonState == System.Windows.Input.MouseButtonState.Pressed)
+        {
+            DragMove();
+        }
+    }
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

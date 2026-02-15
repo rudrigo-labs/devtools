@@ -1,0 +1,76 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using DevTools.Snapshot.Models;
+
+namespace DevTools.Snapshot.Engine;
+
+internal sealed class SnapshotNestedJsonWriter
+{
+    public async Task WriteAsync(string rootPath, string outFile, IReadOnlySet&lt;string&gt; ignoreDirs)
+    {
+        if (string.IsNullOrWhiteSpace(rootPath))
+            throw new ArgumentException(&quot;rootPath is required.&quot;, nameof(rootPath));
+
+        if (!Directory.Exists(rootPath))
+            throw new DirectoryNotFoundException($&quot;RootPath not found: {rootPath}&quot;);
+
+        var folders = new DirectoryInfo(rootPath)
+            .EnumerateDirectories(&quot;*&quot;, SearchOption.AllDirectories)
+            .Where(d =&gt; !IsIgnoredPath(d.FullName, ignoreDirs))
+            .Select(d =&gt; new SnapshotFolder(
+                Name: Path.GetRelativePath(rootPath, d.FullName).Replace(&#39;\\&#39;, &#39;/&#39;),
+                Files: d.EnumerateFiles()
+                        .Where(f =&gt; !ignoreDirs.Contains(f.Name))
+                        .OrderBy(f =&gt; f.Name)
+                        .Select(f =&gt; f.Name)
+                        .ToList()
+            ))
+            .Where(f =&gt; f.Files.Count &gt; 0)
+            .OrderBy(f =&gt; f.Name)
+            .ToList();
+
+        var payload = new SnapshotNestedProject(Path.GetFileName(rootPath.TrimEnd(Path.DirectorySeparatorChar)), folders);
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
+        var json = JsonSerializer.Serialize(payload, options);
+        Directory.CreateDirectory(Path.GetDirectoryName(outFile)!);
+        await File.WriteAllTextAsync(outFile, json, new UTF8Encoding(false));
+    }
+
+    private static bool IsIgnoredPath(string fullPath, IReadOnlySet&lt;string&gt; ignoreDirs)
+    {
+        var parts = fullPath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        foreach (var part in parts)
+        {
+            if (ignoreDirs.Contains(part))
+                return true;
+        }
+
+        return false;
+    }
+
+    private sealed record SnapshotNestedProject(string Project, IReadOnlyList&lt;SnapshotFolder&gt; Folders);
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

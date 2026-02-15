@@ -90,13 +90,13 @@ public partial class HarvestWindow : Window
     {
         if (string.IsNullOrWhiteSpace(SourcePathSelector.SelectedPath))
         {
-            MessageBox.Show("Por favor, selecione um diretório de origem.", "Erro de Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show("Por favor, selecione um diretório de origem.", "Erro de Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         if (string.IsNullOrWhiteSpace(OutputPathSelector.SelectedPath))
         {
-            MessageBox.Show("Por favor, selecione um diretório de destino.", "Erro de Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show("Por favor, selecione um diretório de destino.", "Erro de Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -145,7 +145,7 @@ public partial class HarvestWindow : Window
         }
         catch (Exception ex)
         {
-             MessageBox.Show($"Erro crítico ao executar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+             System.Windows.MessageBox.Show($"Erro crítico ao executar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {

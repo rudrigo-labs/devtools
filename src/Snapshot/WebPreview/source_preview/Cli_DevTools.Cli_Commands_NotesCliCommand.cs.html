@@ -1,0 +1,226 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Cli.Ui;
+using DevTools.Cli.Logging;
+using DevTools.Cli.App;
+using DevTools.Notes.Engine;
+using DevTools.Notes.Models;
+
+namespace DevTools.Cli.Commands;
+
+public sealed class NotesCliCommand : ICliCommand
+{
+    private readonly CliConsole _ui;
+    private readonly CliInput _input;
+    private readonly NotesEngine _engine;
+
+    public NotesCliCommand(CliConsole ui, CliInput input)
+    {
+        _ui = ui;
+        _input = input;
+        _engine = new NotesEngine();
+    }
+
+    public string Key =&gt; &quot;notes&quot;;
+    public string Name =&gt; &quot;Notes&quot;;
+    public string Description =&gt; &quot;Le e salva notas (local).&quot;;
+
+    public async Task&lt;int&gt; ExecuteAsync(CliLaunchOptions options, CancellationToken ct)
+    {
+        // 1. Resolve Action
+        var actionStr = options.GetOption(&quot;action&quot;);
+        NotesAction? action = null;
+        if (actionStr != null)
+        {
+            if (Enum.TryParse&lt;NotesAction&gt;(actionStr, true, out var a)) action = a;
+            else if (actionStr.Equals(&quot;list&quot;, StringComparison.OrdinalIgnoreCase)) action = NotesAction.ListItems;
+            else if (actionStr.Equals(&quot;read&quot;, StringComparison.OrdinalIgnoreCase)) action = NotesAction.LoadNote;
+            else if (actionStr.Equals(&quot;create&quot;, StringComparison.OrdinalIgnoreCase)) action = NotesAction.CreateItem;
+            else if (actionStr.Equals(&quot;export&quot;, StringComparison.OrdinalIgnoreCase)) action = NotesAction.ExportZip;
+            else if (actionStr.Equals(&quot;import&quot;, StringComparison.OrdinalIgnoreCase)) action = NotesAction.ImportZip;
+        }
+
+        if (action == null &amp;&amp; !options.IsNonInteractive)
+        {
+            _ui.Section(&quot;Acoes&quot;);
+            _ui.WriteLine(&quot;1) Listar notas&quot;);
+            _ui.WriteLine(&quot;2) Ler nota&quot;);
+            _ui.WriteLine(&quot;3) Criar nota&quot;);
+            _ui.WriteLine(&quot;4) Exportar backup (ZIP)&quot;);
+            _ui.WriteLine(&quot;5) Importar backup (ZIP)&quot;);
+
+            var choice = _input.ReadInt(&quot;Escolha&quot;, 1, 5);
+            action = choice switch
+            {
+                1 =&gt; NotesAction.ListItems,
+                2 =&gt; NotesAction.LoadNote,
+                3 =&gt; NotesAction.CreateItem,
+                4 =&gt; NotesAction.ExportZip,
+                5 =&gt; NotesAction.ImportZip,
+                _ =&gt; NotesAction.ListItems
+            };
+        }
+
+        if (action == null)
+        {
+            _ui.WriteError(&quot;Action required (--action list|read|create|export|import).&quot;);
+            return 1;
+        }
+
+        // 2. Resolve Parameters
+        var root = options.GetOption(&quot;root&quot;) ?? options.GetOption(&quot;path&quot;);
+        var key = options.GetOption(&quot;key&quot;) ?? options.GetOption(&quot;note&quot;);
+        var title = options.GetOption(&quot;title&quot;);
+        var content = options.GetOption(&quot;content&quot;);
+        var output = options.GetOption(&quot;output&quot;) ?? options.GetOption(&quot;out&quot;);
+        var zip = options.GetOption(&quot;zip&quot;) ?? options.GetOption(&quot;source&quot;);
+        var overwriteStr = options.GetOption(&quot;overwrite&quot;);
+        bool? overwrite = overwriteStr != null ? (overwriteStr == &quot;true&quot;) : null;
+
+        // Interactive Fallback
+        if (!options.IsNonInteractive)
+        {
+            if (string.IsNullOrWhiteSpace(root))
+                root = _input.ReadOptional(&quot;Pasta das notas (opcional)&quot;, &quot;enter = padrao&quot;);
+
+            switch (action)
+            {
+                case NotesAction.LoadNote:
+                    if (string.IsNullOrWhiteSpace(key))
+                        key = _input.ReadRequired(&quot;Caminho/Nome da nota&quot;, &quot;ex: 2023/10/minha-nota.md&quot;);
+                    break;
+                case NotesAction.CreateItem:
+                    if (string.IsNullOrWhiteSpace(title))
+                        title = _input.ReadRequired(&quot;Titulo da nota&quot;, &quot;ex: Reuniao Daily&quot;);
+                    if (string.IsNullOrWhiteSpace(content))
+                        content = _input.ReadMultiline(&quot;Conteudo da nota&quot;, &quot;linha a linha&quot;, &quot;.&quot;);
+                    break;
+                case NotesAction.ExportZip:
+                    if (string.IsNullOrWhiteSpace(output))
+                        output = _input.ReadRequired(&quot;Caminho para salvar o ZIP&quot;, &quot;ex: C:\\Backup\\notes.zip&quot;);
+                    break;
+                case NotesAction.ImportZip:
+                    if (string.IsNullOrWhiteSpace(zip))
+                        zip = _input.ReadRequired(&quot;Caminho do ZIP origem&quot;, &quot;ex: C:\\Downloads\\notes.zip&quot;);
+                    if (overwrite == null)
+                        overwrite = _input.ReadYesNo(&quot;Sobrescrever existentes&quot;, false);
+                    break;
+            }
+        }
+
+        // Defaults
+        overwrite ??= false;
+
+        // Validation
+        if (action == NotesAction.LoadNote &amp;&amp; string.IsNullOrWhiteSpace(key))
+        {
+            _ui.WriteError(&quot;Key/Path required for read action (--key).&quot;);
+            return 1;
+        }
+        if (action == NotesAction.CreateItem &amp;&amp; string.IsNullOrWhiteSpace(title))
+        {
+            _ui.WriteError(&quot;Title required for create action (--title).&quot;);
+            return 1;
+        }
+        if (action == NotesAction.ExportZip &amp;&amp; string.IsNullOrWhiteSpace(output))
+        {
+            _ui.WriteError(&quot;Output path required for export action (--output).&quot;);
+            return 1;
+        }
+        if (action == NotesAction.ImportZip &amp;&amp; string.IsNullOrWhiteSpace(zip))
+        {
+            _ui.WriteError(&quot;Zip path required for import action (--zip).&quot;);
+            return 1;
+        }
+
+        var request = new NotesRequest(
+            Action: action.Value,
+            NoteKey: key,
+            Content: content,
+            NotesRootPath: string.IsNullOrWhiteSpace(root) ? null : root,
+            ConfigPath: null,
+            Overwrite: overwrite.Value,
+            Title: title,
+            OutputPath: output,
+            ZipPath: zip,
+            CreateDateFolder: true,
+            UseMarkdown: true
+        );
+
+        using var progress = new CliProgressReporter(_ui.Theme);
+        var result = await _engine.ExecuteAsync(request, progress, ct).ConfigureAwait(false);
+        progress.Finish();
+
+        if (result.IsSuccess &amp;&amp; result.Value != null)
+        {
+            var response = result.Value;
+
+        if (!options.IsNonInteractive)
+        {
+            _ui.Section(&quot;Resultado&quot;);
+
+            if (action == NotesAction.ListItems &amp;&amp; response.ListResult != null)
+            {
+                _ui.WriteLine($&quot;Total de notas: {response.ListResult.Items.Count}&quot;);
+                foreach (var item in response.ListResult.Items)
+                {
+                    _ui.WriteLine($&quot;- {item.FileName} ({item.UpdatedUtc})&quot;);
+                }
+            }
+            else if (action == NotesAction.LoadNote &amp;&amp; response.ReadResult != null)
+            {
+                _ui.Section(&quot;Nota Carregada&quot;);
+                _ui.WriteLine(response.ReadResult.Content ?? &quot;(Vazio)&quot;);
+            }
+            else
+            {
+                if (action == NotesAction.CreateItem)
+                    _ui.WriteLine(&quot;Nota criada com sucesso!&quot;);
+                else if (action == NotesAction.ExportZip)
+                    _ui.WriteLine($&quot;Backup exportado para: {output ?? &quot;destino&quot;}&quot;);
+                else if (action == NotesAction.ImportZip)
+                    _ui.WriteLine(&quot;Importacao concluida com sucesso.&quot;);
+                else
+                    _ui.WriteLine(&quot;Operacao realizada com sucesso.&quot;);
+            }
+        }
+        else
+        {
+            // Non-interactive output
+            if (action == NotesAction.ListItems &amp;&amp; response.ListResult != null)
+            {
+                foreach (var item in response.ListResult.Items)
+                {
+                    _ui.WriteLine($&quot;{item.FileName}\t{item.UpdatedUtc}&quot;);
+                }
+            }
+            else if (action == NotesAction.LoadNote &amp;&amp; response.ReadResult != null)
+            {
+                _ui.WriteLine(response.ReadResult.Content ?? &quot;&quot;);
+            }
+            else if (action == NotesAction.ExportZip)
+            {
+                _ui.WriteLine(output ?? &quot;Exported&quot;);
+            }
+        }
+        }
+
+        _ui.PrintRunResult(result);
+        return result.IsSuccess &amp;&amp; result.Summary.Failed == 0 ? 0 : 1;
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

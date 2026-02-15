@@ -1,0 +1,177 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Core.Abstractions;
+using DevTools.Core.Models;
+using DevTools.Core.Results;
+using DevTools.Utf8Convert.Abstractions;
+using DevTools.Utf8Convert.Models;
+using DevTools.Utf8Convert.Providers;
+using DevTools.Core.Utilities;
+using DevTools.Utf8Convert.Validation;
+
+namespace DevTools.Utf8Convert.Engine;
+
+public sealed class Utf8ConvertEngine : IDevToolEngine&lt;Utf8ConvertRequest, Utf8ConvertResponse&gt;
+{
+    private readonly IUtf8FileSystem _fs;
+
+    public Utf8ConvertEngine(IUtf8FileSystem? fileSystem = null)
+    {
+        _fs = fileSystem ?? new SystemUtf8FileSystem();
+    }
+
+    public async Task&lt;RunResult&lt;Utf8ConvertResponse&gt;&gt; ExecuteAsync(
+        Utf8ConvertRequest request,
+        IProgressReporter? progress = null,
+        CancellationToken ct = default)
+    {
+        var errors = Utf8ConvertRequestValidator.Validate(request);
+        if (errors.Count &gt; 0)
+            return RunResult&lt;Utf8ConvertResponse&gt;.Fail(errors);
+
+        var rootPath = Path.GetFullPath(request.RootPath);
+        var filter = new PathFilter(request.IncludeGlobs, request.ExcludeGlobs);
+
+        var items = new List&lt;Utf8ConvertItem&gt;();
+        var scanned = 0;
+        var converted = 0;
+        var already = 0;
+        var skippedBinary = 0;
+        var skippedExcluded = 0;
+        var failed = 0;
+
+        var files = _fs.EnumerateFiles(rootPath, request.Recursive).ToList();
+        var total = files.Count;
+        var step = 0;
+
+        foreach (var file in files)
+        {
+            ct.ThrowIfCancellationRequested();
+            step++;
+            progress?.Report(new ProgressEvent(&quot;Processing file&quot;, Percent(step, total), &quot;file&quot;));
+
+            var relative = Normalize(Path.GetRelativePath(rootPath, file));
+            if (filter.IsExcluded(relative) || !filter.IsIncluded(relative))
+            {
+                skippedExcluded++;
+                items.Add(new Utf8ConvertItem(file, Utf8ConvertStatus.SkippedExcluded, null, null, null));
+                continue;
+            }
+
+            scanned++;
+
+            try
+            {
+                var detected = await TextFileHelper.ReadAsync(_fs, file, ct).ConfigureAwait(false);
+
+                if (detected.IsBinary)
+                {
+                    skippedBinary++;
+                    items.Add(new Utf8ConvertItem(file, Utf8ConvertStatus.SkippedBinary, detected.DetectedName, null, null));
+                    continue;
+                }
+
+                var detectedName = detected.DetectedName ?? detected.Encoding.WebName;
+                var outputEncodingName = request.OutputBom ? &quot;utf-8-bom&quot; : &quot;utf-8&quot;;
+
+                var needsConversion = NeedsConversion(detected, request.OutputBom);
+
+                if (!needsConversion)
+                {
+                    already++;
+                    items.Add(new Utf8ConvertItem(file, Utf8ConvertStatus.AlreadyUtf8, detectedName, outputEncodingName, null));
+                    continue;
+                }
+
+                if (!request.DryRun)
+                {
+                    if (request.CreateBackup)
+                    {
+                        var backupPath = CreateBackupPath(file);
+                        _fs.CopyFile(file, backupPath, overwrite: false);
+                    }
+
+                    await TextFileHelper.WriteUtf8Async(_fs, file, detected.Content, request.OutputBom, ct).ConfigureAwait(false);
+                }
+
+                converted++;
+                items.Add(new Utf8ConvertItem(file, Utf8ConvertStatus.Converted, detectedName, outputEncodingName, null));
+            }
+            catch (Exception ex)
+            {
+                failed++;
+                items.Add(new Utf8ConvertItem(file, Utf8ConvertStatus.Error, null, null, ex.Message));
+            }
+        }
+
+        var summary = new Utf8ConvertSummary(scanned, converted, already, skippedBinary, skippedExcluded, failed);
+        var response = new Utf8ConvertResponse(summary, items);
+
+        if (failed &gt; 0)
+        {
+            return new RunResult&lt;Utf8ConvertResponse&gt;
+            {
+                IsSuccess = false,
+                Errors = new[] { new ErrorDetail(&quot;utf8.convert.failed&quot;, &quot;One or more files failed to convert.&quot;) },
+                Value = response
+            };
+        }
+
+        return RunResult&lt;Utf8ConvertResponse&gt;.Success(response);
+    }
+
+    private static bool NeedsConversion(DetectedText detected, bool outputBom)
+    {
+        var isUtf8 = detected.Encoding.WebName.Equals(&quot;utf-8&quot;, StringComparison.OrdinalIgnoreCase);
+        if (!isUtf8)
+            return true;
+
+        if (outputBom &amp;&amp; !detected.HasBom)
+            return true;
+
+        if (!outputBom &amp;&amp; detected.HasBom)
+            return true;
+
+        return false;
+    }
+
+    private static string CreateBackupPath(string file)
+    {
+        var basePath = file + &quot;.bak&quot;;
+        if (!File.Exists(basePath))
+            return basePath;
+
+        var index = 1;
+        while (true)
+        {
+            var candidate = basePath + index;
+            if (!File.Exists(candidate))
+                return candidate;
+            index++;
+        }
+    }
+
+    private static int? Percent(int step, int total)
+    {
+        if (total &lt;= 0) return null;
+        return (int)Math.Round(step * 100d / total);
+    }
+
+    private static string Normalize(string path)
+        =&gt; path.Replace(&#39;\\&#39;, &#39;/&#39;);
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

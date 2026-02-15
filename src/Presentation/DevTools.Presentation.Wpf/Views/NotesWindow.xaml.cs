@@ -100,7 +100,7 @@ namespace DevTools.Presentation.Wpf.Views
         {
             if (string.IsNullOrWhiteSpace(NoteTitle.Text))
             {
-                MessageBox.Show("O título é obrigatório.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show("O título é obrigatório.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -122,13 +122,13 @@ namespace DevTools.Presentation.Wpf.Views
             }
             else
             {
-                MessageBox.Show($"Erro ao salvar: {result.Errors.FirstOrDefault()?.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show($"Erro ao salvar: {result.Errors.FirstOrDefault()?.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private async void ExportButton_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new SaveFileDialog
+            var dialog = new Microsoft.Win32.SaveFileDialog
             {
                 Filter = "ZIP Files (*.zip)|*.zip",
                 FileName = $"Notes_Backup_{DateTime.Now:yyyyMMdd}.zip"
@@ -145,18 +145,18 @@ namespace DevTools.Presentation.Wpf.Views
                 var result = await _engine.ExecuteAsync(request);
                 if (result.IsSuccess)
                 {
-                    MessageBox.Show("Backup exportado com sucesso!", "Exportar", MessageBoxButton.OK, MessageBoxImage.Information);
+                    System.Windows.MessageBox.Show("Backup exportado com sucesso!", "Exportar", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    MessageBox.Show($"Erro ao exportar: {result.Errors.FirstOrDefault()?.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show($"Erro ao exportar: {result.Errors.FirstOrDefault()?.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
         private async void ImportButton_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new OpenFileDialog
+            var dialog = new Microsoft.Win32.OpenFileDialog
             {
                 Filter = "ZIP Files (*.zip)|*.zip"
             };
@@ -172,12 +172,12 @@ namespace DevTools.Presentation.Wpf.Views
                 var result = await _engine.ExecuteAsync(request);
                 if (result.IsSuccess)
                 {
-                    MessageBox.Show("Backup importado com sucesso!", "Importar", MessageBoxButton.OK, MessageBoxImage.Information);
+                    System.Windows.MessageBox.Show("Backup importado com sucesso!", "Importar", MessageBoxButton.OK, MessageBoxImage.Information);
                     await LoadList();
                 }
                 else
                 {
-                    MessageBox.Show($"Erro ao importar: {result.Errors.FirstOrDefault()?.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show($"Erro ao importar: {result.Errors.FirstOrDefault()?.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

@@ -1,0 +1,204 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Text.RegularExpressions;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Collections.Generic;
+using DevTools.Core.Models;
+using DevTools.Ngrok.Engine;
+using DevTools.Ngrok.Models;
+using DevTools.Presentation.Wpf.Services;
+
+namespace DevTools.Presentation.Wpf.Views;
+
+public partial class NgrokWindow : Window
+{
+    private readonly JobManager _jobManager;
+    private readonly SettingsService _settingsService;
+    private readonly NgrokEngine _engine;
+    
+    // Timer para auto-refresh
+    private readonly System.Windows.Threading.DispatcherTimer _timer;
+
+    public NgrokWindow(JobManager jobManager, SettingsService settingsService)
+    {
+        InitializeComponent();
+        _jobManager = jobManager;
+        _settingsService = settingsService;
+        _engine = new NgrokEngine();
+
+        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
+        ProfileSelector.ProfileLoaded += LoadProfile;
+
+        LoadPosition();
+        Closing += (s, e) =&gt; SavePosition();
+
+        _timer = new System.Windows.Threading.DispatcherTimer();
+        _timer.Interval = TimeSpan.FromSeconds(3);
+        _timer.Tick += async (s, e) =&gt; await RefreshTunnels();
+        
+        Loaded += async (s, e) =&gt; 
+        {
+            await RefreshTunnels();
+            _timer.Start();
+        };
+    }
+
+    private Dictionary&lt;string, string&gt; GetCurrentOptions()
+    {
+        var options = new Dictionary&lt;string, string&gt;();
+        options[&quot;port&quot;] = PortInput.Text;
+        return options;
+    }
+
+    private void LoadProfile(ToolProfile profile)
+    {
+        if (profile.Options.TryGetValue(&quot;port&quot;, out var port)) PortInput.Text = port;
+    }
+
+    private async Task RefreshTunnels()
+    {
+        try
+        {
+            var request = new NgrokRequest(NgrokAction.ListTunnels);
+            var result = await _engine.ExecuteAsync(request);
+
+            if (result.IsSuccess &amp;&amp; result.Value?.Tunnels != null)
+            {
+                var tunnels = result.Value.Tunnels;
+                TunnelsList.ItemsSource = tunnels;
+                EmptyStateText.Visibility = tunnels.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+                StatusText.Text = $&quot;Atualizado em: {DateTime.Now:HH:mm:ss}&quot;;
+            }
+            else
+            {
+                // Ngrok pode n&#227;o estar rodando
+                TunnelsList.ItemsSource = null;
+                EmptyStateText.Visibility = Visibility.Visible;
+                StatusText.Text = &quot;Ngrok inativo ou API inacess&#237;vel&quot;;
+            }
+        }
+        catch
+        {
+            // Ignora erros de conex&#227;o silenciosamente no timer
+        }
+    }
+
+    private async void StartButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (int.TryParse(PortInput.Text, out int port))
+        {
+            StartButton.IsEnabled = false;
+            StartButton.Content = &quot;Iniciando...&quot;;
+
+            var request = new NgrokRequest(
+                NgrokAction.StartHttp, 
+                StartOptions: new NgrokStartOptions(&quot;http&quot;, port)
+            );
+
+            await Task.Run(async () =&gt; 
+            {
+                var result = await _engine.ExecuteAsync(request);
+                
+                Dispatcher.Invoke(() =&gt; 
+                {
+                    StartButton.IsEnabled = true;
+                    StartButton.Content = &quot;Expor Porta&quot;;
+                    
+                    if (!result.IsSuccess)
+                    {
+                        MessageBox.Show($&quot;Falha ao iniciar: {string.Join(&quot;, &quot;, result.Errors.Select(x =&gt; x.Message))}&quot;, &quot;Erro&quot;, MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    else
+                    {
+                        // Aguarda um pouco para a API subir e atualiza a lista
+                        Task.Delay(1000).ContinueWith(_ =&gt; Dispatcher.Invoke(RefreshTunnels));
+                    }
+                });
+            });
+        }
+        else
+        {
+            MessageBox.Show(&quot;Porta inv&#225;lida!&quot;, &quot;Erro&quot;, MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    private async void KillAll_Click(object sender, RoutedEventArgs e)
+    {
+        if (MessageBox.Show(&quot;Isso fechar&#225; TODOS os t&#250;neis Ngrok abertos. Continuar?&quot;, &quot;Confirmar&quot;, MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+        {
+            var request = new NgrokRequest(NgrokAction.KillAll);
+            await _engine.ExecuteAsync(request);
+            await RefreshTunnels();
+        }
+    }
+
+    private async void RefreshButton_Click(object sender, RoutedEventArgs e)
+    {
+        await RefreshTunnels();
+    }
+
+    private void CopyUrl_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn &amp;&amp; btn.Tag is string url)
+        {
+            Clipboard.SetText(url);
+            // Feedback visual r&#225;pido seria legal, mas tooltip serve
+        }
+    }
+
+    private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
+    {
+        e.Handled = new Regex(&quot;[^0-9]+&quot;).IsMatch(e.Text);
+    }
+
+    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        // DragMove();
+    }
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    private void LoadPosition()
+    {
+        /* Position handled by TrayService
+        if (_settingsService.Settings.NgrokWindowTop.HasValue &amp;&amp; _settingsService.Settings.NgrokWindowLeft.HasValue)
+        {
+            Top = _settingsService.Settings.NgrokWindowTop.Value;
+            Left = _settingsService.Settings.NgrokWindowLeft.Value;
+        }
+        else
+        {
+            var workArea = SystemParameters.WorkArea;
+            Left = workArea.Right - Width - 20;
+            Top = workArea.Bottom - Height - 20;
+        }
+        */
+    }
+
+    private void SavePosition()
+    {
+        _settingsService.Settings.NgrokWindowTop = Top;
+        _settingsService.Settings.NgrokWindowLeft = Left;
+        _settingsService.Save();
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>
