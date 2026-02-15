@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Logs do Sistema" Height="500" Width="800"
+        Title="Logs do Sistema" Height="640" Width="900" WindowStartupLocation="CenterScreen"
         Style="{StaticResource ModernWindowStyle}">
 
     <Border Background="{StaticResource WindowBackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="0">
@@ -34,17 +34,18 @@
             <Rectangle Grid.Row="0" VerticalAlignment="Bottom" Height="1" Fill="{StaticResource BorderBrush}" Opacity="0.3"/>
 
             <!-- Log Content -->
-            <TextBox x:Name="LogTextBox" Grid.Row="1" Margin="10" 
-                     Background="#1E1E1E" Foreground="#D4D4D4" 
-                     BorderThickness="0" FontFamily="Consolas" FontSize="12"
+            <TextBox x:Name="LogTextBox" Grid.Row="1" Margin="10"
+                     Style="{StaticResource ModernTextBoxStyle}"
+                     FontFamily="Consolas" FontSize="12"
                      IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                     TextWrapping="NoWrap" Padding="10"/>
+                     TextWrapping="NoWrap"/>
 
             <!-- Footer -->
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="20,0">
-                <Button Content="Abrir Pasta" Click="OpenFolder_Click" Width="120" Height="35" Margin="0,0,10,0" Style="{StaticResource PrimaryButtonStyle}"/>
-                <Button Content="Atualizar" Click="Refresh_Click" Width="100" Height="35" Margin="0,0,10,0" Style="{StaticResource SecondaryButtonStyle}"/>
-                <Button Content="Limpar" Click="Clear_Click" Width="100" Height="35" Style="{StaticResource SecondaryButtonStyle}"/>
+                <Button Content="Cancelar" Click="CloseButton_Click" Margin="0,0,10,0" Style="{StaticResource SecondaryButtonStyle}"/>
+                <Button Content="Abrir Pasta" Click="OpenFolder_Click" Margin="0,0,10,0" Style="{StaticResource PrimaryButtonStyle}"/>
+                <Button Content="Atualizar" Click="Refresh_Click" Margin="0,0,10,0" Style="{StaticResource SecondaryButtonStyle}"/>
+                <Button Content="Limpar" Click="Clear_Click" Style="{StaticResource SecondaryButtonStyle}"/>
             </StackPanel>
         </Grid>
     </Border>

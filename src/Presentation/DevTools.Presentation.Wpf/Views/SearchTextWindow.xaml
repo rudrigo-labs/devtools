@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:components="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Busca de Texto" Height="450" Width="600"
+        Title="Busca de Texto" Height="640" Width="900" WindowStartupLocation="CenterScreen"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="CanResizeWithGrip">
 
@@ -31,7 +31,7 @@
                     <TextBlock Text="Busca de Texto" 
                                FontSize="16" 
                                FontWeight="SemiBold" 
-                               Foreground="{DynamicResource TextForegroundBrush}"/>
+                               Foreground="{DynamicResource PrimaryTextBrush}"/>
                 </StackPanel>
 
                 <Button Grid.Column="1" Click="Close_Click" 
@@ -55,8 +55,8 @@
 
                     <!-- Termo de Busca -->
                     <StackPanel Margin="0,0,0,15">
-                        <TextBlock Text="Texto para buscar" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,5"/>
-                        <TextBox x:Name="SearchTextInput" />
+                        <TextBlock Text="Texto para buscar" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                        <TextBox x:Name="SearchTextInput" Style="{StaticResource ModernTextBoxStyle}" />
                     </StackPanel>
 
                     <!-- Opções -->
@@ -73,13 +73,13 @@
                         </Grid.ColumnDefinitions>
                         
                         <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                            <TextBlock Text="Incluir (glob patterns)" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,5"/>
-                            <TextBox x:Name="IncludePatternInput" ToolTip="Ex: *.cs, *.ts"/>
+                            <TextBlock Text="Incluir (glob patterns)" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                            <TextBox x:Name="IncludePatternInput" ToolTip="Ex: *.cs, *.ts" Style="{StaticResource ModernTextBoxStyle}"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                            <TextBlock Text="Excluir (glob patterns)" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,5"/>
-                            <TextBox x:Name="ExcludePatternInput" ToolTip="Ex: bin, obj, node_modules"/>
+                            <TextBlock Text="Excluir (glob patterns)" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                            <TextBox x:Name="ExcludePatternInput" ToolTip="Ex: bin, obj, node_modules" Style="{StaticResource ModernTextBoxStyle}"/>
                         </StackPanel>
                     </Grid>
 
@@ -91,18 +91,24 @@
                                  IsReadOnly="True" 
                                  FontFamily="Consolas"
                                  FontSize="12"
-                                 VerticalScrollBarVisibility="Auto"/>
+                                 VerticalScrollBarVisibility="Auto"
+                                 Style="{StaticResource ModernTextBoxStyle}"/>
                     </Expander>
 
                 </StackPanel>
             </ScrollViewer>
 
             <!-- Footer -->
-            <Border Grid.Row="2" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="15">
-                <Button Content="Buscar" 
-                        Click="Execute_Click" 
-                        Style="{DynamicResource PrimaryButtonStyle}"
-                        HorizontalAlignment="Right"/>
+            <Border Grid.Row="2" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="15" Background="{DynamicResource ControlBackgroundBrush}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cancelar" 
+                            Click="Close_Click" 
+                            Style="{DynamicResource SecondaryButtonStyle}"
+                            Margin="0,0,10,0"/>
+                    <Button Content="Buscar" 
+                            Click="Execute_Click" 
+                            Style="{DynamicResource PrimaryButtonStyle}"/>
+                </StackPanel>
             </Border>
         </Grid>
     </Border>

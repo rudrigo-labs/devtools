@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using H.NotifyIcon;
 using System.Drawing; // SystemIcons fallback
+using System.IO;
 using DevTools.Presentation.Wpf.Views;
 using DevTools.Presentation.Wpf.Utilities;
 using DevTools.Core.Configuration;
@@ -155,14 +156,32 @@ public class TrayService : IDisposable
     {
         try
         {
-            var uri = new Uri("pack://application:,,,/DevTools.Presentation.Wpf;component/Assets/app.ico");
-            var streamInfo = Application.GetResourceStream(uri);
+            // 1) Tenta carregar via pack URI relativo ao assembly atual (robusto após publish)
+            var uriSimple = new Uri("pack://application:,,,/Assets/app.ico");
+            var streamInfo = Application.GetResourceStream(uriSimple);
             if (streamInfo != null)
             {
-                // Usa System.Drawing.Icon nativo para garantir a melhor resolução disponível no arquivo .ico
                 _taskbarIcon.Icon = new Icon(streamInfo.Stream);
                 return true;
             }
+
+            // 2) Fallback: tenta via assembly qualificado (alguns ambientes preferem o formato antigo)
+            var uriQualified = new Uri("pack://application:,,,/DevTools.Presentation.Wpf;component/Assets/app.ico");
+            var streamInfo2 = Application.GetResourceStream(uriQualified);
+            if (streamInfo2 != null)
+            {
+                _taskbarIcon.Icon = new Icon(streamInfo2.Stream);
+                return true;
+            }
+
+            // 3) Fallback: arquivo físico no diretório de deploy (dotnet publish/Inno Setup)
+            var candidatePath = Path.Combine(AppContext.BaseDirectory, "Assets", "app.ico");
+            if (File.Exists(candidatePath))
+            {
+                _taskbarIcon.Icon = new Icon(candidatePath);
+                return true;
+            }
+
             return false;
         }
         catch (Exception ex)

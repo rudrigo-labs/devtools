@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <!-- Fonte única da versão do produto -->
+    <Version>1.0.0</Version>
+
+    <!-- Opcional (bom padrão): mantém versões de assembly coerentes -->
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+
+    <!-- Opcional: sufixo de pre-release (ex.: -beta.1) -->
+    <!-- <VersionSuffix>beta.1</VersionSuffix> -->
+  </PropertyGroup>
+</Project>

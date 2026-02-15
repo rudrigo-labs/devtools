@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="DevTools — Jobs" Height="420" Width="760"
+        Title="DevTools — Jobs" Height="640" Width="900"
         Style="{StaticResource ModernWindowStyle}">
 
     <Border Background="{StaticResource WindowBackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="0">
@@ -81,6 +81,9 @@
             <!-- Actions -->
             <Border Grid.Row="2" Background="{StaticResource ControlBackgroundBrush}" CornerRadius="0,0,12,12" Padding="20,0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="Cancelar" Click="CloseButton_Click"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Margin="0,0,12,0"/>
                     <Button Content="Cancelar Job Selecionado" Click="CancelSelected_Click"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Margin="0,0,12,0"/>

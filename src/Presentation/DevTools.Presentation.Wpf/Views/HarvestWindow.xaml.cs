@@ -160,7 +160,6 @@ public partial class HarvestWindow : Window
 
     private void Cancel_Click(object sender, RoutedEventArgs e)
     {
-        DialogResult = false;
         Close();
     }
 }

@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Ngrok Controller" Height="400" Width="500"
+        Title="Ngrok Controller" Height="640" Width="900" WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="#1E1E1E"
         ResizeMode="CanResizeWithGrip"
-        WindowStartupLocation="Manual">
+        >
 
     <Window.Resources>
         <Style TargetType="ListBox">
@@ -89,7 +89,7 @@
                                     </StackPanel>
                                 </StackPanel>
 
-                                <Button Grid.Column="1" Content="Copiar" Click="CopyUrl_Click" Tag="{Binding PublicUrl}" Width="60" Height="25" Style="{StaticResource SecondaryButtonStyle}" Padding="0" Margin="10,0,0,0"/>
+                                <Button Grid.Column="1" Content="Copiar" Click="CopyUrl_Click" Tag="{Binding PublicUrl}" Style="{StaticResource SecondaryButtonStyle}" Margin="10,0,0,0"/>
                             </Grid>
                         </Border>
                     </DataTemplate>
@@ -103,7 +103,10 @@
         <Border Grid.Row="3" Background="#252526" BorderBrush="#3F3F46" BorderThickness="0,1,0,0">
             <Grid Margin="15,0">
                 <Button Content="Matar Processos Ngrok" Click="KillAll_Click" HorizontalAlignment="Left" Style="{StaticResource DangerButtonStyle}" VerticalAlignment="Center" Padding="15,8"/>
-                <TextBlock x:Name="StatusText" Text="" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="Gray" FontSize="11"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="Cancelar" Click="CloseButton_Click" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
+                    <TextBlock x:Name="StatusText" Text="" VerticalAlignment="Center" Foreground="Gray" FontSize="11"/>
+                </StackPanel>
             </Grid>
         </Border>
         </Grid>

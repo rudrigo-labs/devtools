@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
-        Title="Renomeador em Massa" Height="450" Width="600"
+        Title="Renomear Arquivos" Height="640" Width="900" WindowStartupLocation="CenterScreen"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize" ShowInTaskbar="True" Topmost="True">
 
@@ -26,7 +26,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="✎" FontSize="16" Foreground="{StaticResource AccentBrush}" Margin="0,0,10,0"/>
-                    <TextBlock Text="Renomeador em Massa" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                    <TextBlock Text="Renomear Arquivos" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
                 </StackPanel>
                 <Button Grid.Column="1" Content="✕" Click="CloseButton_Click" Style="{StaticResource IconButtonStyle}" FontSize="14"/>
             </Grid>
@@ -35,28 +35,28 @@
             <StackPanel Grid.Row="1" Margin="0,20,0,0">
                 <c:ProfileSelector x:Name="ProfileSelector" ToolName="rename" Margin="0,0,0,15"/>
                 
-                <Label Content="Pasta Raiz:" Foreground="{StaticResource PrimaryTextBrush}"/>
+                <Label Content="Pasta Raiz:"/>
                 <Grid>
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                     <TextBox x:Name="RootPathBox" IsReadOnly="True" Cursor="Arrow" Style="{StaticResource ModernTextBoxStyle}"/>
-                    <Button Grid.Column="1" Content="..." Width="40" Margin="5,0,0,0" Click="BrowseRoot_Click" Style="{StaticResource SecondaryButtonStyle}" Padding="0"/>
+                    <Button Grid.Column="1" Content="Procurar" Margin="5,0,0,0" Click="BrowseRoot_Click" Style="{StaticResource SecondaryButtonStyle}" />
                 </Grid>
 
                 <Grid Margin="0,15,0,0">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                        <Label Content="Texto Antigo:" Foreground="{StaticResource PrimaryTextBrush}"/>
+                        <Label Content="Texto Antigo:"/>
                         <TextBox x:Name="OldTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                        <Label Content="Texto Novo:" Foreground="{StaticResource PrimaryTextBrush}"/>
+                        <Label Content="Texto Novo:"/>
                         <TextBox x:Name="NewTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
                     </StackPanel>
                 </Grid>
 
                 <StackPanel Margin="0,15,0,0">
-                    <Label Content="Modo de Renomeação:" Foreground="{StaticResource PrimaryTextBrush}"/>
-                    <ComboBox x:Name="ModeCombo" SelectedIndex="0" Height="30" Background="#333333" Foreground="Black">
+                    <Label Content="Modo de Renomeação:"/>
+                    <ComboBox x:Name="ModeCombo" SelectedIndex="0">
                         <ComboBoxItem Content="Geral (Texto Simples)"/>
                         <ComboBoxItem Content="Namespace C# (Inteligente)"/>
                     </ComboBox>
@@ -65,20 +65,20 @@
                 <Grid Margin="0,15,0,0">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                        <Label Content="Include (Glob):" Foreground="{StaticResource PrimaryTextBrush}"/>
+                        <Label Content="Include (Glob):"/>
                         <TextBox x:Name="IncludeBox" Style="{StaticResource ModernTextBoxStyle}" ToolTip="Ex: *.cs, **/*.txt"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                        <Label Content="Exclude (Glob):" Foreground="{StaticResource PrimaryTextBrush}"/>
+                        <Label Content="Exclude (Glob):"/>
                         <TextBox x:Name="ExcludeBox" Style="{StaticResource ModernTextBoxStyle}" ToolTip="Ex: obj/*, bin/*"/>
                     </StackPanel>
                 </Grid>
                 
                 <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
-                    <CheckBox x:Name="BackupCheck" Content="Criar Backup" IsChecked="True" Foreground="#DDDDDD" VerticalContentAlignment="Center" Margin="0,0,15,0"/>
-                    <CheckBox x:Name="UndoLogCheck" Content="Log de Reversão" IsChecked="True" Foreground="#DDDDDD" VerticalContentAlignment="Center"/>
-                    <CheckBox x:Name="DryRunCheck" Content="Dry Run (Teste)" IsChecked="False" Foreground="#DDDDDD" VerticalContentAlignment="Center" Margin="15,0,0,0"/>
-                    <CheckBox x:Name="RememberSettingsCheck" Content="Lembrar" IsChecked="False" Foreground="#DDDDDD" VerticalContentAlignment="Center" Margin="15,0,0,0"/>
+                    <CheckBox x:Name="BackupCheck" Content="Criar Backup" IsChecked="True" Margin="0,0,15,0"/>
+                    <CheckBox x:Name="UndoLogCheck" Content="Log de Reversão" IsChecked="True"/>
+                    <CheckBox x:Name="DryRunCheck" Content="Dry Run (Teste)" IsChecked="False" Margin="15,0,0,0"/>
+                    <CheckBox x:Name="RememberSettingsCheck" Content="Lembrar" IsChecked="False" Margin="15,0,0,0"/>
                 </StackPanel>
                 
                 <c:RunSummaryControl x:Name="RunSummary" Margin="0,15,0,0"/>
