@@ -153,29 +153,29 @@
                                     <Button Style="{StaticResource ToolCardStyle}" Content="Notas Rápidas" 
                                             Tag="&#xE70B;" ToolTip="Anotações flutuantes always-on-top" Width="200" Click="OpenTool_Click" CommandParameter="Notes"/>
                                     
-                                    <Button Style="{StaticResource ToolCardStyle}" Content="Organizador" 
-                                            Tag="&#xE8B7;" ToolTip="Organiza arquivos por extensão/data" Width="200" Click="OpenTool_Click" CommandParameter="Organizer"/>
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Organizador de Arquivos" 
+                                            Tag="&#xE8B7;" ToolTip="Move/organiza por extensão/data conforme categorias" Width="200" Click="OpenTool_Click" CommandParameter="Organizer"/>
 
-                                    <Button Style="{StaticResource ToolCardStyle}" Content="Renomeador" 
-                                            Tag="&#xE8AC;" ToolTip="Renomeação em massa com Regex" Width="200" Click="OpenTool_Click" CommandParameter="Rename"/>
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Renomear Projeto .NET" 
+                                            Tag="&#xE8AC;" ToolTip="Renomeia projeto/solution e namespaces C# com backup" Width="200" Click="OpenTool_Click" CommandParameter="Rename"/>
 
-                                    <Button Style="{StaticResource ToolCardStyle}" Content="Snapshot" 
-                                            Tag="&#xE964;" ToolTip="Cria zip do projeto para backup" Width="200" Click="OpenTool_Click" CommandParameter="Snapshot"/>
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Snapshot do Projeto" 
+                                            Tag="&#xE964;" ToolTip="Gera ZIP do projeto com filtros" Width="200" Click="OpenTool_Click" CommandParameter="Snapshot"/>
 
-                                    <Button Style="{StaticResource ToolCardStyle}" Content="Divisor Imagens" 
-                                            Tag="&#xE91B;" ToolTip="Divide imagens em grid" Width="200" Click="OpenTool_Click" CommandParameter="ImageSplitter"/>
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Dividir Imagens" 
+                                            Tag="&#xE91B;" ToolTip="Divide imagens em grade configurável" Width="200" Click="OpenTool_Click" CommandParameter="ImageSplitter"/>
 
-                                    <Button Style="{StaticResource ToolCardStyle}" Content="Conversor UTF-8" 
-                                            Tag="&#xE8C5;" ToolTip="Corrige encoding de arquivos" Width="200" Click="OpenTool_Click" CommandParameter="Utf8Convert"/>
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Converter para UTF‑8" 
+                                            Tag="&#xE8C5;" ToolTip="Converte arquivos para UTF‑8 preservando conteúdo" Width="200" Click="OpenTool_Click" CommandParameter="Utf8Convert"/>
 
-                                    <Button Style="{StaticResource ToolCardStyle}" Content="Busca Texto" 
-                                            Tag="&#xE721;" ToolTip="Grep rápido em arquivos" Width="200" Click="OpenTool_Click" CommandParameter="SearchText"/>
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Buscar Texto em Arquivos" 
+                                            Tag="&#xE721;" ToolTip="Busca rápida com regex e filtros" Width="200" Click="OpenTool_Click" CommandParameter="SearchText"/>
 
-                                    <Button Style="{StaticResource ToolCardStyle}" Content="Migrations" 
-                                            Tag="&#xE7F8;" ToolTip="Helper para EF Core Migrations" Width="200" Click="OpenTool_Click" CommandParameter="Migrations"/>
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="EF Core Migrations" 
+                                            Tag="&#xE7F8;" ToolTip="Cria/aplica migrations em contextos EF Core" Width="200" Click="OpenTool_Click" CommandParameter="Migrations"/>
                                     
-                                    <Button Style="{StaticResource ToolCardStyle}" Content="Harvest" 
-                                            Tag="&#xE896;" ToolTip="Copia arquivos filtrados para output" Width="200" Click="OpenTool_Click" CommandParameter="Harvest"/>
+                                    <Button Style="{StaticResource ToolCardStyle}" Content="Coletor de Arquivos" 
+                                            Tag="&#xE896;" ToolTip="Copia arquivos filtrados para pasta de saída" Width="200" Click="OpenTool_Click" CommandParameter="Harvest"/>
 
                                     <Button Style="{StaticResource ToolCardStyle}" Content="Túnel SSH" 
                                             Tag="&#xE753;" ToolTip="Gerenciador de túneis SSH" Width="200" Click="OpenTool_Click" CommandParameter="SSHTunnel"/>

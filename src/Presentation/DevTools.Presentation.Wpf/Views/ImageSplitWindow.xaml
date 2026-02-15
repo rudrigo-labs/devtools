@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Divisor de Imagens" Height="640" Width="900" WindowStartupLocation="CenterScreen"
+        Title="Dividir Imagens" Height="640" Width="900" WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -30,12 +30,14 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="✂" FontSize="16" Foreground="{StaticResource AccentBrush}" Margin="0,0,10,0"/>
-                    <TextBlock Text="Divisor de Imagens" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                    <TextBlock Text="Dividir Imagens" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
                 </StackPanel>
-                <Button Grid.Column="1" Content="✕" Click="CloseButton_Click" Style="{StaticResource IconButtonStyle}" FontSize="14"/>
+                <Button Grid.Column="1" Content="?" ToolTip="Divide imagens em grade configurável." Style="{StaticResource IconButtonStyle}" FontSize="14" Margin="0,0,5,0"/>
+                <Button Grid.Column="2" Content="✕" Click="CloseButton_Click" Style="{StaticResource IconButtonStyle}" FontSize="14"/>
             </Grid>
 
             <!-- Content -->

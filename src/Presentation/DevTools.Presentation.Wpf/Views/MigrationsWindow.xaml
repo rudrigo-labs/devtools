@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:components="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Migrations Helper" Height="640" Width="900" WindowStartupLocation="CenterScreen"
+        Title="EF Core Migrations" Height="640" Width="900" WindowStartupLocation="CenterScreen"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="CanResizeWithGrip">
 
@@ -25,16 +25,22 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="15,10">
-                    <TextBlock Text="Migrations Helper" 
+                    <TextBlock Text="EF Core Migrations" 
                                FontSize="16" 
                                FontWeight="SemiBold" 
                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                 </StackPanel>
 
-                <Button Grid.Column="1" Click="Close_Click" 
+                <Button Grid.Column="1" 
+                        Style="{DynamicResource IconButtonStyle}" 
+                        Content="?" 
+                        ToolTip="Cria/aplica migrations para contextos EF Core específicos."
+                        Margin="0,0,5,0"/>
+                <Button Grid.Column="2" Click="Close_Click" 
                         Style="{DynamicResource IconButtonStyle}" 
                         Content="&#xE8BB;" 
                         FontFamily="Segoe MDL2 Assets"

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:components="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Busca de Texto" Height="640" Width="900" WindowStartupLocation="CenterScreen"
+        Title="Buscar Texto em Arquivos" Height="640" Width="900" WindowStartupLocation="CenterScreen"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="CanResizeWithGrip">
 
@@ -25,16 +25,22 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="15,10">
-                    <TextBlock Text="Busca de Texto" 
+                    <TextBlock Text="Buscar Texto em Arquivos" 
                                FontSize="16" 
                                FontWeight="SemiBold" 
                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                 </StackPanel>
 
-                <Button Grid.Column="1" Click="Close_Click" 
+                <Button Grid.Column="1"
+                        Style="{DynamicResource IconButtonStyle}" 
+                        Content="?" 
+                        ToolTip="Busca rápida com regex opcional e filtros de inclusão/exclusão."
+                        Margin="0,0,5,0"/>
+                <Button Grid.Column="2" Click="Close_Click" 
                         Style="{DynamicResource IconButtonStyle}" 
                         Content="&#xE8BB;" 
                         FontFamily="Segoe MDL2 Assets"

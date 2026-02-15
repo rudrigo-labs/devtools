@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Ferramenta Harvest" Height="640" Width="900" WindowStartupLocation="CenterScreen"
+        Title="Coletor de Arquivos" Height="640" Width="900" WindowStartupLocation="CenterScreen"
         Style="{StaticResource ModernWindowStyle}">
 
     <Border Background="{StaticResource WindowBackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="0">
@@ -23,14 +23,20 @@
             <!-- Header (Draggable) -->
             <Border Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown" CornerRadius="12,12,0,0">
                 <Grid Margin="20,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text=">_" FontFamily="Consolas" FontSize="18" Foreground="{StaticResource AccentBrush}" Margin="0,0,10,0"/>
-                        <TextBlock Text="Harvest" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource PrimaryTextBrush}"/>
-                        <TextBlock Text="Scanner de Projetos" FontSize="18" FontWeight="Light" Foreground="{StaticResource SecondaryTextBrush}" Margin="5,0,0,0"/>
+                        <TextBlock Text="Coletor de Arquivos" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource PrimaryTextBrush}"/>
                     </StackPanel>
                     
-                    <!-- Close Button -->
-                    <Button HorizontalAlignment="Right" VerticalAlignment="Center" Click="Cancel_Click"
+                    <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Style="{StaticResource IconButtonStyle}" Content="?" FontSize="14"
+                            ToolTip="Copia arquivos filtrados por regras para pasta de saída" Margin="0,0,5,0"/>
+                    <Button Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Click="Cancel_Click"
                             Style="{StaticResource IconButtonStyle}" Content="✕" FontSize="14"/>
                 </Grid>
             </Border>
