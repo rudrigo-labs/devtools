@@ -138,30 +138,9 @@ public partial class MigrationsWindow : Window
 
     private void Execute_Click(object sender, RoutedEventArgs e)
     {
-        var root = ProjectSelector.SelectedPath;
-        var startup = StartupSelector.SelectedPath;
-        
-        if (string.IsNullOrWhiteSpace(root) || string.IsNullOrWhiteSpace(startup))
+        if (!ValidateInputs(out var validationError, out var action, out var provider, out var root, out var startup, out var migrationName))
         {
-            System.Windows.MessageBox.Show("Selecione os diretórios do Projeto e do Startup Project.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
-        }
-
-        var actionTag = (ActionCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-        var action = actionTag == "Add" ? MigrationsAction.AddMigration : MigrationsAction.UpdateDatabase;
-
-        var providerTag = (ProviderCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-        var provider = providerTag switch
-        {
-            "Sqlite" => DatabaseProvider.Sqlite,
-            _ => DatabaseProvider.SqlServer
-        };
-
-
-        var migrationName = MigrationNameInput.Text;
-        if (action == MigrationsAction.AddMigration && string.IsNullOrWhiteSpace(migrationName))
-        {
-            System.Windows.MessageBox.Show("Informe o nome da Migration.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
+            UiMessageService.ShowError(validationError, "Erro de Validação");
             return;
         }
 
@@ -204,5 +183,49 @@ public partial class MigrationsWindow : Window
                 return "Falha ao executar comando EF Core.";
             }
         });
+    }
+
+    private bool ValidateInputs(
+        out string errorMessage,
+        out MigrationsAction action,
+        out DatabaseProvider provider,
+        out string root,
+        out string startup,
+        out string migrationName)
+    {
+        root = ProjectSelector.SelectedPath;
+        startup = StartupSelector.SelectedPath;
+        migrationName = MigrationNameInput.Text;
+
+        var actionTag = (ActionCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+        action = actionTag == "Add" ? MigrationsAction.AddMigration : MigrationsAction.UpdateDatabase;
+
+        var providerTag = (ProviderCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+        provider = providerTag switch
+        {
+            "Sqlite" => DatabaseProvider.Sqlite,
+            _ => DatabaseProvider.SqlServer
+        };
+
+        if (string.IsNullOrWhiteSpace(root) || string.IsNullOrWhiteSpace(startup))
+        {
+            errorMessage = "Selecione os diretórios do Projeto e do Startup Project.";
+            return false;
+        }
+
+        if (action == MigrationsAction.AddMigration && string.IsNullOrWhiteSpace(migrationName))
+        {
+            errorMessage = "Informe o nome da Migration.";
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(DbContextInput.Text))
+        {
+            errorMessage = "Informe o nome completo do DbContext.";
+            return false;
+        }
+
+        errorMessage = string.Empty;
+        return true;
     }
 }

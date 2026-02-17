@@ -84,7 +84,7 @@ public partial class SshTunnelWindow : Window
             var profile = BuildProfileFromUi();
             if (string.IsNullOrWhiteSpace(profile.SshHost))
             {
-                System.Windows.MessageBox.Show("Host SSH é obrigatório.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                UiMessageService.ShowError("Host SSH é obrigatório.", "Erro");
                 return;
             }
 
@@ -95,10 +95,10 @@ public partial class SshTunnelWindow : Window
             {
                 await _tunnelService.StartAsync(profile);
             }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Erro ao iniciar túnel: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+        catch (Exception ex)
+        {
+            UiMessageService.ShowError("Erro ao iniciar túnel SSH.", "Erro ao iniciar túnel", ex);
+        }
             finally
             {
                 ToggleTunnelButton.IsEnabled = true;

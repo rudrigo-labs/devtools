@@ -43,6 +43,8 @@ public sealed class JobManager
             StartedAt = DateTimeOffset.Now
         };
 
+        AppLogger.Info($"[Job] Iniciando: {jobName} (Id: {jobId})");
+
         _ctsByJobId[jobId] = cts;
 
         RunOnUi(() => Jobs.Insert(0, job));
@@ -141,6 +143,9 @@ public sealed class JobManager
             // se concluiu com sucesso e nunca recebeu percent, fecha em 100
             if (success && job.ProgressPercent < 100)
                 job.ProgressPercent = 100;
+
+            var statusLabel = canceled ? "Cancelado" : success ? "Sucesso" : "Erro";
+            AppLogger.Info($"[Job] Finalizado ({statusLabel}): {job.Name} (Id: {job.Id}) - {message}");
 
             // Notifica assinantes (ex: Tray)
             OnJobCompleted?.Invoke(message, success);

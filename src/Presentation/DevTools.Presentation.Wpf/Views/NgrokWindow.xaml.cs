@@ -106,7 +106,8 @@ public partial class NgrokWindow : Window
                     
                     if (!result.IsSuccess)
                     {
-                        System.Windows.MessageBox.Show($"Falha ao iniciar: {string.Join(", ", result.Errors.Select(x => x.Message))}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        var errorSummary = string.Join(", ", result.Errors.Select(x => x.Message));
+                        UiMessageService.ShowError($"Falha ao iniciar: {errorSummary}", "Erro ao iniciar Ngrok");
                     }
                     else
                     {
@@ -118,13 +119,13 @@ public partial class NgrokWindow : Window
         }
         else
         {
-            System.Windows.MessageBox.Show("Porta inválida!", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+            UiMessageService.ShowError("Porta inválida!", "Erro");
         }
     }
 
     private async void KillAll_Click(object sender, RoutedEventArgs e)
     {
-        if (System.Windows.MessageBox.Show("Isso fechará TODOS os túneis Ngrok abertos. Continuar?", "Confirmar", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+        if (UiMessageService.Confirm("Isso fechará TODOS os túneis Ngrok abertos. Continuar?", "Confirmar"))
         {
             var request = new NgrokRequest(NgrokAction.KillAll);
             await _engine.ExecuteAsync(request);

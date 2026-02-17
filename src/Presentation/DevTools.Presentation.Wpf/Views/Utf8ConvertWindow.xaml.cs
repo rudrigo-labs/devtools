@@ -25,7 +25,7 @@ public partial class Utf8ConvertWindow : Window
         ProfileSelector.ProfileLoaded += LoadProfile;
 
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastUtf8RootPath))
-            RootPathBox.Text = _settingsService.Settings.LastUtf8RootPath;
+            RootPathSelector.SelectedPath = _settingsService.Settings.LastUtf8RootPath;
 
         /* Position handled by TrayService
         if (_settingsService.Settings.Utf8WindowTop.HasValue)
@@ -58,7 +58,7 @@ public partial class Utf8ConvertWindow : Window
     private Dictionary<string, string> GetCurrentOptions()
     {
         var options = new Dictionary<string, string>();
-        options["root"] = RootPathBox.Text;
+        options["root"] = RootPathSelector.SelectedPath;
         options["recursive"] = (RecursiveCheck.IsChecked ?? true).ToString().ToLowerInvariant();
         options["backup"] = (BackupCheck.IsChecked ?? true).ToString().ToLowerInvariant();
         options["output-bom"] = (BomCheck.IsChecked ?? true).ToString().ToLowerInvariant();
@@ -67,7 +67,7 @@ public partial class Utf8ConvertWindow : Window
 
     private void LoadProfile(ToolProfile profile)
     {
-        if (profile.Options.TryGetValue("root", out var root)) RootPathBox.Text = root;
+        if (profile.Options.TryGetValue("root", out var root)) RootPathSelector.SelectedPath = root;
         
         if (profile.Options.TryGetValue("recursive", out var recursive)) 
             RecursiveCheck.IsChecked = bool.TryParse(recursive, out var r) ? r : true;
@@ -86,35 +86,23 @@ public partial class Utf8ConvertWindow : Window
 
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
 
-    private void BrowseRoot_Click(object sender, RoutedEventArgs e)
-    {
-        using var dlg = new System.Windows.Forms.FolderBrowserDialog
-        {
-            Description = "Selecione a Pasta Raiz",
-            UseDescriptionForTitle = true,
-            ShowNewFolderButton = true
-        };
-
-        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dlg.SelectedPath))
-        {
-            RootPathBox.Text = dlg.SelectedPath;
-            _settingsService.Settings.LastUtf8RootPath = dlg.SelectedPath;
-            _settingsService.Save();
-        }
-    }
+    private void BrowseRoot_Click(object sender, RoutedEventArgs e) { }
 
     private void ProcessButton_Click(object sender, RoutedEventArgs e)
     {
-        var root = RootPathBox.Text;
-        if (string.IsNullOrWhiteSpace(root))
+        if (!ValidateInputs(out var errorMessage))
         {
-            System.Windows.MessageBox.Show("Pasta Raiz é obrigatória.", "Dados Incompletos", MessageBoxButton.OK, MessageBoxImage.Warning);
+            UiMessageService.ShowError(errorMessage, "Erro de Validação");
             return;
         }
 
+        var root = RootPathSelector.SelectedPath;
         var recursive = RecursiveCheck.IsChecked ?? true;
         var backup = BackupCheck.IsChecked ?? true;
         var bom = BomCheck.IsChecked ?? true;
+
+        _settingsService.Settings.LastUtf8RootPath = root;
+        _settingsService.Save();
 
         Close();
 
@@ -134,5 +122,17 @@ public partial class Utf8ConvertWindow : Window
                 ? $"Conversão concluída! {result.Value?.Summary.Converted ?? 0} arquivos convertidos."
                 : $"Falha na conversão: {string.Join(", ", result.Errors.Select(x => x.Message))}";
         });
+    }
+
+    private bool ValidateInputs(out string errorMessage)
+    {
+        if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
+        {
+            errorMessage = "Pasta Raiz é obrigatória.";
+            return false;
+        }
+
+        errorMessage = string.Empty;
+        return true;
     }
 }

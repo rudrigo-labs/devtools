@@ -39,11 +39,7 @@
                 <c:ProfileSelector x:Name="ProfileSelector" ToolName="rename" Margin="0,0,0,15"/>
                 
                 <Label Content="Pasta Raiz:"/>
-                <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                    <TextBox x:Name="RootPathBox" IsReadOnly="True" Cursor="Arrow" Style="{StaticResource ModernTextBoxStyle}"/>
-                    <Button Grid.Column="1" Content="Procurar" Margin="5,0,0,0" Click="BrowseRoot_Click" Style="{StaticResource SecondaryButtonStyle}" />
-                </Grid>
+                <c:PathSelector x:Name="RootPathSelector" Title="Pasta Raiz" IsFolderPicker="True" />
 
                 <Grid Margin="0,15,0,0">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>

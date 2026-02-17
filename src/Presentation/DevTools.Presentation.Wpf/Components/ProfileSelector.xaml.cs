@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using DevTools.Core.Configuration;
 using DevTools.Core.Models;
+using DevTools.Presentation.Wpf.Services;
 
 namespace DevTools.Presentation.Wpf.Components;
 
@@ -52,7 +53,7 @@ public partial class ProfileSelector : System.Windows.Controls.UserControl
         }
         catch (Exception ex)
         {
-            System.Windows.MessageBox.Show($"Falha ao carregar perfis: {ex.Message}", "Erro ao carregar perfis", MessageBoxButton.OK, MessageBoxImage.Error);
+            UiMessageService.ShowError("Falha ao carregar perfis.", "Erro ao carregar perfis", ex);
         }
     }
     
@@ -71,7 +72,7 @@ public partial class ProfileSelector : System.Windows.Controls.UserControl
         var name = ProfileCombo.Text;
         if (string.IsNullOrWhiteSpace(name))
         {
-            System.Windows.MessageBox.Show("Digite um nome para o perfil.", "Nome necessario", MessageBoxButton.OK, MessageBoxImage.Warning);
+            UiMessageService.ShowError("Digite um nome para o perfil.", "Nome necessario");
             return;
         }
         
@@ -96,13 +97,13 @@ public partial class ProfileSelector : System.Windows.Controls.UserControl
                         }
                     }
 
-                    System.Windows.MessageBox.Show($"Perfil '{name}' salvo com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                    UiMessageService.ShowInfo($"Perfil '{name}' salvo com sucesso.", "Sucesso");
                 }
             }
         }
         catch (Exception ex)
         {
-            System.Windows.MessageBox.Show($"Falha ao salvar perfil: {ex.Message}", "Erro ao salvar", MessageBoxButton.OK, MessageBoxImage.Error);
+            UiMessageService.ShowError("Falha ao salvar perfil.", "Erro ao salvar", ex);
         }
     }
     
@@ -112,7 +113,7 @@ public partial class ProfileSelector : System.Windows.Controls.UserControl
 
         if (ProfileCombo.SelectedItem is ToolProfile profile)
         {
-            if (System.Windows.MessageBox.Show($"Tem certeza que deseja excluir o perfil '{profile.Name}'?", "Confirmar", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            if (UiMessageService.Confirm($"Tem certeza que deseja excluir o perfil '{profile.Name}'?", "Confirmar"))
             {
                 try
                 {
@@ -121,7 +122,7 @@ public partial class ProfileSelector : System.Windows.Controls.UserControl
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show($"Falha ao excluir perfil: {ex.Message}", "Erro ao excluir", MessageBoxButton.OK, MessageBoxImage.Error);
+                    UiMessageService.ShowError("Falha ao excluir perfil.", "Erro ao excluir", ex);
                 }
             }
         }

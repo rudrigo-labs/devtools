@@ -7,10 +7,10 @@ namespace DevTools.Presentation.Wpf.Components;
 public partial class PathSelector : System.Windows.Controls.UserControl
 {
     public static readonly DependencyProperty TitleProperty =
-        DependencyProperty.Register("Title", typeof(string), typeof(PathSelector), new PropertyMetadata("Path"));
+        DependencyProperty.Register("Title", typeof(string), typeof(PathSelector), new PropertyMetadata("Path", OnTitleChanged));
 
     public static readonly DependencyProperty SelectedPathProperty =
-        DependencyProperty.Register("SelectedPath", typeof(string), typeof(PathSelector), new PropertyMetadata(string.Empty));
+        DependencyProperty.Register("SelectedPath", typeof(string), typeof(PathSelector), new PropertyMetadata(string.Empty, OnSelectedPathChanged));
 
     public static readonly DependencyProperty IsFolderPickerProperty =
         DependencyProperty.Register("IsFolderPicker", typeof(bool), typeof(PathSelector), new PropertyMetadata(true));
@@ -36,8 +36,18 @@ public partial class PathSelector : System.Windows.Controls.UserControl
     public PathSelector()
     {
         InitializeComponent();
-        TitleBlock.DataContext = this;
-        PathInput.DataContext = this;
+    }
+
+    private static void OnSelectedPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (PathSelector)d;
+        control.PathInput.Text = e.NewValue as string ?? string.Empty;
+    }
+
+    private static void OnTitleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (PathSelector)d;
+        control.TitleBlock.Text = e.NewValue as string ?? "Path";
     }
 
     private void Browse_Click(object sender, RoutedEventArgs e)

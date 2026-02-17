@@ -92,13 +92,24 @@ public partial class DashboardWindow : Window
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
-        Hide(); // Apenas esconde, não fecha a aplicação
+        if (_trayService.HasOpenToolWindow)
+        {
+            return;
+        }
+
+        UiMessageService.ShowInfo("O DevTools vai continuar em execução na bandeja do sistema.", "Minimizado para bandeja");
+        Hide();
     }
 
     private void DashboardWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        // Impede que o fechamento encerre a aplicação; apenas oculta na bandeja
         e.Cancel = true;
+        if (_trayService.HasOpenToolWindow)
+        {
+            return;
+        }
+
+        UiMessageService.ShowInfo("O DevTools vai continuar em execução na bandeja do sistema.", "Minimizado para bandeja");
         Hide();
     }
 
@@ -165,7 +176,7 @@ public partial class DashboardWindow : Window
             SshHost.Text = profile.SshHost;
             SshPort.Text = profile.SshPort.ToString();
             SshUser.Text = profile.SshUser;
-            SshKeyFile.Text = profile.IdentityFile;
+            SshKeyFileSelector.SelectedPath = profile.IdentityFile;
             LocalBind.Text = profile.LocalBindHost;
             LocalPort.Text = profile.LocalPort.ToString();
             RemoteHost.Text = profile.RemoteHost;
@@ -188,7 +199,7 @@ public partial class DashboardWindow : Window
         _selectedProfile.SshHost = SshHost.Text;
         int.TryParse(SshPort.Text, out int sshPort); _selectedProfile.SshPort = sshPort;
         _selectedProfile.SshUser = SshUser.Text;
-        _selectedProfile.IdentityFile = SshKeyFile.Text;
+        _selectedProfile.IdentityFile = SshKeyFileSelector.SelectedPath;
         _selectedProfile.LocalBindHost = LocalBind.Text;
         int.TryParse(LocalPort.Text, out int localPort); _selectedProfile.LocalPort = localPort;
         _selectedProfile.RemoteHost = RemoteHost.Text;
@@ -196,14 +207,14 @@ public partial class DashboardWindow : Window
 
         _configService.SaveSection("Ssh", _currentSshConfig);
         SshProfilesList.Items.Refresh();
-        System.Windows.MessageBox.Show("Configuração salva com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        UiMessageService.ShowInfo("Configuração salva com sucesso!", "Sucesso");
     }
 
     private void DeleteSshProfile_Click(object sender, RoutedEventArgs e)
     {
         if (_selectedProfile == null) return;
 
-        if (System.Windows.MessageBox.Show($"Tem certeza que deseja excluir o perfil '{_selectedProfile.Name}'?", "Confirmar Exclusão", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+        if (UiMessageService.Confirm($"Tem certeza que deseja excluir o perfil '{_selectedProfile.Name}'?", "Confirmar Exclusão"))
         {
             _currentSshConfig.Profiles.Remove(_selectedProfile);
             _configService.SaveSection("Ssh", _currentSshConfig);
@@ -211,19 +222,7 @@ public partial class DashboardWindow : Window
         }
     }
 
-    private void BrowseSshKey_Click(object sender, RoutedEventArgs e)
-    {
-        var dlg = new Microsoft.Win32.OpenFileDialog
-        {
-            DefaultExt = ".pem",
-            Filter = "Key Files (*.pem;*.ppk)|*.pem;*.ppk|All Files (*.*)|*.*"
-        };
-
-        if (dlg.ShowDialog() == true)
-        {
-            SshKeyFile.Text = dlg.FileName;
-        }
-    }
+    private void BrowseSshKey_Click(object sender, RoutedEventArgs e) { }
 
     // --- Harvest Settings ---
 
@@ -288,11 +287,11 @@ public partial class DashboardWindow : Window
             double.TryParse(HarvestWeightDeadCode.Text, out double deadCode); _currentHarvestConfig.Weights.DeadCodePenalty = deadCode;
 
         _configService.SaveSection("Harvest", _currentHarvestConfig);
-        System.Windows.MessageBox.Show("Configuração do Harvest salva com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        UiMessageService.ShowInfo("Configuração do Harvest salva com sucesso!", "Sucesso");
         }
         catch (Exception ex)
         {
-            System.Windows.MessageBox.Show($"Erro ao salvar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            UiMessageService.ShowError("Erro ao salvar configuração do Harvest.", "Erro ao salvar", ex);
         }
     }
 
@@ -356,14 +355,14 @@ public partial class DashboardWindow : Window
 
         _configService.SaveSection("Organizer", _currentOrganizerConfig);
         OrganizerCategoriesList.Items.Refresh();
-        System.Windows.MessageBox.Show("Categoria salva!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        UiMessageService.ShowInfo("Categoria salva!", "Sucesso");
     }
 
     private void DeleteOrganizerCategory_Click(object sender, RoutedEventArgs e)
     {
         if (_selectedCategory == null) return;
         
-        if (System.Windows.MessageBox.Show($"Excluir categoria '{_selectedCategory.Name}'?", "Confirmar", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+        if (UiMessageService.Confirm($"Excluir categoria '{_selectedCategory.Name}'?", "Confirmar"))
         {
             _currentOrganizerConfig.Categories.Remove(_selectedCategory);
             _configService.SaveSection("Organizer", _currentOrganizerConfig);
@@ -386,21 +385,21 @@ public partial class DashboardWindow : Window
     {
         _currentMigrationsConfig = _configService.GetSection<MigrationsSettings>("Migrations");
         
-        MigRootPathInput.Text = _currentMigrationsConfig.RootPath;
-        MigStartupPathInput.Text = _currentMigrationsConfig.StartupProjectPath;
+        MigRootPathSelector.SelectedPath = _currentMigrationsConfig.RootPath;
+        MigStartupPathSelector.SelectedPath = _currentMigrationsConfig.StartupProjectPath;
         MigContextInput.Text = _currentMigrationsConfig.DbContextFullName;
         MigArgsInput.Text = _currentMigrationsConfig.AdditionalArgs;
     }
 
     private void SaveMigrationsSettings_Click(object sender, RoutedEventArgs e)
     {
-        _currentMigrationsConfig.RootPath = MigRootPathInput.Text;
-        _currentMigrationsConfig.StartupProjectPath = MigStartupPathInput.Text;
+        _currentMigrationsConfig.RootPath = MigRootPathSelector.SelectedPath;
+        _currentMigrationsConfig.StartupProjectPath = MigStartupPathSelector.SelectedPath;
         _currentMigrationsConfig.DbContextFullName = MigContextInput.Text;
         _currentMigrationsConfig.AdditionalArgs = MigArgsInput.Text;
 
         _configService.SaveSection("Migrations", _currentMigrationsConfig);
-        System.Windows.MessageBox.Show("Configurações do Migrations salvas!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        UiMessageService.ShowInfo("Configurações do Migrations salvas!", "Sucesso");
     }
 
     // --- Ngrok Settings ---
@@ -417,18 +416,18 @@ public partial class DashboardWindow : Window
         _currentNgrokConfig = _configService.GetSection<NgrokSettings>("Ngrok");
         _currentNgrokConfig.Normalize();
 
-        NgrokExePathInput.Text = _currentNgrokConfig.ExecutablePath;
+        NgrokExeSelector.SelectedPath = _currentNgrokConfig.ExecutablePath;
         NgrokAuthTokenInput.Text = _currentNgrokConfig.AuthToken;
         NgrokArgsInput.Text = _currentNgrokConfig.AdditionalArgs;
     }
 
     private void SaveNgrokSettings_Click(object sender, RoutedEventArgs e)
     {
-        _currentNgrokConfig.ExecutablePath = NgrokExePathInput.Text;
+        _currentNgrokConfig.ExecutablePath = NgrokExeSelector.SelectedPath;
         _currentNgrokConfig.AuthToken = NgrokAuthTokenInput.Text;
         _currentNgrokConfig.AdditionalArgs = NgrokArgsInput.Text;
 
         _configService.SaveSection("Ngrok", _currentNgrokConfig);
-        System.Windows.MessageBox.Show("Configurações do Ngrok salvas!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        UiMessageService.ShowInfo("Configurações do Ngrok salvas!", "Sucesso");
     }
 }

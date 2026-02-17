@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
@@ -21,6 +21,9 @@
   <ItemGroup>
     <ProjectReference Include="..\\..\\Core\\DevTools.Core\\DevTools.Core.csproj" />
     <ProjectReference Include="..\\DevTools.Rename\\DevTools.Rename.csproj" />
+    <ProjectReference Include="..\\DevTools.Organizer\\DevTools.Organizer.csproj" />
+    <ProjectReference Include="..\\DevTools.Harvest\\DevTools.Harvest.csproj" />
+    <ProjectReference Include="..\\..\\Presentation\\DevTools.Presentation.Wpf\\DevTools.Presentation.Wpf.csproj" />
   </ItemGroup>
 
 </Project>

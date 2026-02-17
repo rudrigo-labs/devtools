@@ -25,7 +25,7 @@ public partial class RenameWindow : Window
         ProfileSelector.ProfileLoaded += LoadProfile;
 
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastRenameRootPath))
-            RootPathBox.Text = _settingsService.Settings.LastRenameRootPath;
+            RootPathSelector.SelectedPath = _settingsService.Settings.LastRenameRootPath;
 
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastRenameInclude))
             IncludeBox.Text = _settingsService.Settings.LastRenameInclude;
@@ -74,7 +74,7 @@ public partial class RenameWindow : Window
     private Dictionary<string, string> GetCurrentOptions()
     {
         var options = new Dictionary<string, string>();
-        options["root"] = RootPathBox.Text;
+        options["root"] = RootPathSelector.SelectedPath;
         options["old-text"] = OldTextBox.Text;
         options["new-text"] = NewTextBox.Text;
         options["mode"] = ModeCombo.SelectedIndex == 1 ? "namespace" : "general";
@@ -89,7 +89,7 @@ public partial class RenameWindow : Window
 
     private void LoadProfile(ToolProfile profile)
     {
-        if (profile.Options.TryGetValue("root", out var root)) RootPathBox.Text = root;
+        if (profile.Options.TryGetValue("root", out var root)) RootPathSelector.SelectedPath = root;
         if (profile.Options.TryGetValue("old-text", out var oldText)) OldTextBox.Text = oldText;
         if (profile.Options.TryGetValue("new-text", out var newText)) NewTextBox.Text = newText;
         
@@ -109,33 +109,19 @@ public partial class RenameWindow : Window
             UndoLogCheck.IsChecked = bool.TryParse(undo, out var u) ? u : true;
     }
 
-    private void BrowseRoot_Click(object sender, RoutedEventArgs e)
-    {
-        using var dlg = new System.Windows.Forms.FolderBrowserDialog
-        {
-            Description = "Selecione a Pasta Raiz",
-            UseDescriptionForTitle = true,
-            ShowNewFolderButton = true
-        };
-
-        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dlg.SelectedPath))
-        {
-            RootPathBox.Text = dlg.SelectedPath;
-        }
-    }
+    private void BrowseRoot_Click(object sender, RoutedEventArgs e) { }
 
     private async void ProcessButton_Click(object sender, RoutedEventArgs e)
     {
-        var root = RootPathBox.Text;
-        var oldText = OldTextBox.Text;
-        var newText = NewTextBox.Text;
-
-        if (string.IsNullOrWhiteSpace(root) || string.IsNullOrEmpty(oldText))
+        if (!ValidateInputs(out var errorMessage))
         {
-            System.Windows.MessageBox.Show("Pasta Raiz e Texto Antigo são obrigatórios.", "Dados Incompletos", MessageBoxButton.OK, MessageBoxImage.Warning);
+            UiMessageService.ShowError(errorMessage, "Erro de Validação");
             return;
         }
 
+        var root = RootPathSelector.SelectedPath;
+        var oldText = OldTextBox.Text;
+        var newText = NewTextBox.Text;
         var mode = ModeCombo.SelectedIndex == 1 ? RenameMode.NamespaceOnly : RenameMode.General;
         var backup = BackupCheck.IsChecked ?? true;
         var undo = UndoLogCheck.IsChecked ?? true;
@@ -178,11 +164,29 @@ public partial class RenameWindow : Window
         }
         catch (Exception ex)
         {
-             System.Windows.MessageBox.Show($"Erro crítico ao executar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            UiMessageService.ShowError("Erro crítico ao executar renomeação.", "Erro na ferramenta Rename", ex);
         }
         finally
         {
             IsEnabled = true;
         }
+    }
+
+    private bool ValidateInputs(out string errorMessage)
+    {
+        if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
+        {
+            errorMessage = "Pasta Raiz é obrigatória.";
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(OldTextBox.Text))
+        {
+            errorMessage = "Texto Antigo é obrigatório.";
+            return false;
+        }
+
+        errorMessage = string.Empty;
+        return true;
     }
 }

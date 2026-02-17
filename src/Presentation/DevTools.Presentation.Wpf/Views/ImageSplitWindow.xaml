@@ -47,25 +47,11 @@
 
                 <!-- Input File -->
                 <Label Content="Imagem de Entrada:"/>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="InputPathBox" IsReadOnly="True" Cursor="Arrow" Style="{StaticResource ModernTextBoxStyle}"/>
-                    <Button Grid.Column="1" Content="Procurar" Margin="5,0,0,0" Click="BrowseInput_Click" Style="{StaticResource SecondaryButtonStyle}"/>
-                </Grid>
+                <c:PathSelector x:Name="InputPathSelector" Title="Imagem de Entrada" IsFolderPicker="False" />
 
                 <!-- Output Directory -->
                 <Label Content="Pasta de Saída (Opcional - Padrão: Mesma da Entrada):"/>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="OutputPathBox" IsReadOnly="True" Cursor="Arrow" Style="{StaticResource ModernTextBoxStyle}"/>
-                    <Button Grid.Column="1" Content="Procurar" Margin="5,0,0,0" Click="BrowseOutput_Click" Style="{StaticResource SecondaryButtonStyle}"/>
-                </Grid>
+                <c:PathSelector x:Name="OutputPathSelector" Title="Pasta de Saída" IsFolderPicker="True" />
 
                 <!-- Settings -->
                 <Grid Margin="0,15,0,0">

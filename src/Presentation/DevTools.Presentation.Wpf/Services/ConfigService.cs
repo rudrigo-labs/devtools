@@ -26,28 +26,38 @@ public class ConfigService
 
     public bool IsConfigured()
     {
-        // Simple validation: File must exist and have valid JSON content
         if (!File.Exists(_configPath))
+        {
+            AppLogger.Error($"Config file not found at '{_configPath}'.");
             return false;
+        }
 
         try
         {
             var content = File.ReadAllText(_configPath);
             if (string.IsNullOrWhiteSpace(content))
+            {
+                AppLogger.Error($"Config file '{_configPath}' is empty.");
                 return false;
+            }
 
-            JsonDocument.Parse(content); // Just validates JSON syntax
+            JsonDocument.Parse(content);
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            AppLogger.Error($"Failed to read or parse config file '{_configPath}'.", ex);
             return false;
         }
     }
 
     public T GetSection<T>(string sectionName) where T : new()
     {
-        if (!File.Exists(_configPath)) return new T();
+        if (!File.Exists(_configPath))
+        {
+            AppLogger.Error($"Config file not found when reading section '{sectionName}'. Path: '{_configPath}'.");
+            return new T();
+        }
 
         try
         {
@@ -57,10 +67,11 @@ public class ConfigService
             {
                 return JsonSerializer.Deserialize<T>(section.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new T();
             }
+            AppLogger.Error($"Config section '{sectionName}' not found in '{_configPath}'.");
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore errors
+            AppLogger.Error($"Failed to read config section '{sectionName}' from '{_configPath}'.", ex);
         }
         return new T();
     }
@@ -77,7 +88,10 @@ public class ConfigService
                 var json = File.ReadAllText(_configPath);
                 root = JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, object>>(json) ?? new();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                AppLogger.Error($"Failed to read existing config file '{_configPath}' before saving section '{sectionName}'.", ex);
+            }
         }
 
         // Update section
@@ -154,9 +168,9 @@ public class ConfigService
             var json = JsonSerializer.Serialize(defaultContent, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(_configPath, json);
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore write errors
+            AppLogger.Error($"Failed to create default config file at '{_configPath}'.", ex);
         }
     }
 }

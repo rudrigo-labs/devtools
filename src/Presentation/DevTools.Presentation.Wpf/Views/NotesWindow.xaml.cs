@@ -100,7 +100,7 @@ namespace DevTools.Presentation.Wpf.Views
         {
             if (string.IsNullOrWhiteSpace(NoteTitle.Text))
             {
-                System.Windows.MessageBox.Show("O título é obrigatório.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                UiMessageService.ShowError("O título é obrigatório.", "Erro");
                 return;
             }
 
@@ -122,7 +122,8 @@ namespace DevTools.Presentation.Wpf.Views
             }
             else
             {
-                System.Windows.MessageBox.Show($"Erro ao salvar: {result.Errors.FirstOrDefault()?.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                var error = result.Errors.FirstOrDefault()?.Message ?? "Erro desconhecido.";
+                UiMessageService.ShowError($"Erro ao salvar: {error}", "Erro ao salvar nota");
             }
         }
 
@@ -145,11 +146,12 @@ namespace DevTools.Presentation.Wpf.Views
                 var result = await _engine.ExecuteAsync(request);
                 if (result.IsSuccess)
                 {
-                    System.Windows.MessageBox.Show("Backup exportado com sucesso!", "Exportar", MessageBoxButton.OK, MessageBoxImage.Information);
+                    UiMessageService.ShowInfo("Backup exportado com sucesso!", "Exportar");
                 }
                 else
                 {
-                    System.Windows.MessageBox.Show($"Erro ao exportar: {result.Errors.FirstOrDefault()?.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    var error = result.Errors.FirstOrDefault()?.Message ?? "Erro desconhecido.";
+                    UiMessageService.ShowError($"Erro ao exportar: {error}", "Erro ao exportar backup");
                 }
             }
         }
@@ -172,12 +174,13 @@ namespace DevTools.Presentation.Wpf.Views
                 var result = await _engine.ExecuteAsync(request);
                 if (result.IsSuccess)
                 {
-                    System.Windows.MessageBox.Show("Backup importado com sucesso!", "Importar", MessageBoxButton.OK, MessageBoxImage.Information);
+                    UiMessageService.ShowInfo("Backup importado com sucesso!", "Importar");
                     await LoadList();
                 }
                 else
                 {
-                    System.Windows.MessageBox.Show($"Erro ao importar: {result.Errors.FirstOrDefault()?.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    var error = result.Errors.FirstOrDefault()?.Message ?? "Erro desconhecido.";
+                    UiMessageService.ShowError($"Erro ao importar: {error}", "Erro ao importar backup");
                 }
             }
         }

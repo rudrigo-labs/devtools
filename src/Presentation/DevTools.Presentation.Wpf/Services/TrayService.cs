@@ -43,6 +43,8 @@ public class TrayService : IDisposable
         _dashboardWindow = dashboardWindow;
     }
 
+    public bool HasOpenToolWindow => _currentToolWindow != null && _currentToolWindow.IsVisible;
+
     // Helper to enforce Single Instance and Bottom-Right Positioning
     private void ShowWindow<T>(Func<T?> getWindow, Action<T?> setWindow, Func<T> factory) where T : Window
     {
@@ -323,7 +325,7 @@ public class TrayService : IDisposable
                
                if (!success)
                {
-                   System.Windows.MessageBox.Show(message, "Erro DevTools", MessageBoxButton.OK, MessageBoxImage.Error);
+                   UiMessageService.ShowError(message, "Erro DevTools");
                }
                else
                {

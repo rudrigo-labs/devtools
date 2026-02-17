@@ -83,9 +83,9 @@ public partial class OrganizerWindow : Window
         var outputPath = OutputPathSelector.SelectedPath;
         var simulate = SimulateCheck.IsChecked ?? false;
 
-        if (string.IsNullOrWhiteSpace(inputPath))
+        if (!ValidateInputs(out var validationError))
         {
-            System.Windows.MessageBox.Show("Por favor, selecione uma pasta de entrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+            UiMessageService.ShowError(validationError, "Erro de Validação");
             return;
         }
 
@@ -114,5 +114,17 @@ public partial class OrganizerWindow : Window
                 ? $"Organização concluída! Arquivos processados: {result.Value?.Stats.TotalFiles ?? 0}" 
                 : $"Falha na organização: {string.Join(", ", result.Errors.Select(e => e.Message))}";
         });
+    }
+
+    private bool ValidateInputs(out string errorMessage)
+    {
+        if (string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath))
+        {
+            errorMessage = "Por favor, selecione uma pasta de entrada.";
+            return false;
+        }
+
+        errorMessage = string.Empty;
+        return true;
     }
 }

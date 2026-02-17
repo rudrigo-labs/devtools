@@ -26,7 +26,7 @@ public partial class SnapshotWindow : Window
         ProfileSelector.ProfileLoaded += LoadProfile;
 
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastSnapshotRootPath))
-            RootPathBox.Text = _settingsService.Settings.LastSnapshotRootPath;
+            RootPathSelector.SelectedPath = _settingsService.Settings.LastSnapshotRootPath;
 
         /* Position handled by TrayService
         if (_settingsService.Settings.SnapshotWindowTop.HasValue)
@@ -59,7 +59,7 @@ public partial class SnapshotWindow : Window
     private Dictionary<string, string> GetCurrentOptions()
     {
         var options = new Dictionary<string, string>();
-        options["root"] = RootPathBox.Text;
+        options["root"] = RootPathSelector.SelectedPath;
         options["text"] = (TextCheck.IsChecked ?? true).ToString().ToLowerInvariant();
         options["html"] = (HtmlCheck.IsChecked ?? false).ToString().ToLowerInvariant();
         options["json-nested"] = (JsonNestedCheck.IsChecked ?? false).ToString().ToLowerInvariant();
@@ -69,7 +69,7 @@ public partial class SnapshotWindow : Window
 
     private void LoadProfile(ToolProfile profile)
     {
-        if (profile.Options.TryGetValue("root", out var root)) RootPathBox.Text = root;
+        if (profile.Options.TryGetValue("root", out var root)) RootPathSelector.SelectedPath = root;
         
         if (profile.Options.TryGetValue("text", out var text)) 
             TextCheck.IsChecked = bool.TryParse(text, out var t) ? t : true;
@@ -91,38 +91,26 @@ public partial class SnapshotWindow : Window
 
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
 
-    private void BrowseRoot_Click(object sender, RoutedEventArgs e)
-    {
-        using var dlg = new System.Windows.Forms.FolderBrowserDialog
-        {
-            Description = "Selecione a Pasta do Projeto",
-            UseDescriptionForTitle = true,
-            ShowNewFolderButton = true
-        };
-
-        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dlg.SelectedPath))
-        {
-            RootPathBox.Text = dlg.SelectedPath;
-            _settingsService.Settings.LastSnapshotRootPath = dlg.SelectedPath;
-            _settingsService.Save();
-        }
-    }
+    private void BrowseRoot_Click(object sender, RoutedEventArgs e) { }
 
     private void ProcessButton_Click(object sender, RoutedEventArgs e)
     {
-        var root = RootPathBox.Text;
-        if (string.IsNullOrWhiteSpace(root))
+        if (!ValidateInputs(out var errorMessage))
         {
-            System.Windows.MessageBox.Show("Pasta do Projeto é obrigatória.", "Dados Incompletos", MessageBoxButton.OK, MessageBoxImage.Warning);
+            UiMessageService.ShowError(errorMessage, "Erro de Validação");
             return;
         }
 
+        var root = RootPathSelector.SelectedPath;
         var genText = TextCheck.IsChecked ?? true;
         var genHtml = HtmlCheck.IsChecked ?? false;
         var genJsonNested = JsonNestedCheck.IsChecked ?? false;
         var genJsonRecursive = JsonRecursiveCheck.IsChecked ?? false;
 
         Close();
+
+        _settingsService.Settings.LastSnapshotRootPath = root;
+        _settingsService.Save();
 
         _jobManager.StartJob("Snapshot", async (reporter, ct) =>
         {
@@ -141,5 +129,17 @@ public partial class SnapshotWindow : Window
                 ? $"Snapshot gerado com sucesso na pasta 'Snapshot'!"
                 : $"Falha ao gerar Snapshot: {string.Join(", ", result.Errors.Select(x => x.Message))}";
         });
+    }
+
+    private bool ValidateInputs(out string errorMessage)
+    {
+        if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
+        {
+            errorMessage = "Pasta do Projeto é obrigatória.";
+            return false;
+        }
+
+        errorMessage = string.Empty;
+        return true;
     }
 }

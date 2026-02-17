@@ -86,17 +86,35 @@ public partial class HarvestWindow : Window
              CopyFilesCheck.IsChecked = bool.TryParse(copy, out var c) ? c : true;
     }
 
-    private async void Run_Click(object sender, RoutedEventArgs e)
+    private bool ValidateInputs(out string errorMessage)
     {
         if (string.IsNullOrWhiteSpace(SourcePathSelector.SelectedPath))
         {
-            System.Windows.MessageBox.Show("Por favor, selecione um diretório de origem.", "Erro de Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
+            errorMessage = "Por favor, selecione um diretório de origem.";
+            return false;
         }
 
         if (string.IsNullOrWhiteSpace(OutputPathSelector.SelectedPath))
         {
-            System.Windows.MessageBox.Show("Por favor, selecione um diretório de destino.", "Erro de Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
+            errorMessage = "Por favor, selecione um diretório de destino.";
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(MinScoreBox.Text) && !int.TryParse(MinScoreBox.Text, out _))
+        {
+            errorMessage = "Score mínimo deve ser um número inteiro válido.";
+            return false;
+        }
+
+        errorMessage = string.Empty;
+        return true;
+    }
+
+    private async void Run_Click(object sender, RoutedEventArgs e)
+    {
+        if (!ValidateInputs(out var validationError))
+        {
+            UiMessageService.ShowError(validationError, "Erro de Validação");
             return;
         }
 
@@ -131,21 +149,13 @@ public partial class HarvestWindow : Window
         
         try 
         {
-            // Simple progress reporter could be added here if needed, 
-            // but for now we just await the result.
             var result = await System.Threading.Tasks.Task.Run(() => engine.ExecuteAsync(Result));
             
             RunSummary.BindResult(result);
-            
-            // If successful and not user cancelled, maybe we don't close immediately 
-            // so user can see the summary.
-            // If we wanted to "fire and forget" via JobManager, we would do that instead.
-            // But requirement is "WPF mostra status e permite ver detalhes".
-            
         }
         catch (Exception ex)
         {
-             System.Windows.MessageBox.Show($"Erro crítico ao executar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            UiMessageService.ShowError("Erro crítico ao executar coleta.", "Erro na ferramenta Harvest", ex);
         }
         finally
         {

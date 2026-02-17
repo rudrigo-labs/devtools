@@ -99,20 +99,14 @@ public partial class SearchTextWindow : Window
 
     private void Execute_Click(object sender, RoutedEventArgs e)
     {
-        var root = PathSelector.SelectedPath;
-        var text = SearchTextInput.Text;
-        
-        if (string.IsNullOrWhiteSpace(root))
+        if (!ValidateInputs(out var errorMessage))
         {
-            System.Windows.MessageBox.Show("Selecione o diretório de busca.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
+            UiMessageService.ShowError(errorMessage, "Erro de Validação");
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            System.Windows.MessageBox.Show("Informe o texto a ser pesquisado.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
-        }
+        var root = PathSelector.SelectedPath;
+        var text = SearchTextInput.Text;
 
         var request = new SearchTextRequest(
             RootPath: root,
@@ -157,5 +151,23 @@ public partial class SearchTextWindow : Window
     {
         if (string.IsNullOrWhiteSpace(input)) return Array.Empty<string>();
         return input.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    }
+
+    private bool ValidateInputs(out string errorMessage)
+    {
+        if (string.IsNullOrWhiteSpace(PathSelector.SelectedPath))
+        {
+            errorMessage = "Selecione o diretório de busca.";
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(SearchTextInput.Text))
+        {
+            errorMessage = "Informe o texto a ser pesquisado.";
+            return false;
+        }
+
+        errorMessage = string.Empty;
+        return true;
     }
 }

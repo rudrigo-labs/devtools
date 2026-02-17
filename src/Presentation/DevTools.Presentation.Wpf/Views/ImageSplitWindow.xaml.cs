@@ -28,10 +28,10 @@ public partial class ImageSplitWindow : Window
 
         // Restore Settings
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastImageSplitInputPath))
-            InputPathBox.Text = _settingsService.Settings.LastImageSplitInputPath;
+            InputPathSelector.SelectedPath = _settingsService.Settings.LastImageSplitInputPath;
         
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastImageSplitOutputDir))
-            OutputPathBox.Text = _settingsService.Settings.LastImageSplitOutputDir;
+            OutputPathSelector.SelectedPath = _settingsService.Settings.LastImageSplitOutputDir;
 
         // Restore Position
         /* Position handled by TrayService
@@ -68,8 +68,8 @@ public partial class ImageSplitWindow : Window
     private Dictionary<string, string> GetCurrentOptions()
     {
         var options = new Dictionary<string, string>();
-        options["input"] = InputPathBox.Text;
-        options["output"] = OutputPathBox.Text;
+        options["input"] = InputPathSelector.SelectedPath;
+        options["output"] = OutputPathSelector.SelectedPath;
         options["alpha"] = AlphaBox.Text;
         options["min-w"] = MinSizeBox.Text;
         options["min-h"] = MinSizeBox.Text; // UI uses single size box for both
@@ -79,10 +79,10 @@ public partial class ImageSplitWindow : Window
 
     private void LoadProfile(ToolProfile profile)
     {
-        if (profile.Options.TryGetValue("input", out var input)) InputPathBox.Text = input;
-        else if (profile.Options.TryGetValue("file", out var file)) InputPathBox.Text = file;
+        if (profile.Options.TryGetValue("input", out var input)) InputPathSelector.SelectedPath = input;
+        else if (profile.Options.TryGetValue("file", out var file)) InputPathSelector.SelectedPath = file;
         
-        if (profile.Options.TryGetValue("output", out var output)) OutputPathBox.Text = output;
+        if (profile.Options.TryGetValue("output", out var output)) OutputPathSelector.SelectedPath = output;
         
         if (profile.Options.TryGetValue("alpha", out var alpha)) AlphaBox.Text = alpha;
         else if (profile.Options.TryGetValue("threshold", out var threshold)) AlphaBox.Text = threshold;
@@ -105,38 +105,9 @@ public partial class ImageSplitWindow : Window
         Close();
     }
 
-    private void BrowseInput_Click(object sender, RoutedEventArgs e)
-    {
-        var dlg = new Microsoft.Win32.OpenFileDialog
-        {
-            Filter = "Imagens (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp|Todos os Arquivos (*.*)|*.*",
-            Title = "Selecione a Imagem para Recortar"
-        };
+    private void BrowseInput_Click(object sender, RoutedEventArgs e) { }
 
-        if (dlg.ShowDialog() == true)
-        {
-            InputPathBox.Text = dlg.FileName;
-            _settingsService.Settings.LastImageSplitInputPath = dlg.FileName;
-            _settingsService.Save();
-        }
-    }
-
-    private void BrowseOutput_Click(object sender, RoutedEventArgs e)
-    {
-        using var dlg = new System.Windows.Forms.FolderBrowserDialog
-        {
-            Description = "Selecione a Pasta de Saída",
-            UseDescriptionForTitle = true,
-            ShowNewFolderButton = true
-        };
-
-        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dlg.SelectedPath))
-        {
-            OutputPathBox.Text = dlg.SelectedPath;
-            _settingsService.Settings.LastImageSplitOutputDir = dlg.SelectedPath;
-            _settingsService.Save();
-        }
-    }
+    private void BrowseOutput_Click(object sender, RoutedEventArgs e) { }
 
     private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
     {
@@ -150,21 +121,25 @@ public partial class ImageSplitWindow : Window
 
     private void ProcessButton_Click(object sender, RoutedEventArgs e)
     {
-        var inputPath = InputPathBox.Text;
-        var outputPath = OutputPathBox.Text;
-        
-        if (string.IsNullOrWhiteSpace(inputPath))
+        if (!ValidateInputs(out var errorMessage))
         {
-            System.Windows.MessageBox.Show("Por favor, selecione uma imagem de entrada.", "Campo Obrigatório", MessageBoxButton.OK, MessageBoxImage.Warning);
+            UiMessageService.ShowError(errorMessage, "Erro de Validação");
             return;
         }
 
+        var inputPath = InputPathSelector.SelectedPath;
+        var outputPath = OutputPathSelector.SelectedPath;
+        
         if (!byte.TryParse(AlphaBox.Text, out var alpha)) alpha = 10;
         if (!int.TryParse(MinSizeBox.Text, out var minSize)) minSize = 3;
         var overwrite = OverwriteCheck.IsChecked ?? false;
 
         // Close window to start job
         Close();
+
+        _settingsService.Settings.LastImageSplitInputPath = inputPath;
+        _settingsService.Settings.LastImageSplitOutputDir = outputPath;
+        _settingsService.Save();
 
         _jobManager.StartJob("ImageSplitter", async (reporter, ct) =>
         {
@@ -194,5 +169,29 @@ public partial class ImageSplitWindow : Window
             
             return $"Falha no recorte: {string.Join(", ", result.Errors.Select(e => e.Message))}";
         });
+    }
+
+    private bool ValidateInputs(out string errorMessage)
+    {
+        if (string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath))
+        {
+            errorMessage = "Por favor, selecione uma imagem de entrada.";
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(MinSizeBox.Text) && !int.TryParse(MinSizeBox.Text, out _))
+        {
+            errorMessage = "Tamanho mínimo deve ser um número inteiro válido.";
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(AlphaBox.Text) && !byte.TryParse(AlphaBox.Text, out _))
+        {
+            errorMessage = "Alpha deve ser um número entre 0 e 255.";
+            return false;
+        }
+
+        errorMessage = string.Empty;
+        return true;
     }
 }

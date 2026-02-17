@@ -6,7 +6,7 @@
              mc:Ignorable="d" d:DesignWidth="400">
     <StackPanel>
         <TextBlock x:Name="TitleBlock"
-                   Text="{Binding Title}"
+                   Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
                    Foreground="#AAAAAA"
                    Margin="0,0,0,5"
                    FontSize="12"/>
@@ -16,7 +16,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBox x:Name="PathInput"
-                     Text="{Binding SelectedPath}"
+                     Text="{Binding SelectedPath, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource ModernTextBoxStyle}"
                      IsReadOnly="True"
                      Margin="0,0,10,0"/>
