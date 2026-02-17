@@ -19,6 +19,7 @@
                      Text="{Binding SelectedPath, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource ModernTextBoxStyle}"
                      IsReadOnly="True"
+                     ToolTip="{Binding SelectedPath, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"
                      Margin="0,0,10,0"/>
             <Button Grid.Column="1" Content="Procurar" Style="{StaticResource SecondaryButtonStyle}" Click="Browse_Click" ToolTip="Selecionar pasta/arquivo"/>
         </Grid>

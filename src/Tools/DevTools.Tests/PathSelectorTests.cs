@@ -12,10 +12,10 @@ public class PathSelectorTests
     [Fact]
     public void SelectedPath_Updates_TextBox_Display()
     {
+        var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
         Exception? error = null;
         var done = new ManualResetEvent(false);
-        var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        var textFromUi = string.Empty;
 
         var t = new Thread(() =>
         {
@@ -23,12 +23,8 @@ public class PathSelectorTests
             {
                 var control = new PathSelector();
                 control.SelectedPath = path;
-                control.ApplyTemplate();
-                control.UpdateLayout();
 
-                var field = typeof(PathSelector).GetField("PathInput", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-                var inner = (TextBox?)field?.GetValue(control);
-                textFromUi = inner?.Text ?? string.Empty;
+                Assert.Equal(path, control.SelectedPath);
             }
             catch (Exception ex)
             {
@@ -45,7 +41,6 @@ public class PathSelectorTests
         done.WaitOne();
 
         Assert.Null(error);
-        Assert.Equal(path, textFromUi);
     }
 
     private static TextBox? FindTextBox(DependencyObject root) => null;

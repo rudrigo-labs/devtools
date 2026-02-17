@@ -7,10 +7,16 @@ namespace DevTools.Presentation.Wpf.Components;
 public partial class PathSelector : System.Windows.Controls.UserControl
 {
     public static readonly DependencyProperty TitleProperty =
-        DependencyProperty.Register("Title", typeof(string), typeof(PathSelector), new PropertyMetadata("Path", OnTitleChanged));
+        DependencyProperty.Register(nameof(Title), typeof(string), typeof(PathSelector), new PropertyMetadata("Path"));
 
     public static readonly DependencyProperty SelectedPathProperty =
-        DependencyProperty.Register("SelectedPath", typeof(string), typeof(PathSelector), new PropertyMetadata(string.Empty, OnSelectedPathChanged));
+        DependencyProperty.Register(
+            nameof(SelectedPath),
+            typeof(string),
+            typeof(PathSelector),
+            new FrameworkPropertyMetadata(
+                string.Empty,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
     public static readonly DependencyProperty IsFolderPickerProperty =
         DependencyProperty.Register("IsFolderPicker", typeof(bool), typeof(PathSelector), new PropertyMetadata(true));
@@ -38,18 +44,6 @@ public partial class PathSelector : System.Windows.Controls.UserControl
         InitializeComponent();
     }
 
-    private static void OnSelectedPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        var control = (PathSelector)d;
-        control.PathInput.Text = e.NewValue as string ?? string.Empty;
-    }
-
-    private static void OnTitleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        var control = (PathSelector)d;
-        control.TitleBlock.Text = e.NewValue as string ?? "Path";
-    }
-
     private void Browse_Click(object sender, RoutedEventArgs e)
     {
         if (IsFolderPicker)
@@ -65,7 +59,6 @@ public partial class PathSelector : System.Windows.Controls.UserControl
             if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.SelectedPath))
             {
                 SelectedPath = dialog.SelectedPath;
-                PathInput.Text = SelectedPath;
             }
         }
         else
@@ -75,7 +68,6 @@ public partial class PathSelector : System.Windows.Controls.UserControl
             if (dialog.ShowDialog(owner) == true)
             {
                 SelectedPath = dialog.FileName;
-                PathInput.Text = SelectedPath;
             }
         }
     }

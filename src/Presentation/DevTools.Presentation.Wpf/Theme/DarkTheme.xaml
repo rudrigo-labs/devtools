@@ -188,25 +188,39 @@
     <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}"/>
 
     <!-- Modern TextBox Style -->
-    <Style x:Key="ModernTextBoxStyle" TargetType="TextBox">
-        <Setter Property="Background" Value="{StaticResource ControlBackgroundBrush}"/>
-        <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Height" Value="32"/>
-        <Setter Property="Padding" Value="10,8"/>
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="CaretBrush" Value="{StaticResource PrimaryTextBrush}"/>
+    <Style x:Key="ModernTextBoxStyle" TargetType="{x:Type TextBox}">
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Background" Value="#1E1E1E"/>
+        <Setter Property="BorderBrush" Value="#3A3A3A"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="CaretBrush" Value="White"/>
+
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="TextBox">
-                    <Border Background="{TemplateBinding Background}" 
-                            CornerRadius="6" 
-                            Padding="{TemplateBinding Padding}">
-                        <ScrollViewer x:Name="PART_ContentHost"/>
+                <ControlTemplate TargetType="{x:Type TextBox}">
+                    <Border
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="6">
+
+                        <!-- ESSENCIAL: sem isso o texto não aparece -->
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                  Margin="{TemplateBinding Padding}" />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+
+        <Style.Triggers>
+            <Trigger Property="IsReadOnly" Value="True">
+                <Setter Property="Opacity" Value="1"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="1"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- Modern ComboBox Style -->
