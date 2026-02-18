@@ -85,6 +85,11 @@ public partial class DashboardWindow : Window
         }
     }
 
+    /// <summary>
+    /// Botão Encerrar escolha:Sim
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void Shutdown_Click(object sender, RoutedEventArgs e)
     {
         System.Windows.Application.Current.Shutdown();
@@ -97,7 +102,18 @@ public partial class DashboardWindow : Window
             return;
         }
 
-        UiMessageService.ShowInfo("O DevTools vai continuar em execução na bandeja do sistema.", "Minimizado para bandeja");
+        Hide();
+    }
+
+    private void DialogNoButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_trayService.HasOpenToolWindow)
+        {
+            return;
+        }
+
+        MaterialDesignThemes.Wpf.DialogHost.Close("RootDialog");
+
         Hide();
     }
 
@@ -109,7 +125,8 @@ public partial class DashboardWindow : Window
             return;
         }
 
-        UiMessageService.ShowInfo("O DevTools vai continuar em execução na bandeja do sistema.", "Minimizado para bandeja");
+        MaterialDesignThemes.Wpf.DialogHost.Close("RootDialog");
+
         Hide();
     }
 
