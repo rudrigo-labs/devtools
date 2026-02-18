@@ -5,22 +5,51 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="40" d:DesignWidth="400">
+
     <StackPanel Margin="0,5,0,15">
-        <TextBlock Text="Perfil" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+        <!-- Usa o mesmo estilo de Label das outras telas -->
+        <Label Content="Perfil"/>
+
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <ComboBox Grid.Column="0" x:Name="ProfileCombo" 
+
+            <!-- Combo alinhado com o visual “modern” -->
+            <ComboBox Grid.Column="0"
+                      x:Name="ProfileCombo"
                       IsEditable="True"
                       SelectionChanged="ProfileCombo_SelectionChanged"
-                      MinHeight="32" />
-            <Button Grid.Column="1" Content="Salvar" Click="SaveButton_Click" 
-                    Style="{DynamicResource SecondaryButtonStyle}" Margin="8,0,0,0"/>
-            <Button Grid.Column="2" Content="🗑" Click="DeleteButton_Click" 
-                    Style="{DynamicResource IconButtonStyle}" Margin="8,0,0,0" ToolTip="Excluir Perfil"/>
+                      MinHeight="32"
+                      Style="{DynamicResource ModernComboBoxStyle}"
+                      Background="{DynamicResource ControlBackgroundBrush}"
+                      Foreground="{DynamicResource PrimaryTextBrush}"
+                      BorderBrush="{DynamicResource BorderBrush}">
+                <ComboBox.Resources>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource ModernTextBoxStyle}"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#2D2D2D"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E0E0E0"/>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                    </Style>
+                </ComboBox.Resources>
+            </ComboBox>
+
+            <Button Grid.Column="1"
+                    Content="Salvar"
+                    Click="SaveButton_Click"
+                    Style="{DynamicResource SecondaryButtonStyle}"
+                    Margin="8,0,0,0"/>
+
+            <Button Grid.Column="2"
+                    Content="🗑"
+                    Click="DeleteButton_Click"
+                    Style="{DynamicResource IconButtonStyle}"
+                    Margin="8,0,0,0"
+                    ToolTip="Excluir Perfil"/>
         </Grid>
     </StackPanel>
 </UserControl>

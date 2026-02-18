@@ -9,8 +9,7 @@
         WindowStyle="None"
         AllowsTransparency="True"
         Background="#1E1E1E"
-        ResizeMode="CanResizeWithGrip"
-        >
+        ResizeMode="CanResizeWithGrip">
 
     <Window.Resources>
         <Style TargetType="ListBox">
@@ -40,7 +39,7 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="{StaticResource WindowBackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="5">
+    <Border Background="{StaticResource WindowBackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="0">
         <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>

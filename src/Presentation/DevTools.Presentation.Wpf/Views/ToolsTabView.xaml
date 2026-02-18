@@ -1,0 +1,47 @@
+<UserControl x:Class="DevTools.Presentation.Wpf.Views.ToolsTabView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,15,0">
+        <StackPanel>
+            <TextBlock Text="Ferramentas Disponíveis" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
+
+            <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
+                <Button Style="{StaticResource ToolCardStyle}" Content="Notas Rápidas" 
+                        Tag="&#xE70B;" ToolTip="Anotações flutuantes always-on-top" Width="200" Click="ToolButton_Click" CommandParameter="Notes"/>
+
+                <Button Style="{StaticResource ToolCardStyle}" Content="Organizador de Arquivos" 
+                        Tag="&#xE8B7;" ToolTip="Move/organiza por extensão/data conforme categorias" Width="200" Click="ToolButton_Click" CommandParameter="Organizer"/>
+
+                <Button Style="{StaticResource ToolCardStyle}" Content="Renomear Projeto .NET" 
+                        Tag="&#xE8AC;" ToolTip="Renomeia projeto/solution e namespaces C# com backup" Width="200" Click="ToolButton_Click" CommandParameter="Rename"/>
+
+                <Button Style="{StaticResource ToolCardStyle}" Content="Snapshot do Projeto" 
+                        Tag="&#xE964;" ToolTip="Gera ZIP do projeto com filtros" Width="200" Click="ToolButton_Click" CommandParameter="Snapshot"/>
+
+                <Button Style="{StaticResource ToolCardStyle}" Content="Dividir Imagens" 
+                        Tag="&#xE91B;" ToolTip="Divide imagens em grade configurável" Width="200" Click="ToolButton_Click" CommandParameter="ImageSplitter"/>
+
+                <Button Style="{StaticResource ToolCardStyle}" Content="Converter para UTF‑8" 
+                        Tag="&#xE8C5;" ToolTip="Converte arquivos para UTF‑8 preservando conteúdo" Width="200" Click="ToolButton_Click" CommandParameter="Utf8Convert"/>
+
+                <Button Style="{StaticResource ToolCardStyle}" Content="Buscar Texto em Arquivos" 
+                        Tag="&#xE721;" ToolTip="Busca rápida com regex e filtros" Width="200" Click="ToolButton_Click" CommandParameter="SearchText"/>
+
+                <Button Style="{StaticResource ToolCardStyle}" Content="EF Core Migrations" 
+                        Tag="&#xE7F8;" ToolTip="Cria/aplica migrations em contextos EF Core" Width="200" Click="ToolButton_Click" CommandParameter="Migrations"/>
+
+                <Button Style="{StaticResource ToolCardStyle}" Content="Coletor de Arquivos" 
+                        Tag="&#xE896;" ToolTip="Copia arquivos filtrados para pasta de saída" Width="200" Click="ToolButton_Click" CommandParameter="Harvest"/>
+
+                <Button Style="{StaticResource ToolCardStyle}" Content="Túnel SSH" 
+                        Tag="&#xE753;" ToolTip="Gerenciador de túneis SSH" Width="200" Click="ToolButton_Click" CommandParameter="SSHTunnel"/>
+
+            </WrapPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+

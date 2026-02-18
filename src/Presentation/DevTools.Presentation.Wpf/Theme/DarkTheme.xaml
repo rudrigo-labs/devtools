@@ -254,6 +254,52 @@
         <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
 
+    <!-- Tool Card Style used in Dashboard/Settings/Tools tabs -->
+    <Style x:Key="ToolCardStyle" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource ControlBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}"/>
+        <Setter Property="Margin" Value="0,0,15,15"/>
+        <Setter Property="Height" Value="140"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="4"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1">
+                        <StackPanel Margin="15">
+                            <TextBlock Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
+                                       FontSize="28"
+                                       Foreground="{StaticResource AccentBrush}"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       HorizontalAlignment="Left"
+                                       Margin="0,0,0,15"/>
+
+                            <TextBlock Text="{TemplateBinding Content}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       TextWrapping="Wrap"
+                                       Margin="0,0,0,5"/>
+
+                            <TextBlock Text="{Binding ToolTip, RelativeSource={RelativeSource TemplatedParent}}"
+                                       FontSize="12"
+                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                       TextWrapping="Wrap"
+                                       MaxHeight="40"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource ControlHighlightBrush}"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Window Style (Transparent/Floating) -->
     <Style x:Key="ModernWindowStyle" TargetType="Window">
         <Setter Property="WindowStyle" Value="None"/>
