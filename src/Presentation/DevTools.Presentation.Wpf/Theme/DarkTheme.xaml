@@ -223,17 +223,78 @@
         </Style.Triggers>
     </Style>
 
+    <!-- Dark dropdown for ComboBox -->
+    <SolidColorBrush x:Key="DropdownBackgroundBrush" Color="#2D2D2D"/>
+    <SolidColorBrush x:Key="DropdownForegroundBrush" Color="#E0E0E0"/>
+
     <!-- Modern ComboBox Style -->
     <Style x:Key="ModernComboBoxStyle" TargetType="ComboBox">
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+
         <Setter Property="Background" Value="{StaticResource ControlBackgroundBrush}"/>
         <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Height" Value="32"/>
         <Setter Property="Padding" Value="10,4"/>
         <Setter Property="FontSize" Value="14"/>
-    </Style>
 
-    <Style TargetType="ComboBox" BasedOn="{StaticResource ModernComboBoxStyle}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <!-- FECHADO -->
+                        <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6">
+                            <Grid>
+                                <ContentPresenter
+                                Margin="{TemplateBinding Padding}"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Left"
+                                Content="{TemplateBinding SelectionBoxItem}"
+                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"/>
+
+                                <Path Margin="0,0,12,0"
+                                  HorizontalAlignment="Right"
+                                  VerticalAlignment="Center"
+                                  Fill="{TemplateBinding Foreground}"
+                                  Data="M 0 0 L 6 6 L 12 0 Z"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- POPUP -->
+                        <Popup x:Name="Popup"
+                           IsOpen="{TemplateBinding IsDropDownOpen}"
+                           Placement="Bottom"
+                           AllowsTransparency="True"
+                           Focusable="False"
+                           PopupAnimation="Fade">
+                            <Border Margin="0,4,0,0"
+                                Background="{StaticResource DropdownBackgroundBrush}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                                <ScrollViewer>
+                                    <ItemsPresenter/>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <Style TargetType="ComboBoxItem">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource DropdownForegroundBrush}"/>
+        <Setter Property="Padding" Value="10,6"/>
+    </Style>
 
     <!-- Alias for compatibility -->
     <Style x:Key="InputStyle" TargetType="TextBox" BasedOn="{StaticResource ModernTextBoxStyle}"/>

@@ -74,7 +74,7 @@
                         <!-- Ação -->
                         <StackPanel Grid.Column="0" Margin="0,0,5,0">
                             <TextBlock Text="Ação" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
-                            <ComboBox x:Name="ActionCombo" SelectionChanged="ActionCombo_SelectionChanged" SelectedIndex="0">
+                            <ComboBox x:Name="ActionCombo" SelectionChanged="ActionCombo_SelectionChanged" SelectedIndex="0" Style="{StaticResource ModernComboBoxStyle}" Background="{DynamicResource ControlBackgroundBrush}">
                                 <ComboBoxItem Content="Add Migration" Tag="Add"/>
                                 <ComboBoxItem Content="Update Database" Tag="Update"/>
                             </ComboBox>
@@ -83,7 +83,7 @@
                         <!-- Provider -->
                         <StackPanel Grid.Column="1" Margin="5,0,0,0">
                             <TextBlock Text="Provider" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
-                            <ComboBox x:Name="ProviderCombo" SelectedIndex="0">
+                            <ComboBox x:Name="ProviderCombo" SelectedIndex="0" Style="{StaticResource ModernComboBoxStyle}" Background="{DynamicResource ControlBackgroundBrush}">
                                 <ComboBoxItem Content="SQL Server" Tag="SqlServer"/>
                                 <ComboBoxItem Content="SQLite" Tag="Sqlite"/>
                             </ComboBox>
@@ -104,7 +104,10 @@
                     <CheckBox x:Name="DryRunCheck" Content="Dry Run (Gerar comando sem executar)" Margin="0,5,0,15"/>
 
                     <!-- Output Area -->
-                    <Expander Header="Log de Saída" IsExpanded="True" BorderBrush="{DynamicResource BorderBrush}">
+                    <Expander IsExpanded="True" BorderBrush="{DynamicResource BorderBrush}">
+                        <Expander.Header>
+                            <TextBlock Text="Log de Saída" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        </Expander.Header>
                         <TextBox x:Name="OutputText" 
                                  Height="100" 
                                  TextWrapping="Wrap" 

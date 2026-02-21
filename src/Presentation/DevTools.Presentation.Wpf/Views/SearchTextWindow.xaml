@@ -6,13 +6,16 @@
         xmlns:components="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Buscar Texto em Arquivos" Height="640" Width="900" WindowStartupLocation="CenterScreen"
-        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
-        ResizeMode="CanResizeWithGrip">
+        Style="{StaticResource ModernWindowStyle}">
 
-    <Border Background="{DynamicResource WindowBackgroundBrush}" 
-            CornerRadius="8" 
-            BorderBrush="{DynamicResource BorderBrush}" 
-            BorderThickness="1">
+    <Border Background="{StaticResource WindowBackgroundBrush}" 
+            CornerRadius="12" 
+            BorderBrush="{StaticResource BorderBrush}" 
+            BorderThickness="1"
+            Padding="0">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="25" ShadowDepth="10" Opacity="0.6" Color="Black"/>
+        </Border.Effect>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/> <!-- Header -->

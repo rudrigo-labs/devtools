@@ -10,14 +10,12 @@
 
         <Expander DockPanel.Dock="Bottom" Header="Detalhes / Logs" Margin="0,10,0,0" IsExpanded="True" BorderBrush="{StaticResource BorderBrush}">
             <TextBox Text="{Binding SelectedItem.Logs, ElementName=JobsDataGrid, Mode=OneWay}" 
-                     Height="150" 
-                     Background="#1E1E1E" 
-                     Foreground="#D4D4D4"
-                     FontFamily="Consolas"
+                     Height="150"
                      IsReadOnly="True"
+                     FontFamily="Consolas"
+                     FontSize="12"
                      VerticalScrollBarVisibility="Auto"
-                     BorderThickness="0"
-                     Padding="5"/>
+                     Style="{StaticResource ModernTextBoxStyle}"/>
         </Expander>
 
         <DataGrid x:Name="JobsDataGrid" 

@@ -3,14 +3,22 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         Title="Renomear Projeto .NET" Height="640" Width="900" WindowStartupLocation="CenterScreen"
-        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
-        ResizeMode="NoResize" ShowInTaskbar="True" Topmost="True">
+        Style="{StaticResource ModernWindowStyle}"
+        ShowInTaskbar="True"
+        Topmost="True">
 
     <Window.Resources>
         <!-- Styles removed to use global theme -->
     </Window.Resources>
 
-    <Border Background="{StaticResource WindowBackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="5">
+    <Border Background="{StaticResource WindowBackgroundBrush}"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="12"
+            Padding="0">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="25" ShadowDepth="10" Opacity="0.6" Color="Black"/>
+        </Border.Effect>
         <Grid Margin="15">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -45,17 +53,17 @@
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,5,0">
                         <Label Content="Texto Antigo:"/>
-                        <TextBox x:Name="OldTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
+                        <TextBox x:Name="OldTextBox" Style="{StaticResource ModernTextBoxStyle}" MinHeight="32"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="5,0,0,0">
                         <Label Content="Texto Novo:"/>
-                        <TextBox x:Name="NewTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
+                        <TextBox x:Name="NewTextBox" Style="{StaticResource ModernTextBoxStyle}" MinHeight="32"/>
                     </StackPanel>
                 </Grid>
 
                 <StackPanel Margin="0,15,0,0">
                     <Label Content="Modo de Renomeação:"/>
-                    <ComboBox x:Name="ModeCombo" SelectedIndex="0">
+                    <ComboBox x:Name="ModeCombo" SelectedIndex="0" Style="{StaticResource ModernComboBoxStyle}">
                         <ComboBoxItem Content="Geral (Texto Simples)"/>
                         <ComboBoxItem Content="Namespace C# (Inteligente)"/>
                     </ComboBox>
@@ -65,11 +73,11 @@
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,5,0">
                         <Label Content="Include (Glob):"/>
-                        <TextBox x:Name="IncludeBox" Style="{StaticResource ModernTextBoxStyle}" ToolTip="Ex: *.cs, **/*.txt"/>
+                        <TextBox x:Name="IncludeBox" Style="{StaticResource ModernTextBoxStyle}" MinHeight="32" ToolTip="Ex: *.cs, **/*.txt"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="5,0,0,0">
                         <Label Content="Exclude (Glob):"/>
-                        <TextBox x:Name="ExcludeBox" Style="{StaticResource ModernTextBoxStyle}" ToolTip="Ex: obj/*, bin/*"/>
+                        <TextBox x:Name="ExcludeBox" Style="{StaticResource ModernTextBoxStyle}" MinHeight="32" ToolTip="Ex: obj/*, bin/*"/>
                     </StackPanel>
                 </Grid>
                 

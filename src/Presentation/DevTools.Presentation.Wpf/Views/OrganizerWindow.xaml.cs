@@ -27,8 +27,6 @@ public partial class OrganizerWindow : Window
         // Carregar configurações
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastOrganizerInputPath))
             InputPathSelector.SelectedPath = _settingsService.Settings.LastOrganizerInputPath;
-        else
-            InputPathSelector.SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
         // Posicionar no canto inferior direito
         Loaded += (s, e) => 

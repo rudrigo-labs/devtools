@@ -25,9 +25,6 @@ public partial class SnapshotWindow : Window
         ProfileSelector.GetOptionsFunc = GetCurrentOptions;
         ProfileSelector.ProfileLoaded += LoadProfile;
 
-        if (!string.IsNullOrEmpty(_settingsService.Settings.LastSnapshotRootPath))
-            RootPathSelector.SelectedPath = _settingsService.Settings.LastSnapshotRootPath;
-
         /* Position handled by TrayService
         if (_settingsService.Settings.SnapshotWindowTop.HasValue)
         {

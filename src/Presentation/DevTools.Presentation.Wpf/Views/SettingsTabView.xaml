@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:components="clr-namespace:DevTools.Presentation.Wpf.Components"
              mc:Ignorable="d">
 
     <Grid>
@@ -349,10 +350,10 @@
                     <TextBlock Text="Caminhos do Projeto" FontSize="16" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,10"/>
 
                     <Label Content="Caminho Raiz do Projeto (Root Path)" Foreground="#CCCCCC"/>
-                    <TextBox x:Name="MigRootPathInput" Style="{StaticResource InputStyle}"/>
+                    <components:PathSelector x:Name="MigRootPathSelector" IsFolderPicker="True" />
 
                     <Label Content="Caminho do Projeto de Startup (Startup Project)" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                    <TextBox x:Name="MigStartupPathInput" Style="{StaticResource InputStyle}"/>
+                    <components:PathSelector x:Name="MigStartupPathSelector" IsFolderPicker="True" />
 
                     <TextBlock Text="Configuração do Contexto" FontSize="16" Foreground="{StaticResource AccentBrush}" Margin="0,30,0,10"/>
 
@@ -384,12 +385,12 @@
 
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="0,0,20,0" MaxWidth="600" HorizontalAlignment="Left">
-                    <TextBlock Text="Execução Local" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,0,0,10"/>
+                    <TextBlock Text="Execução Local" FontSize="16" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,10"/>
 
                     <Label Content="Caminho do Executável (ngrok.exe)" Foreground="#CCCCCC"/>
-                    <TextBox x:Name="NgrokExePathInput" Style="{StaticResource InputStyle}"/>
+                    <components:PathSelector x:Name="NgrokExePathSelector" IsFolderPicker="True" />
 
-                    <TextBlock Text="Autenticação e Argumentos" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,30,0,10"/>
+                    <TextBlock Text="Autenticação e Argumentos" FontSize="16" Foreground="{StaticResource AccentBrush}" Margin="0,30,0,10"/>
 
                     <Label Content="Auth Token (Opcional - via --authtoken)" Foreground="#CCCCCC"/>
                     <TextBox x:Name="NgrokAuthTokenInput" Style="{StaticResource InputStyle}" FontFamily="Consolas"/>

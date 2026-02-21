@@ -97,21 +97,11 @@ public partial class DashboardWindow : Window
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_trayService.HasOpenToolWindow)
-        {
-            return;
-        }
-
         Hide();
     }
 
     private void DialogNoButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_trayService.HasOpenToolWindow)
-        {
-            return;
-        }
-
         MaterialDesignThemes.Wpf.DialogHost.Close("RootDialog");
 
         Hide();
@@ -120,13 +110,6 @@ public partial class DashboardWindow : Window
     private void DashboardWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         e.Cancel = true;
-        if (_trayService.HasOpenToolWindow)
-        {
-            return;
-        }
-
-        MaterialDesignThemes.Wpf.DialogHost.Close("RootDialog");
-
         Hide();
     }
 

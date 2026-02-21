@@ -127,7 +127,7 @@ public partial class SettingsTabView : WpfControls.UserControl
 
         ConfigService.SaveSection("Ssh", _currentSshConfig);
         SshProfilesList.Items.Refresh();
-        System.Windows.MessageBox.Show("Configuração salva com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        UiMessageService.ShowInfo("Configuração salva com sucesso!", "Sucesso");
     }
 
     private void DeleteSshProfile_Click(object sender, RoutedEventArgs e)
@@ -135,12 +135,14 @@ public partial class SettingsTabView : WpfControls.UserControl
         if (ConfigService == null) return;
         if (_selectedProfile == null) return;
 
-        if (System.Windows.MessageBox.Show($"Tem certeza que deseja excluir o perfil '{_selectedProfile.Name}'?", "Confirmar Exclusão", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+        if (!UiMessageService.Confirm($"Tem certeza que deseja excluir o perfil '{_selectedProfile.Name}'?", "Confirmar Exclusão"))
         {
-            _currentSshConfig.Profiles.Remove(_selectedProfile);
-            ConfigService.SaveSection("Ssh", _currentSshConfig);
-            LoadSshProfiles();
+            return;
         }
+
+        _currentSshConfig.Profiles.Remove(_selectedProfile);
+        ConfigService.SaveSection("Ssh", _currentSshConfig);
+        LoadSshProfiles();
     }
 
     private void BrowseSshKey_Click(object sender, RoutedEventArgs e)
@@ -222,11 +224,11 @@ public partial class SettingsTabView : WpfControls.UserControl
             _currentHarvestConfig.Weights.DeadCodePenalty = deadCode;
 
             ConfigService.SaveSection("Harvest", _currentHarvestConfig);
-            System.Windows.MessageBox.Show("Configuração do Harvest salva com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+            UiMessageService.ShowInfo("Configuração do Harvest salva com sucesso!", "Sucesso");
         }
         catch (Exception ex)
         {
-            System.Windows.MessageBox.Show($"Erro ao salvar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            UiMessageService.ShowError($"Erro ao salvar: {ex.Message}", "Erro", ex);
         }
     }
 
@@ -293,7 +295,7 @@ public partial class SettingsTabView : WpfControls.UserControl
 
         ConfigService.SaveSection("Organizer", _currentOrganizerConfig);
         OrganizerCategoriesList.Items.Refresh();
-        System.Windows.MessageBox.Show("Categoria salva!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        UiMessageService.ShowInfo("Categoria salva!", "Sucesso");
     }
 
     private void DeleteOrganizerCategory_Click(object sender, RoutedEventArgs e)
@@ -301,12 +303,14 @@ public partial class SettingsTabView : WpfControls.UserControl
         if (ConfigService == null) return;
         if (_selectedCategory == null) return;
 
-        if (System.Windows.MessageBox.Show($"Excluir categoria '{_selectedCategory.Name}'?", "Confirmar", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+        if (!UiMessageService.Confirm($"Excluir categoria '{_selectedCategory.Name}'?", "Confirmar"))
         {
-            _currentOrganizerConfig.Categories.Remove(_selectedCategory);
-            ConfigService.SaveSection("Organizer", _currentOrganizerConfig);
-            LoadOrganizerConfig();
+            return;
         }
+
+        _currentOrganizerConfig.Categories.Remove(_selectedCategory);
+        ConfigService.SaveSection("Organizer", _currentOrganizerConfig);
+        LoadOrganizerConfig();
     }
 
     private void OpenMigrationsSettings_Click(object sender, RoutedEventArgs e)
@@ -321,9 +325,8 @@ public partial class SettingsTabView : WpfControls.UserControl
         if (ConfigService == null) return;
 
         _currentMigrationsConfig = ConfigService.GetSection<MigrationsSettings>("Migrations");
-
-        MigRootPathInput.Text = _currentMigrationsConfig.RootPath;
-        MigStartupPathInput.Text = _currentMigrationsConfig.StartupProjectPath;
+        MigRootPathSelector.SelectedPath = _currentMigrationsConfig.RootPath;
+        MigStartupPathSelector.SelectedPath = _currentMigrationsConfig.StartupProjectPath;
         MigContextInput.Text = _currentMigrationsConfig.DbContextFullName;
         MigArgsInput.Text = _currentMigrationsConfig.AdditionalArgs;
     }
@@ -332,13 +335,13 @@ public partial class SettingsTabView : WpfControls.UserControl
     {
         if (ConfigService == null) return;
 
-        _currentMigrationsConfig.RootPath = MigRootPathInput.Text;
-        _currentMigrationsConfig.StartupProjectPath = MigStartupPathInput.Text;
+        _currentMigrationsConfig.RootPath = MigRootPathSelector.SelectedPath ?? string.Empty;
+        _currentMigrationsConfig.StartupProjectPath = MigStartupPathSelector.SelectedPath ?? string.Empty;
         _currentMigrationsConfig.DbContextFullName = MigContextInput.Text;
         _currentMigrationsConfig.AdditionalArgs = MigArgsInput.Text;
 
         ConfigService.SaveSection("Migrations", _currentMigrationsConfig);
-        System.Windows.MessageBox.Show("Configurações do Migrations salvas!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        UiMessageService.ShowInfo("Configurações do Migrations salvas!", "Sucesso");
     }
 
     private void OpenNgrokSettings_Click(object sender, RoutedEventArgs e)
@@ -355,7 +358,7 @@ public partial class SettingsTabView : WpfControls.UserControl
         _currentNgrokConfig = ConfigService.GetSection<NgrokSettings>("Ngrok");
         _currentNgrokConfig.Normalize();
 
-        NgrokExePathInput.Text = _currentNgrokConfig.ExecutablePath;
+        NgrokExePathSelector.SelectedPath = _currentNgrokConfig.ExecutablePath;
         NgrokAuthTokenInput.Text = _currentNgrokConfig.AuthToken;
         NgrokArgsInput.Text = _currentNgrokConfig.AdditionalArgs;
     }
@@ -364,11 +367,11 @@ public partial class SettingsTabView : WpfControls.UserControl
     {
         if (ConfigService == null) return;
 
-        _currentNgrokConfig.ExecutablePath = NgrokExePathInput.Text;
+        _currentNgrokConfig.ExecutablePath = NgrokExePathSelector.SelectedPath ?? string.Empty;
         _currentNgrokConfig.AuthToken = NgrokAuthTokenInput.Text;
         _currentNgrokConfig.AdditionalArgs = NgrokArgsInput.Text;
 
         ConfigService.SaveSection("Ngrok", _currentNgrokConfig);
-        System.Windows.MessageBox.Show("Configurações do Ngrok salvas!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+        UiMessageService.ShowInfo("Configurações do Ngrok salvas!", "Sucesso");
     }
 }

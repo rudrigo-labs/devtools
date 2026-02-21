@@ -3,10 +3,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         Title="Snapshot de Projeto" Height="640" Width="900" WindowStartupLocation="CenterScreen"
-        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
-        ResizeMode="NoResize" ShowInTaskbar="True" Topmost="True">
+        Style="{StaticResource ModernWindowStyle}"
+        ShowInTaskbar="True"
+        Topmost="True">
 
-    <Border Background="{StaticResource WindowBackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="5">
+    <Border Background="{StaticResource WindowBackgroundBrush}"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="12"
+            Padding="0">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="25" ShadowDepth="10" Opacity="0.6" Color="Black"/>
+        </Border.Effect>
         <Grid Margin="15">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -35,7 +43,7 @@
                 <c:ProfileSelector x:Name="ProfileSelector" ToolName="snapshot" Margin="0,0,0,15"/>
 
                 <Label Content="Pasta do Projeto:"/>
-                <c:PathSelector x:Name="RootPathSelector" Title="Pasta do Projeto" IsFolderPicker="True" />
+                <c:PathSelector x:Name="RootPathSelector" IsFolderPicker="True" />
 
                 <Label Content="Formatos de Saída:" Margin="0,15,0,5"/>
                 <Grid>

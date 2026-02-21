@@ -6,10 +6,7 @@
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Dividir Imagens" Height="640" Width="900" WindowStartupLocation="CenterScreen"
-        WindowStyle="None"
-        AllowsTransparency="True"
-        Background="Transparent"
-        ResizeMode="NoResize"
+        Style="{StaticResource ModernWindowStyle}"
         ShowInTaskbar="True"
         Topmost="True">
 
@@ -17,7 +14,14 @@
         <!-- Styles removed to use global theme -->
     </Window.Resources>
 
-    <Border Background="{StaticResource WindowBackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="5">
+    <Border Background="{StaticResource WindowBackgroundBrush}"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="12"
+            Padding="0">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="25" ShadowDepth="10" Opacity="0.6" Color="Black"/>
+        </Border.Effect>
         <Grid Margin="15">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/> <!-- Header -->

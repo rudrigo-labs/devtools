@@ -5,20 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Notes" Height="720" Width="420"
-        WindowStyle="None"
-        ResizeMode="CanResizeWithGrip"
-        AllowsTransparency="True"
-        Background="#FF121212"
+        Style="{StaticResource ModernWindowStyle}"
         Topmost="True"
         ShowInTaskbar="False">
 
     <Window.Resources>
-        <SolidColorBrush x:Key="PhoneBackgroundBrush" Color="#FF121212"/>
-        <SolidColorBrush x:Key="PhoneForegroundBrush" Color="#FFFFFFFF"/>
-        <SolidColorBrush x:Key="PhoneAccentBrush" Color="#FF0078D7"/> <!-- Windows Blue -->
         <Style TargetType="Button" x:Key="AppBarButtonStyle">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource PhoneForegroundBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Width" Value="48"/>
             <Setter Property="Height" Value="48"/>
@@ -42,8 +36,15 @@
         </Style>
     </Window.Resources>
 
-    <Border BorderThickness="1" BorderBrush="#333333">
-        <Grid>
+    <Border Background="{StaticResource WindowBackgroundBrush}"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="12"
+            Padding="0">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="25" ShadowDepth="10" Opacity="0.6" Color="Black"/>
+        </Border.Effect>
+        <Grid Margin="15">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/> <!-- Header -->
                 <RowDefinition Height="*"/>    <!-- Content -->
@@ -51,7 +52,7 @@
 
             <!-- Header (Draggable) -->
             <Border Grid.Row="0" Background="Transparent" Padding="15,10" MouseLeftButtonDown="Header_MouseLeftButtonDown">
-                <TextBlock x:Name="HeaderTitle" Text="NOTAS" FontFamily="Segoe UI Light" FontSize="24" Foreground="{StaticResource PhoneForegroundBrush}" IsHitTestVisible="False"/>
+                <TextBlock x:Name="HeaderTitle" Text="NOTAS" FontFamily="Segoe UI Light" FontSize="24" Foreground="{StaticResource PrimaryTextBrush}" IsHitTestVisible="False"/>
             </Border>
 
             <!-- List View -->
@@ -63,7 +64,7 @@
 
                 <ListBox x:Name="NotesList" Grid.Row="0" 
                          Background="Transparent" BorderThickness="0" 
-                         Foreground="{StaticResource PhoneForegroundBrush}"
+                         Foreground="{StaticResource PrimaryTextBrush}"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                          MouseDoubleClick="NotesList_MouseDoubleClick"
@@ -131,24 +132,20 @@
                 </Grid.RowDefinitions>
 
                 <TextBox x:Name="NoteTitle" Grid.Row="0" Margin="15,0,15,10"
-                         Background="{StaticResource PhoneBackgroundBrush}" Foreground="{StaticResource PhoneForegroundBrush}"
-                         CaretBrush="{StaticResource PhoneForegroundBrush}"
-                         BorderThickness="0,0,0,1" BorderBrush="#333333" Height="Auto"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Height="Auto"
                          FontSize="18" FontFamily="Segoe UI" FontWeight="SemiBold"
                          Padding="0,5"/>
 
                 <TextBox x:Name="NotesContent" Grid.Row="1"
-                         Background="{StaticResource PhoneBackgroundBrush}" Height="Auto"
-                         Foreground="{StaticResource PhoneForegroundBrush}"
-                         CaretBrush="{StaticResource PhoneForegroundBrush}"
-                         BorderThickness="0"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Height="Auto"
                          FontFamily="Consolas"
                          FontSize="14"
                          Padding="15,5"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
                          VerticalScrollBarVisibility="Auto"
-                         SelectionBrush="{StaticResource PhoneAccentBrush}"
                          TextChanged="NotesContent_TextChanged"/>
 
                 <!-- AppBar Edit -->
