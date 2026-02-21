@@ -109,15 +109,24 @@
 
             <!-- Footer -->
             <Border Grid.Row="2" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="15" Background="{DynamicResource ControlBackgroundBrush}">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Cancelar" 
-                            Click="Close_Click" 
-                            Style="{DynamicResource SecondaryButtonStyle}"
-                            Margin="0,0,10,0"/>
-                    <Button Content="Buscar" 
-                            Click="Execute_Click" 
-                            Style="{DynamicResource PrimaryButtonStyle}"/>
-                </StackPanel>
+                <Grid HorizontalAlignment="Right"
+                      Grid.IsSharedSizeScope="True">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="ActionButtons"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="ActionButtons"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Content="Cancelar"
+                            Click="Close_Click"/>
+
+                    <Button Grid.Column="2"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Content="Buscar"
+                            Click="Execute_Click"/>
+                </Grid>
             </Border>
         </Grid>
     </Border>
