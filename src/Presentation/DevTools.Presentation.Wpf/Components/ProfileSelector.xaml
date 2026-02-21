@@ -26,16 +26,7 @@
                       Background="{DynamicResource ControlBackgroundBrush}"
                       Foreground="{DynamicResource PrimaryTextBrush}"
                       BorderBrush="{DynamicResource BorderBrush}">
-                <ComboBox.Resources>
-                    <Style TargetType="TextBox" BasedOn="{StaticResource ModernTextBoxStyle}"/>
-                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#2D2D2D"/>
-                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E0E0E0"/>
-                    <Style TargetType="ComboBoxItem">
-                        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
-                        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
-                    </Style>
-                </ComboBox.Resources>
-            </ComboBox>
+</ComboBox>
 
             <Button x:Name="SaveButton"
                     Grid.Column="1"

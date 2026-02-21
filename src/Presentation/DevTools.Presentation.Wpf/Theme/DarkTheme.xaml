@@ -245,6 +245,12 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
                     <Grid>
+                        <ToggleButton x:Name="Toggle"
+                                      Focusable="False"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      ClickMode="Press"
+                                      IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" />
                         <!-- FECHADO -->
                         <Border x:Name="Bd"
                             Background="{TemplateBinding Background}"
@@ -252,7 +258,7 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="6">
                             <Grid>
-                                <ContentPresenter
+                                <ContentPresenter x:Name="SelectionPresenter"
                                 Margin="{TemplateBinding Padding}"
                                 VerticalAlignment="Center"
                                 HorizontalAlignment="Left"
@@ -260,7 +266,15 @@
                                 ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                 ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"/>
 
-                                <Path Margin="0,0,12,0"
+                                <TextBox x:Name="PART_EditableTextBox"
+                                         Visibility="Collapsed"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         Foreground="{TemplateBinding Foreground}"
+                                         FontSize="{TemplateBinding FontSize}"
+                                         Padding="0"
+                                         VerticalContentAlignment="Center"
+                                         Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/><Path Margin="0,0,12,0"
                                   HorizontalAlignment="Right"
                                   VerticalAlignment="Center"
                                   Fill="{TemplateBinding Foreground}"
@@ -276,7 +290,7 @@
                            Focusable="False"
                            PopupAnimation="Fade">
                             <Border Margin="0,4,0,0"
-                                Background="{StaticResource DropdownBackgroundBrush}"
+                                Background="{DynamicResource DropdownBackgroundBrush}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="6">
@@ -286,6 +300,17 @@
                             </Border>
                         </Popup>
                     </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEditable" Value="True">
+                            <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="SelectionPresenter" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.55"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

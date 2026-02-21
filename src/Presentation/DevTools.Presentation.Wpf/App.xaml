@@ -6,8 +6,13 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
+                <!-- App theme (source of truth) -->
                 <ResourceDictionary Source="Theme/DarkTheme.xaml"/>
+
+                <!-- MaterialDesign only for DialogHost -->
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.DialogHost.xaml" />
+
+                <!-- Tray icon resources -->
                 <ResourceDictionary Source="Theme/TrayResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
