@@ -1,96 +1,87 @@
-using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using System.Windows.Input;
 using DevTools.Presentation.Wpf.Services;
+using DevTools.Presentation.Wpf.Utilities;
 
 namespace DevTools.Presentation.Wpf.Views;
 
 public partial class LogsWindow : Window
 {
-    private readonly SettingsService _settingsService;
+    private string? _logFilePath;
 
-    public LogsWindow(SettingsService settingsService)
+    public LogsWindow()
     {
         InitializeComponent();
-        _settingsService = settingsService;
-        
-        Loaded += OnLoaded;
+        _logFilePath = AppLogger.LogFilePath;
+        LoadLogs();
     }
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+    private void LoadLogs()
     {
-        RefreshLogs();
-    }
+        if (string.IsNullOrEmpty(_logFilePath) || !File.Exists(_logFilePath))
+        {
+            LogBox.Text = "Nenhum arquivo de log encontrado.";
+            return;
+        }
 
-    private void RefreshLogs()
-    {
         try
         {
-            if (File.Exists(AppLogger.LogFilePath))
+            using (var fs = new FileStream(_logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var reader = new StreamReader(fs))
             {
-                // Read with file share to avoid locking issues if app is writing
-                using var fs = new FileStream(AppLogger.LogFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                using var sr = new StreamReader(fs);
-                LogTextBox.Text = sr.ReadToEnd();
-                LogTextBox.ScrollToEnd();
-            }
-            else
-            {
-                LogTextBox.Text = "Arquivo de log não encontrado.";
+                LogBox.Text = reader.ReadToEnd();
+                LogBox.ScrollToEnd();
             }
         }
         catch (Exception ex)
         {
-            LogTextBox.Text = $"Erro ao ler logs: {ex.Message}";
+            LogBox.Text = $"Erro ao ler log: {ex.Message}";
         }
     }
 
     private void Refresh_Click(object sender, RoutedEventArgs e)
     {
-        RefreshLogs();
-    }
-
-    private void Clear_Click(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            // Try to write empty
-            File.WriteAllText(AppLogger.LogFilePath, string.Empty);
-            RefreshLogs();
-        }
-        catch (Exception ex)
-        {
-            System.Windows.MessageBox.Show($"Não foi possível limpar o arquivo de log: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
+        LoadLogs();
     }
 
     private void OpenFolder_Click(object sender, RoutedEventArgs e)
     {
-        try
+        if (string.IsNullOrEmpty(_logFilePath)) return;
+        
+        var dir = Path.GetDirectoryName(_logFilePath);
+        if (Directory.Exists(dir))
         {
-            var dir = Path.GetDirectoryName(AppLogger.LogFilePath);
-            if (dir != null && Directory.Exists(dir))
+            Process.Start(new ProcessStartInfo
             {
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = dir,
-                    UseShellExecute = true
-                });
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Windows.MessageBox.Show($"Erro ao abrir pasta: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                FileName = dir,
+                UseShellExecute = true,
+                Verb = "open"
+            });
         }
     }
 
-    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private void Clear_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(_logFilePath) || !File.Exists(_logFilePath)) return;
+
+        try
+        {
+            File.WriteAllText(_logFilePath, string.Empty);
+            LoadLogs();
+        }
+        catch (Exception ex)
+        {
+            DevToolsMessage.Error($"Erro ao limpar logs: {ex.Message}", "Erro");
+        }
+    }
+
+    private void Header_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         DragMove();
     }
 
-    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    private void Close_Click(object sender, RoutedEventArgs e)
     {
         Close();
     }

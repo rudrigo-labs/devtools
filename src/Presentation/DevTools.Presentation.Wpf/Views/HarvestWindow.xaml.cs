@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using DevTools.Harvest.Engine;
 using DevTools.Harvest.Models;
 using DevTools.Presentation.Wpf.Services;
+using DevTools.Presentation.Wpf.Utilities;
 using DevTools.Core.Models;
 
 namespace DevTools.Presentation.Wpf.Views;
@@ -24,7 +25,6 @@ public partial class HarvestWindow : Window
         ProfileSelector.GetOptionsFunc = GetCurrentOptions;
         ProfileSelector.ProfileLoaded += LoadProfile;
 
-        // Carregar configurações salvas
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastHarvestSourcePath))
             SourcePathSelector.SelectedPath = _settingsService.Settings.LastHarvestSourcePath;
             
@@ -39,27 +39,6 @@ public partial class HarvestWindow : Window
 
         if (_settingsService.Settings.LastHarvestCopyFiles.HasValue)
             CopyFilesCheck.IsChecked = _settingsService.Settings.LastHarvestCopyFiles.Value;
-        
-        // Posicionar no canto inferior direito e fechar ao perder foco
-        /* Position handled by TrayService
-        Loaded += (s, e) => 
-        {
-            var desktopWorkingArea = SystemParameters.WorkArea;
-            this.Left = desktopWorkingArea.Right - this.ActualWidth - 20;
-            this.Top = desktopWorkingArea.Bottom - this.ActualHeight - 20;
-            this.Activate();
-        };
-        */
-
-        // Comportamento estilo Tray: Fechar ao clicar fora
-        this.Deactivated += (s, e) => 
-        {
-            // Se o usuário clicar fora, fecha a janela (como um menu)
-            // Mas apenas se não estiver abrindo um diálogo filho (como o PathSelector)
-            // TODO: Refinar lógica se PathSelector causar Deactivate. Por enquanto, simplificado.
-            // this.Close(); 
-            // Comentado pois o FolderBrowserDialog causa Deactivate. Precisamos de flag.
-        };
     }
 
     private Dictionary<string, string> GetCurrentOptions()
@@ -90,17 +69,28 @@ public partial class HarvestWindow : Window
     {
         if (string.IsNullOrWhiteSpace(SourcePathSelector.SelectedPath))
         {
-            System.Windows.MessageBox.Show("Por favor, selecione um diretório de origem.", "Erro de Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
+            DevToolsMessage.Warning("Por favor, selecione um diretório de origem.", "Erro de Validação");
+            return;
+        }
+
+        if (!System.IO.Directory.Exists(SourcePathSelector.SelectedPath))
+        {
+            DevToolsMessage.Error("O diretório de origem especificado não existe.", "Diretório Inválido");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(OutputPathSelector.SelectedPath))
         {
-            System.Windows.MessageBox.Show("Por favor, selecione um diretório de destino.", "Erro de Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
+            DevToolsMessage.Warning("Por favor, selecione um diretório de destino.", "Erro de Validação");
             return;
         }
 
-        // Salvar configurações apenas se opt-in
+        if (!System.IO.Directory.Exists(OutputPathSelector.SelectedPath))
+        {
+            DevToolsMessage.Error("O diretório de destino especificado não existe.", "Diretório Inválido");
+            return;
+        }
+
         if (RememberSettingsCheck.IsChecked == true)
         {
             _settingsService.Settings.LastHarvestSourcePath = SourcePathSelector.SelectedPath;
@@ -122,30 +112,20 @@ public partial class HarvestWindow : Window
             CopyFiles: CopyFilesCheck.IsChecked ?? true
         );
 
-        // Execute directly to show result in-place
         var engine = new HarvestEngine();
         
-        // Disable UI while running
         IsEnabled = false;
         RunSummary.Clear();
         
         try 
         {
-            // Simple progress reporter could be added here if needed, 
-            // but for now we just await the result.
             var result = await System.Threading.Tasks.Task.Run(() => engine.ExecuteAsync(Result));
-            
             RunSummary.BindResult(result);
-            
-            // If successful and not user cancelled, maybe we don't close immediately 
-            // so user can see the summary.
-            // If we wanted to "fire and forget" via JobManager, we would do that instead.
-            // But requirement is "WPF mostra status e permite ver detalhes".
-            
         }
         catch (Exception ex)
         {
-             System.Windows.MessageBox.Show($"Erro crítico ao executar: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+             AppLogger.Error("Erro crítico ao executar Harvest", ex);
+             DevToolsMessage.Error($"Erro crítico ao executar: {ex.Message}", "Erro");
         }
         finally
         {
@@ -155,7 +135,6 @@ public partial class HarvestWindow : Window
     
     private void Header_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-        // DragMove();
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -163,3 +142,4 @@ public partial class HarvestWindow : Window
         Close();
     }
 }
+

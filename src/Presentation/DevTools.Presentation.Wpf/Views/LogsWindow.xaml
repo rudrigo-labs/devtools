@@ -4,49 +4,63 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Logs do Sistema" Height="640" Width="900" WindowStartupLocation="CenterScreen"
-        Style="{StaticResource ModernWindowStyle}">
+        Title="DevTools - Logs"
+        Height="600" Width="900"
+        WindowStyle="None"
+        ResizeMode="CanResizeWithGrip"
+        AllowsTransparency="True"
+        Background="{StaticResource DevToolsWindowBackground}"
+        BorderBrush="{StaticResource DevToolsBorder}"
+        BorderThickness="1">
 
-    <Border Background="{StaticResource WindowBackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="0">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="25" ShadowDepth="10" Opacity="0.6" Color="Black"/>
-        </Border.Effect>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="40" ResizeBorderThickness="5" />
+    </WindowChrome.WindowChrome>
 
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50"/> <!-- Header -->
-                <RowDefinition Height="*"/>   <!-- Content -->
-                <RowDefinition Height="60"/>  <!-- Footer -->
-            </Grid.RowDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-            <!-- Header (Draggable) -->
-            <Border Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown" CornerRadius="12,12,0,0">
-                <Grid Margin="20,0">
-                    <TextBlock Text="Logs do Sistema" VerticalAlignment="Center" Foreground="{StaticResource TextBrush}" FontSize="16" FontWeight="SemiBold"/>
-                    
-                    <Button HorizontalAlignment="Right" VerticalAlignment="Center" Click="CloseButton_Click" Style="{StaticResource IconButtonStyle}" ToolTip="Fechar">
-                        <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" Fill="{StaticResource TextBrush}" Stretch="Uniform" Width="12" Height="12"/>
-                    </Button>
-                </Grid>
-            </Border>
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{StaticResource DevToolsSurface}" MouseLeftButtonDown="Header_MouseLeftButtonDown">
+            <Grid Margin="12,0">
+                <TextBlock Text="Application Logs" 
+                           VerticalAlignment="Center" 
+                           FontSize="{StaticResource DevToolsFontSize.SectionTitle}"
+                           Foreground="{StaticResource DevToolsTextPrimary}"
+                           FontWeight="SemiBold"/>
+                
+                <Button Content="✕" 
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource DevToolsWindowButtonStyle}"
+                        Click="Close_Click"/>
+            </Grid>
+        </Border>
 
-            <!-- Separator -->
-            <Rectangle Grid.Row="0" VerticalAlignment="Bottom" Height="1" Fill="{StaticResource BorderBrush}" Opacity="0.3"/>
+        <!-- Log Content -->
+        <TextBox Grid.Row="1" x:Name="LogBox" 
+                 Margin="16"
+                 IsReadOnly="True" 
+                 TextWrapping="Wrap" 
+                 VerticalScrollBarVisibility="Auto"
+                 FontFamily="Consolas"
+                 FontSize="12"
+                 Background="{StaticResource DevToolsInputBackground}"
+                 Foreground="{StaticResource DevToolsTextPrimary}"
+                 BorderThickness="0"
+                 Padding="8"/>
 
-            <!-- Log Content -->
-            <TextBox x:Name="LogTextBox" Grid.Row="1" Margin="10"
-                     Style="{StaticResource ModernTextBoxStyle}"
-                     FontFamily="Consolas" FontSize="12"
-                     IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                     TextWrapping="NoWrap"/>
-
-            <!-- Footer -->
-            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="20,0">
-                <Button Content="Cancelar" Click="CloseButton_Click" Margin="0,0,10,0" Style="{StaticResource SecondaryButtonStyle}"/>
-                <Button Content="Abrir Pasta" Click="OpenFolder_Click" Margin="0,0,10,0" Style="{StaticResource PrimaryButtonStyle}"/>
-                <Button Content="Atualizar" Click="Refresh_Click" Margin="0,0,10,0" Style="{StaticResource SecondaryButtonStyle}"/>
-                <Button Content="Limpar" Click="Clear_Click" Style="{StaticResource SecondaryButtonStyle}"/>
+        <!-- Footer Actions -->
+        <Border Grid.Row="2" Background="{StaticResource DevToolsSurface}" Padding="16">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Atualizar" Click="Refresh_Click" Style="{StaticResource DevToolsSecondaryButton}" Margin="0,0,8,0"/>
+                <Button Content="Abrir Pasta" Click="OpenFolder_Click" Style="{StaticResource DevToolsSecondaryButton}" Margin="0,0,8,0"/>
+                <Button Content="Limpar Logs" Click="Clear_Click" Style="{StaticResource DevToolsDangerButton}"/>
             </StackPanel>
-        </Grid>
-    </Border>
+        </Border>
+    </Grid>
 </Window>

@@ -1,12 +1,13 @@
 using System;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+using System.Windows.Input;
+using DevTools.Core.Models;
 using DevTools.Presentation.Wpf.Services;
+using DevTools.Presentation.Wpf.Utilities;
 using DevTools.SearchText.Engine;
 using DevTools.SearchText.Models;
-using DevTools.Core.Models;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -30,16 +31,6 @@ public partial class SearchTextWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // Restore Position disabled to enforce TrayService placement
-        /*
-        if (_settings.Settings.SearchTextWindowTop.HasValue)
-        {
-            Top = _settings.Settings.SearchTextWindowTop.Value;
-            Left = _settings.Settings.SearchTextWindowLeft.Value;
-        }
-        */
-
-        // Restore Inputs
         if (!string.IsNullOrEmpty(_settings.Settings.LastSearchTextRootPath))
             PathSelector.SelectedPath = _settings.Settings.LastSearchTextRootPath;
 
@@ -76,20 +67,19 @@ public partial class SearchTextWindow : Window
     {
         if (profile.Options.TryGetValue("root", out var root)) PathSelector.SelectedPath = root;
         if (profile.Options.TryGetValue("pattern", out var pattern)) SearchTextInput.Text = pattern;
-        
+
         if (profile.Options.TryGetValue("regex", out var regex))
-             UseRegexCheck.IsChecked = bool.TryParse(regex, out var r) ? r : false;
-             
+            UseRegexCheck.IsChecked = bool.TryParse(regex, out var r) ? r : false;
+
         if (profile.Options.TryGetValue("case-sensitive", out var cs))
-             CaseSensitiveCheck.IsChecked = bool.TryParse(cs, out var c) ? c : false;
-             
+            CaseSensitiveCheck.IsChecked = bool.TryParse(cs, out var c) ? c : false;
+
         if (profile.Options.TryGetValue("include", out var inc)) IncludePatternInput.Text = inc;
         if (profile.Options.TryGetValue("exclude", out var exc)) ExcludePatternInput.Text = exc;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        // if (e.ButtonState == MouseButtonState.Pressed) DragMove();
     }
 
     private void Close_Click(object sender, RoutedEventArgs e)
@@ -101,16 +91,22 @@ public partial class SearchTextWindow : Window
     {
         var root = PathSelector.SelectedPath;
         var text = SearchTextInput.Text;
-        
+
         if (string.IsNullOrWhiteSpace(root))
         {
-            System.Windows.MessageBox.Show("Selecione o diretório de busca.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
+            DevToolsMessage.Warning("Selecione o diretório de busca.", "Atenção");
+            return;
+        }
+
+        if (!System.IO.Directory.Exists(root))
+        {
+            DevToolsMessage.Error("O diretório de busca especificado não existe.", "Diretório Inválido");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            System.Windows.MessageBox.Show("Informe o texto a ser pesquisado.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
+            DevToolsMessage.Warning("Informe o texto a ser pesquisado.", "Atenção");
             return;
         }
 
@@ -120,35 +116,44 @@ public partial class SearchTextWindow : Window
             UseRegex: UseRegexCheck.IsChecked == true,
             CaseSensitive: CaseSensitiveCheck.IsChecked == true,
             IncludeGlobs: ParsePatterns(IncludePatternInput.Text),
-            ExcludeGlobs: ParsePatterns(ExcludePatternInput.Text)
-        );
+            ExcludeGlobs: ParsePatterns(ExcludePatternInput.Text));
 
         OutputText.Text = "Buscando...";
 
         _jobManager.StartJob("Busca de Texto", async (progress, ct) =>
         {
-            var engine = new SearchTextEngine();
-            var result = await engine.ExecuteAsync(request, progress, ct);
-
-            if (result.IsSuccess && result.Value != null)
+            try
             {
-                var count = result.Value.TotalOccurrences;
-                var fileCount = result.Value.TotalFilesWithMatches;
+                var engine = new SearchTextEngine();
+                var result = await engine.ExecuteAsync(request, progress, ct);
 
-                Dispatcher.Invoke(() =>
+                if (result.IsSuccess && result.Value != null)
                 {
-                    OutputText.Text = $"Encontrados {count} resultados em {fileCount} arquivos.\n\n" + 
-                                      string.Join("\n", result.Value.Files.SelectMany(f => f.Lines.Select(m => $"{f.FullPath}:{m.LineNumber} -> {m.LineText.Trim()}")));
-                });
-                return $"Busca concluída: {count} ocorrências.";
+                    var count = result.Value.TotalOccurrences;
+                    var fileCount = result.Value.TotalFilesWithMatches;
+                    var matches = result.Value.Files.SelectMany(f => f.Lines.Select(m => $"{f.FullPath}:{m.LineNumber} -> {m.LineText.Trim()}"));
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        OutputText.Text = $"Encontrados {count} resultados em {fileCount} arquivos.\n\n" +
+                                          string.Join("\n", matches);
+                    });
+                    return $"Busca concluída: {count} ocorrências.";
+                }
+                else
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        OutputText.Text = $"ERRO:\n{string.Join("\n", result.Errors.Select(e => e.Message))}";
+                    });
+                    return "Falha na busca.";
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Dispatcher.Invoke(() =>
-                {
-                    OutputText.Text = $"ERRO:\n{string.Join("\n", result.Errors.Select(e => e.Message))}";
-                });
-                return "Falha na busca.";
+                AppLogger.Error("Erro crítico na busca", ex);
+                Dispatcher.Invoke(() => OutputText.Text = $"ERRO CRÍTICO: {ex.Message}");
+                return $"Erro crítico: {ex.Message}";
             }
         });
     }
@@ -159,3 +164,4 @@ public partial class SearchTextWindow : Window
         return input.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 }
+

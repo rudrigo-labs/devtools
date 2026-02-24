@@ -1,12 +1,12 @@
 using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+using DevTools.Core.Models;
 using DevTools.Organizer.Engine;
 using DevTools.Organizer.Models;
 using DevTools.Presentation.Wpf.Services;
-using DevTools.Core.Models;
+using DevTools.Presentation.Wpf.Utilities;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -23,27 +23,22 @@ public partial class OrganizerWindow : Window
 
         ProfileSelector.GetOptionsFunc = GetCurrentOptions;
         ProfileSelector.ProfileLoaded += LoadProfile;
-        
-        // Carregar configurações
+
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastOrganizerInputPath))
             InputPathSelector.SelectedPath = _settingsService.Settings.LastOrganizerInputPath;
         else
             InputPathSelector.SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
-        // Posicionar no canto inferior direito
-        Loaded += (s, e) => 
+        Loaded += (s, e) =>
         {
             var desktopWorkingArea = SystemParameters.WorkArea;
-            this.Left = desktopWorkingArea.Right - this.ActualWidth - 20;
-            this.Top = desktopWorkingArea.Bottom - this.ActualHeight - 20;
-            this.Activate();
+            Left = desktopWorkingArea.Right - ActualWidth - 20;
+            Top = desktopWorkingArea.Bottom - ActualHeight - 20;
+            Activate();
         };
 
-        // Comportamento estilo Tray: Fechar ao clicar fora
-        this.Deactivated += (s, e) => 
+        Deactivated += (s, e) =>
         {
-             // this.Close(); 
-             // Comentado para evitar fechamento acidental ao usar dialogs
         };
     }
 
@@ -60,16 +55,15 @@ public partial class OrganizerWindow : Window
     {
         if (profile.Options.TryGetValue("inbox", out var inbox)) InputPathSelector.SelectedPath = inbox;
         else if (profile.Options.TryGetValue("input", out var input)) InputPathSelector.SelectedPath = input;
-        
+
         if (profile.Options.TryGetValue("output", out var output)) OutputPathSelector.SelectedPath = output;
-        
+
         if (profile.Options.TryGetValue("apply", out var applyStr))
-             SimulateCheck.IsChecked = !(bool.TryParse(applyStr, out var a) ? a : false);
+            SimulateCheck.IsChecked = !(bool.TryParse(applyStr, out var a) ? a : false);
     }
 
     private void Header_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-        // Dragging disabled per user request
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -85,34 +79,55 @@ public partial class OrganizerWindow : Window
 
         if (string.IsNullOrWhiteSpace(inputPath))
         {
-            System.Windows.MessageBox.Show("Por favor, selecione uma pasta de entrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+            DevToolsMessage.Warning("Por favor, selecione uma pasta de entrada.", "Erro");
             return;
         }
 
-        // Salvar configurações
+        if (!System.IO.Directory.Exists(inputPath))
+        {
+            DevToolsMessage.Error("O diretório de entrada especificado não existe.", "Diretório Inválido");
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(outputPath) && !System.IO.Directory.Exists(outputPath))
+        {
+            DevToolsMessage.Error("O diretório de saída especificado não existe.", "Diretório Inválido");
+            return;
+        }
+
         _settingsService.Settings.LastOrganizerInputPath = inputPath;
         _settingsService.Save();
 
-        // Se output vazio, usa input (comportamento padrão do Organizer)
         if (string.IsNullOrWhiteSpace(outputPath))
         {
             outputPath = inputPath;
         }
 
-        // Fecha janela para iniciar background job
         Close();
 
-        // Inicia Job
         _jobManager.StartJob("Organizer", async (reporter, ct) =>
         {
-            var engine = new OrganizerEngine();
-            // Apply = !simulate
-            var request = new OrganizerRequest(inputPath, outputPath, null, null, !simulate);
-            
-            var result = await engine.ExecuteAsync(request, reporter, ct);
-            return result.IsSuccess 
-                ? $"Organização concluída! Arquivos processados: {result.Value?.Stats.TotalFiles ?? 0}" 
-                : $"Falha na organização: {string.Join(", ", result.Errors.Select(e => e.Message))}";
+            try
+            {
+                var engine = new OrganizerEngine();
+                var request = new OrganizerRequest(inputPath, outputPath, null, null, !simulate);
+
+                var result = await engine.ExecuteAsync(request, reporter, ct);
+
+                if (!result.IsSuccess)
+                {
+                    return $"Erro ao organizar: {string.Join(", ", result.Errors.Select(e => e.Message))}";
+                }
+
+                var stats = result.Value.Stats;
+                return $"Organização concluída! Movidos: {stats.WouldMove}, Falhas: {stats.Errors}, Duplicados: {stats.Duplicates}";
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Error("Erro crítico ao executar Organizer", ex);
+                return $"Erro crítico: {ex.Message}";
+            }
         });
     }
 }
+

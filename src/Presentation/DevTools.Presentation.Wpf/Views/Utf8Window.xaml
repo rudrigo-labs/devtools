@@ -1,11 +1,11 @@
-<Window x:Class="DevTools.Presentation.Wpf.Views.NgrokWindow"
+<Window x:Class="DevTools.Presentation.Wpf.Views.Utf8Window"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="DevTools - Ngrok"
+        Title="DevTools - UTF-8 Convert"
         Height="550" Width="850"
         WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
@@ -27,7 +27,7 @@
         <!-- Header -->
         <Border Grid.Row="0" Background="{StaticResource DevToolsSurface}" MouseLeftButtonDown="Header_MouseLeftButtonDown">
             <Grid Margin="12,0">
-                <TextBlock Text="Ngrok Manager" 
+                <TextBlock Text="UTF-8 Convert" 
                            VerticalAlignment="Center" 
                            FontSize="{StaticResource DevToolsFontSize.SectionTitle}"
                            Foreground="{StaticResource DevToolsTextPrimary}"
@@ -51,37 +51,35 @@
             <!-- Parameters -->
             <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Margin="0,0,16,0">
                 <StackPanel>
-                    <c:ProfileSelector x:Name="ProfileSelector" ToolName="ngrok" Margin="0,0,0,16"/>
+                    <c:ProfileSelector x:Name="ProfileSelector" ToolName="utf8convert" Margin="0,0,0,16"/>
+
+                    <c:PathSelector x:Name="RootPathSelector" Title="Diretório Raiz" IsFolderPicker="True" Margin="0,0,0,16"/>
 
                     <StackPanel>
-                        <TextBlock Text="Ação" FontSize="{StaticResource DevToolsFontSize.SectionTitle}" Foreground="{StaticResource DevToolsAccent}" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                        <ComboBox x:Name="ActionCombo" Style="{StaticResource DevToolsComboBox}" SelectionChanged="ActionCombo_SelectionChanged" Margin="0,0,0,16">
-                            <ComboBoxItem Content="Listar Túneis (ListTunnels)" Tag="ListTunnels" IsSelected="True"/>
-                            <ComboBoxItem Content="Iniciar HTTP (StartHttp)" Tag="StartHttp"/>
-                            <ComboBoxItem Content="Fechar Túnel (CloseTunnel)" Tag="CloseTunnel"/>
-                            <ComboBoxItem Content="Matar Processos (KillAll)" Tag="KillAll"/>
-                            <ComboBoxItem Content="Status do Serviço (Status)" Tag="Status"/>
-                        </ComboBox>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,16,0,0">
-                        <TextBlock Text="Configuração do Túnel" FontSize="{StaticResource DevToolsFontSize.SectionTitle}" Foreground="{StaticResource DevToolsAccent}" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                        <TextBlock Text="Filtros" FontSize="{StaticResource DevToolsFontSize.SectionTitle}" Foreground="{StaticResource DevToolsAccent}" FontWeight="SemiBold" Margin="0,0,0,8"/>
                         <StackPanel Margin="0,0,0,16">
-                            <Label Content="Porta Local" Foreground="{StaticResource DevToolsTextSecondary}"/>
-                            <TextBox x:Name="PortBox" Style="{StaticResource DevToolsTextInput}" Text="8080"/>
+                            <Label Content="Incluir (globs, um por linha)" Foreground="{StaticResource DevToolsTextSecondary}"/>
+                            <TextBox x:Name="IncludeBox" Height="60" TextWrapping="Wrap" AcceptsReturn="True" 
+                                     Style="{StaticResource DevToolsTextInput}" Margin="0,0,0,8"/>
                             
-                            <Label Content="Subdomínio (Opcional)" Foreground="{StaticResource DevToolsTextSecondary}"/>
-                            <TextBox x:Name="SubdomainBox" Style="{StaticResource DevToolsTextInput}"/>
-                            
-                            <Label Content="Nome do Túnel (para fechar)" Foreground="{StaticResource DevToolsTextSecondary}"/>
-                            <TextBox x:Name="TunnelNameBox" Style="{StaticResource DevToolsTextInput}"/>
-                            
-                            <Label Content="Auth Token (Opcional)" Foreground="{StaticResource DevToolsTextSecondary}"/>
-                            <TextBox x:Name="AuthTokenBox" Style="{StaticResource DevToolsTextInput}"/>
+                            <Label Content="Excluir (globs, um por linha)" Foreground="{StaticResource DevToolsTextSecondary}"/>
+                            <TextBox x:Name="ExcludeBox" Height="60" TextWrapping="Wrap" AcceptsReturn="True" 
+                                     Style="{StaticResource DevToolsTextInput}"/>
                         </StackPanel>
                     </StackPanel>
 
-                    <Button x:Name="RunButton" Content="Executar" Click="Run_Click" 
+                    <StackPanel Margin="0,16,0,0">
+                        <TextBlock Text="Opções" FontSize="{StaticResource DevToolsFontSize.SectionTitle}" Foreground="{StaticResource DevToolsAccent}" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                        <StackPanel Margin="0,0,0,16">
+                            <CheckBox x:Name="RecursiveCheck" Content="Recursivo" IsChecked="True" Margin="0,0,0,8" Style="{StaticResource DevToolsCheckBox}"/>
+                            <CheckBox x:Name="DryRunCheck" Content="Simulação (Dry Run)" Margin="0,0,0,8" Style="{StaticResource DevToolsCheckBox}"/>
+                            <CheckBox x:Name="BackupCheck" Content="Criar Backup (.bak)" IsChecked="True" Margin="0,0,0,8" Style="{StaticResource DevToolsCheckBox}"/>
+                            <CheckBox x:Name="BomCheck" Content="Adicionar BOM" IsChecked="True" Margin="0,0,0,8" Style="{StaticResource DevToolsCheckBox}"/>
+                            <CheckBox x:Name="RememberSettingsCheck" Content="Lembrar configurações" IsChecked="True" Margin="0,8,0,0" Style="{StaticResource DevToolsCheckBox}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Button x:Name="RunButton" Content="Executar Conversão" Click="Run_Click" 
                             Margin="0,24,0,0" Height="40" 
                             Style="{StaticResource DevToolsPrimaryButton}"/>
                 </StackPanel>
