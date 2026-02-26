@@ -45,10 +45,6 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                    <c:ProfileSelector x:Name="ProfileSelector"
-                                       ToolName="migrations"
-                                       Margin="0,0,0,12"/>
-
                     <TextBlock Text="Projeto raiz (Root)"
                                Foreground="{StaticResource DevToolsTextSecondary}"/>
                     <c:PathSelector x:Name="ProjectSelector"

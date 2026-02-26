@@ -4,7 +4,9 @@
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         Title="DevTools - Organizer"
         Width="640"
-        Height="360"
+        SizeToContent="Height"
+        MinHeight="400"
+        WindowStartupLocation="Manual"
         WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
         Background="{StaticResource DevToolsWindowBackground}">
@@ -40,9 +42,7 @@
 
             <StackPanel Grid.Row="1"
                         Margin="0,12,0,12">
-                <c:ProfileSelector x:Name="ProfileSelector"
-                                   ToolName="organizer"
-                                   Margin="0,0,0,12"/>
+                <!-- ProfileSelector Removed -->
 
                 <c:PathSelector x:Name="InputPathSelector"
                                 Title="Inbox (pasta de entrada)"
@@ -61,13 +61,16 @@
             <StackPanel Grid.Row="2"
                         Orientation="Horizontal"
                         HorizontalAlignment="Right">
+                <Button Content="Cancelar"
+                        Width="100"
+                        Margin="0,0,10,0"
+                        Click="CloseButton_Click"
+                        Style="{StaticResource DevToolsSecondaryButton}"/>
                 <Button Content="Organizar"
                         Width="140"
-                        Margin="0,0,0,0"
                         Click="RunButton_Click"
                         Style="{StaticResource DevToolsPrimaryButton}"/>
             </StackPanel>
         </Grid>
     </Border>
 </Window>
-

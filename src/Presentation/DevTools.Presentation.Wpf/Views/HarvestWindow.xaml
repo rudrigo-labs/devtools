@@ -45,9 +45,8 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                    <c:ProfileSelector x:Name="ProfileSelector"
-                                       ToolName="harvest"
-                                       Margin="0,0,0,12"/>
+                    
+                    <!-- Profile Selector Removed per user request -->
 
                     <TextBlock Text="Diretório de origem"
                                Foreground="{StaticResource DevToolsTextSecondary}"/>
@@ -111,4 +110,3 @@
         </Grid>
     </Border>
 </Window>
-

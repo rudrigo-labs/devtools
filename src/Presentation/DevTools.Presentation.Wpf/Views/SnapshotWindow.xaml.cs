@@ -4,6 +4,7 @@ using DevTools.Snapshot.Models;
 using DevTools.Presentation.Wpf.Services;
 using DevTools.Presentation.Wpf.Utilities;
 using DevTools.Core.Models;
+using DevTools.Presentation.Wpf.Components;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -17,9 +18,6 @@ public partial class SnapshotWindow : Window
     {
         InitializeComponent();
         _settingsService = settingsService;
-
-        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
-        ProfileSelector.ProfileLoaded += LoadProfile;
 
         // Load Settings
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastSnapshotRootPath))
@@ -45,41 +43,6 @@ public partial class SnapshotWindow : Window
 
         if (_settingsService.Settings.LastSnapshotHtml.HasValue)
             HtmlCheck.IsChecked = _settingsService.Settings.LastSnapshotHtml.Value;
-    }
-
-    private Dictionary<string, string> GetCurrentOptions()
-    {
-        return new Dictionary<string, string>
-        {
-            ["root"] = RootPathSelector.SelectedPath,
-            ["output"] = OutputPathSelector.SelectedPath,
-            ["ignore"] = IgnoredBox.Text,
-            ["max-kb"] = MaxKbBox.Text,
-            ["text"] = (TextCheck.IsChecked ?? true).ToString().ToLowerInvariant(),
-            ["json-nested"] = (JsonNestedCheck.IsChecked ?? false).ToString().ToLowerInvariant(),
-            ["json-recursive"] = (JsonRecursiveCheck.IsChecked ?? false).ToString().ToLowerInvariant(),
-            ["html"] = (HtmlCheck.IsChecked ?? false).ToString().ToLowerInvariant()
-        };
-    }
-
-    private void LoadProfile(ToolProfile profile)
-    {
-        if (profile.Options.TryGetValue("root", out var root)) RootPathSelector.SelectedPath = root;
-        if (profile.Options.TryGetValue("output", out var output)) OutputPathSelector.SelectedPath = output;
-        if (profile.Options.TryGetValue("ignore", out var ignore)) IgnoredBox.Text = ignore;
-        if (profile.Options.TryGetValue("max-kb", out var maxKb)) MaxKbBox.Text = maxKb;
-        
-        if (profile.Options.TryGetValue("text", out var text)) 
-            TextCheck.IsChecked = bool.TryParse(text, out var t) ? t : true;
-        
-        if (profile.Options.TryGetValue("json-nested", out var nested)) 
-            JsonNestedCheck.IsChecked = bool.TryParse(nested, out var n) ? n : false;
-        
-        if (profile.Options.TryGetValue("json-recursive", out var recursive)) 
-            JsonRecursiveCheck.IsChecked = bool.TryParse(recursive, out var r) ? r : false;
-        
-        if (profile.Options.TryGetValue("html", out var html)) 
-            HtmlCheck.IsChecked = bool.TryParse(html, out var h) ? h : false;
     }
 
     private async void Run_Click(object sender, RoutedEventArgs e)

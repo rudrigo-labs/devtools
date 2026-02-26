@@ -59,8 +59,37 @@ public class TrayService : IDisposable
         }
     }
 
+    public void CloseAllTools()
+    {
+        _notesWindow?.Hide(); 
+        
+        CloseWindow(ref _organizerWindow);
+        CloseWindow(ref _harvestWindow);
+        CloseWindow(ref _searchTextWindow);
+        CloseWindow(ref _migrationsWindow);
+        CloseWindow(ref _imageSplitWindow);
+        CloseWindow(ref _renameWindow);
+        CloseWindow(ref _utf8Window);
+        CloseWindow(ref _snapshotWindow);
+        CloseWindow(ref _sshTunnelWindow);
+        CloseWindow(ref _ngrokWindow);
+        CloseWindow(ref _logsWindow);
+        
+        _dashboardWindow?.Hide();
+    }
+
+    private void CloseWindow<T>(ref T? window) where T : Window
+    {
+        if (window != null)
+        {
+            try { window.Close(); } catch { }
+            window = null;
+        }
+    }
+
     public void ShowDashboard()
     {
+        CloseAllTools();
         if (_dashboardWindow != null)
         {
             _dashboardWindow.Show();
@@ -223,13 +252,24 @@ public class TrayService : IDisposable
         return fallbackMenu;
     }
 
+    private void PositionWindowBottomRight(Window window)
+    {
+        if (window == null) return;
+        
+        var desktopWorkingArea = SystemParameters.WorkArea;
+        window.Left = desktopWorkingArea.Right - window.Width - 20;
+        window.Top = desktopWorkingArea.Bottom - window.Height - 20;
+    }
+
     private void ShowOrganizerWindow()
     {
+        CloseAllTools();
         if (_organizerWindow == null || !_organizerWindow.IsLoaded)
         {
             _organizerWindow = new OrganizerWindow(_jobManager, _settingsService);
         }
 
+        PositionWindowBottomRight(_organizerWindow);
         _organizerWindow.Show();
         if (_organizerWindow.WindowState == WindowState.Minimized)
             _organizerWindow.WindowState = WindowState.Normal;
@@ -238,11 +278,13 @@ public class TrayService : IDisposable
 
     private void ShowImageSplitWindow()
     {
+        CloseAllTools();
         if (_imageSplitWindow == null || !_imageSplitWindow.IsLoaded)
         {
             _imageSplitWindow = new ImageSplitWindow(_jobManager, _settingsService);
         }
 
+        PositionWindowBottomRight(_imageSplitWindow);
         _imageSplitWindow.Show();
         if (_imageSplitWindow.WindowState == WindowState.Minimized)
             _imageSplitWindow.WindowState = WindowState.Normal;
@@ -251,11 +293,13 @@ public class TrayService : IDisposable
 
     private void ShowRenameWindow()
     {
+        CloseAllTools();
         if (_renameWindow == null || !_renameWindow.IsLoaded)
         {
             _renameWindow = new RenameWindow(_jobManager, _settingsService);
         }
 
+        PositionWindowBottomRight(_renameWindow);
         _renameWindow.Show();
         if (_renameWindow.WindowState == WindowState.Minimized)
             _renameWindow.WindowState = WindowState.Normal;
@@ -264,11 +308,13 @@ public class TrayService : IDisposable
 
     private void ShowUtf8Window()
     {
+        CloseAllTools();
         if (_utf8Window == null || !_utf8Window.IsLoaded)
         {
             _utf8Window = new Utf8Window(_jobManager, _settingsService);
         }
 
+        PositionWindowBottomRight(_utf8Window);
         _utf8Window.Show();
         if (_utf8Window.WindowState == WindowState.Minimized)
             _utf8Window.WindowState = WindowState.Normal;
@@ -277,11 +323,13 @@ public class TrayService : IDisposable
 
     private void ShowSnapshotWindow()
     {
+        CloseAllTools();
         if (_snapshotWindow == null || !_snapshotWindow.IsLoaded)
         {
             _snapshotWindow = new SnapshotWindow(_settingsService);
         }
 
+        PositionWindowBottomRight(_snapshotWindow);
         _snapshotWindow.Show();
         if (_snapshotWindow.WindowState == WindowState.Minimized)
             _snapshotWindow.WindowState = WindowState.Normal;
@@ -290,37 +338,43 @@ public class TrayService : IDisposable
 
     private void ShowSshTunnelWindow()
     {
+        CloseAllTools();
         if (_sshTunnelWindow == null || !_sshTunnelWindow.IsLoaded)
         {
             _sshTunnelWindow = new SshTunnelWindow(_settingsService);
         }
 
+        PositionWindowBottomRight(_sshTunnelWindow);
         _sshTunnelWindow.Show();
         if (_sshTunnelWindow.WindowState == WindowState.Minimized)
             _sshTunnelWindow.WindowState = WindowState.Normal;
         _sshTunnelWindow.Activate();
     }
 
-    private void ShowNgrokWindow()
+    private void ShowHarvestWindow()
     {
-        if (_ngrokWindow == null || !_ngrokWindow.IsLoaded)
+        CloseAllTools();
+        if (_harvestWindow == null || !_harvestWindow.IsLoaded)
         {
-            _ngrokWindow = new NgrokWindow(_settingsService);
+            _harvestWindow = new HarvestWindow(_jobManager, _settingsService);
         }
 
-        _ngrokWindow.Show();
-        if (_ngrokWindow.WindowState == WindowState.Minimized)
-            _ngrokWindow.WindowState = WindowState.Normal;
-        _ngrokWindow.Activate();
+        PositionWindowBottomRight(_harvestWindow);
+        _harvestWindow.Show();
+        if (_harvestWindow.WindowState == WindowState.Minimized)
+            _harvestWindow.WindowState = WindowState.Normal;
+        _harvestWindow.Activate();
     }
 
     private void ShowSearchTextWindow()
     {
+        CloseAllTools();
         if (_searchTextWindow == null || !_searchTextWindow.IsLoaded)
         {
             _searchTextWindow = new SearchTextWindow(_jobManager, _settingsService);
         }
 
+        PositionWindowBottomRight(_searchTextWindow);
         _searchTextWindow.Show();
         if (_searchTextWindow.WindowState == WindowState.Minimized)
             _searchTextWindow.WindowState = WindowState.Normal;
@@ -329,32 +383,37 @@ public class TrayService : IDisposable
 
     private void ShowMigrationsWindow()
     {
+        CloseAllTools();
         if (_migrationsWindow == null || !_migrationsWindow.IsLoaded)
         {
             _migrationsWindow = new MigrationsWindow(_jobManager, _settingsService, _configService);
         }
 
+        PositionWindowBottomRight(_migrationsWindow);
         _migrationsWindow.Show();
         if (_migrationsWindow.WindowState == WindowState.Minimized)
             _migrationsWindow.WindowState = WindowState.Normal;
         _migrationsWindow.Activate();
     }
 
-    private void ShowNotesWindow()
+    private void ShowNgrokWindow()
     {
-        if (_notesWindow == null || !_notesWindow.IsLoaded)
+        CloseAllTools();
+        if (_ngrokWindow == null || !_ngrokWindow.IsLoaded)
         {
-            _notesWindow = new NotesWindow(_settingsService);
+            _ngrokWindow = new NgrokWindow(_settingsService);
         }
 
-        _notesWindow.Show();
-        if (_notesWindow.WindowState == WindowState.Minimized)
-            _notesWindow.WindowState = WindowState.Normal;
-        _notesWindow.Activate();
+        PositionWindowBottomRight(_ngrokWindow);
+        _ngrokWindow.Show();
+        if (_ngrokWindow.WindowState == WindowState.Minimized)
+            _ngrokWindow.WindowState = WindowState.Normal;
+        _ngrokWindow.Activate();
     }
 
-    public void ShowJobCenter()
+    private void ShowJobCenter()
     {
+        CloseAllTools();
         if (_dashboardWindow != null)
         {
             _dashboardWindow.Show();
@@ -371,26 +430,30 @@ public class TrayService : IDisposable
         }
     }
 
-    private void ShowHarvestWindow()
+    private void ShowNotesWindow()
     {
-        if (_harvestWindow == null || !_harvestWindow.IsLoaded)
+        CloseAllTools();
+        if (_notesWindow == null || !_notesWindow.IsLoaded)
         {
-            _harvestWindow = new HarvestWindow(_jobManager, _settingsService);
+            _notesWindow = new NotesWindow(_settingsService);
         }
 
-        _harvestWindow.Show();
-        if (_harvestWindow.WindowState == WindowState.Minimized)
-            _harvestWindow.WindowState = WindowState.Normal;
-        _harvestWindow.Activate();
+        PositionWindowBottomRight(_notesWindow);
+        _notesWindow.Show();
+        if (_notesWindow.WindowState == WindowState.Minimized)
+            _notesWindow.WindowState = WindowState.Normal;
+        _notesWindow.Activate();
     }
 
     private void ShowLogsWindow()
     {
+        CloseAllTools();
         if (_logsWindow == null || !_logsWindow.IsLoaded)
         {
             _logsWindow = new LogsWindow();
         }
 
+        PositionWindowBottomRight(_logsWindow);
         _logsWindow.Show();
         if (_logsWindow.WindowState == WindowState.Minimized)
             _logsWindow.WindowState = WindowState.Normal;

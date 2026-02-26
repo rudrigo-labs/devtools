@@ -6,100 +6,118 @@
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="DevTools - Snapshot"
-        Height="600" Width="900"
+        Width="900"
+        SizeToContent="Height"
+        MinHeight="600"
+        WindowStartupLocation="Manual"
         WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
         AllowsTransparency="True"
-        Background="{StaticResource DevToolsWindowBackground}"
-        BorderBrush="{StaticResource DevToolsBorder}"
-        BorderThickness="1">
+        Background="{StaticResource DevToolsWindowBackground}">
+    <Border BorderBrush="{StaticResource DevToolsBorder}"
+            BorderThickness="1"
+            CornerRadius="8"
+            Background="{StaticResource DevToolsWindowBackground}">
+        <Grid Margin="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-    <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="40" ResizeBorderThickness="5" />
-    </WindowChrome.WindowChrome>
-
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <!-- Header -->
-        <Border Grid.Row="0" Background="{StaticResource DevToolsSurface}" MouseLeftButtonDown="Header_MouseLeftButtonDown">
-            <Grid Margin="12,0">
-                <TextBlock Text="Codebase Snapshot" 
-                           VerticalAlignment="Center" 
-                           FontSize="{StaticResource DevToolsFontSize.SectionTitle}"
-                           Foreground="{StaticResource DevToolsTextPrimary}"
-                           FontWeight="SemiBold"/>
-                
-                <Button Content="✕" 
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        Style="{StaticResource DevToolsWindowButtonStyle}"
-                        Click="Cancel_Click"/>
-            </Grid>
-        </Border>
-
-        <!-- Content -->
-        <Grid Grid.Row="1" Margin="16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="400"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Parameters -->
-            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Margin="0,0,16,0">
-                <StackPanel>
-                    <c:ProfileSelector x:Name="ProfileSelector" ToolName="snapshot" Margin="0,0,0,16"/>
-
-                    <c:PathSelector x:Name="RootPathSelector" Title="Diretório Raiz (Source)" IsFolderPicker="True" Margin="0,0,0,16"/>
+            <!-- Header -->
+            <Border Grid.Row="0" 
+                    Background="{StaticResource DevToolsSurface}" 
+                    MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                <DockPanel Margin="10,0">
+                    <TextBlock Text="Codebase Snapshot" 
+                               VerticalAlignment="Center" 
+                               FontSize="{StaticResource DevToolsFontSize.SectionTitle}"
+                               Foreground="{StaticResource DevToolsTextPrimary}"
+                               FontWeight="SemiBold"/>
                     
-                    <c:PathSelector x:Name="OutputPathSelector" Title="Diretório de Saída (Output)" IsFolderPicker="True" Margin="0,0,0,16"/>
-
-                    <StackPanel>
-                        <TextBlock Text="Filtros e Limites" FontSize="{StaticResource DevToolsFontSize.SectionTitle}" Foreground="{StaticResource DevToolsAccent}" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                        <StackPanel Margin="0,0,0,16">
-                            <Label Content="Pastas Ignoradas (uma por linha)" Foreground="{StaticResource DevToolsTextSecondary}"/>
-                            <TextBox x:Name="IgnoredBox" Height="60" TextWrapping="Wrap" AcceptsReturn="True" 
-                                     Style="{StaticResource DevToolsTextInput}" Margin="0,0,0,8"/>
-                            
-                            <Label Content="Tamanho Máximo por Arquivo (KB)" Foreground="{StaticResource DevToolsTextSecondary}"/>
-                            <TextBox x:Name="MaxKbBox" Style="{StaticResource DevToolsTextInput}"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,16,0,0">
-                        <TextBlock Text="Formatos de Saída" FontSize="{StaticResource DevToolsFontSize.SectionTitle}" Foreground="{StaticResource DevToolsAccent}" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                        <StackPanel Margin="0,0,0,16">
-                            <CheckBox x:Name="TextCheck" Content="Texto Plano (Concatenado)" IsChecked="True" Margin="0,0,0,8" Style="{StaticResource DevToolsCheckBox}"/>
-                            <CheckBox x:Name="JsonNestedCheck" Content="JSON Aninhado (Nested)" Margin="0,0,0,8" Style="{StaticResource DevToolsCheckBox}"/>
-                            <CheckBox x:Name="JsonRecursiveCheck" Content="JSON Recursivo (Recursive)" Margin="0,0,0,8" Style="{StaticResource DevToolsCheckBox}"/>
-                            <CheckBox x:Name="HtmlCheck" Content="HTML Preview (Navegável)" Margin="0,0,0,8" Style="{StaticResource DevToolsCheckBox}"/>
-                            
-                            <CheckBox x:Name="RememberSettingsCheck" Content="Lembrar configurações" IsChecked="True" Margin="0,16,0,0" Style="{StaticResource DevToolsCheckBox}"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <Button x:Name="RunButton" Content="Gerar Snapshot" Click="Run_Click" 
-                            Margin="0,24,0,0" Height="40" 
-                            Style="{StaticResource DevToolsPrimaryButton}"/>
-                </StackPanel>
-            </ScrollViewer>
-
-            <!-- Results -->
-            <Border Grid.Column="1" Background="{StaticResource DevToolsSurface}" CornerRadius="8" Padding="16">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    
-                    <TextBlock Text="Resultado" FontWeight="Bold" Margin="0,0,0,12" Foreground="{StaticResource DevToolsTextPrimary}"/>
-                    
-                    <c:RunSummaryControl x:Name="RunSummary" Grid.Row="1"/>
-                </Grid>
+                    <Button Content="X" 
+                            Width="28"
+                            Height="24"
+                            DockPanel.Dock="Right"
+                            Margin="8,8,0,8"
+                            Click="Cancel_Click"
+                            Style="{StaticResource DevToolsSecondaryButton}"/>
+                </DockPanel>
             </Border>
+
+            <!-- Content -->
+            <Grid Grid.Row="1" Margin="0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="400"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Parameters -->
+                <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Margin="0,0,16,0">
+                    <StackPanel>
+                        <!-- ProfileSelector Removed -->
+
+                        <c:PathSelector x:Name="RootPathSelector" Title="Diretório Raiz (Source)" IsFolderPicker="True" Margin="0,0,0,16"/>
+                        
+                        <c:PathSelector x:Name="OutputPathSelector" Title="Diretório de Saída (Output)" IsFolderPicker="True" Margin="0,0,0,16"/>
+
+                        <StackPanel>
+                            <TextBlock Text="Filtros e Limites" FontSize="{StaticResource DevToolsFontSize.SectionTitle}" Foreground="{StaticResource DevToolsAccent}" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                            <StackPanel Margin="0,0,0,16">
+                                <Label Content="Pastas Ignoradas (uma por linha)" Foreground="{StaticResource DevToolsTextSecondary}"/>
+                                <TextBox x:Name="IgnoredBox" Height="60" TextWrapping="Wrap" AcceptsReturn="True" 
+                                         Style="{StaticResource DevToolsTextInput}" Margin="0,0,0,8"/>
+                                
+                                <Label Content="Tamanho Máximo por Arquivo (KB)" Foreground="{StaticResource DevToolsTextSecondary}"/>
+                                <TextBox x:Name="MaxKbBox" Style="{StaticResource DevToolsTextInput}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,16,0,0">
+                            <TextBlock Text="Formatos de Saída" FontSize="{StaticResource DevToolsFontSize.SectionTitle}" Foreground="{StaticResource DevToolsAccent}" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                            <StackPanel Margin="0,0,0,16">
+                                <CheckBox x:Name="TextCheck" Content="Texto Plano (Concatenado)" IsChecked="True" Margin="0,0,0,8" Style="{StaticResource DevToolsCheckBox}"/>
+                                <CheckBox x:Name="JsonNestedCheck" Content="JSON Aninhado (Nested)" Margin="0,0,0,8" Style="{StaticResource DevToolsCheckBox}"/>
+                                <CheckBox x:Name="JsonRecursiveCheck" Content="JSON Recursivo (Recursive)" Margin="0,0,0,8" Style="{StaticResource DevToolsCheckBox}"/>
+                                <CheckBox x:Name="HtmlCheck" Content="HTML Preview (Navegável)" Margin="0,0,0,8" Style="{StaticResource DevToolsCheckBox}"/>
+                                
+                                <CheckBox x:Name="RememberSettingsCheck" Content="Lembrar configurações" IsChecked="True" Margin="0,16,0,0" Style="{StaticResource DevToolsCheckBox}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Results -->
+                <Border Grid.Column="1" Background="{StaticResource DevToolsSurface}" CornerRadius="8" Padding="16">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <TextBlock Text="Resultado" FontWeight="Bold" Margin="0,0,0,12" Foreground="{StaticResource DevToolsTextPrimary}"/>
+                        
+                        <c:RunSummaryControl x:Name="RunSummary" Grid.Row="1"/>
+                    </Grid>
+                </Border>
+            </Grid>
+            
+            <!-- Footer -->
+            <StackPanel Grid.Row="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button Content="Cancelar"
+                        Width="100"
+                        Margin="0,0,10,0"
+                        Click="Cancel_Click"
+                        Style="{StaticResource DevToolsSecondaryButton}"/>
+                <Button x:Name="RunButton" 
+                        Content="Gerar Snapshot" 
+                        Click="Run_Click" 
+                        Width="140"
+                        Style="{StaticResource DevToolsPrimaryButton}"/>
+            </StackPanel>
         </Grid>
-    </Grid>
+    </Border>
 </Window>
