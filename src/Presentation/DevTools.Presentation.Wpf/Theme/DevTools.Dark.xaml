@@ -71,6 +71,14 @@
         <Setter Property="MinHeight" Value="36"/>
     </Style>
 
+    <!-- DevTools CheckBox -->
+    <Style x:Key="DevToolsCheckBox" TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{StaticResource DevToolsTextPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource DevToolsFontSize.Input}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+
     <!-- DevTools Primary Button -->
     <Style x:Key="DevToolsPrimaryButton" TargetType="Button">
         <Setter Property="Background" Value="{StaticResource DevToolsAccent}"/>

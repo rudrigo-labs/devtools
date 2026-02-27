@@ -74,8 +74,6 @@ public class TrayService : IDisposable
         CloseWindow(ref _sshTunnelWindow);
         CloseWindow(ref _ngrokWindow);
         CloseWindow(ref _logsWindow);
-        
-        _dashboardWindow?.Hide();
     }
 
     private void CloseWindow<T>(ref T? window) where T : Window
@@ -252,10 +250,24 @@ public class TrayService : IDisposable
         return fallbackMenu;
     }
 
-    private void PositionWindowBottomRight(Window window)
+    private void ConfigureToolWindow(Window window)
     {
         if (window == null) return;
         
+        // Ensure the tool is owned by Dashboard if possible, to stay on top
+        if (_dashboardWindow != null && _dashboardWindow.IsVisible)
+        {
+            try 
+            {
+                // Only set Owner if it hasn't been set yet to avoid errors
+                if (window.Owner == null && window != _dashboardWindow)
+                {
+                    window.Owner = _dashboardWindow;
+                }
+            }
+            catch { /* Ignore owner setting errors */ }
+        }
+
         var desktopWorkingArea = SystemParameters.WorkArea;
         window.Left = desktopWorkingArea.Right - window.Width - 20;
         window.Top = desktopWorkingArea.Bottom - window.Height - 20;
@@ -269,7 +281,7 @@ public class TrayService : IDisposable
             _organizerWindow = new OrganizerWindow(_jobManager, _settingsService);
         }
 
-        PositionWindowBottomRight(_organizerWindow);
+        ConfigureToolWindow(_organizerWindow);
         _organizerWindow.Show();
         if (_organizerWindow.WindowState == WindowState.Minimized)
             _organizerWindow.WindowState = WindowState.Normal;
@@ -284,7 +296,7 @@ public class TrayService : IDisposable
             _imageSplitWindow = new ImageSplitWindow(_jobManager, _settingsService);
         }
 
-        PositionWindowBottomRight(_imageSplitWindow);
+        ConfigureToolWindow(_imageSplitWindow);
         _imageSplitWindow.Show();
         if (_imageSplitWindow.WindowState == WindowState.Minimized)
             _imageSplitWindow.WindowState = WindowState.Normal;
@@ -299,7 +311,7 @@ public class TrayService : IDisposable
             _renameWindow = new RenameWindow(_jobManager, _settingsService);
         }
 
-        PositionWindowBottomRight(_renameWindow);
+        ConfigureToolWindow(_renameWindow);
         _renameWindow.Show();
         if (_renameWindow.WindowState == WindowState.Minimized)
             _renameWindow.WindowState = WindowState.Normal;
@@ -314,7 +326,7 @@ public class TrayService : IDisposable
             _utf8Window = new Utf8Window(_jobManager, _settingsService);
         }
 
-        PositionWindowBottomRight(_utf8Window);
+        ConfigureToolWindow(_utf8Window);
         _utf8Window.Show();
         if (_utf8Window.WindowState == WindowState.Minimized)
             _utf8Window.WindowState = WindowState.Normal;
@@ -329,7 +341,7 @@ public class TrayService : IDisposable
             _snapshotWindow = new SnapshotWindow(_settingsService);
         }
 
-        PositionWindowBottomRight(_snapshotWindow);
+        ConfigureToolWindow(_snapshotWindow);
         _snapshotWindow.Show();
         if (_snapshotWindow.WindowState == WindowState.Minimized)
             _snapshotWindow.WindowState = WindowState.Normal;
@@ -344,7 +356,7 @@ public class TrayService : IDisposable
             _sshTunnelWindow = new SshTunnelWindow(_settingsService);
         }
 
-        PositionWindowBottomRight(_sshTunnelWindow);
+        ConfigureToolWindow(_sshTunnelWindow);
         _sshTunnelWindow.Show();
         if (_sshTunnelWindow.WindowState == WindowState.Minimized)
             _sshTunnelWindow.WindowState = WindowState.Normal;
@@ -359,7 +371,7 @@ public class TrayService : IDisposable
             _harvestWindow = new HarvestWindow(_jobManager, _settingsService);
         }
 
-        PositionWindowBottomRight(_harvestWindow);
+        ConfigureToolWindow(_harvestWindow);
         _harvestWindow.Show();
         if (_harvestWindow.WindowState == WindowState.Minimized)
             _harvestWindow.WindowState = WindowState.Normal;
@@ -374,7 +386,7 @@ public class TrayService : IDisposable
             _searchTextWindow = new SearchTextWindow(_jobManager, _settingsService);
         }
 
-        PositionWindowBottomRight(_searchTextWindow);
+        ConfigureToolWindow(_searchTextWindow);
         _searchTextWindow.Show();
         if (_searchTextWindow.WindowState == WindowState.Minimized)
             _searchTextWindow.WindowState = WindowState.Normal;
@@ -389,7 +401,7 @@ public class TrayService : IDisposable
             _migrationsWindow = new MigrationsWindow(_jobManager, _settingsService, _configService);
         }
 
-        PositionWindowBottomRight(_migrationsWindow);
+        ConfigureToolWindow(_migrationsWindow);
         _migrationsWindow.Show();
         if (_migrationsWindow.WindowState == WindowState.Minimized)
             _migrationsWindow.WindowState = WindowState.Normal;
@@ -404,7 +416,7 @@ public class TrayService : IDisposable
             _ngrokWindow = new NgrokWindow(_settingsService);
         }
 
-        PositionWindowBottomRight(_ngrokWindow);
+        ConfigureToolWindow(_ngrokWindow);
         _ngrokWindow.Show();
         if (_ngrokWindow.WindowState == WindowState.Minimized)
             _ngrokWindow.WindowState = WindowState.Normal;
@@ -438,7 +450,7 @@ public class TrayService : IDisposable
             _notesWindow = new NotesWindow(_settingsService);
         }
 
-        PositionWindowBottomRight(_notesWindow);
+        ConfigureToolWindow(_notesWindow);
         _notesWindow.Show();
         if (_notesWindow.WindowState == WindowState.Minimized)
             _notesWindow.WindowState = WindowState.Normal;
@@ -453,7 +465,7 @@ public class TrayService : IDisposable
             _logsWindow = new LogsWindow();
         }
 
-        PositionWindowBottomRight(_logsWindow);
+        ConfigureToolWindow(_logsWindow);
         _logsWindow.Show();
         if (_logsWindow.WindowState == WindowState.Minimized)
             _logsWindow.WindowState = WindowState.Normal;

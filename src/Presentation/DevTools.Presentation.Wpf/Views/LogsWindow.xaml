@@ -25,20 +25,24 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="{StaticResource DevToolsSurface}" MouseLeftButtonDown="Header_MouseLeftButtonDown">
-            <Grid Margin="12,0">
+        <Border Grid.Row="0" 
+                Background="Transparent" 
+                MouseLeftButtonDown="Header_MouseLeftButtonDown">
+            <DockPanel Margin="10,0">
+                <Button Content="X" 
+                        Width="28"
+                        Height="24"
+                        DockPanel.Dock="Right"
+                        Margin="8,8,0,8"
+                        Click="Close_Click"
+                        Style="{StaticResource DevToolsSecondaryButton}"/>
+                
                 <TextBlock Text="Application Logs" 
                            VerticalAlignment="Center" 
                            FontSize="{StaticResource DevToolsFontSize.SectionTitle}"
                            Foreground="{StaticResource DevToolsTextPrimary}"
                            FontWeight="SemiBold"/>
-                
-                <Button Content="✕" 
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        Style="{StaticResource DevToolsWindowButtonStyle}"
-                        Click="Close_Click"/>
-            </Grid>
+            </DockPanel>
         </Border>
 
         <!-- Log Content -->

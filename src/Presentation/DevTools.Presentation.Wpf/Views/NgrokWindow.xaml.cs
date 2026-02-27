@@ -28,45 +28,7 @@ public partial class NgrokWindow : Window
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastNgrokAuthToken))
             AuthTokenBox.Text = _settingsService.Settings.LastNgrokAuthToken;
 
-        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
-        ProfileSelector.ProfileLoaded += LoadProfile;
-
         // Position handled by TrayService logic
-    }
-
-    private Dictionary<string, string> GetCurrentOptions()
-    {
-        var actionItem = ActionCombo.SelectedItem as ComboBoxItem;
-        var action = actionItem?.Tag?.ToString() ?? "ListTunnels";
-
-        return new Dictionary<string, string>
-        {
-            ["action"] = action,
-            ["port"] = PortBox.Text,
-            ["subdomain"] = SubdomainBox.Text,
-            ["tunnel"] = TunnelNameBox.Text,
-            ["auth"] = AuthTokenBox.Text
-        };
-    }
-
-    private void LoadProfile(ToolProfile profile)
-    {
-        if (profile.Options.TryGetValue("action", out var action))
-        {
-            foreach (ComboBoxItem item in ActionCombo.Items)
-            {
-                if (item.Tag?.ToString() == action)
-                {
-                    ActionCombo.SelectedItem = item;
-                    break;
-                }
-            }
-        }
-        
-        if (profile.Options.TryGetValue("port", out var port)) PortBox.Text = port;
-        if (profile.Options.TryGetValue("subdomain", out var subdomain)) SubdomainBox.Text = subdomain;
-        if (profile.Options.TryGetValue("tunnel", out var tunnel)) TunnelNameBox.Text = tunnel;
-        if (profile.Options.TryGetValue("auth", out var auth)) AuthTokenBox.Text = auth;
     }
 
     private void ActionCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -27,15 +27,9 @@
 
             <!-- Header -->
             <Border Grid.Row="0" 
-                    Background="{StaticResource DevToolsSurface}" 
+                    Background="Transparent" 
                     MouseLeftButtonDown="Header_MouseLeftButtonDown">
                 <DockPanel Margin="10,0">
-                    <TextBlock Text="Codebase Snapshot" 
-                               VerticalAlignment="Center" 
-                               FontSize="{StaticResource DevToolsFontSize.SectionTitle}"
-                               Foreground="{StaticResource DevToolsTextPrimary}"
-                               FontWeight="SemiBold"/>
-                    
                     <Button Content="X" 
                             Width="28"
                             Height="24"
@@ -43,6 +37,12 @@
                             Margin="8,8,0,8"
                             Click="Cancel_Click"
                             Style="{StaticResource DevToolsSecondaryButton}"/>
+                    
+                    <TextBlock Text="Codebase Snapshot" 
+                               VerticalAlignment="Center" 
+                               FontSize="{StaticResource DevToolsFontSize.SectionTitle}"
+                               Foreground="{StaticResource DevToolsTextPrimary}"
+                               FontWeight="SemiBold"/>
                 </DockPanel>
             </Border>
 

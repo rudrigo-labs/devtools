@@ -20,9 +20,6 @@ public partial class Utf8Window : Window
         _jobManager = jobManager;
         _settingsService = settingsService;
 
-        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
-        ProfileSelector.ProfileLoaded += LoadProfile;
-
         // Load Settings
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastUtf8RootPath))
             RootPathSelector.SelectedPath = _settingsService.Settings.LastUtf8RootPath;
@@ -46,40 +43,6 @@ public partial class Utf8Window : Window
             ExcludeBox.Text = _settingsService.Settings.LastUtf8Excludes;
 
         // Position handled by TrayService logic
-    }
-
-    private Dictionary<string, string> GetCurrentOptions()
-    {
-        return new Dictionary<string, string>
-        {
-            ["root"] = RootPathSelector.SelectedPath,
-            ["recursive"] = (RecursiveCheck.IsChecked ?? true).ToString().ToLowerInvariant(),
-            ["dryrun"] = (DryRunCheck.IsChecked ?? false).ToString().ToLowerInvariant(),
-            ["backup"] = (BackupCheck.IsChecked ?? true).ToString().ToLowerInvariant(),
-            ["bom"] = (BomCheck.IsChecked ?? true).ToString().ToLowerInvariant(),
-            ["include"] = IncludeBox.Text,
-            ["exclude"] = ExcludeBox.Text
-        };
-    }
-
-    private void LoadProfile(ToolProfile profile)
-    {
-        if (profile.Options.TryGetValue("root", out var root)) RootPathSelector.SelectedPath = root;
-        
-        if (profile.Options.TryGetValue("recursive", out var recursive)) 
-            RecursiveCheck.IsChecked = bool.TryParse(recursive, out var r) ? r : true;
-        
-        if (profile.Options.TryGetValue("dryrun", out var dryrun)) 
-            DryRunCheck.IsChecked = bool.TryParse(dryrun, out var d) ? d : false;
-        
-        if (profile.Options.TryGetValue("backup", out var backup)) 
-            BackupCheck.IsChecked = bool.TryParse(backup, out var b) ? b : true;
-        
-        if (profile.Options.TryGetValue("bom", out var bom)) 
-            BomCheck.IsChecked = bool.TryParse(bom, out var bo) ? bo : true;
-        
-        if (profile.Options.TryGetValue("include", out var include)) IncludeBox.Text = include;
-        if (profile.Options.TryGetValue("exclude", out var exclude)) ExcludeBox.Text = exclude;
     }
 
     private async void Run_Click(object sender, RoutedEventArgs e)

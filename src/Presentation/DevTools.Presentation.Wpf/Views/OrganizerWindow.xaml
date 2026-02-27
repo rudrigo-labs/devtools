@@ -23,13 +23,9 @@
 
             <Border x:Name="Header"
                     Grid.Row="0"
-                    Background="{StaticResource DevToolsSurface}"
+                    Background="Transparent"
                     MouseLeftButtonDown="Header_MouseLeftButtonDown">
                 <DockPanel Margin="10,0">
-                    <TextBlock Text="Organizer"
-                               VerticalAlignment="Center"
-                               FontSize="{StaticResource DevToolsFontSize.SectionTitle}"
-                               Foreground="{StaticResource DevToolsTextPrimary}"/>
                     <Button Content="X"
                             Width="28"
                             Height="24"
@@ -37,6 +33,11 @@
                             Margin="8,8,0,8"
                             Click="CloseButton_Click"
                             Style="{StaticResource DevToolsSecondaryButton}"/>
+
+                    <TextBlock Text="Organizer"
+                               VerticalAlignment="Center"
+                               FontSize="{StaticResource DevToolsFontSize.SectionTitle}"
+                               Foreground="{StaticResource DevToolsTextPrimary}"/>
                 </DockPanel>
             </Border>
 

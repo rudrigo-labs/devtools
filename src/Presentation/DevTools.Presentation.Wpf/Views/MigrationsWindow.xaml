@@ -21,13 +21,9 @@
 
             <Border x:Name="Header"
                     Grid.Row="0"
-                    Background="{StaticResource DevToolsSurface}"
+                    Background="Transparent"
                     MouseLeftButtonDown="Header_MouseLeftButtonDown">
                 <DockPanel Margin="10,0">
-                    <TextBlock Text="Migrations"
-                               VerticalAlignment="Center"
-                               FontSize="{StaticResource DevToolsFontSize.SectionTitle}"
-                               Foreground="{StaticResource DevToolsTextPrimary}"/>
                     <Button Content="X"
                             Width="28"
                             Height="24"
@@ -35,6 +31,11 @@
                             Margin="8,8,0,8"
                             Click="Close_Click"
                             Style="{StaticResource DevToolsSecondaryButton}"/>
+
+                    <TextBlock Text="Migrations"
+                               VerticalAlignment="Center"
+                               FontSize="{StaticResource DevToolsFontSize.SectionTitle}"
+                               Foreground="{StaticResource DevToolsTextPrimary}"/>
                 </DockPanel>
             </Border>
 
@@ -66,7 +67,7 @@
                                        Foreground="{StaticResource DevToolsTextSecondary}"/>
                             <ComboBox x:Name="ActionCombo"
                                       SelectionChanged="ActionCombo_SelectionChanged"
-                                      Style="{StaticResource DevToolsComboBox}">
+                                      Style="{StaticResource DevToolsSelectInput}">
                                 <ComboBoxItem Content="Add Migration" Tag="Add"/>
                                 <ComboBoxItem Content="Update Database" Tag="Update"/>
                             </ComboBox>
@@ -76,7 +77,7 @@
                             <TextBlock Text="Provider"
                                        Foreground="{StaticResource DevToolsTextSecondary}"/>
                             <ComboBox x:Name="ProviderCombo"
-                                      Style="{StaticResource DevToolsComboBox}">
+                                      Style="{StaticResource DevToolsSelectInput}">
                                 <ComboBoxItem Content="SqlServer" Tag="SqlServer"/>
                                 <ComboBoxItem Content="Sqlite" Tag="Sqlite"/>
                             </ComboBox>

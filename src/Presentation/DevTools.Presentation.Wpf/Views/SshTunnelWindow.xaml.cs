@@ -46,9 +46,6 @@ public partial class SshTunnelWindow : Window
         // Initialize TunnelService manually as in the original code
         _tunnelService = new TunnelService(new SystemProcessRunner());
 
-        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
-        ProfileSelector.ProfileLoaded += LoadProfile;
-
         // Timer for status updates
         _timer = new DispatcherTimer();
         _timer.Tick += (s, e) => UpdateStatusUI();
@@ -56,41 +53,6 @@ public partial class SshTunnelWindow : Window
         _timer.Start();
 
         UpdateStatusUI();
-    }
-
-    private Dictionary<string, string> GetCurrentOptions()
-    {
-        return new Dictionary<string, string>
-        {
-            ["ssh-host"] = SshHostBox.Text,
-            ["ssh-port"] = SshPortBox.Text,
-            ["ssh-user"] = SshUserBox.Text,
-            ["identity-file"] = IdentityFileSelector.SelectedPath,
-            ["remote-host"] = RemoteHostBox.Text,
-            ["remote-port"] = RemotePortBox.Text,
-            ["local-bind"] = LocalBindBox.Text,
-            ["local-port"] = LocalPortBox.Text,
-            ["compression"] = (CompressionCheck.IsChecked ?? false).ToString().ToLowerInvariant(),
-            ["verbose"] = (VerboseCheck.IsChecked ?? false).ToString().ToLowerInvariant()
-        };
-    }
-
-    private void LoadProfile(ToolProfile profile)
-    {
-        if (profile.Options.TryGetValue("ssh-host", out var sshHost)) SshHostBox.Text = sshHost;
-        if (profile.Options.TryGetValue("ssh-port", out var sshPort)) SshPortBox.Text = sshPort;
-        if (profile.Options.TryGetValue("ssh-user", out var sshUser)) SshUserBox.Text = sshUser;
-        if (profile.Options.TryGetValue("identity-file", out var identity)) IdentityFileSelector.SelectedPath = identity;
-        if (profile.Options.TryGetValue("remote-host", out var remoteHost)) RemoteHostBox.Text = remoteHost;
-        if (profile.Options.TryGetValue("remote-port", out var remotePort)) RemotePortBox.Text = remotePort;
-        if (profile.Options.TryGetValue("local-bind", out var localBind)) LocalBindBox.Text = localBind;
-        if (profile.Options.TryGetValue("local-port", out var localPort)) LocalPortBox.Text = localPort;
-        
-        if (profile.Options.TryGetValue("compression", out var compression)) 
-            CompressionCheck.IsChecked = bool.TryParse(compression, out var c) ? c : false;
-        
-        if (profile.Options.TryGetValue("verbose", out var verbose)) 
-            VerboseCheck.IsChecked = bool.TryParse(verbose, out var v) ? v : false;
     }
 
     private void UpdateStatusUI()
@@ -140,7 +102,6 @@ public partial class SshTunnelWindow : Window
         LocalPortBox.IsEnabled = enabled;
         CompressionCheck.IsEnabled = enabled;
         VerboseCheck.IsEnabled = enabled;
-        ProfileSelector.IsEnabled = enabled;
     }
 
     private async void ToggleTunnel_Click(object sender, RoutedEventArgs e)

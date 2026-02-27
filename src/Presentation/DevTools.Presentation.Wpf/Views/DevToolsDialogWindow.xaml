@@ -27,7 +27,7 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="{StaticResource DevToolsSurface}" MouseLeftButtonDown="Header_MouseLeftButtonDown">
+        <Border Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown">
             <TextBlock x:Name="TitleText" 
                        Text="Title" 
                        VerticalAlignment="Center" 

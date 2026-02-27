@@ -25,20 +25,24 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="{StaticResource DevToolsSurface}" MouseLeftButtonDown="Header_MouseLeftButtonDown">
-            <Grid Margin="12,0">
+        <Border Grid.Row="0" 
+                Background="Transparent" 
+                MouseLeftButtonDown="Header_MouseLeftButtonDown">
+            <DockPanel Margin="10,0">
+                <Button Content="X" 
+                        Width="28"
+                        Height="24"
+                        DockPanel.Dock="Right"
+                        Margin="8,8,0,8"
+                        Click="Cancel_Click"
+                        Style="{StaticResource DevToolsSecondaryButton}"/>
+                
                 <TextBlock Text="SSH Tunnel Manager" 
                            VerticalAlignment="Center" 
                            FontSize="{StaticResource DevToolsFontSize.SectionTitle}"
                            Foreground="{StaticResource DevToolsTextPrimary}"
                            FontWeight="SemiBold"/>
-                
-                <Button Content="✕" 
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        Style="{StaticResource DevToolsWindowButtonStyle}"
-                        Click="Cancel_Click"/>
-            </Grid>
+            </DockPanel>
         </Border>
 
         <!-- Content -->
@@ -51,8 +55,6 @@
             <!-- Parameters -->
             <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Margin="0,0,16,0">
                 <StackPanel>
-                    <c:ProfileSelector x:Name="ProfileSelector" ToolName="sshtunnel" Margin="0,0,0,16"/>
-
                     <StackPanel>
                         <TextBlock Text="Conexão Bastion (Jump Host)" FontSize="{StaticResource DevToolsFontSize.SectionTitle}" Foreground="{StaticResource DevToolsAccent}" FontWeight="SemiBold" Margin="0,0,0,8"/>
                         <Grid Margin="0,0,0,16">
