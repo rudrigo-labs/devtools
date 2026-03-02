@@ -24,43 +24,11 @@ public partial class ImageSplitWindow : Window
         _jobManager = jobManager;
         _settingsService = settingsService;
 
-        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
-        ProfileSelector.ProfileLoaded += LoadProfile;
-
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastImageSplitInputPath))
             InputPathSelector.SelectedPath = _settingsService.Settings.LastImageSplitInputPath;
         
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastImageSplitOutputDir))
             OutputPathSelector.SelectedPath = _settingsService.Settings.LastImageSplitOutputDir;
-    }
-
-    private Dictionary<string, string> GetCurrentOptions()
-    {
-        var options = new Dictionary<string, string>();
-        options["input"] = InputPathSelector.SelectedPath;
-        options["output"] = OutputPathSelector.SelectedPath;
-        options["alpha"] = AlphaBox.Text;
-        options["min-w"] = MinSizeBox.Text;
-        options["min-h"] = MinSizeBox.Text;
-        options["overwrite"] = (OverwriteCheck.IsChecked ?? false).ToString().ToLowerInvariant();
-        return options;
-    }
-
-    private void LoadProfile(ToolProfile profile)
-    {
-        if (profile.Options.TryGetValue("input", out var input)) InputPathSelector.SelectedPath = input;
-        else if (profile.Options.TryGetValue("file", out var file)) InputPathSelector.SelectedPath = file;
-        
-        if (profile.Options.TryGetValue("output", out var output)) OutputPathSelector.SelectedPath = output;
-        
-        if (profile.Options.TryGetValue("alpha", out var alpha)) AlphaBox.Text = alpha;
-        else if (profile.Options.TryGetValue("threshold", out var threshold)) AlphaBox.Text = threshold;
-        
-        if (profile.Options.TryGetValue("min-w", out var minW)) MinSizeBox.Text = minW;
-        else if (profile.Options.TryGetValue("width", out var width)) MinSizeBox.Text = width;
-        
-        if (profile.Options.TryGetValue("overwrite", out var overwrite))
-            OverwriteCheck.IsChecked = bool.TryParse(overwrite, out var o) ? o : false;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
