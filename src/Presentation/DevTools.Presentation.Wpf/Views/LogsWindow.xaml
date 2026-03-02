@@ -7,45 +7,31 @@
         Title="Logs do Sistema" Height="640" Width="900" WindowStartupLocation="CenterScreen"
         Style="{StaticResource ModernWindowStyle}">
 
-    <Border Background="{StaticResource WindowBackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="0">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="25" ShadowDepth="10" Opacity="0.6" Color="Black"/>
-        </Border.Effect>
+    <c:DevToolsToolFrame x:Name="MainFrame"
+                         Title="Logs do Sistema"
+                         PrimaryButtonContent="Atualizar"
+                         SecondaryButtonContent="Fechar"
+                         PrimaryButtonClick="Refresh_Click"
+                         SecondaryButtonClick="CloseButton_Click"
+                         CloseButtonClick="CloseButton_Click">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="50"/> <!-- Header -->
-                <RowDefinition Height="*"/>   <!-- Content -->
-                <RowDefinition Height="60"/>  <!-- Footer -->
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Header (Draggable) -->
-            <Border Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown" CornerRadius="12,12,0,0">
-                <Grid Margin="20,0">
-                    <TextBlock Text="Logs do Sistema" VerticalAlignment="Center" Foreground="{StaticResource TextBrush}" FontSize="16" FontWeight="SemiBold"/>
-                    
-                    <Button HorizontalAlignment="Right" VerticalAlignment="Center" Click="CloseButton_Click" Style="{StaticResource IconButtonStyle}" ToolTip="Fechar">
-                        <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" Fill="{StaticResource TextBrush}" Stretch="Uniform" Width="12" Height="12"/>
-                    </Button>
-                </Grid>
-            </Border>
-
-            <!-- Separator -->
-            <Rectangle Grid.Row="0" VerticalAlignment="Bottom" Height="1" Fill="{StaticResource BorderBrush}" Opacity="0.3"/>
+            <!-- Toolbar -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,10">
+                <Button Content="Abrir Pasta" Click="OpenFolder_Click" Margin="0,0,10,0" Style="{StaticResource SecondaryButtonStyle}" Padding="10,5" FontSize="12"/>
+                <Button Content="Limpar" Click="Clear_Click" Style="{StaticResource SecondaryButtonStyle}" Padding="10,5" FontSize="12"/>
+            </StackPanel>
 
             <!-- Log Content -->
-            <TextBox x:Name="LogTextBox" Grid.Row="1" Margin="10"
+            <TextBox x:Name="LogTextBox" Grid.Row="1"
                      Style="{StaticResource ModernTextBoxStyle}"
                      FontFamily="Consolas" FontSize="12"
                      IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                      TextWrapping="NoWrap"/>
-
-            <!-- Footer -->
-            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="20,0">
-                <Button Content="Cancelar" Click="CloseButton_Click" Margin="0,0,10,0" Style="{StaticResource SecondaryButtonStyle}"/>
-                <Button Content="Abrir Pasta" Click="OpenFolder_Click" Margin="0,0,10,0" Style="{StaticResource PrimaryButtonStyle}"/>
-                <Button Content="Atualizar" Click="Refresh_Click" Margin="0,0,10,0" Style="{StaticResource SecondaryButtonStyle}"/>
-                <Button Content="Limpar" Click="Clear_Click" Style="{StaticResource SecondaryButtonStyle}"/>
-            </StackPanel>
         </Grid>
-    </Border>
+    </c:DevToolsToolFrame>
 </Window>

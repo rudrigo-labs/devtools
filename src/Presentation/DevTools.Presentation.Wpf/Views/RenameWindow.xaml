@@ -11,41 +11,17 @@
         <!-- Styles removed to use global theme -->
     </Window.Resources>
 
-    <Border Background="{StaticResource WindowBackgroundBrush}"
-            BorderBrush="{StaticResource BorderBrush}"
-            BorderThickness="1"
-            CornerRadius="12"
-            Padding="0">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="25" ShadowDepth="10" Opacity="0.6" Color="Black"/>
-        </Border.Effect>
-        <Grid Margin="15">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-
-            <!-- Header -->
-                <Grid Grid.Row="0" MouseLeftButtonDown="Header_MouseLeftButtonDown" Background="Transparent">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="✎" FontSize="16" Foreground="{StaticResource AccentBrush}" Margin="0,0,10,0"/>
-                    <TextBlock Text="Renomear Projeto .NET" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
-                </StackPanel>
-                <Button Grid.Column="1" Content="?" ToolTip="Renomeia projeto/solution e namespaces C# com opções de backup."
-                        Style="{StaticResource IconButtonStyle}" FontSize="14" Margin="0,0,5,0"/>
-                <Button Grid.Column="2" Content="✕" Click="CloseButton_Click" Style="{StaticResource IconButtonStyle}" FontSize="14"/>
-            </Grid>
-
-            <!-- Content -->
-            <StackPanel Grid.Row="1" Margin="0,20,0,0">
-                
-                <Label Content="Pasta Raiz:"/>
+    <c:DevToolsToolFrame Title="Renomear Projeto .NET"
+                         HelpText="Renomeia projeto/solution e namespaces C# com opções de backup."
+                         PrimaryButtonContent="Renomear"
+                         SecondaryButtonContent="Cancelar"
+                         PrimaryButtonClick="ProcessButton_Click"
+                         SecondaryButtonClick="CloseButton_Click">
+        
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,5,0">
+        <StackPanel Margin="0,10,0,0">
+            
+            <Label Content="Pasta Raiz:"/>
                 <c:PathSelector x:Name="RootPathSelector" Title="Pasta Raiz" IsFolderPicker="True" />
 
                 <Grid Margin="0,15,0,0">
@@ -88,29 +64,7 @@
                 </StackPanel>
                 
                 <c:RunSummaryControl x:Name="RunSummary" Margin="0,15,0,0"/>
-            </StackPanel>
-
-            <!-- Actions -->
-            <Grid Grid.Row="2"
-                  HorizontalAlignment="Right"
-                  Margin="0,10,0,0"
-                  Grid.IsSharedSizeScope="True">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" SharedSizeGroup="ActionButtons"/>
-                    <ColumnDefinition Width="12"/>
-                    <ColumnDefinition Width="Auto" SharedSizeGroup="ActionButtons"/>
-                </Grid.ColumnDefinitions>
-
-                <Button Grid.Column="0"
-                        Style="{StaticResource SecondaryButtonStyle}"
-                        Content="Cancelar"
-                        Click="CloseButton_Click"/>
-
-                <Button Grid.Column="2"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Content="Renomear"
-                        Click="ProcessButton_Click"/>
-            </Grid>
-        </Grid>
-    </Border>
+        </StackPanel>
+        </ScrollViewer>
+    </c:DevToolsToolFrame>
 </Window>

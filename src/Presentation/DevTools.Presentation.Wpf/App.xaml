@@ -8,6 +8,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <!-- App theme (source of truth) -->
                 <ResourceDictionary Source="Theme/DarkTheme.xaml"/>
+                <ResourceDictionary Source="Theme/Icons.xaml"/>
 
                 <!-- MaterialDesign only for DialogHost -->
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.DialogHost.xaml" />

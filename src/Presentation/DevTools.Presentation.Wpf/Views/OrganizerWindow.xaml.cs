@@ -42,11 +42,6 @@ public partial class OrganizerWindow : Window
         };
     }
 
-    private void Header_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-    {
-        // Dragging disabled per user request
-    }
-
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
         Close();

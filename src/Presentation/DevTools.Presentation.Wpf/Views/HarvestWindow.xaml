@@ -8,45 +8,17 @@
         Title="Coletor de Arquivos" Height="640" Width="900" WindowStartupLocation="CenterScreen"
         Style="{StaticResource ModernWindowStyle}">
 
-    <Border Background="{StaticResource WindowBackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="0">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="25" ShadowDepth="10" Opacity="0.6" Color="Black"/>
-        </Border.Effect>
+    <c:DevToolsToolFrame Title="Coletor de Arquivos"
+                         HelpText="Copia arquivos filtrados por regras para pasta de saída"
+                         PrimaryButtonContent="EXECUTAR HARVEST"
+                         SecondaryButtonContent="Cancelar"
+                         PrimaryButtonClick="Run_Click"
+                         SecondaryButtonClick="Cancel_Click"
+                         CloseButtonClick="Cancel_Click">
 
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50"/> <!-- Header -->
-                <RowDefinition Height="*"/>   <!-- Content -->
-                <RowDefinition Height="80"/>  <!-- Actions -->
-            </Grid.RowDefinitions>
-
-            <!-- Header (Draggable) -->
-            <Border Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown" CornerRadius="12,12,0,0">
-                <Grid Margin="20,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text=">_" FontFamily="Consolas" FontSize="18" Foreground="{StaticResource AccentBrush}" Margin="0,0,10,0"/>
-                        <TextBlock Text="Coletor de Arquivos" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource PrimaryTextBrush}"/>
-                    </StackPanel>
-                    
-                    <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"
-                            Style="{StaticResource IconButtonStyle}" Content="?" FontSize="14"
-                            ToolTip="Copia arquivos filtrados por regras para pasta de saída" Margin="0,0,5,0"/>
-                    <Button Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Click="Cancel_Click"
-                            Style="{StaticResource IconButtonStyle}" Content="✕" FontSize="14"/>
-                </Grid>
-            </Border>
-
-            <!-- Separator -->
-            <Border Grid.Row="0" VerticalAlignment="Bottom" Height="1" Background="#333333"/>
-
-            <!-- Form -->
-            <StackPanel Grid.Row="1" Margin="30,20">
-                <TextBlock Text="Configuração" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,15"/>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,5,0">
+        <StackPanel Margin="0,10,0,0">
+            <TextBlock Text="Configuração" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,15"/>
                 
                 <c:PathSelector x:Name="SourcePathSelector" Title="Diretório de Origem (Projeto para Análise)" 
                                 IsFolderPicker="True" Margin="0,0,0,20"/>
@@ -72,30 +44,6 @@
                 
                 <c:RunSummaryControl x:Name="RunSummary" Margin="0,20,0,0"/>
             </StackPanel>
-
-            <!-- Actions -->
-            <Border Grid.Row="2" Background="{StaticResource ControlBackgroundBrush}" CornerRadius="0,0,12,12" Padding="30,0">
-                <Grid HorizontalAlignment="Right"
-                      VerticalAlignment="Center"
-                      Grid.IsSharedSizeScope="True">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="ActionButtons"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="ActionButtons"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Button Grid.Column="0"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            Content="Cancelar"
-                            Click="Cancel_Click"/>
-
-                    <Button Grid.Column="2"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            Content="EXECUTAR HARVEST"
-                            Click="Run_Click"
-                            Padding="30,12"/>
-                </Grid>
-            </Border>
-        </Grid>
-    </Border>
+        </ScrollViewer>
+    </c:DevToolsToolFrame>
 </Window>

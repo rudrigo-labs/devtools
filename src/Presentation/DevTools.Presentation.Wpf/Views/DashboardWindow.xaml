@@ -40,38 +40,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <Style TargetType="Button" x:Key="ToolCardStyle">
-            <Setter Property="Background" Value="#2D2D30"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Margin" Value="0,0,15,15"/>
-            <Setter Property="Height" Value="140"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="4" BorderBrush="#3F3F46" BorderThickness="1">
-                            <!-- Simplificando o layout para evitar sobreposição -->
-                            <StackPanel Margin="15">
-                                <TextBlock Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" 
-                                           FontSize="28" Foreground="{StaticResource AccentColor}" 
-                                           FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Left" Margin="0,0,0,15"/>
-                                
-                                <TextBlock Text="{TemplateBinding Content}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,5"/>
-                                
-                                <TextBlock Text="{Binding ToolTip, RelativeSource={RelativeSource TemplatedParent}}" 
-                                           FontSize="12" Foreground="#999999" TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis"/>
-                            </StackPanel>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#3E3E42"/>
-                                <Setter Property="Cursor" Value="Hand"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
 
     <materialDesign:DialogHost x:Name="RootDialog" Identifier="RootDialog" DialogTheme="Dark">
@@ -183,34 +151,34 @@
                                     <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
                                         <!-- Cards de Ferramentas -->
                                         <Button Style="{StaticResource ToolCardStyle}" Content="Notas Rápidas" 
-                                            Tag="&#xE70B;" ToolTip="Anotações flutuantes always-on-top" Width="200" Click="OpenTool_Click" CommandParameter="Notes"/>
+                                            Tag="{StaticResource Icon.Notes}" ToolTip="Anotações flutuantes always-on-top" Click="OpenTool_Click" CommandParameter="Notes"/>
 
                                         <Button Style="{StaticResource ToolCardStyle}" Content="Organizador de Arquivos" 
-                                            Tag="&#xE8B7;" ToolTip="Move/organiza por extensão/data conforme categorias" Width="200" Click="OpenTool_Click" CommandParameter="Organizer"/>
+                                            Tag="{StaticResource Icon.Organizer}" ToolTip="Move/organiza por extensão/data conforme categorias" Click="OpenTool_Click" CommandParameter="Organizer"/>
 
                                         <Button Style="{StaticResource ToolCardStyle}" Content="Renomear Projeto .NET" 
-                                            Tag="&#xE8AC;" ToolTip="Renomeia projeto/solution e namespaces C# com backup" Width="200" Click="OpenTool_Click" CommandParameter="Rename"/>
+                                            Tag="{StaticResource Icon.Rename}" ToolTip="Renomeia projeto/solution e namespaces C# com backup" Click="OpenTool_Click" CommandParameter="Rename"/>
 
                                         <Button Style="{StaticResource ToolCardStyle}" Content="Snapshot do Projeto" 
-                                            Tag="&#xE964;" ToolTip="Gera ZIP do projeto com filtros" Width="200" Click="OpenTool_Click" CommandParameter="Snapshot"/>
+                                            Tag="{StaticResource Icon.Snapshot}" ToolTip="Gera ZIP do projeto com filtros" Click="OpenTool_Click" CommandParameter="Snapshot"/>
 
                                         <Button Style="{StaticResource ToolCardStyle}" Content="Dividir Imagens" 
-                                            Tag="&#xE91B;" ToolTip="Divide imagens em grade configurável" Width="200" Click="OpenTool_Click" CommandParameter="ImageSplitter"/>
+                                            Tag="{StaticResource Icon.ImageSplitter}" ToolTip="Divide imagens em grade configurável" Click="OpenTool_Click" CommandParameter="ImageSplitter"/>
 
                                         <Button Style="{StaticResource ToolCardStyle}" Content="Converter para UTF‑8" 
-                                            Tag="&#xE8C5;" ToolTip="Converte arquivos para UTF‑8 preservando conteúdo" Width="200" Click="OpenTool_Click" CommandParameter="Utf8Convert"/>
+                                            Tag="{StaticResource Icon.Utf8Convert}" ToolTip="Converte arquivos para UTF‑8 preservando conteúdo" Click="OpenTool_Click" CommandParameter="Utf8Convert"/>
 
                                         <Button Style="{StaticResource ToolCardStyle}" Content="Buscar Texto em Arquivos" 
-                                            Tag="&#xE721;" ToolTip="Busca rápida com regex e filtros" Width="200" Click="OpenTool_Click" CommandParameter="SearchText"/>
+                                            Tag="{StaticResource Icon.SearchText}" ToolTip="Busca rápida com regex e filtros" Click="OpenTool_Click" CommandParameter="SearchText"/>
 
                                         <Button Style="{StaticResource ToolCardStyle}" Content="EF Core Migrations" 
-                                            Tag="&#xE7F8;" ToolTip="Cria/aplica migrations em contextos EF Core" Width="200" Click="OpenTool_Click" CommandParameter="Migrations"/>
+                                            Tag="{StaticResource Icon.Migrations}" ToolTip="Cria/aplica migrations em contextos EF Core" Click="OpenTool_Click" CommandParameter="Migrations"/>
 
                                         <Button Style="{StaticResource ToolCardStyle}" Content="Coletor de Arquivos" 
-                                            Tag="&#xE896;" ToolTip="Copia arquivos filtrados para pasta de saída" Width="200" Click="OpenTool_Click" CommandParameter="Harvest"/>
+                                            Tag="{StaticResource Icon.Harvest}" ToolTip="Copia arquivos filtrados para pasta de saída" Click="OpenTool_Click" CommandParameter="Harvest"/>
 
                                         <Button Style="{StaticResource ToolCardStyle}" Content="Túnel SSH" 
-                                            Tag="&#xE753;" ToolTip="Gerenciador de túneis SSH" Width="200" Click="OpenTool_Click" CommandParameter="SSHTunnel"/>
+                                            Tag="{StaticResource Icon.SSHTunnel}" ToolTip="Gerenciador de túneis SSH" Click="OpenTool_Click" CommandParameter="SSHTunnel"/>
 
                                     </WrapPanel>
                                 </StackPanel>
@@ -302,23 +270,23 @@
                                     <TextBlock Text="Configurações do Projeto" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
                                     <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
                                         <!-- Card: SSH -->
-                                        <Button Style="{StaticResource ToolCardStyle}" Tag="&#xE753;" Content="Túnel SSH" 
+                                        <Button Style="{StaticResource ToolCardStyle}" Tag="{StaticResource Icon.SSHTunnel}" Content="Túnel SSH" 
                                             ToolTip="Gerenciar perfis e chaves SSH" Width="200" Click="OpenSshSettings_Click"/>
 
                                         <!-- Card: Harvest -->
-                                        <Button Style="{StaticResource ToolCardStyle}" Tag="&#xE896;" Content="Harvest" 
+                                        <Button Style="{StaticResource ToolCardStyle}" Tag="{StaticResource Icon.Harvest}" Content="Harvest" 
                                             ToolTip="Configurar regras de extração e IA" Width="200" Click="OpenHarvestSettings_Click"/>
 
                                         <!-- Card: Organizer -->
-                                        <Button Style="{StaticResource ToolCardStyle}" Tag="&#xE8B7;" Content="Organizer" 
+                                        <Button Style="{StaticResource ToolCardStyle}" Tag="{StaticResource Icon.Organizer}" Content="Organizer" 
                                             ToolTip="Categorias e regras de organização" Width="200" Click="OpenOrganizerSettings_Click"/>
 
                                         <!-- Card: Migrations -->
-                                        <Button Style="{StaticResource ToolCardStyle}" Tag="&#xE7F8;" Content="Migrations" 
+                                        <Button Style="{StaticResource ToolCardStyle}" Tag="{StaticResource Icon.Migrations}" Content="Migrations" 
                                             ToolTip="Caminhos e contextos do EF Core" Width="200" Click="OpenMigrationsSettings_Click"/>
 
                                         <!-- Card: Ngrok -->
-                                        <Button Style="{StaticResource ToolCardStyle}" Tag="&#xE91B;" Content="Ngrok" 
+                                        <Button Style="{StaticResource ToolCardStyle}" Tag="{StaticResource Icon.Ngrok}" Content="Ngrok" 
                                             ToolTip="Caminho do executável e token" Width="200" Click="OpenNgrokSettings_Click"/>
                                     </WrapPanel>
                                 </StackPanel>

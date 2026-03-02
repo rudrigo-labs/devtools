@@ -57,11 +57,6 @@ public partial class SearchTextWindow : Window
         _settings.Save();
     }
 
-    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        // if (e.ButtonState == MouseButtonState.Pressed) DragMove();
-    }
-
     private void Close_Click(object sender, RoutedEventArgs e)
     {
         Close();

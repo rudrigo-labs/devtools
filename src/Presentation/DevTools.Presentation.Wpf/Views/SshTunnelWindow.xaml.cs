@@ -65,14 +65,17 @@ public partial class SshTunnelWindow : Window
 
     private async void ToggleTunnel_Click(object sender, RoutedEventArgs e)
     {
+        var primaryButton = MainFrame.PrimaryButton;
+        if (primaryButton == null) return;
+
         if (_tunnelService.IsOn)
         {
             // Stop
-            ToggleTunnelButton.IsEnabled = false;
-            ToggleTunnelButton.Content = "Parando...";
+            primaryButton.IsEnabled = false;
+            primaryButton.Content = "Parando...";
             await _tunnelService.StopAsync(TimeSpan.FromSeconds(5));
             UpdateStatusUI();
-            ToggleTunnelButton.IsEnabled = true;
+            primaryButton.IsEnabled = true;
         }
         else
         {
@@ -84,8 +87,8 @@ public partial class SshTunnelWindow : Window
                 return;
             }
 
-            ToggleTunnelButton.IsEnabled = false;
-            ToggleTunnelButton.Content = "Conectando...";
+            primaryButton.IsEnabled = false;
+            primaryButton.Content = "Conectando...";
             
             try
             {
@@ -97,7 +100,7 @@ public partial class SshTunnelWindow : Window
         }
             finally
             {
-                ToggleTunnelButton.IsEnabled = true;
+                primaryButton.IsEnabled = true;
                 UpdateStatusUI();
             }
         }
@@ -125,19 +128,20 @@ public partial class SshTunnelWindow : Window
 
     private void UpdateStatusUI()
     {
+        var primaryButton = MainFrame.PrimaryButton;
+        if (primaryButton == null) return;
+
         if (_tunnelService.IsOn)
         {
-            StatusIndicator.Fill = System.Windows.Media.Brushes.Green;
-            StatusText.Text = "Conectado";
-            ToggleTunnelButton.Content = "Desconectar";
-            ToggleTunnelButton.Style = (Style)FindResource("SecondaryButtonStyle"); // Use secondary style for disconnect
+            MainFrame.StatusText = "🟢 Conectado";
+            primaryButton.Content = "Desconectar";
+            primaryButton.Style = (Style)FindResource("SecondaryButtonStyle"); // Use secondary style for disconnect
         }
         else
         {
-            StatusIndicator.Fill = System.Windows.Media.Brushes.Gray;
-            StatusText.Text = "Parado";
-            ToggleTunnelButton.Content = "Conectar";
-            ToggleTunnelButton.Style = (Style)FindResource("PrimaryButtonStyle");
+            MainFrame.StatusText = "⚫ Parado";
+            primaryButton.Content = "Conectar";
+            primaryButton.Style = (Style)FindResource("PrimaryButtonStyle");
         }
     }
 
@@ -157,14 +161,6 @@ public partial class SshTunnelWindow : Window
     private void SavePosition()
     {
         // Implementar persistência de posição da janela se necessário
-    }
-
-    private void Header_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-    {
-        if (e.ButtonState == System.Windows.Input.MouseButtonState.Pressed)
-        {
-            DragMove();
-        }
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)

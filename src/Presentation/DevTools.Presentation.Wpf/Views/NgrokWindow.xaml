@@ -16,106 +16,74 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="{StaticResource WindowBackgroundBrush}"
-            BorderBrush="{StaticResource BorderBrush}"
-            BorderThickness="1"
-            CornerRadius="12"
-            Padding="0">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="25" ShadowDepth="10" Opacity="0.6" Color="Black"/>
-        </Border.Effect>
+    <c:DevToolsToolFrame x:Name="MainFrame"
+                         Title="Expor Porta (Ngrok)"
+                         HelpText="Cria túnel http público para uma porta local."
+                         StatusText="⚫ Parado"
+                         PrimaryButtonContent="Expor Porta"
+                         SecondaryButtonContent="Cancelar"
+                         PrimaryButtonClick="StartButton_Click"
+                         SecondaryButtonClick="CloseButton_Click"
+                         CloseButtonClick="CloseButton_Click">
         <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="50"/>
-        </Grid.RowDefinitions>
-
-        <!-- Header -->
-        <Border Grid.Row="0" Background="#2D2D30" MouseLeftButtonDown="Header_MouseLeftButtonDown">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="Expor Porta (Ngrok)" VerticalAlignment="Center" Margin="15,0,0,0" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource PrimaryTextBrush}"/>
-                <Button Grid.Column="1" Content="?" ToolTip="Cria túnel http público para uma porta local." HorizontalAlignment="Right" Style="{StaticResource IconButtonStyle}" FontSize="14" Margin="0,0,5,0"/>
-                <Button Grid.Column="2" Content="✕" Click="CloseButton_Click" HorizontalAlignment="Right" Style="{StaticResource IconButtonStyle}" FontSize="14"/>
-            </Grid>
-        </Border>
-
-        <!-- New Tunnel Form -->
-        <Border Grid.Row="1" Background="#252526" Padding="20" Margin="0,0,0,1">
-            <StackPanel>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="150"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="Porta Local (ex: 5000)" Margin="0,0,0,5" Foreground="{StaticResource PrimaryTextBrush}"/>
-                        <TextBox x:Name="PortInput" Text="5000" PreviewTextInput="NumberValidationTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
-                    </StackPanel>
-
-                    <Button Grid.Column="2" x:Name="StartButton" Content="Expor Porta" Click="StartButton_Click" VerticalAlignment="Bottom" Style="{StaticResource PrimaryButtonStyle}" Padding="0,8"/>
-                </Grid>
-            </StackPanel>
-        </Border>
-
-        <!-- Tunnels List -->
-        <Grid Grid.Row="2" Margin="20,10,20,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            
-            <Grid Grid.Row="0" Margin="0,0,0,10">
-                <TextBlock Text="Túneis Ativos" FontWeight="Bold" Foreground="{StaticResource PrimaryTextBrush}"/>
-                <Button Content="Atualizar" Click="RefreshButton_Click" HorizontalAlignment="Right" Style="{StaticResource SecondaryButtonStyle}" Padding="10,5" FontSize="12"/>
-            </Grid>
 
-            <ListBox x:Name="TunnelsList" Grid.Row="1" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Border Background="#333333" CornerRadius="4" Margin="0,0,0,5" Padding="10">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                
-                                <StackPanel>
-                                    <TextBlock Text="{Binding PublicUrl}" FontWeight="SemiBold" Foreground="#4EC9B0" FontSize="14"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                        <TextBlock Text="➡" Margin="0,0,5,0" Foreground="Gray"/>
-                                        <TextBlock Text="{Binding Config.Addr}" Foreground="#CCCCCC"/>
-                                    </StackPanel>
-                                </StackPanel>
-
-                                <Button Grid.Column="1" Content="Copiar" Click="CopyUrl_Click" Tag="{Binding PublicUrl}" Style="{StaticResource SecondaryButtonStyle}" Margin="10,0,0,0"/>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            
-            <TextBlock x:Name="EmptyStateText" Grid.Row="1" Text="Nenhum túnel ativo." HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#555555" Visibility="Collapsed"/>
-        </Grid>
-
-        <!-- Footer -->
-        <Border Grid.Row="3" Background="#252526" BorderBrush="#3F3F46" BorderThickness="0,1,0,0">
-            <Grid Margin="15,0">
-                <Button Content="Matar Processos Ngrok" Click="KillAll_Click" HorizontalAlignment="Left" Style="{StaticResource DangerButtonStyle}" VerticalAlignment="Center" Padding="15,8"/>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Content="Cancelar" Click="CloseButton_Click" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
-                    <TextBlock x:Name="StatusText" Text="" VerticalAlignment="Center" Foreground="Gray" FontSize="11"/>
+            <!-- New Tunnel Form -->
+            <Border Grid.Row="0" Background="#252526" Padding="20" Margin="0,0,0,10" CornerRadius="4">
+                <StackPanel>
+                    <TextBlock Text="Porta Local (ex: 5000)" Margin="0,0,0,5" Foreground="{StaticResource PrimaryTextBrush}"/>
+                    <TextBox x:Name="PortInput" Text="5000" PreviewTextInput="NumberValidationTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
                 </StackPanel>
+            </Border>
+
+            <!-- Tunnels List -->
+            <Grid Grid.Row="1" Margin="20,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <TextBlock Text="Túneis Ativos" FontWeight="Bold" Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                    <Button Content="Atualizar" Click="RefreshButton_Click" HorizontalAlignment="Right" Style="{StaticResource SecondaryButtonStyle}" Padding="10,5" FontSize="12"/>
+                </Grid>
+
+                <ListBox x:Name="TunnelsList" Grid.Row="1" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Background="Transparent" BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#333333" CornerRadius="4" Margin="0,0,0,5" Padding="10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding PublicUrl}" FontWeight="SemiBold" Foreground="#4EC9B0" FontSize="14"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                            <TextBlock Text="➡" Margin="0,0,5,0" Foreground="Gray"/>
+                                            <TextBlock Text="{Binding Config.Addr}" Foreground="#CCCCCC"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <Button Grid.Column="1" Content="Copiar" Click="CopyUrl_Click" Tag="{Binding PublicUrl}" Style="{StaticResource SecondaryButtonStyle}" Margin="10,0,0,0"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                
+                <TextBlock x:Name="EmptyStateText" Grid.Row="1" Text="Nenhum túnel ativo." HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#555555" Visibility="Collapsed"/>
             </Grid>
-        </Border>
+
+            <!-- Footer Actions -->
+            <StackPanel Grid.Row="2" Margin="20,10,20,0" Orientation="Horizontal">
+                <Button Content="Matar Processos Ngrok" Click="KillAll_Click" Style="{StaticResource DangerButtonStyle}" Padding="15,8"/>
+            </StackPanel>
         </Grid>
-    </Border>
+    </c:DevToolsToolFrame>
 </Window>

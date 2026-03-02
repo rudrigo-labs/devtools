@@ -176,7 +176,7 @@ public partial class DashboardWindow : Window
             SshHost.Text = profile.SshHost;
             SshPort.Text = profile.SshPort.ToString();
             SshUser.Text = profile.SshUser;
-            SshKeyFileSelector.SelectedPath = profile.IdentityFile;
+            SshKeyFileSelector.SelectedPath = profile.IdentityFile ?? string.Empty;
             LocalBind.Text = profile.LocalBindHost;
             LocalPort.Text = profile.LocalPort.ToString();
             RemoteHost.Text = profile.RemoteHost;

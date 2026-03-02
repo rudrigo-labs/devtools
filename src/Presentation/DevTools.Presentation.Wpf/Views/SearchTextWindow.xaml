@@ -8,124 +8,66 @@
         Title="Buscar Texto em Arquivos" Height="640" Width="900" WindowStartupLocation="CenterScreen"
         Style="{StaticResource ModernWindowStyle}">
 
-    <Border Background="{StaticResource WindowBackgroundBrush}" 
-            CornerRadius="12" 
-            BorderBrush="{StaticResource BorderBrush}" 
-            BorderThickness="1"
-            Padding="0">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="25" ShadowDepth="10" Opacity="0.6" Color="Black"/>
-        </Border.Effect>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/> <!-- Header -->
-                <RowDefinition Height="*"/>    <!-- Content -->
-                <RowDefinition Height="Auto"/> <!-- Footer -->
-            </Grid.RowDefinitions>
-
-            <!-- Header -->
-            <Grid Grid.Row="0" MouseLeftButtonDown="Header_MouseLeftButtonDown" Background="Transparent">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+    <c:DevToolsToolFrame x:Name="MainFrame"
+                         Title="Buscar Texto em Arquivos"
+                         HelpText="Busca rápida com regex opcional e filtros."
+                         PrimaryButtonContent="Buscar"
+                         SecondaryButtonContent="Cancelar"
+                         PrimaryButtonClick="Execute_Click"
+                         SecondaryButtonClick="Close_Click"
+                         CloseButtonClick="Close_Click">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
                 
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="15,10">
-                    <TextBlock Text="Buscar Texto em Arquivos" 
-                               FontSize="16" 
-                               FontWeight="SemiBold" 
-                               Foreground="{DynamicResource PrimaryTextBrush}"/>
+                <!-- Caminho -->
+                <components:PathSelector x:Name="PathSelector" 
+                                     Title="Diretório de Busca"
+                                     IsFolderPicker="True"
+                                     Margin="0,0,0,15"/>
+
+                <!-- Termo de Busca -->
+                <StackPanel Margin="0,0,0,15">
+                    <TextBlock Text="Texto para buscar" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                    <TextBox x:Name="SearchTextInput" Style="{StaticResource ModernTextBoxStyle}" />
                 </StackPanel>
 
-                <Button Grid.Column="1"
-                        Style="{DynamicResource IconButtonStyle}" 
-                        Content="?" 
-                        ToolTip="Busca rápida com regex opcional e filtros de inclusão/exclusão."
-                        Margin="0,0,5,0"/>
-                <Button Grid.Column="2" Click="Close_Click" 
-                        Style="{DynamicResource IconButtonStyle}" 
-                        Content="&#xE8BB;" 
-                        FontFamily="Segoe MDL2 Assets"
-                        Margin="0,0,10,0"/>
-            </Grid>
-
-            <!-- Content -->
-            <ScrollViewer Grid.Row="1" Margin="15,0,15,10">
-                <StackPanel>
-                    
-                    <!-- Caminho -->
-                    <components:PathSelector x:Name="PathSelector" 
-                                         Title="Diretório de Busca"
-                                         IsFolderPicker="True"
-                                         Margin="0,0,0,15"/>
-
-                    <!-- Termo de Busca -->
-                    <StackPanel Margin="0,0,0,15">
-                        <TextBlock Text="Texto para buscar" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
-                        <TextBox x:Name="SearchTextInput" Style="{StaticResource ModernTextBoxStyle}" />
-                    </StackPanel>
-
-                    <!-- Opções -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                        <CheckBox x:Name="UseRegexCheck" Content="Usar Regex" Margin="0,0,20,0"/>
-                        <CheckBox x:Name="CaseSensitiveCheck" Content="Case Sensitive"/>
-                    </StackPanel>
-
-                    <!-- Filtros -->
-                    <Grid Margin="0,0,0,15">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                            <TextBlock Text="Incluir (glob patterns)" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
-                            <TextBox x:Name="IncludePatternInput" ToolTip="Ex: *.cs, *.ts" Style="{StaticResource ModernTextBoxStyle}"/>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                            <TextBlock Text="Excluir (glob patterns)" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
-                            <TextBox x:Name="ExcludePatternInput" ToolTip="Ex: bin, obj, node_modules" Style="{StaticResource ModernTextBoxStyle}"/>
-                        </StackPanel>
-                    </Grid>
-
-                    <!-- Output Area -->
-                    <Expander Header="Resultados" IsExpanded="True" BorderBrush="{DynamicResource BorderBrush}">
-                        <TextBox x:Name="OutputText" 
-                                 Height="120" 
-                                 TextWrapping="Wrap" 
-                                 IsReadOnly="True" 
-                                 FontFamily="Consolas"
-                                 FontSize="12"
-                                 VerticalScrollBarVisibility="Auto"
-                                 Style="{StaticResource ModernTextBoxStyle}"/>
-                    </Expander>
-
+                <!-- Opções -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                    <CheckBox x:Name="UseRegexCheck" Content="Usar Regex" Margin="0,0,20,0"/>
+                    <CheckBox x:Name="CaseSensitiveCheck" Content="Case Sensitive"/>
                 </StackPanel>
-            </ScrollViewer>
 
-            <!-- Footer -->
-            <Border Grid.Row="2" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="15" Background="{DynamicResource ControlBackgroundBrush}">
-                <Grid HorizontalAlignment="Right"
-                      Grid.IsSharedSizeScope="True">
+                <!-- Filtros -->
+                <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="ActionButtons"/>
-                        <ColumnDefinition Width="12"/>
-                        <ColumnDefinition Width="Auto" SharedSizeGroup="ActionButtons"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                        <TextBlock Text="Incluir (glob patterns)" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                        <TextBox x:Name="IncludePatternInput" ToolTip="Ex: *.cs, *.ts" Style="{StaticResource ModernTextBoxStyle}"/>
+                    </StackPanel>
 
-                    <Button Grid.Column="0"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            Content="Cancelar"
-                            Click="Close_Click"/>
-
-                    <Button Grid.Column="2"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            Content="Buscar"
-                            Click="Execute_Click"/>
+                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                        <TextBlock Text="Excluir (glob patterns)" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                        <TextBox x:Name="ExcludePatternInput" ToolTip="Ex: bin, obj, node_modules" Style="{StaticResource ModernTextBoxStyle}"/>
+                    </StackPanel>
                 </Grid>
-            </Border>
-        </Grid>
-    </Border>
+
+                <!-- Output Area -->
+                <Expander Header="Resultados" IsExpanded="True" BorderBrush="{DynamicResource BorderBrush}">
+                    <TextBox x:Name="OutputText" 
+                             Height="120" 
+                             TextWrapping="Wrap" 
+                             IsReadOnly="True" 
+                             FontFamily="Consolas"
+                             FontSize="12"
+                             VerticalScrollBarVisibility="Auto"
+                             Style="{StaticResource ModernTextBoxStyle}"/>
+                </Expander>
+
+            </StackPanel>
+        </ScrollViewer>
+    </c:DevToolsToolFrame>
 </Window>

@@ -15,13 +15,10 @@ public partial class JobCenterWindow : Window
         DataContext = _jobManager;
     }
 
-    private void Header_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-    {
-        // DragMove();
-    }
-
     private void CloseButton_Click(object sender, RoutedEventArgs e)
-        => Close();
+    {
+        Close();
+    }
 
     private void CancelSelected_Click(object sender, RoutedEventArgs e)
     {

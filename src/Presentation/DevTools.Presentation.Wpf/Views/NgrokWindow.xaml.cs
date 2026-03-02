@@ -52,14 +52,14 @@ public partial class NgrokWindow : Window
                 var tunnels = result.Value.Tunnels;
                 TunnelsList.ItemsSource = tunnels;
                 EmptyStateText.Visibility = tunnels.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-                StatusText.Text = $"Atualizado em: {DateTime.Now:HH:mm:ss}";
+                MainFrame.StatusText = $"Atualizado em: {DateTime.Now:HH:mm:ss}";
             }
             else
             {
                 // Ngrok pode não estar rodando
                 TunnelsList.ItemsSource = null;
                 EmptyStateText.Visibility = Visibility.Visible;
-                StatusText.Text = "Ngrok inativo ou API inacessível";
+                MainFrame.StatusText = "Ngrok inativo ou API inacessível";
             }
         }
         catch
@@ -70,10 +70,13 @@ public partial class NgrokWindow : Window
 
     private async void StartButton_Click(object sender, RoutedEventArgs e)
     {
+        var startButton = MainFrame.PrimaryButton;
+        if (startButton == null) return;
+
         if (int.TryParse(PortInput.Text, out int port))
         {
-            StartButton.IsEnabled = false;
-            StartButton.Content = "Iniciando...";
+            startButton.IsEnabled = false;
+            startButton.Content = "Iniciando...";
 
             var request = new NgrokRequest(
                 NgrokAction.StartHttp, 
@@ -86,8 +89,8 @@ public partial class NgrokWindow : Window
                 
                 Dispatcher.Invoke(() => 
                 {
-                    StartButton.IsEnabled = true;
-                    StartButton.Content = "Expor Porta";
+                    startButton.IsEnabled = true;
+                    startButton.Content = "Expor Porta";
                     
                     if (!result.IsSuccess)
                     {
@@ -135,11 +138,6 @@ public partial class NgrokWindow : Window
     private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
     {
         e.Handled = new Regex("[^0-9]+").IsMatch(e.Text);
-    }
-
-    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        // DragMove();
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
