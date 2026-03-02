@@ -21,9 +21,6 @@ public partial class HarvestWindow : Window
         _jobManager = jobManager;
         _settingsService = settingsService;
 
-        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
-        ProfileSelector.ProfileLoaded += LoadProfile;
-
         // Carregar configurações salvas
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastHarvestSourcePath))
             SourcePathSelector.SelectedPath = _settingsService.Settings.LastHarvestSourcePath;
@@ -60,30 +57,6 @@ public partial class HarvestWindow : Window
             // this.Close(); 
             // Comentado pois o FolderBrowserDialog causa Deactivate. Precisamos de flag.
         };
-    }
-
-    private Dictionary<string, string> GetCurrentOptions()
-    {
-        var options = new Dictionary<string, string>();
-        options["root"] = SourcePathSelector.SelectedPath;
-        options["output"] = OutputPathSelector.SelectedPath;
-        options["config"] = ConfigPathSelector.SelectedPath;
-        options["min-score"] = MinScoreBox.Text;
-        options["copy"] = (CopyFilesCheck.IsChecked ?? true).ToString().ToLowerInvariant();
-        return options;
-    }
-
-    private void LoadProfile(ToolProfile profile)
-    {
-        if (profile.Options.TryGetValue("root", out var root)) SourcePathSelector.SelectedPath = root;
-        if (profile.Options.TryGetValue("output", out var output)) OutputPathSelector.SelectedPath = output;
-        if (profile.Options.TryGetValue("config", out var config)) ConfigPathSelector.SelectedPath = config;
-        
-        if (profile.Options.TryGetValue("min-score", out var minScore))
-             MinScoreBox.Text = minScore;
-             
-        if (profile.Options.TryGetValue("copy", out var copy))
-             CopyFilesCheck.IsChecked = bool.TryParse(copy, out var c) ? c : true;
     }
 
     private bool ValidateInputs(out string errorMessage)

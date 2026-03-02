@@ -27,10 +27,6 @@ public partial class SshTunnelWindow : Window
         // Inicializa serviços do SSH Tunnel
         _tunnelService = new TunnelService(new SystemProcessRunner());
 
-        // Configura ProfileSelector
-        ProfileSelector.ProfileLoaded += LoadProfile;
-        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
-        
         // Monitora fechamento para salvar posição
         Closing += (s, e) => SavePosition();
         
@@ -115,7 +111,7 @@ public partial class SshTunnelWindow : Window
 
         return new TunnelProfile
         {
-            Name = ProfileSelector.SelectedProfile?.Name ?? "Manual",
+            Name = "Manual",
             SshHost = SshHostInput.Text,
             SshPort = sshPort > 0 ? sshPort : 22,
             SshUser = SshUserInput.Text,

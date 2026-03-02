@@ -21,9 +21,6 @@ public partial class Utf8ConvertWindow : Window
         _jobManager = jobManager;
         _settingsService = settingsService;
 
-        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
-        ProfileSelector.ProfileLoaded += LoadProfile;
-
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastUtf8RootPath))
             RootPathSelector.SelectedPath = _settingsService.Settings.LastUtf8RootPath;
 
@@ -53,30 +50,6 @@ public partial class Utf8ConvertWindow : Window
             _settingsService.Save();
         };
         */
-    }
-
-    private Dictionary<string, string> GetCurrentOptions()
-    {
-        var options = new Dictionary<string, string>();
-        options["root"] = RootPathSelector.SelectedPath;
-        options["recursive"] = (RecursiveCheck.IsChecked ?? true).ToString().ToLowerInvariant();
-        options["backup"] = (BackupCheck.IsChecked ?? true).ToString().ToLowerInvariant();
-        options["output-bom"] = (BomCheck.IsChecked ?? true).ToString().ToLowerInvariant();
-        return options;
-    }
-
-    private void LoadProfile(ToolProfile profile)
-    {
-        if (profile.Options.TryGetValue("root", out var root)) RootPathSelector.SelectedPath = root;
-        
-        if (profile.Options.TryGetValue("recursive", out var recursive)) 
-            RecursiveCheck.IsChecked = bool.TryParse(recursive, out var r) ? r : true;
-            
-        if (profile.Options.TryGetValue("backup", out var backup)) 
-            BackupCheck.IsChecked = bool.TryParse(backup, out var b) ? b : true;
-            
-        if (profile.Options.TryGetValue("output-bom", out var bom)) 
-            BomCheck.IsChecked = bool.TryParse(bom, out var bo) ? bo : true;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

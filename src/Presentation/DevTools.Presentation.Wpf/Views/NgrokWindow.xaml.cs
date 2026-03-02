@@ -26,9 +26,6 @@ public partial class NgrokWindow : Window
         _settingsService = settingsService;
         _engine = new NgrokEngine();
 
-        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
-        ProfileSelector.ProfileLoaded += LoadProfile;
-
         LoadPosition();
         Closing += (s, e) => SavePosition();
 
@@ -41,18 +38,6 @@ public partial class NgrokWindow : Window
             await RefreshTunnels();
             _timer.Start();
         };
-    }
-
-    private Dictionary<string, string> GetCurrentOptions()
-    {
-        var options = new Dictionary<string, string>();
-        options["port"] = PortInput.Text;
-        return options;
-    }
-
-    private void LoadProfile(ToolProfile profile)
-    {
-        if (profile.Options.TryGetValue("port", out var port)) PortInput.Text = port;
     }
 
     private async Task RefreshTunnels()

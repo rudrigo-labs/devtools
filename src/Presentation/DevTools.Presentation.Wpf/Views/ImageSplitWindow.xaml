@@ -47,8 +47,6 @@
             <!-- Content -->
             <StackPanel Grid.Row="1" Margin="0,20,0,0">
                 
-                <c:ProfileSelector x:Name="ProfileSelector" ToolName="imagesplit" Margin="0,0,0,15"/>
-
                 <!-- Input File -->
                 <Label Content="Imagem de Entrada:"/>
                 <c:PathSelector x:Name="InputPathSelector" Title="Imagem de Entrada" IsFolderPicker="False" />

@@ -21,9 +21,6 @@ public partial class OrganizerWindow : Window
         _jobManager = jobManager;
         _settingsService = settingsService;
 
-        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
-        ProfileSelector.ProfileLoaded += LoadProfile;
-        
         // Carregar configurações
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastOrganizerInputPath))
             InputPathSelector.SelectedPath = _settingsService.Settings.LastOrganizerInputPath;
@@ -43,26 +40,6 @@ public partial class OrganizerWindow : Window
              // this.Close(); 
              // Comentado para evitar fechamento acidental ao usar dialogs
         };
-    }
-
-    private Dictionary<string, string> GetCurrentOptions()
-    {
-        var options = new Dictionary<string, string>();
-        options["inbox"] = InputPathSelector.SelectedPath;
-        options["output"] = OutputPathSelector.SelectedPath;
-        options["apply"] = (!(SimulateCheck.IsChecked ?? false)).ToString().ToLowerInvariant();
-        return options;
-    }
-
-    private void LoadProfile(ToolProfile profile)
-    {
-        if (profile.Options.TryGetValue("inbox", out var inbox)) InputPathSelector.SelectedPath = inbox;
-        else if (profile.Options.TryGetValue("input", out var input)) InputPathSelector.SelectedPath = input;
-        
-        if (profile.Options.TryGetValue("output", out var output)) OutputPathSelector.SelectedPath = output;
-        
-        if (profile.Options.TryGetValue("apply", out var applyStr))
-             SimulateCheck.IsChecked = !(bool.TryParse(applyStr, out var a) ? a : false);
     }
 
     private void Header_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

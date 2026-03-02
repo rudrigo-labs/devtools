@@ -13,7 +13,6 @@ O objetivo é facilitar conversas como “ajustar o combo da tela X” sem dúvi
 
 ## Convenções gerais
 
-- **ProfileSelector**: controle de perfis reutilizado em várias ferramentas.
 - **PathSelector**: controle de seleção de caminho (pasta ou arquivo).
 - **ModernTextBoxStyle / ModernComboBoxStyle**: estilos globais definidos em `Theme/DarkTheme.xaml`.
 - Em geral os campos exibem **string** e o código interpreta como:
@@ -30,7 +29,6 @@ Arquivo: `Views/SshTunnelWindow.xaml`
 
 | ID                 | Tipo            | Exibe                                   | Espera / representa                                               |
 | ------------------ | --------------- | --------------------------------------- | ----------------------------------------------------------------- |
-| ProfileSelector    | ProfileSelector | Nome do perfil de túnel SSH             | Nome do perfil → conjunto de configs (host, porta, binds etc.)    |
 | SshHostInput       | TextBox         | Host do bastion                         | Hostname/IP usado na conexão SSH                                  |
 | SshPortInput       | TextBox         | Porta do bastion                        | Porta numérica do bastion                                         |
 | SshUserInput       | TextBox         | Usuário SSH                             | Usuário passado para o comando SSH                                |
@@ -51,7 +49,6 @@ Arquivo: `Views/MigrationsWindow.xaml`
 
 | ID                | Tipo          | Exibe                                   | Espera / representa                                               |
 | ----------------- | ------------- | --------------------------------------- | ----------------------------------------------------------------- |
-| ProfileSelector   | ProfileSelector | Nome do perfil de migrations           | Perfil com paths, provider, contexto etc.                         |
 | ProjectSelector   | PathSelector  | Pasta raiz do projeto (.csproj)        | Caminho de pasta                                                  |
 | StartupSelector   | PathSelector  | Pasta do projeto de startup            | Caminho de pasta                                                  |
 | ActionCombo       | ComboBox      | “Add Migration” / “Update Database”    | Tag = Add/Update; define comando `dotnet ef`                      |
@@ -69,7 +66,6 @@ Arquivo: `Views/NgrokWindow.xaml`
 
 | ID               | Tipo            | Exibe                                   | Espera / representa                                               |
 | ---------------- | --------------- | --------------------------------------- | ----------------------------------------------------------------- |
-| ProfileSelector  | ProfileSelector | Nome do perfil Ngrok                    | Porta/configs salvas para o perfil                                |
 | PortInput        | TextBox         | Porta local (ex.: 5000)                 | Porta numérica local                                              |
 | StartButton      | Button          | “Expor Porta”                           | Dispara criação do túnel Ngrok                                    |
 | TunnelsList      | ListBox         | Lista de túneis ativos                  | Items com PublicUrl e Config.Addr via binding                     |
@@ -83,7 +79,6 @@ Arquivo: `Views/SearchTextWindow.xaml`
 
 | ID                   | Tipo          | Exibe                              | Espera / representa                                      |
 | -------------------- | ------------- | ---------------------------------- | -------------------------------------------------------- |
-| ProfileSelector      | ProfileSelector | Perfil de busca                   | Combinação de path, regex, include/exclude etc.         |
 | PathSelector         | PathSelector  | Diretório de busca                 | Pasta raiz para varrer arquivos                         |
 | SearchTextInput      | TextBox       | Texto ou regex                     | String usada como termo de busca                        |
 | UseRegexCheck        | CheckBox      | “Usar Regex”                       | Booleano; alterna entre match literal e regex           |
@@ -100,7 +95,6 @@ Arquivo: `Views/OrganizerWindow.xaml`
 
 | ID                 | Tipo            | Exibe                                   | Espera / representa                                               |
 | ------------------ | --------------- | --------------------------------------- | ----------------------------------------------------------------- |
-| ProfileSelector    | ProfileSelector | Perfil de organização                   | Mapeamento de categorias/regras                                   |
 | InputPathSelector  | PathSelector    | Pasta de entrada                        | Diretório de origem                                               |
 | OutputPathSelector | PathSelector    | Pasta de saída (opcional)               | Diretório de destino                                              |
 | SimulateCheck      | CheckBox        | “Simular (Apenas Teste)”                | Booleano; se true, não move arquivos de fato                      |

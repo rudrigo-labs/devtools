@@ -22,9 +22,6 @@ public partial class SnapshotWindow : Window
         _jobManager = jobManager;
         _settingsService = settingsService;
 
-        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
-        ProfileSelector.ProfileLoaded += LoadProfile;
-
         /* Position handled by TrayService
         if (_settingsService.Settings.SnapshotWindowTop.HasValue)
         {
@@ -51,34 +48,6 @@ public partial class SnapshotWindow : Window
             _settingsService.Save();
         };
         */
-    }
-
-    private Dictionary<string, string> GetCurrentOptions()
-    {
-        var options = new Dictionary<string, string>();
-        options["root"] = RootPathSelector.SelectedPath;
-        options["text"] = (TextCheck.IsChecked ?? true).ToString().ToLowerInvariant();
-        options["html"] = (HtmlCheck.IsChecked ?? false).ToString().ToLowerInvariant();
-        options["json-nested"] = (JsonNestedCheck.IsChecked ?? false).ToString().ToLowerInvariant();
-        options["json-recursive"] = (JsonRecursiveCheck.IsChecked ?? false).ToString().ToLowerInvariant();
-        return options;
-    }
-
-    private void LoadProfile(ToolProfile profile)
-    {
-        if (profile.Options.TryGetValue("root", out var root)) RootPathSelector.SelectedPath = root;
-        
-        if (profile.Options.TryGetValue("text", out var text)) 
-            TextCheck.IsChecked = bool.TryParse(text, out var t) ? t : true;
-            
-        if (profile.Options.TryGetValue("html", out var html)) 
-            HtmlCheck.IsChecked = bool.TryParse(html, out var h) ? h : false;
-            
-        if (profile.Options.TryGetValue("json-nested", out var jn)) 
-            JsonNestedCheck.IsChecked = bool.TryParse(jn, out var n) ? n : false;
-            
-        if (profile.Options.TryGetValue("json-recursive", out var jr)) 
-            JsonRecursiveCheck.IsChecked = bool.TryParse(jr, out var r) ? r : false;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
