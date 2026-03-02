@@ -1,187 +1,119 @@
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Collections.Generic;
-using DevTools.Core.Models;
 using DevTools.Ngrok.Engine;
 using DevTools.Ngrok.Models;
 using DevTools.Presentation.Wpf.Services;
+using DevTools.Presentation.Wpf.Utilities;
+using DevTools.Core.Models;
 
 namespace DevTools.Presentation.Wpf.Views;
 
 public partial class NgrokWindow : Window
 {
-    private readonly JobManager _jobManager;
     private readonly SettingsService _settingsService;
-    private readonly NgrokEngine _engine;
-    
-    // Timer para auto-refresh
-    private readonly System.Windows.Threading.DispatcherTimer _timer;
 
-    public NgrokWindow(JobManager jobManager, SettingsService settingsService)
+    public NgrokRequest? Result { get; private set; }
+
+    public NgrokWindow(SettingsService settingsService)
     {
         InitializeComponent();
-        _jobManager = jobManager;
         _settingsService = settingsService;
-        _engine = new NgrokEngine();
 
-        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
-        ProfileSelector.ProfileLoaded += LoadProfile;
+        if (_settingsService.Settings.LastNgrokPort.HasValue)
+            PortBox.Text = _settingsService.Settings.LastNgrokPort.Value.ToString();
+        if (!string.IsNullOrEmpty(_settingsService.Settings.LastNgrokSubdomain))
+            SubdomainBox.Text = _settingsService.Settings.LastNgrokSubdomain;
+        if (!string.IsNullOrEmpty(_settingsService.Settings.LastNgrokTunnelName))
+            TunnelNameBox.Text = _settingsService.Settings.LastNgrokTunnelName;
+        if (!string.IsNullOrEmpty(_settingsService.Settings.LastNgrokAuthToken))
+            AuthTokenBox.Text = _settingsService.Settings.LastNgrokAuthToken;
 
-        LoadPosition();
-        Closing += (s, e) => SavePosition();
+        // Position handled by TrayService logic
+    }
 
-        _timer = new System.Windows.Threading.DispatcherTimer();
-        _timer.Interval = TimeSpan.FromSeconds(3);
-        _timer.Tick += async (s, e) => await RefreshTunnels();
+    private void ActionCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        // Could toggle visibility here based on action
+    }
+
+    private async void Run_Click(object sender, RoutedEventArgs e)
+    {
+        var actionItem = ActionCombo.SelectedItem as ComboBoxItem;
+        var actionTag = actionItem?.Tag?.ToString() ?? "ListTunnels";
         
-        Loaded += async (s, e) => 
+        if (!Enum.TryParse<NgrokAction>(actionTag, out var action))
         {
-            await RefreshTunnels();
-            _timer.Start();
-        };
-    }
+            DevToolsMessage.Error("Ação inválida.", "Erro");
+            return;
+        }
 
-    private Dictionary<string, string> GetCurrentOptions()
-    {
-        var options = new Dictionary<string, string>();
-        options["port"] = PortInput.Text;
-        return options;
-    }
+        var extraArgs = new List<string>();
+        if (!string.IsNullOrWhiteSpace(AuthTokenBox.Text))
+        {
+            extraArgs.Add("--authtoken");
+            extraArgs.Add(AuthTokenBox.Text);
+        }
+        
+        if (!string.IsNullOrWhiteSpace(SubdomainBox.Text))
+        {
+            extraArgs.Add("--subdomain");
+            extraArgs.Add(SubdomainBox.Text);
+        }
 
-    private void LoadProfile(ToolProfile profile)
-    {
-        if (profile.Options.TryGetValue("port", out var port)) PortInput.Text = port;
-    }
+        int port = 8080;
+        if (!int.TryParse(PortBox.Text, out var p))
+        {
+            DevToolsMessage.Error("Porta inválida. Digite um número.", "Erro de Validação");
+            return;
+        }
+        port = p;
 
-    private async Task RefreshTunnels()
-    {
+        _settingsService.Settings.LastNgrokPort = port;
+        _settingsService.Settings.LastNgrokSubdomain = SubdomainBox.Text;
+        _settingsService.Settings.LastNgrokTunnelName = TunnelNameBox.Text;
+        _settingsService.Settings.LastNgrokAuthToken = AuthTokenBox.Text;
+        _settingsService.Save();
+
+        var startOptions = new NgrokStartOptions(
+            Protocol: "http",
+            Port: port,
+            ExtraArgs: extraArgs
+        );
+
+        Result = new NgrokRequest(
+            Action: action,
+            TunnelName: TunnelNameBox.Text,
+            StartOptions: startOptions
+        );
+
+        var engine = new NgrokEngine();
+        
+        IsEnabled = false;
+        RunSummary.Clear();
+
         try
         {
-            var request = new NgrokRequest(NgrokAction.ListTunnels);
-            var result = await _engine.ExecuteAsync(request);
-
-            if (result.IsSuccess && result.Value?.Tunnels != null)
-            {
-                var tunnels = result.Value.Tunnels;
-                TunnelsList.ItemsSource = tunnels;
-                EmptyStateText.Visibility = tunnels.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-                StatusText.Text = $"Atualizado em: {DateTime.Now:HH:mm:ss}";
-            }
-            else
-            {
-                // Ngrok pode não estar rodando
-                TunnelsList.ItemsSource = null;
-                EmptyStateText.Visibility = Visibility.Visible;
-                StatusText.Text = "Ngrok inativo ou API inacessível";
-            }
+            var result = await Task.Run(() => engine.ExecuteAsync(Result));
+            RunSummary.BindResult(result);
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignora erros de conexão silenciosamente no timer
+            AppLogger.Error("Erro crítico ao executar Ngrok", ex);
+            DevToolsMessage.Error($"Erro crítico: {ex.Message}", "Erro");
         }
-    }
-
-    private async void StartButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (int.TryParse(PortInput.Text, out int port))
+        finally
         {
-            StartButton.IsEnabled = false;
-            StartButton.Content = "Iniciando...";
-
-            var request = new NgrokRequest(
-                NgrokAction.StartHttp, 
-                StartOptions: new NgrokStartOptions("http", port)
-            );
-
-            await Task.Run(async () => 
-            {
-                var result = await _engine.ExecuteAsync(request);
-                
-                Dispatcher.Invoke(() => 
-                {
-                    StartButton.IsEnabled = true;
-                    StartButton.Content = "Expor Porta";
-                    
-                    if (!result.IsSuccess)
-                    {
-                        MessageBox.Show($"Falha ao iniciar: {string.Join(", ", result.Errors.Select(x => x.Message))}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                    else
-                    {
-                        // Aguarda um pouco para a API subir e atualiza a lista
-                        Task.Delay(1000).ContinueWith(_ => Dispatcher.Invoke(RefreshTunnels));
-                    }
-                });
-            });
-        }
-        else
-        {
-            MessageBox.Show("Porta inválida!", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+            IsEnabled = true;
         }
     }
 
-    private async void KillAll_Click(object sender, RoutedEventArgs e)
+    private void Header_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-        if (MessageBox.Show("Isso fechará TODOS os túneis Ngrok abertos. Continuar?", "Confirmar", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
-        {
-            var request = new NgrokRequest(NgrokAction.KillAll);
-            await _engine.ExecuteAsync(request);
-            await RefreshTunnels();
-        }
+        DragMove();
     }
 
-    private async void RefreshButton_Click(object sender, RoutedEventArgs e)
-    {
-        await RefreshTunnels();
-    }
-
-    private void CopyUrl_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is Button btn && btn.Tag is string url)
-        {
-            Clipboard.SetText(url);
-            // Feedback visual rápido seria legal, mas tooltip serve
-        }
-    }
-
-    private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
-    {
-        e.Handled = new Regex("[^0-9]+").IsMatch(e.Text);
-    }
-
-    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        // DragMove();
-    }
-
-    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    private void Cancel_Click(object sender, RoutedEventArgs e)
     {
         Close();
-    }
-
-    private void LoadPosition()
-    {
-        /* Position handled by TrayService
-        if (_settingsService.Settings.NgrokWindowTop.HasValue && _settingsService.Settings.NgrokWindowLeft.HasValue)
-        {
-            Top = _settingsService.Settings.NgrokWindowTop.Value;
-            Left = _settingsService.Settings.NgrokWindowLeft.Value;
-        }
-        else
-        {
-            var workArea = SystemParameters.WorkArea;
-            Left = workArea.Right - Width - 20;
-            Top = workArea.Bottom - Height - 20;
-        }
-        */
-    }
-
-    private void SavePosition()
-    {
-        _settingsService.Settings.NgrokWindowTop = Top;
-        _settingsService.Settings.NgrokWindowLeft = Left;
-        _settingsService.Save();
     }
 }

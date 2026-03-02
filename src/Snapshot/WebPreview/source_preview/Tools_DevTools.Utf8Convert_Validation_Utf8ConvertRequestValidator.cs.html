@@ -1,0 +1,52 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Core.Results;
+using DevTools.Utf8Convert.Models;
+
+namespace DevTools.Utf8Convert.Validation;
+
+public static class Utf8ConvertRequestValidator
+{
+    public static IReadOnlyList&lt;ErrorDetail&gt; Validate(Utf8ConvertRequest request)
+    {
+        var errors = new List&lt;ErrorDetail&gt;();
+
+        if (request is null)
+        {
+            errors.Add(new ErrorDetail(&quot;utf8.request.null&quot;, &quot;Request is null.&quot;));
+            return errors;
+        }
+
+        if (string.IsNullOrWhiteSpace(request.RootPath))
+        {
+            errors.Add(new ErrorDetail(&quot;utf8.root.required&quot;, &quot;RootPath is required.&quot;));
+        }
+        else if (!Directory.Exists(request.RootPath))
+        {
+            errors.Add(new ErrorDetail(&quot;utf8.root.not_found&quot;, &quot;RootPath not found.&quot;, request.RootPath));
+        }
+
+        if (request.IncludeGlobs is not null &amp;&amp; request.IncludeGlobs.Any(s =&gt; s is null))
+            errors.Add(new ErrorDetail(&quot;utf8.include.invalid&quot;, &quot;IncludeGlobs contains invalid entries.&quot;));
+
+        if (request.ExcludeGlobs is not null &amp;&amp; request.ExcludeGlobs.Any(s =&gt; s is null))
+            errors.Add(new ErrorDetail(&quot;utf8.exclude.invalid&quot;, &quot;ExcludeGlobs contains invalid entries.&quot;));
+
+        return errors;
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

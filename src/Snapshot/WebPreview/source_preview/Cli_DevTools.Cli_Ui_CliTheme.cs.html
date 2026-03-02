@@ -1,0 +1,31 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>namespace DevTools.Cli.Ui;
+
+public sealed class CliTheme
+{
+    public ConsoleColor TitleColor { get; init; } = ConsoleColor.Cyan;
+    public ConsoleColor AccentColor { get; init; } = ConsoleColor.DarkCyan;
+    public ConsoleColor InfoColor { get; init; } = ConsoleColor.Gray;
+    public ConsoleColor SuccessColor { get; init; } = ConsoleColor.Green;
+    public ConsoleColor WarningColor { get; init; } = ConsoleColor.Yellow;
+    public ConsoleColor ErrorColor { get; init; } = ConsoleColor.Red;
+    public ConsoleColor DimColor { get; init; } = ConsoleColor.DarkGray;
+    public ConsoleColor InputLabelColor { get; init; } = ConsoleColor.White;
+    public ConsoleColor InputBoxColor { get; init; } = ConsoleColor.Cyan;
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

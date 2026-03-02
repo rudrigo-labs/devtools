@@ -1,0 +1,91 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Net;
+using System.Net.Sockets;
+
+namespace DevTools.SSHTunnel.Engine;
+
+public static class PortChecker
+{
+    public static bool IsPortFree(string bindHost, int port)
+    {
+        if (!TryResolveBindHost(bindHost, out var addresses))
+            return false;
+
+        foreach (var address in addresses)
+        {
+            if (!IsPortFree(address, port))
+                return false;
+        }
+
+        return true;
+    }
+
+    public static bool TryResolveBindHost(string bindHost, out IReadOnlyList&lt;IPAddress&gt; addresses)
+    {
+        if (IPAddress.TryParse(bindHost, out var ip))
+        {
+            addresses = new[] { ip };
+            return true;
+        }
+
+        try
+        {
+            var resolved = Dns.GetHostAddresses(bindHost)
+                .Where(a =&gt; a.AddressFamily is AddressFamily.InterNetwork or AddressFamily.InterNetworkV6)
+                .ToArray();
+
+            if (resolved.Length == 0)
+            {
+                addresses = Array.Empty&lt;IPAddress&gt;();
+                return false;
+            }
+
+            addresses = resolved;
+            return true;
+        }
+        catch
+        {
+            addresses = Array.Empty&lt;IPAddress&gt;();
+            return false;
+        }
+    }
+
+    private static bool IsPortFree(IPAddress address, int port)
+    {
+        TcpListener? listener = null;
+        try
+        {
+            listener = new TcpListener(address, port);
+            listener.Start();
+            return true;
+        }
+        catch (SocketException)
+        {
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
+        finally
+        {
+            try { listener?.Stop(); } catch { }
+        }
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

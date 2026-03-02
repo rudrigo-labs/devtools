@@ -1,0 +1,61 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-markup'>&lt;Project Sdk=&quot;Microsoft.NET.Sdk&quot;&gt;
+
+  &lt;PropertyGroup&gt;
+    &lt;OutputType&gt;WinExe&lt;/OutputType&gt;
+    &lt;TargetFramework&gt;net10.0-windows&lt;/TargetFramework&gt;
+    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
+    &lt;UseWPF&gt;true&lt;/UseWPF&gt;
+    &lt;ApplicationIcon&gt;Assets\application.ico&lt;/ApplicationIcon&gt;
+  &lt;/PropertyGroup&gt;
+
+  &lt;ItemGroup&gt;
+    &lt;None Remove=&quot;Assets\app.ico&quot; /&gt;
+    &lt;None Remove=&quot;Assets\application.ico&quot; /&gt;
+  &lt;/ItemGroup&gt;
+
+  &lt;ItemGroup&gt;
+    &lt;Resource Include=&quot;Assets\app.ico&quot; /&gt;
+    &lt;Content Include=&quot;Assets\app.ico&quot;&gt;
+      &lt;CopyToOutputDirectory&gt;PreserveNewest&lt;/CopyToOutputDirectory&gt;
+    &lt;/Content&gt;
+
+    &lt;Resource Include=&quot;Assets\application.ico&quot; /&gt;
+  &lt;/ItemGroup&gt;
+
+  &lt;ItemGroup&gt;
+    &lt;PackageReference Include=&quot;H.NotifyIcon.Wpf&quot; Version=&quot;2.1.1&quot; /&gt;
+  &lt;/ItemGroup&gt;
+
+  &lt;ItemGroup&gt;
+    &lt;ProjectReference Include=&quot;..\..\Core\DevTools.Core\DevTools.Core.csproj&quot; /&gt;
+    &lt;ProjectReference Include=&quot;..\..\Tools\DevTools.Organizer\DevTools.Organizer.csproj&quot; /&gt;
+    &lt;ProjectReference Include=&quot;..\..\Tools\DevTools.Harvest\DevTools.Harvest.csproj&quot; /&gt;
+    &lt;ProjectReference Include=&quot;..\..\Tools\DevTools.Notes\DevTools.Notes.csproj&quot; /&gt;
+    &lt;ProjectReference Include=&quot;..\..\Tools\DevTools.Image\DevTools.Image.csproj&quot; /&gt;
+    &lt;ProjectReference Include=&quot;..\..\Tools\DevTools.Rename\DevTools.Rename.csproj&quot; /&gt;
+    &lt;ProjectReference Include=&quot;..\..\Tools\DevTools.Snapshot\DevTools.Snapshot.csproj&quot; /&gt;
+    &lt;ProjectReference Include=&quot;..\..\Tools\DevTools.Utf8Convert\DevTools.Utf8Convert.csproj&quot; /&gt;
+    &lt;ProjectReference Include=&quot;..\..\Tools\DevTools.SSHTunnel\DevTools.SSHTunnel.csproj&quot; /&gt;
+    &lt;ProjectReference Include=&quot;..\..\Tools\DevTools.Ngrok\DevTools.Ngrok.csproj&quot; /&gt;
+    &lt;ProjectReference Include=&quot;..\..\Tools\DevTools.SearchText\DevTools.SearchText.csproj&quot; /&gt;
+    &lt;ProjectReference Include=&quot;..\..\Tools\DevTools.Migrations\DevTools.Migrations.csproj&quot; /&gt;
+  &lt;/ItemGroup&gt;
+
+&lt;/Project&gt;</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

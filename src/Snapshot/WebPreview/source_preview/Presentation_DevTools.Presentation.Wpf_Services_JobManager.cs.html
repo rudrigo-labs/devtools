@@ -1,0 +1,199 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System;
+using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using DevTools.Core.Abstractions;
+using DevTools.Core.Models;
+using DevTools.Presentation.Wpf.Models;
+
+namespace DevTools.Presentation.Wpf.Services;
+
+public sealed class JobManager
+{
+    private readonly ConcurrentDictionary&lt;Guid, CancellationTokenSource&gt; _ctsByJobId = new();
+    private readonly SynchronizationContext _uiContext;
+
+    public ObservableCollection&lt;UiJob&gt; Jobs { get; } = new();
+
+    public event Action&lt;string, bool&gt;? OnJobCompleted;
+
+    public JobManager()
+    {
+        // Captura o contexto de UI (ideal: instanciar JobManager no startup do WPF).
+        _uiContext = SynchronizationContext.Current ?? new SynchronizationContext();
+    }
+
+    public Guid StartJob(
+        string jobName,
+        Func&lt;IProgressReporter, CancellationToken, Task&lt;string&gt;&gt; action)
+    {
+        var jobId = Guid.NewGuid();
+        var cts = new CancellationTokenSource();
+
+        var job = new UiJob
+        {
+            Id = jobId,
+            Name = jobName,
+            Status = UiJobStatus.Running,
+            ProgressPercent = 0,
+            Message = &quot;Iniciando...&quot;,
+            StartedAt = DateTimeOffset.Now
+        };
+
+        _ctsByJobId[jobId] = cts;
+
+        RunOnUi(() =&gt; Jobs.Insert(0, job));
+
+        var reporter = new UiProgressReporter(this, jobId);
+
+        _ = Task.Run(async () =&gt;
+        {
+            try
+            {
+                // exec
+                var resultMessage = await action(reporter, cts.Token).ConfigureAwait(false);
+
+                Complete(jobId, success: true, message: resultMessage);
+            }
+            catch (OperationCanceledException)
+            {
+                Complete(jobId, success: false, message: &quot;Cancelado.&quot;, canceled: true);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Error($&quot;Job &#39;{jobName}&#39; failed&quot;, ex);
+                Complete(jobId, success: false, message: $&quot;{jobName} falhou: {ex.Message}&quot;);
+            }
+            finally
+            {
+                _ctsByJobId.TryRemove(jobId, out _);
+            }
+        }, cts.Token);
+
+        return jobId;
+    }
+
+    public bool CancelJob(Guid jobId)
+    {
+        if (_ctsByJobId.TryGetValue(jobId, out var cts))
+        {
+            cts.Cancel();
+            return true;
+        }
+
+        return false;
+    }
+
+    public UiJob? GetJob(Guid jobId)
+        =&gt; Jobs.FirstOrDefault(j =&gt; j.Id == jobId);
+
+    internal void OnProgress(Guid jobId, ProgressEvent ev)
+    {
+        var job = GetJob(jobId);
+        if (job is null) return;
+
+        RunOnUi(() =&gt;
+        {
+            // message
+            if (!string.IsNullOrWhiteSpace(ev.Message))
+            {
+                job.Message = ev.Message;
+                // Append ao log acumulado
+                var timestamp = DateTime.Now.ToString(&quot;HH:mm:ss&quot;);
+                job.Logs += $&quot;[{timestamp}] {ev.Message}{Environment.NewLine}&quot;;
+            }
+
+            // percent (no seu Core &#233; Percent, n&#227;o Percentage)
+            if (ev.Percent.HasValue)
+                job.ProgressPercent = Clamp0To100(ev.Percent.Value);
+
+            // mant&#233;m Running enquanto reporta
+            if (job.Status == UiJobStatus.Running)
+                job.Status = UiJobStatus.Running;
+        });
+    }
+
+    private void Complete(Guid jobId, bool success, string message, bool canceled = false)
+    {
+        var job = GetJob(jobId);
+        if (job is null) return;
+
+        RunOnUi(() =&gt;
+        {
+            job.CompletedAt = DateTimeOffset.Now;
+            job.Message = message;
+            
+            // Log final
+            var timestamp = DateTime.Now.ToString(&quot;HH:mm:ss&quot;);
+            job.Logs += $&quot;[{timestamp}] Finalizado: {message}{Environment.NewLine}&quot;;
+
+            if (canceled)
+            {
+                job.Status = UiJobStatus.Canceled;
+                return;
+            }
+
+            job.Status = success ? UiJobStatus.Success : UiJobStatus.Error;
+
+            // se concluiu com sucesso e nunca recebeu percent, fecha em 100
+            if (success &amp;&amp; job.ProgressPercent &lt; 100)
+                job.ProgressPercent = 100;
+
+            // Notifica assinantes (ex: Tray)
+            OnJobCompleted?.Invoke(message, success);
+        });
+    }
+
+    private void RunOnUi(Action action)
+    {
+        // Se j&#225; estiver na UI thread, roda direto
+        if (Application.Current?.Dispatcher?.CheckAccess() == true)
+        {
+            action();
+            return;
+        }
+
+        // sen&#227;o, posta no contexto capturado
+        _uiContext.Post(_ =&gt; action(), null);
+    }
+
+    private static int Clamp0To100(int value)
+        =&gt; value &lt; 0 ? 0 : value &gt; 100 ? 100 : value;
+
+    private sealed class UiProgressReporter : IProgressReporter
+    {
+        private readonly JobManager _jobManager;
+        private readonly Guid _jobId;
+
+        public UiProgressReporter(JobManager jobManager, Guid jobId)
+        {
+            _jobManager = jobManager;
+            _jobId = jobId;
+        }
+
+        public void Report(ProgressEvent ev)
+        {
+            _jobManager.OnProgress(_jobId, ev);
+        }
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

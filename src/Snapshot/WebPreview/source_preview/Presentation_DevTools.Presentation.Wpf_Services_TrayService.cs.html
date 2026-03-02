@@ -1,0 +1,361 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
+using H.NotifyIcon;
+using System.Drawing; // SystemIcons fallback
+using System.IO;
+using DevTools.Presentation.Wpf.Views;
+using DevTools.Presentation.Wpf.Utilities;
+using DevTools.Core.Configuration;
+
+namespace DevTools.Presentation.Wpf.Services;
+
+public class TrayService : IDisposable
+{
+    private readonly JobManager _jobManager;
+    private readonly SettingsService _settingsService;
+    private readonly ConfigService _configService;
+    private readonly ProfileManager _profileManager;
+
+    private TaskbarIcon _taskbarIcon = null!;
+    private Window? _jobCenterWindow;
+    private NotesWindow? _notesWindow;
+    private DashboardWindow? _dashboardWindow;
+
+    // Tool Windows References
+    private Window? _currentToolWindow;
+    private OrganizerWindow? _organizerWindow;
+    private ImageSplitWindow? _imageSplitWindow;
+    private RenameWindow? _renameWindow;
+    private Utf8ConvertWindow? _utf8ConvertWindow;
+    private SnapshotWindow? _snapshotWindow;
+    private SshTunnelWindow? _sshTunnelWindow;
+    private NgrokWindow? _ngrokWindow;
+    private SearchTextWindow? _searchTextWindow;
+    private MigrationsWindow? _migrationsWindow;
+    private HarvestWindow? _harvestWindow;
+    private LogsWindow? _logsWindow;
+
+    public void SetDashboardWindow(DashboardWindow dashboardWindow)
+    {
+        _dashboardWindow = dashboardWindow;
+    }
+
+    // Helper to enforce Single Instance and Bottom-Right Positioning
+    private void ShowWindow&lt;T&gt;(Func&lt;T?&gt; getWindow, Action&lt;T?&gt; setWindow, Func&lt;T&gt; factory) where T : Window
+    {
+        Application.Current.Dispatcher.Invoke(() =&gt;
+        {
+            var window = getWindow();
+
+            // If the requested window is already open, just activate it
+            if (window != null &amp;&amp; window.IsVisible)
+            {
+                window.Activate();
+                window.Focus();
+                if (window.WindowState == WindowState.Minimized)
+                    window.WindowState = WindowState.Normal;
+                
+                _currentToolWindow = window;
+                return;
+            }
+
+            // Close any other open tool window
+            if (_currentToolWindow != null &amp;&amp; _currentToolWindow.IsVisible)
+            {
+                _currentToolWindow.Close();
+                _currentToolWindow = null;
+            }
+
+            // Create and show the new window
+            window = factory();
+            setWindow(window);
+            _currentToolWindow = window;
+
+            window.Closed += (_, __) =&gt; 
+            {
+                setWindow(null);
+                if (_currentToolWindow == window)
+                    _currentToolWindow = null;
+            };
+
+            // Enforce Bottom-Right Positioning
+            window.Loaded += (s, e) =&gt;
+            {
+                 var screen = SystemParameters.WorkArea;
+                 window.Left = screen.Right - window.ActualWidth - 20;
+                 window.Top = screen.Bottom - window.ActualHeight - 20;
+            };
+
+            window.Show();
+        });
+    }
+
+    public void OpenTool(string tag)
+    {
+        switch (tag)
+        {
+            case &quot;Notes&quot;: ShowNotesWindow(); break;
+            case &quot;Organizer&quot;: ShowOrganizerWindow(); break;
+            case &quot;Harvest&quot;: OnHarvestClick(this, new RoutedEventArgs()); break;
+            case &quot;SearchText&quot;: ShowSearchTextWindow(); break;
+            case &quot;Migrations&quot;: ShowMigrationsWindow(); break;
+            case &quot;ImageSplitter&quot;: ShowImageSplitWindow(); break;
+            case &quot;Rename&quot;: ShowRenameWindow(); break;
+            case &quot;Utf8Convert&quot;: ShowUtf8Window(); break;
+            case &quot;Snapshot&quot;: ShowSnapshotWindow(); break;
+            case &quot;SSHTunnel&quot;: ShowSshTunnelWindow(); break;
+            case &quot;Ngrok&quot;: ShowNgrokWindow(); break;
+            case &quot;Jobs&quot;: ShowJobCenter(); break;
+            case &quot;Logs&quot;: ShowLogsWindow(); break;
+        }
+    }
+
+    public void ShowDashboard()
+    {
+        if (_dashboardWindow != null)
+        {
+            _dashboardWindow.ResetToHome();
+            _dashboardWindow.Show();
+            _dashboardWindow.Activate();
+            if (_dashboardWindow.WindowState == WindowState.Minimized)
+                _dashboardWindow.WindowState = WindowState.Normal;
+        }
+    }
+
+    public TrayService(JobManager jobManager, SettingsService settingsService, ConfigService configService, ProfileManager profileManager)
+    {
+        _jobManager = jobManager;
+        _settingsService = settingsService;
+        _configService = configService;
+        _profileManager = profileManager;
+        _jobManager.OnJobCompleted += OnJobCompleted;
+    }
+
+    public void Initialize()
+    {
+        _taskbarIcon = new TaskbarIcon
+        {
+            ToolTipText = &quot;DevTools Tray&quot;,
+            ContextMenu = CreateContextMenu(),
+            DoubleClickCommand = new DelegateCommand(ShowDashboard)
+        };
+
+        if (!TrySetIconSource())
+        {
+            // fallback se falhar carregamento do recurso
+            _taskbarIcon.Icon = SystemIcons.Application;
+        }
+
+        _taskbarIcon.ForceCreate();
+    }
+
+    private bool TrySetIconSource()
+    {
+        try
+        {
+            // 1) Tenta carregar via pack URI relativo ao assembly atual (robusto ap&#243;s publish)
+            var uriSimple = new Uri(&quot;pack://application:,,,/Assets/app.ico&quot;);
+            var streamInfo = Application.GetResourceStream(uriSimple);
+            if (streamInfo != null)
+            {
+                _taskbarIcon.Icon = new Icon(streamInfo.Stream);
+                return true;
+            }
+
+            // 2) Fallback: tenta via assembly qualificado (alguns ambientes preferem o formato antigo)
+            var uriQualified = new Uri(&quot;pack://application:,,,/DevTools.Presentation.Wpf;component/Assets/app.ico&quot;);
+            var streamInfo2 = Application.GetResourceStream(uriQualified);
+            if (streamInfo2 != null)
+            {
+                _taskbarIcon.Icon = new Icon(streamInfo2.Stream);
+                return true;
+            }
+
+            // 3) Fallback: arquivo f&#237;sico no diret&#243;rio de deploy (dotnet publish/Inno Setup)
+            var candidatePath = Path.Combine(AppContext.BaseDirectory, &quot;Assets&quot;, &quot;app.ico&quot;);
+            if (File.Exists(candidatePath))
+            {
+                _taskbarIcon.Icon = new Icon(candidatePath);
+                return true;
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            AppLogger.Error(&quot;Error loading icon&quot;, ex);
+            System.Diagnostics.Debug.WriteLine($&quot;Error loading icon: {ex.Message}&quot;);
+            return false;
+        }
+    }
+
+    private ContextMenu CreateContextMenu()
+    {
+        // Carrega o menu estilizado dos recursos (TrayResources.xaml)
+        if (Application.Current.FindResource(&quot;TrayContextMenu&quot;) is ContextMenu menu)
+        {
+            foreach (var item in menu.Items)
+            {
+                if (item is MenuItem menuItem &amp;&amp; menuItem.Tag is string tag)
+                {
+                    switch (tag)
+                    {
+                        case &quot;Dashboard&quot;:
+                            menuItem.Click += (s, e) =&gt; ShowDashboard();
+                            break;
+
+                        case &quot;Notes&quot;:
+                            menuItem.Click += (s, e) =&gt; ShowNotesWindow();
+                            break;
+
+                        case &quot;Organizer&quot;:
+                            menuItem.Click += (s, e) =&gt; ShowOrganizerWindow();
+                            break;
+
+                        case &quot;Harvest&quot;:
+                            menuItem.Click += OnHarvestClick;
+                            break;
+
+                        case &quot;SearchText&quot;:
+                            menuItem.Click += (s, e) =&gt; ShowSearchTextWindow();
+                            break;
+
+                        case &quot;Migrations&quot;:
+                            menuItem.Click += (s, e) =&gt; ShowMigrationsWindow();
+                            break;
+
+                        case &quot;ImageSplitter&quot;:
+                            menuItem.Click += (s, e) =&gt; ShowImageSplitWindow();
+                            break;
+
+                        case &quot;Rename&quot;:
+                            menuItem.Click += (s, e) =&gt; ShowRenameWindow();
+                            break;
+
+                        case &quot;Utf8Convert&quot;:
+                            menuItem.Click += (s, e) =&gt; ShowUtf8Window();
+                            break;
+
+                        case &quot;Snapshot&quot;:
+                            menuItem.Click += (s, e) =&gt; ShowSnapshotWindow();
+                            break;
+
+                        case &quot;SSHTunnel&quot;:
+                            menuItem.Click += (s, e) =&gt; ShowSshTunnelWindow();
+                            break;
+
+                        case &quot;Ngrok&quot;:
+                            menuItem.Click += (s, e) =&gt; ShowNgrokWindow();
+                            break;
+
+                        case &quot;Jobs&quot;:
+                            menuItem.Click += (s, e) =&gt; ShowJobCenter();
+                            break;
+
+                        case &quot;Logs&quot;:
+                            menuItem.Click += (s, e) =&gt; ShowLogsWindow();
+                            break;
+
+                        case &quot;Exit&quot;:
+                            menuItem.Click += (s, e) =&gt; Application.Current.Shutdown();
+                            break;
+                    }
+                }
+            }
+
+            return menu;
+        }
+
+        // Fallback b&#225;sico caso o recurso n&#227;o seja encontrado
+        var fallbackMenu = new ContextMenu();
+
+        var jobs = new MenuItem { Header = &quot;Jobs (Fallback)&quot; };
+        jobs.Click += (s, e) =&gt; ShowJobCenter();
+        fallbackMenu.Items.Add(jobs);
+
+        var itemExit = new MenuItem { Header = &quot;Sair (Fallback)&quot; };
+        itemExit.Click += (s, e) =&gt; Application.Current.Shutdown();
+        fallbackMenu.Items.Add(itemExit);
+
+        return fallbackMenu;
+    }
+
+    private void ShowOrganizerWindow() =&gt; ShowWindow(() =&gt; _organizerWindow, w =&gt; _organizerWindow = w, () =&gt; new OrganizerWindow(_jobManager, _settingsService));
+
+    private void ShowImageSplitWindow() =&gt; ShowWindow(() =&gt; _imageSplitWindow, w =&gt; _imageSplitWindow = w, () =&gt; new ImageSplitWindow(_jobManager, _settingsService));
+
+    private void ShowRenameWindow() =&gt; ShowWindow(() =&gt; _renameWindow, w =&gt; _renameWindow = w, () =&gt; new RenameWindow(_jobManager, _settingsService));
+
+    private void ShowUtf8Window() =&gt; ShowWindow(() =&gt; _utf8ConvertWindow, w =&gt; _utf8ConvertWindow = w, () =&gt; new Utf8ConvertWindow(_jobManager, _settingsService));
+
+    private void ShowSnapshotWindow() =&gt; ShowWindow(() =&gt; _snapshotWindow, w =&gt; _snapshotWindow = w, () =&gt; new SnapshotWindow(_jobManager, _settingsService));
+
+    private void ShowSshTunnelWindow() =&gt; ShowWindow(() =&gt; _sshTunnelWindow, w =&gt; _sshTunnelWindow = w, () =&gt; new SshTunnelWindow(_jobManager, _settingsService, _configService));
+
+    private void ShowNgrokWindow() =&gt; ShowWindow(() =&gt; _ngrokWindow, w =&gt; _ngrokWindow = w, () =&gt; new NgrokWindow(_jobManager, _settingsService));
+
+    private void ShowSearchTextWindow() =&gt; ShowWindow(() =&gt; _searchTextWindow, w =&gt; _searchTextWindow = w, () =&gt; new SearchTextWindow(_jobManager, _settingsService));
+
+    private void ShowMigrationsWindow() =&gt; ShowWindow(() =&gt; _migrationsWindow, w =&gt; _migrationsWindow = w, () =&gt; new MigrationsWindow(_jobManager, _settingsService, _configService));
+
+    private void ShowNotesWindow() =&gt; ShowWindow(() =&gt; _notesWindow, w =&gt; _notesWindow = w, () =&gt; new NotesWindow(_settingsService));
+
+    public void ShowJobCenter() =&gt; ShowWindow(() =&gt; _jobCenterWindow, w =&gt; _jobCenterWindow = w, () =&gt; new JobCenterWindow(_jobManager));
+
+    private void OnHarvestClick(object sender, RoutedEventArgs e)
+    {
+        ShowWindow(() =&gt; _harvestWindow, w =&gt; _harvestWindow = w, () =&gt; new HarvestWindow(_jobManager, _settingsService));
+    }
+
+    private void ShowLogsWindow() =&gt; ShowWindow(() =&gt; _logsWindow, w =&gt; _logsWindow = w, () =&gt; new LogsWindow(_settingsService));
+
+    private void OnJobCompleted(string message, bool success)
+    {
+        Application.Current.Dispatcher.Invoke(() =&gt;
+        {
+            try 
+            {
+               // Atualiza ToolTip
+               _taskbarIcon.ToolTipText = $&quot;DevTools: {message}&quot;;
+               
+               if (!success)
+               {
+                   MessageBox.Show(message, &quot;Erro DevTools&quot;, MessageBoxButton.OK, MessageBoxImage.Error);
+               }
+               else
+               {
+                   // Feedback visual sutil (mudan&#231;a de tooltip j&#225; ocorre)
+               }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Error(&quot;Error updating UI in OnJobCompleted&quot;, ex);
+            }
+        });
+    }
+
+    public void Dispose()
+    {
+        _taskbarIcon?.Dispose();
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

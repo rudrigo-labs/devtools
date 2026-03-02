@@ -44,17 +44,25 @@ public partial class PathSelector : System.Windows.Controls.UserControl
     {
         if (IsFolderPicker)
         {
-            var dialog = new OpenFolderDialog();
-            if (dialog.ShowDialog() == true)
+            using var dialog = new System.Windows.Forms.FolderBrowserDialog
             {
-                SelectedPath = dialog.FolderName;
+                Description = "Selecione a pasta",
+                UseDescriptionForTitle = true,
+                ShowNewFolderButton = true
+            };
+
+            var result = dialog.ShowDialog();
+            if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.SelectedPath))
+            {
+                SelectedPath = dialog.SelectedPath;
                 PathInput.Text = SelectedPath;
             }
         }
         else
         {
-            var dialog = new OpenFileDialog();
-            if (dialog.ShowDialog() == true)
+            var dialog = new Microsoft.Win32.OpenFileDialog();
+            var owner = Window.GetWindow(this);
+            if (dialog.ShowDialog(owner) == true)
             {
                 SelectedPath = dialog.FileName;
                 PathInput.Text = SelectedPath;

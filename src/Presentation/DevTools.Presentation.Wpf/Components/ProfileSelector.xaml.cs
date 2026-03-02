@@ -4,10 +4,11 @@ using System.Windows;
 using System.Windows.Controls;
 using DevTools.Core.Configuration;
 using DevTools.Core.Models;
+using DevTools.Presentation.Wpf.Utilities;
 
 namespace DevTools.Presentation.Wpf.Components;
 
-public partial class ProfileSelector : UserControl
+public partial class ProfileSelector : System.Windows.Controls.UserControl
 {
     private readonly ProfileManager _profileManager;
     private string? _toolName;
@@ -44,10 +45,16 @@ public partial class ProfileSelector : UserControl
     public void LoadProfiles()
     {
         if (string.IsNullOrEmpty(_toolName)) return;
-        
-        var profiles = _profileManager.LoadProfiles(_toolName);
-        ProfileCombo.ItemsSource = profiles;
-        ProfileCombo.DisplayMemberPath = "Name";
+        try
+        {
+            var profiles = _profileManager.LoadProfiles(_toolName);
+            ProfileCombo.ItemsSource = profiles;
+            ProfileCombo.DisplayMemberPath = "Name";
+        }
+        catch (Exception ex)
+        {
+            DevToolsMessage.Error($"Falha ao carregar perfis: {ex.Message}", "Erro ao carregar perfis");
+        }
     }
     
     private void ProfileCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -65,32 +72,38 @@ public partial class ProfileSelector : UserControl
         var name = ProfileCombo.Text;
         if (string.IsNullOrWhiteSpace(name))
         {
-            MessageBox.Show("Digite um nome para o perfil.", "Nome necessario", MessageBoxButton.OK, MessageBoxImage.Warning);
+            DevToolsMessage.Warning("Digite um nome para o perfil.", "Nome necessario");
             return;
         }
         
-        if (GetOptionsFunc != null)
+        try
         {
-            var options = GetOptionsFunc();
-            if (options != null)
+            if (GetOptionsFunc != null)
             {
-                var profile = new ToolProfile { Name = name, Options = options, UpdatedUtc = DateTime.UtcNow };
-                _profileManager.SaveProfile(_toolName, profile);
-                
-                LoadProfiles();
-                
-                // Reselect
-                foreach(var item in ProfileCombo.Items)
+                var options = GetOptionsFunc();
+                if (options != null)
                 {
-                    if (item is ToolProfile p && p.Name == name)
+                    var profile = new ToolProfile { Name = name, Options = options, UpdatedUtc = DateTime.UtcNow };
+                    _profileManager.SaveProfile(_toolName, profile);
+
+                    LoadProfiles();
+
+                    foreach (var item in ProfileCombo.Items)
                     {
-                        ProfileCombo.SelectedItem = item;
-                        break;
+                        if (item is ToolProfile p && p.Name == name)
+                        {
+                            ProfileCombo.SelectedItem = item;
+                            break;
+                        }
                     }
+
+                    DevToolsMessage.Info($"Perfil '{name}' salvo com sucesso.", "Sucesso");
                 }
-                
-                MessageBox.Show($"Perfil '{name}' salvo com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+        }
+        catch (Exception ex)
+        {
+            DevToolsMessage.Error($"Falha ao salvar perfil: {ex.Message}", "Erro ao salvar");
         }
     }
     
@@ -100,10 +113,17 @@ public partial class ProfileSelector : UserControl
 
         if (ProfileCombo.SelectedItem is ToolProfile profile)
         {
-            if (MessageBox.Show($"Tem certeza que deseja excluir o perfil '{profile.Name}'?", "Confirmar", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            if (DevToolsMessage.Confirm($"Tem certeza que deseja excluir o perfil '{profile.Name}'?", "Confirmar"))
             {
-                _profileManager.DeleteProfile(_toolName, profile.Name);
-                LoadProfiles();
+                try
+                {
+                    _profileManager.DeleteProfile(_toolName, profile.Name);
+                    LoadProfiles();
+                }
+                catch (Exception ex)
+                {
+                    DevToolsMessage.Error($"Falha ao excluir perfil: {ex.Message}", "Erro ao excluir");
+                }
             }
         }
     }

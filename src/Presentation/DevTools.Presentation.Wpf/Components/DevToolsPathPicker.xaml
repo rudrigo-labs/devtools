@@ -1,0 +1,32 @@
+<UserControl x:Class="DevTools.Presentation.Wpf.Components.DevToolsPathPicker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d"
+             d:DesignHeight="50" d:DesignWidth="600">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="8" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0">
+            <TextBlock Text="{Binding Label, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                       FontSize="{StaticResource DevToolsFontSize.Label}"
+                       Foreground="{StaticResource DevToolsTextSecondary}"
+                       Margin="0,0,0,{StaticResource DevToolsSpacing.LabelToField}"/>
+
+            <TextBox Text="{Binding SelectedPath, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource DevToolsTextInput}"
+                     FontSize="{StaticResource DevToolsFontSize.Input}"/>
+        </StackPanel>
+
+        <Button Grid.Column="2"
+                Content="Procurar"
+                Style="{StaticResource DevToolsSecondaryButton}"
+                Click="OnBrowseClick"/>
+    </Grid>
+</UserControl>
+

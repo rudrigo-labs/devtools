@@ -1,0 +1,270 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Text;
+using DevTools.Core.Results;
+
+namespace DevTools.Cli.Ui;
+
+public sealed class CliConsole
+{
+    private readonly CliTheme _theme;
+    private readonly CliState _state;
+
+    public CliConsole(CliTheme theme, CliState state)
+    {
+        _theme = theme;
+        _state = state;
+    }
+
+    public CliTheme Theme =&gt; _theme;
+    public CliState State =&gt; _state;
+
+    public void Clear()
+    {
+        try
+        {
+            if (!Console.IsOutputRedirected)
+                Console.Clear();
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+
+    public void PrintRunResult(RunResult result)
+    {
+        WriteLine();
+        
+        var s = result.Summary;
+        // Check if summary is empty (default struct/record check might be needed)
+        // RunSummary.Empty uses default values.
+        if (s != null &amp;&amp; !string.IsNullOrEmpty(s.ToolName))
+        {
+            var width = 60;
+            var line = new string(&#39;-&#39;, width);
+            
+            WriteDim(line);
+            WriteAccent($&quot;RESUMO DA EXECU&#199;&#195;O: {s.ToolName}&quot;);
+            WriteDim(line);
+            
+            WriteKeyValue(&quot;Modo&quot;, s.Mode);
+            WriteKeyValue(&quot;Input&quot;, s.MainInput);
+            if (!string.IsNullOrWhiteSpace(s.OutputLocation))
+                WriteKeyValue(&quot;Output&quot;, s.OutputLocation);
+                
+            WriteKeyValue(&quot;Processados&quot;, s.Processed.ToString());
+            WriteKeyValue(&quot;Alterados&quot;, s.Changed.ToString());
+            WriteKeyValue(&quot;Ignorados&quot;, s.Ignored.ToString());
+            WriteKeyValue(&quot;Falhas&quot;, s.Failed.ToString());
+            WriteKeyValue(&quot;Dura&#231;&#227;o&quot;, s.Duration.ToString(@&quot;hh\:mm\:ss\.fff&quot;));
+            
+            WriteDim(line);
+            WriteLine();
+        }
+        
+        if (result.Errors.Count &gt; 0)
+        {
+            WriteError($&quot;Encontrados {result.Errors.Count} erros:&quot;);
+            foreach (var err in result.Errors)
+            {
+                WriteLine();
+                WriteError($&quot;[x] {err.Message}&quot;);
+                if (!string.IsNullOrWhiteSpace(err.Cause))
+                    WriteDim($&quot;    Causa: {err.Cause}&quot;);
+                if (!string.IsNullOrWhiteSpace(err.Action))
+                    WriteInfo($&quot;    Sugest&#227;o: {err.Action}&quot;);
+                if (!string.IsNullOrWhiteSpace(err.Details))
+                     WriteDim($&quot;    Detalhe T&#233;cnico: {err.Details}&quot;);
+            }
+            WriteLine();
+        }
+        
+        if (result.IsSuccess)
+        {
+             WriteSuccess(&quot;✅ Conclu&#237;do&quot;);
+        }
+        else
+        {
+             WriteError(&quot;❌ Falhou&quot;);
+        }
+        WriteLine();
+    }
+
+    public void Header(string title, string? subtitle = null)
+    {
+        Clear();
+
+        RenderTopMenu();
+        WriteLine();
+
+        var width = GetFrameWidth(60, 90);
+        var line = &quot;+&quot; + new string(&#39;-&#39;, width - 2) + &quot;+&quot;;
+        WriteColored(line, _theme.AccentColor);
+        WriteColored($&quot;|{Center(&quot;DEVTOOLS CLI&quot;, width - 2)}|&quot;, _theme.TitleColor);
+        WriteColored($&quot;|{Center(title, width - 2)}|&quot;, _theme.TitleColor);
+        WriteColored(line, _theme.AccentColor);
+        if (!string.IsNullOrWhiteSpace(subtitle))
+            WriteDim(subtitle);
+        WriteDim(&quot;Dica: digite &#39;c&#39; para cancelar.&quot;);
+        WriteLine();
+    }
+
+    public void Section(string title)
+    {
+        WriteLine();
+        WriteColored($&quot;-- {title} --&quot;, _theme.AccentColor);
+    }
+
+    public void WriteAccent(string message) =&gt; WriteColored(message, _theme.AccentColor);
+    public void WriteInfo(string message) =&gt; WriteColored(message, _theme.InfoColor);
+    public void WriteSuccess(string message) =&gt; WriteColored(message, _theme.SuccessColor);
+    public void WriteWarning(string message) =&gt; WriteColored(message, _theme.WarningColor);
+    public void WriteError(string message) =&gt; WriteColored(message, _theme.ErrorColor);
+    public void WriteDim(string message) =&gt; WriteColored(message, _theme.DimColor);
+
+    public void Write(string message) =&gt; Console.Write(message);
+    public void WriteLine(string? message = null) =&gt; Console.WriteLine(message ?? string.Empty);
+
+    public void WritePromptLabel(string label, string? hint = null)
+    {
+        WriteColored(label, _theme.InputLabelColor);
+        if (!string.IsNullOrWhiteSpace(hint))
+        {
+            Write(&quot; &quot;);
+            WriteDim($&quot;- {hint}&quot;);
+        }
+        WriteLine();
+    }
+
+    public void WriteInputBoxPrefix()
+    {
+        var prev = Console.ForegroundColor;
+        Console.ForegroundColor = _theme.InputBoxColor;
+        try
+        {
+            Console.Write(&quot;  [&gt;] &quot;);
+        }
+        finally
+        {
+            Console.ForegroundColor = prev;
+        }
+    }
+
+    public void WriteKeyValue(string label, string value)
+    {
+        WriteColored(label.PadRight(20), _theme.DimColor);
+        WriteLine(value);
+    }
+
+    private void RenderTopMenu()
+    {
+        if (_state.MenuItems.Count == 0)
+            return;
+
+        var width = GetFrameWidth(60, 90);
+        var border = new string(&#39;=&#39;, width);
+        WriteColored(border, _theme.AccentColor);
+
+        foreach (var line in BuildMenuLines(width))
+            WriteColored(line.PadRight(width), _theme.AccentColor);
+
+        WriteColored(border, _theme.AccentColor);
+    }
+
+    private IEnumerable&lt;string&gt; BuildMenuLines(int width)
+    {
+        var sep = &quot; | &quot;;
+        var current = string.Empty;
+
+        foreach (var item in _state.MenuItems)
+        {
+            var candidate = string.IsNullOrWhiteSpace(current) ? item : current + sep + item;
+            if (candidate.Length &gt; width)
+            {
+                if (!string.IsNullOrWhiteSpace(current))
+                    yield return current;
+                current = item;
+            }
+            else
+            {
+                current = candidate;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(current))
+            yield return current;
+    }
+
+    public int GetFrameWidth(int minWidth, int maxWidth)
+    {
+        var width = 70;
+        try
+        {
+            if (!Console.IsOutputRedirected)
+                width = Console.WindowWidth - 2;
+        }
+        catch
+        {
+            // ignore
+        }
+
+        if (width &lt; minWidth) width = minWidth;
+        if (width &gt; maxWidth) width = maxWidth;
+        return width;
+    }
+
+    public void Pause(string message = &quot;Pressione ENTER para voltar...&quot;)
+    {
+        WriteLine();
+        WriteDim(message);
+        Console.ReadLine();
+    }
+
+    public static void ConfigureEncoding()
+    {
+        Console.OutputEncoding = Encoding.UTF8;
+        Console.InputEncoding = Encoding.UTF8;
+
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+    }
+
+    private void WriteColored(string message, ConsoleColor color)
+    {
+        var prev = Console.ForegroundColor;
+        Console.ForegroundColor = color;
+        try
+        {
+            Console.WriteLine(message);
+        }
+        finally
+        {
+            Console.ForegroundColor = prev;
+        }
+    }
+
+    private static string Center(string value, int width)
+    {
+        value ??= string.Empty;
+        if (value.Length &gt;= width)
+            return value;
+
+        var left = (width - value.Length) / 2;
+        return new string(&#39; &#39;, left) + value;
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

@@ -1,0 +1,352 @@
+Snapshot: 2026-02-15T03:47:27.1495915+00:00
+Project: src
+--------------------------------------------
+src
+├── Cli
+│   └── DevTools.Cli
+│       ├── App
+│       │   ├── ArgParser.cs
+│       │   ├── CliApp.cs
+│       │   └── CliLaunchOptions.cs
+│       ├── Commands
+│       │   ├── HarvestCliCommand.cs
+│       │   ├── ICliCommand.cs
+│       │   ├── ImageSplitCliCommand.cs
+│       │   ├── MigrationsCliCommand.cs
+│       │   ├── NgrokCliCommand.cs
+│       │   ├── NotesCliCommand.cs
+│       │   ├── OrganizerCliCommand.cs
+│       │   ├── RenameCliCommand.cs
+│       │   ├── SearchTextCliCommand.cs
+│       │   ├── SnapshotCliCommand.cs
+│       │   ├── SshTunnelCliCommand.cs
+│       │   └── Utf8ConvertCliCommand.cs
+│       ├── Logging
+│       │   └── CliErrorLogger.cs
+│       ├── Ui
+│       │   ├── CliAbortException.cs
+│       │   ├── CliConsole.cs
+│       │   ├── CliInput.cs
+│       │   ├── CliMenu.cs
+│       │   ├── CliProgressReporter.cs
+│       │   ├── CliState.cs
+│       │   └── CliTheme.cs
+│       ├── DevTools.Cli.csproj
+│       └── Program.cs
+├── Core
+│   └── DevTools.Core
+│       ├── Abstractions
+│       │   ├── IDevToolEngine.cs
+│       │   ├── IFileSystem.cs
+│       │   ├── IProcessRunner.cs
+│       │   └── IProgressReporter.cs
+│       ├── Configuration
+│       │   └── ProfileManager.cs
+│       ├── Models
+│       │   ├── ProcessResult.cs
+│       │   ├── ProgressEvent.cs
+│       │   └── ToolProfile.cs
+│       ├── Providers
+│       │   └── SystemFileSystem.cs
+│       ├── Results
+│       │   ├── ErrorDetail.cs
+│       │   ├── RunResult.cs
+│       │   ├── RunResultT.cs
+│       │   └── RunSummary.cs
+│       ├── Utilities
+│       │   ├── GlobMatcher.cs
+│       │   └── PathFilter.cs
+│       ├── Validation
+│       │   └── Guard.cs
+│       ├── DevTools.Core.csproj
+│       └── rename-undo.json
+├── Presentation
+│   └── DevTools.Presentation.Wpf
+│       ├── Assets
+│       │   ├── app.ico
+│       │   └── application.ico
+│       ├── Components
+│       │   ├── ConfigMissingOverlay.xaml
+│       │   ├── ConfigMissingOverlay.xaml.cs
+│       │   ├── PathSelector.xaml
+│       │   ├── PathSelector.xaml.cs
+│       │   ├── ProfileSelector.xaml
+│       │   ├── ProfileSelector.xaml.cs
+│       │   ├── RunSummaryControl.xaml
+│       │   └── RunSummaryControl.xaml.cs
+│       ├── Models
+│       │   ├── AppSettings.cs
+│       │   └── UiJob.cs
+│       ├── Services
+│       │   ├── AppLogger.cs
+│       │   ├── ConfigService.cs
+│       │   ├── JobManager.cs
+│       │   ├── SettingsService.cs
+│       │   ├── TrayNotificationService.cs
+│       │   └── TrayService.cs
+│       ├── Theme
+│       │   ├── DarkTheme.xaml
+│       │   └── TrayResources.xaml
+│       ├── Utilities
+│       │   └── DelegateCommand.cs
+│       ├── Views
+│       │   ├── DashboardWindow.xaml
+│       │   ├── DashboardWindow.xaml.cs
+│       │   ├── HarvestWindow.xaml
+│       │   ├── HarvestWindow.xaml.cs
+│       │   ├── ImageSplitWindow.xaml
+│       │   ├── ImageSplitWindow.xaml.cs
+│       │   ├── JobCenterWindow.xaml
+│       │   ├── JobCenterWindow.xaml.cs
+│       │   ├── LogsWindow.xaml
+│       │   ├── LogsWindow.xaml.cs
+│       │   ├── MigrationsWindow.xaml
+│       │   ├── MigrationsWindow.xaml.cs
+│       │   ├── NgrokWindow.xaml
+│       │   ├── NgrokWindow.xaml.cs
+│       │   ├── NotesWindow.xaml
+│       │   ├── NotesWindow.xaml.cs
+│       │   ├── OrganizerWindow.xaml
+│       │   ├── OrganizerWindow.xaml.cs
+│       │   ├── RenameWindow.xaml
+│       │   ├── RenameWindow.xaml.cs
+│       │   ├── SearchTextWindow.xaml
+│       │   ├── SearchTextWindow.xaml.cs
+│       │   ├── SnapshotWindow.xaml
+│       │   ├── SnapshotWindow.xaml.cs
+│       │   ├── SshTunnelWindow.xaml
+│       │   ├── SshTunnelWindow.xaml.cs
+│       │   ├── Utf8ConvertWindow.xaml
+│       │   └── Utf8ConvertWindow.xaml.cs
+│       ├── app.ico
+│       ├── App.xaml
+│       ├── App.xaml.cs
+│       ├── AssemblyInfo.cs
+│       └── DevTools.Presentation.Wpf.csproj
+├── tmp-organizer-out
+│   ├── Duplicates
+│   ├── Manuais
+│   └── Outros
+├── Tools
+│   ├── DevTools.Harvest
+│   │   ├── Configuration
+│   │   │   ├── HarvestConfig.cs
+│   │   │   ├── HarvestConfig.json
+│   │   │   └── HarvestConfigLoader.cs
+│   │   ├── Engine
+│   │   │   ├── DependencyGraphBuilder.cs
+│   │   │   ├── HarvestEngine.cs
+│   │   │   ├── KeywordAnalyzer.cs
+│   │   │   └── ScoringEngine.cs
+│   │   ├── Models
+│   │   │   ├── FileNode.cs
+│   │   │   ├── HarvestHit.cs
+│   │   │   ├── HarvestReport.cs
+│   │   │   ├── HarvestRequest.cs
+│   │   │   ├── HarvestResponse.cs
+│   │   │   └── KeywordDensity.cs
+│   │   ├── Validation
+│   │   │   └── HarvestRequestValidator.cs
+│   │   └── DevTools.Harvest.csproj
+│   ├── DevTools.Image
+│   │   ├── Engine
+│   │   │   ├── ImageSplitEngine.cs
+│   │   │   └── ImageSplitter.cs
+│   │   ├── Models
+│   │   │   ├── ImageRegion.cs
+│   │   │   ├── ImageSplitOutput.cs
+│   │   │   ├── ImageSplitRequest.cs
+│   │   │   └── ImageSplitResponse.cs
+│   │   ├── Validation
+│   │   │   └── ImageSplitRequestValidator.cs
+│   │   └── DevTools.Image.csproj
+│   ├── DevTools.Migrations
+│   │   ├── Engine
+│   │   │   ├── EfCommandBuilder.cs
+│   │   │   └── MigrationsEngine.cs
+│   │   ├── Models
+│   │   │   ├── DatabaseProvider.cs
+│   │   │   ├── MigrationsAction.cs
+│   │   │   ├── MigrationsRequest.cs
+│   │   │   ├── MigrationsResponse.cs
+│   │   │   ├── MigrationsSettings.cs
+│   │   │   └── MigrationTarget.cs
+│   │   ├── Providers
+│   │   │   └── SystemProcessRunner.cs
+│   │   ├── Validation
+│   │   │   └── MigrationsRequestValidator.cs
+│   │   └── DevTools.Migrations.csproj
+│   ├── DevTools.Ngrok
+│   │   ├── Engine
+│   │   │   ├── NgrokApiClient.cs
+│   │   │   ├── NgrokApiException.cs
+│   │   │   ├── NgrokEngine.cs
+│   │   │   ├── NgrokProcessService.cs
+│   │   │   └── TunnelGrouping.cs
+│   │   ├── Models
+│   │   │   ├── NgrokAction.cs
+│   │   │   ├── NgrokRequest.cs
+│   │   │   ├── NgrokResponse.cs
+│   │   │   ├── NgrokSettings.cs
+│   │   │   ├── NgrokStartOptions.cs
+│   │   │   ├── TunnelGroup.cs
+│   │   │   └── TunnelInfo.cs
+│   │   ├── Validation
+│   │   │   └── NgrokRequestValidator.cs
+│   │   └── DevTools.Ngrok.csproj
+│   ├── DevTools.Notes
+│   │   ├── Abstractions
+│   │   │   └── INotesStore.cs
+│   │   ├── Engine
+│   │   │   └── NotesEngine.cs
+│   │   ├── Models
+│   │   │   ├── NoteCreateResult.cs
+│   │   │   ├── NoteListItem.cs
+│   │   │   ├── NoteListResult.cs
+│   │   │   ├── NoteReadResult.cs
+│   │   │   ├── NotesAction.cs
+│   │   │   ├── NotesBackupReport.cs
+│   │   │   ├── NotesIndex.cs
+│   │   │   ├── NotesIndexEntry.cs
+│   │   │   ├── NotesRequest.cs
+│   │   │   ├── NotesResponse.cs
+│   │   │   └── NoteWriteResult.cs
+│   │   ├── Providers
+│   │   │   ├── EnvironmentVariableExpander.cs
+│   │   │   ├── NotesBackupStore.cs
+│   │   │   ├── NotesHash.cs
+│   │   │   ├── NotesIndexStore.cs
+│   │   │   ├── NotesPaths.cs
+│   │   │   ├── NotesSimpleStore.cs
+│   │   │   ├── NotesSlug.cs
+│   │   │   └── SystemNotesStore.cs
+│   │   ├── Validation
+│   │   │   └── NotesRequestValidator.cs
+│   │   └── DevTools.Notes.csproj
+│   ├── DevTools.Organizer
+│   │   ├── Engine
+│   │   │   ├── OrganizerConfigLoader.cs
+│   │   │   ├── OrganizerEngine.cs
+│   │   │   ├── TextExtractor.cs
+│   │   │   └── TextNormalizer.cs
+│   │   ├── Models
+│   │   │   ├── OrganizerAction.cs
+│   │   │   ├── OrganizerConfig.cs
+│   │   │   ├── OrganizerPlanItem.cs
+│   │   │   ├── OrganizerRequest.cs
+│   │   │   ├── OrganizerResponse.cs
+│   │   │   └── OrganizerStats.cs
+│   │   ├── Validation
+│   │   │   └── OrganizerRequestValidator.cs
+│   │   └── DevTools.Organizer.csproj
+│   ├── DevTools.Rename
+│   │   ├── Abstractions
+│   │   │   └── IRenameFileSystem.cs
+│   │   ├── Engine
+│   │   │   ├── RenameEngine.cs
+│   │   │   └── RoslynRenamer.cs
+│   │   ├── Models
+│   │   │   ├── FileDiffSummary.cs
+│   │   │   ├── LineChange.cs
+│   │   │   ├── RenameChange.cs
+│   │   │   ├── RenameChangeType.cs
+│   │   │   ├── RenameMode.cs
+│   │   │   ├── RenameReport.cs
+│   │   │   ├── RenameRequest.cs
+│   │   │   ├── RenameResponse.cs
+│   │   │   ├── RenameSummary.cs
+│   │   │   └── RenameUndoLog.cs
+│   │   ├── Providers
+│   │   │   ├── DiffGenerator.cs
+│   │   │   ├── DirectoryScanner.cs
+│   │   │   ├── RenameReportWriter.cs
+│   │   │   ├── SystemRenameFileSystem.cs
+│   │   │   ├── TextEncodingDetector.cs
+│   │   │   └── TextFileHelper.cs
+│   │   ├── Validation
+│   │   │   └── RenameRequestValidator.cs
+│   │   └── DevTools.Rename.csproj
+│   ├── DevTools.SearchText
+│   │   ├── Engine
+│   │   │   ├── SearchTextDefaults.cs
+│   │   │   ├── SearchTextEngine.cs
+│   │   │   └── TextMatcher.cs
+│   │   ├── Models
+│   │   │   ├── SearchTextFileMatch.cs
+│   │   │   ├── SearchTextLineMatch.cs
+│   │   │   ├── SearchTextRequest.cs
+│   │   │   └── SearchTextResponse.cs
+│   │   ├── Validation
+│   │   │   └── SearchTextRequestValidator.cs
+│   │   └── DevTools.SearchText.csproj
+│   ├── DevTools.Snapshot
+│   │   ├── Engine
+│   │   │   ├── SnapshotDefaults.cs
+│   │   │   ├── SnapshotEngine.cs
+│   │   │   ├── SnapshotHtmlWriter.cs
+│   │   │   ├── SnapshotNestedJsonWriter.cs
+│   │   │   ├── SnapshotRecursiveJsonWriter.cs
+│   │   │   └── SnapshotTextWriter.cs
+│   │   ├── Models
+│   │   │   ├── SnapshotArtifact.cs
+│   │   │   ├── SnapshotArtifactKind.cs
+│   │   │   ├── SnapshotFileKind.cs
+│   │   │   ├── SnapshotFolder.cs
+│   │   │   ├── SnapshotRecursiveNode.cs
+│   │   │   ├── SnapshotRequest.cs
+│   │   │   ├── SnapshotResponse.cs
+│   │   │   └── SnapshotStats.cs
+│   │   ├── Validation
+│   │   │   └── SnapshotRequestValidator.cs
+│   │   └── DevTools.Snapshot.csproj
+│   ├── DevTools.SSHTunnel
+│   │   ├── Abstractions
+│   │   │   └── IProcessRunnerWithPid.cs
+│   │   ├── Engine
+│   │   │   ├── PortChecker.cs
+│   │   │   ├── SshCommandBuilder.cs
+│   │   │   ├── SshTunnelEngine.cs
+│   │   │   ├── SshTunnelExceptions.cs
+│   │   │   ├── SshTunnelProcess.cs
+│   │   │   └── TunnelService.cs
+│   │   ├── Models
+│   │   │   ├── SshStrictHostKeyChecking.cs
+│   │   │   ├── SshTunnelAction.cs
+│   │   │   ├── SshTunnelRequest.cs
+│   │   │   ├── SshTunnelResponse.cs
+│   │   │   ├── TunnelProfile.cs
+│   │   │   └── TunnelState.cs
+│   │   ├── Providers
+│   │   │   └── SystemProcessRunner.cs
+│   │   ├── Validation
+│   │   │   └── SshTunnelRequestValidator.cs
+│   │   └── DevTools.SSHTunnel.csproj
+│   ├── DevTools.Tests
+│   │   ├── DevTools.Tests.csproj
+│   │   ├── PathFilterTests.cs
+│   │   └── RoslynRenamerTests.cs
+│   └── DevTools.Utf8Convert
+│       ├── Abstractions
+│       │   └── IUtf8FileSystem.cs
+│       ├── Engine
+│       │   └── Utf8ConvertEngine.cs
+│       ├── Models
+│       │   ├── Utf8ConvertItem.cs
+│       │   ├── Utf8ConvertRequest.cs
+│       │   ├── Utf8ConvertResponse.cs
+│       │   ├── Utf8ConvertStatus.cs
+│       │   └── Utf8ConvertSummary.cs
+│       ├── Providers
+│       │   ├── SystemUtf8FileSystem.cs
+│       │   ├── TextEncodingDetector.cs
+│       │   └── TextFileHelper.cs
+│       ├── Validation
+│       │   └── Utf8ConvertRequestValidator.cs
+│       └── DevTools.Utf8Convert.csproj
+├── AGENT_DEVTOOLS_RULES.md
+├── AGENT_EXECUTION_RULES.md
+├── DevTools.slnx
+├── generate-app-icon.ps1
+├── KICKOFF.md
+├── MANUAL.md
+└── README.md

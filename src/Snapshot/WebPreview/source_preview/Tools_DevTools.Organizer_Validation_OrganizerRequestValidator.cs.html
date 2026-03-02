@@ -1,0 +1,55 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Core.Abstractions;
+using DevTools.Core.Results;
+using DevTools.Organizer.Models;
+
+namespace DevTools.Organizer.Validation;
+
+public static class OrganizerRequestValidator
+{
+    public static IReadOnlyList&lt;ErrorDetail&gt; Validate(OrganizerRequest request, IFileSystem fs)
+    {
+        var errors = new List&lt;ErrorDetail&gt;();
+
+        if (request is null)
+        {
+            errors.Add(new ErrorDetail(&quot;organizer.request.null&quot;, &quot;Request is null.&quot;));
+            return errors;
+        }
+
+        if (string.IsNullOrWhiteSpace(request.InboxPath))
+        {
+            errors.Add(new ErrorDetail(&quot;organizer.inbox.required&quot;, &quot;InboxPath is required.&quot;));
+        }
+        else if (!fs.DirectoryExists(request.InboxPath))
+        {
+            errors.Add(new ErrorDetail(&quot;organizer.inbox.not_found&quot;, &quot;InboxPath not found.&quot;, request.InboxPath));
+        }
+
+        if (string.IsNullOrWhiteSpace(request.OutputPath))
+        {
+            errors.Add(new ErrorDetail(&quot;organizer.output.required&quot;, &quot;OutputPath is required.&quot;));
+        }
+
+        if (request.MinScore.HasValue &amp;&amp; request.MinScore.Value &lt; 0)
+            errors.Add(new ErrorDetail(&quot;organizer.min_score.invalid&quot;, &quot;MinScore cannot be negative.&quot;));
+
+        return errors;
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

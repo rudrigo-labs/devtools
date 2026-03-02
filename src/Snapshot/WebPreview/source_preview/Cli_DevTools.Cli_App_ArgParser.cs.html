@@ -1,0 +1,67 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>namespace DevTools.Cli.App;
+
+public static class ArgParser
+{
+    public static CliLaunchOptions Parse(string[] args)
+    {
+        var options = new CliLaunchOptions();
+        
+        if (args.Length == 0)
+            return options;
+
+        // First arg is command name if it doesn&#39;t start with -
+        int startIndex = 0;
+        if (!args[0].StartsWith(&quot;-&quot;))
+        {
+            options.CommandName = args[0];
+            startIndex = 1;
+        }
+
+        for (int i = startIndex; i &lt; args.Length; i++)
+        {
+            var arg = args[i];
+            if (!arg.StartsWith(&quot;-&quot;))
+                continue; // Skip positional args that are not values (shouldn&#39;t happen with this simple parser)
+
+            var key = arg.TrimStart(&#39;-&#39;);
+            
+            // Check for --non-interactive flag
+            if (string.Equals(key, &quot;non-interactive&quot;, StringComparison.OrdinalIgnoreCase))
+            {
+                options.IsNonInteractive = true;
+                continue;
+            }
+
+            // Check if next arg is value
+            if (i + 1 &lt; args.Length &amp;&amp; !args[i + 1].StartsWith(&quot;-&quot;))
+            {
+                options.Options[key] = args[i + 1];
+                i++; // Consume value
+            }
+            else
+            {
+                // Boolean flag
+                options.Options[key] = &quot;true&quot;;
+            }
+        }
+
+        return options;
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

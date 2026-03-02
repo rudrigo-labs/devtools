@@ -1,0 +1,66 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Globalization;
+using System.Text;
+
+namespace DevTools.Organizer.Engine;
+
+internal static class TextNormalizer
+{
+    public static string Normalize(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        var normalized = value.Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder(normalized.Length);
+
+        foreach (var c in normalized)
+        {
+            var uc = CharUnicodeInfo.GetUnicodeCategory(c);
+            if (uc == UnicodeCategory.NonSpacingMark)
+                continue;
+
+            sb.Append(char.ToLowerInvariant(c));
+        }
+
+        return CompressWhitespace(sb.ToString());
+    }
+
+    private static string CompressWhitespace(string value)
+    {
+        var sb = new StringBuilder(value.Length);
+        var wasSpace = false;
+
+        foreach (var c in value)
+        {
+            if (char.IsWhiteSpace(c))
+            {
+                if (wasSpace) continue;
+                sb.Append(&#39; &#39;);
+                wasSpace = true;
+                continue;
+            }
+
+            wasSpace = false;
+            sb.Append(c);
+        }
+
+        return sb.ToString().Trim();
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

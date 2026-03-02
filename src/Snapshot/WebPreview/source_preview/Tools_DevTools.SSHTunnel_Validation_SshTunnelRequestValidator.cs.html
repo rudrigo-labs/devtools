@@ -1,0 +1,105 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Net;
+using System.Net.Sockets;
+using DevTools.Core.Results;
+using DevTools.SSHTunnel.Models;
+
+namespace DevTools.SSHTunnel.Validation;
+
+public static class SshTunnelRequestValidator
+{
+    public static IReadOnlyList&lt;ErrorDetail&gt; Validate(SshTunnelRequest request)
+    {
+        var errors = new List&lt;ErrorDetail&gt;();
+
+        if (request is null)
+        {
+            errors.Add(new ErrorDetail(&quot;sshtunnel.request.null&quot;, &quot;Request is null.&quot;));
+            return errors;
+        }
+
+        if (!Enum.IsDefined(typeof(SshTunnelAction), request.Action))
+        {
+            errors.Add(new ErrorDetail(&quot;sshtunnel.action.invalid&quot;, &quot;Action is invalid.&quot;));
+            return errors;
+        }
+
+        if (request.Action == SshTunnelAction.Start)
+        {
+            if (request.Profile is null)
+            {
+                errors.Add(new ErrorDetail(&quot;sshtunnel.profile.required&quot;, &quot;Profile is required for Start.&quot;));
+                return errors;
+            }
+
+            var p = request.Profile;
+
+            if (string.IsNullOrWhiteSpace(p.SshHost))
+                errors.Add(new ErrorDetail(&quot;sshtunnel.sshhost.required&quot;, &quot;SshHost is required.&quot;));
+
+            if (string.IsNullOrWhiteSpace(p.SshUser))
+                errors.Add(new ErrorDetail(&quot;sshtunnel.sshuser.required&quot;, &quot;SshUser is required.&quot;));
+
+            if (string.IsNullOrWhiteSpace(p.LocalBindHost))
+                errors.Add(new ErrorDetail(&quot;sshtunnel.localbind.required&quot;, &quot;LocalBindHost is required.&quot;));
+            else if (!IsValidBindHost(p.LocalBindHost))
+                errors.Add(new ErrorDetail(&quot;sshtunnel.localbind.invalid&quot;, &quot;LocalBindHost is invalid or not resolvable.&quot;));
+
+            if (string.IsNullOrWhiteSpace(p.RemoteHost))
+                errors.Add(new ErrorDetail(&quot;sshtunnel.remotehost.required&quot;, &quot;RemoteHost is required.&quot;));
+
+            if (!IsValidPort(p.SshPort))
+                errors.Add(new ErrorDetail(&quot;sshtunnel.sshport.invalid&quot;, &quot;SshPort must be between 1 and 65535.&quot;));
+
+            if (!IsValidPort(p.LocalPort))
+                errors.Add(new ErrorDetail(&quot;sshtunnel.localport.invalid&quot;, &quot;LocalPort must be between 1 and 65535.&quot;));
+
+            if (!IsValidPort(p.RemotePort))
+                errors.Add(new ErrorDetail(&quot;sshtunnel.remoteport.invalid&quot;, &quot;RemotePort must be between 1 and 65535.&quot;));
+
+            if (p.ConnectTimeoutSeconds.HasValue &amp;&amp; p.ConnectTimeoutSeconds.Value &lt;= 0)
+                errors.Add(new ErrorDetail(&quot;sshtunnel.timeout.invalid&quot;, &quot;ConnectTimeoutSeconds must be greater than zero.&quot;));
+
+            if (!Enum.IsDefined(typeof(SshStrictHostKeyChecking), p.StrictHostKeyChecking))
+                errors.Add(new ErrorDetail(&quot;sshtunnel.strict_host_key.invalid&quot;, &quot;StrictHostKeyChecking is invalid.&quot;));
+        }
+
+        return errors;
+    }
+
+    private static bool IsValidPort(int port)
+        =&gt; port &gt;= 1 &amp;&amp; port &lt;= 65535;
+
+    private static bool IsValidBindHost(string host)
+    {
+        if (IPAddress.TryParse(host, out _))
+            return true;
+
+        try
+        {
+            var resolved = Dns.GetHostAddresses(host)
+                .Any(a =&gt; a.AddressFamily is AddressFamily.InterNetwork or AddressFamily.InterNetworkV6);
+            return resolved;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

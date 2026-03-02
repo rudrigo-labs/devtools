@@ -1,0 +1,48 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System;
+using System.Windows.Input;
+
+namespace DevTools.Presentation.Wpf.Utilities;
+
+public class DelegateCommand : ICommand
+{
+    private readonly Action _execute;
+    private readonly Func&lt;bool&gt;? _canExecute;
+
+    public DelegateCommand(Action execute, Func&lt;bool&gt;? canExecute = null)
+    {
+        _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+        _canExecute = canExecute;
+    }
+
+    public event EventHandler? CanExecuteChanged
+    {
+        add { CommandManager.RequerySuggested += value; }
+        remove { CommandManager.RequerySuggested -= value; }
+    }
+
+    public bool CanExecute(object? parameter)
+    {
+        return _canExecute == null || _canExecute();
+    }
+
+    public void Execute(object? parameter)
+    {
+        _execute();
+    }
+}</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

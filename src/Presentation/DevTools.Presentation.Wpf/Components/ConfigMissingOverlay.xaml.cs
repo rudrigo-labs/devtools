@@ -6,7 +6,7 @@ using DevTools.Presentation.Wpf.Services;
 
 namespace DevTools.Presentation.Wpf.Components;
 
-public partial class ConfigMissingOverlay : UserControl
+public partial class ConfigMissingOverlay : System.Windows.Controls.UserControl
 {
     private readonly ConfigService _configService;
 

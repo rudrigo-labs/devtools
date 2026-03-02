@@ -1,0 +1,107 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Core.Abstractions;
+using DevTools.SSHTunnel.Models;
+
+namespace DevTools.SSHTunnel.Engine;
+
+public sealed class TunnelService : IDisposable
+{
+    private readonly SshTunnelProcess _ssh;
+    public TunnelProfile? CurrentProfile { get; private set; }
+    public TunnelState State { get; private set; } = TunnelState.Off;
+    public string? LastError { get; private set; }
+
+    public bool IsOn =&gt; State == TunnelState.On &amp;&amp; _ssh.IsRunning;
+
+    public int? ProcessId =&gt; _ssh.ProcessId;
+
+    public TunnelService(IProcessRunner runner)
+    {
+        _ssh = new SshTunnelProcess(runner ?? throw new ArgumentNullException(nameof(runner)));
+    }
+
+    public async Task StartAsync(TunnelProfile profile, TimeSpan? startupTimeout = null, CancellationToken ct = default)
+    {
+        if (IsOn &amp;&amp; CurrentProfile?.Name == profile.Name)
+            return;
+
+        await StopAsync(TimeSpan.FromSeconds(2), ct).ConfigureAwait(false);
+
+        if (!PortChecker.TryResolveBindHost(profile.LocalBindHost, out _))
+        {
+            State = TunnelState.Error;
+            LastError = $&quot;Host de bind inv&#225;lido: {profile.LocalBindHost}&quot;;
+            throw new SshTunnelConfigException(&quot;sshtunnel.config.bind_host&quot;, LastError);
+        }
+
+        if (!PortChecker.IsPortFree(profile.LocalBindHost, profile.LocalPort))
+        {
+            State = TunnelState.Error;
+            LastError = $&quot;A porta {profile.LocalBindHost}:{profile.LocalPort} j&#225; est&#225; em uso.&quot;;
+            throw new SshTunnelConfigException(&quot;sshtunnel.config.port_in_use&quot;, LastError);
+        }
+
+        var args = SshCommandBuilder.BuildArgs(profile);
+        var timeout = startupTimeout ?? TimeSpan.FromSeconds(profile.ConnectTimeoutSeconds ?? 10);
+        if (timeout &lt;= TimeSpan.Zero)
+            timeout = TimeSpan.FromSeconds(10);
+
+        try
+        {
+            await _ssh.StartAsync(args, timeout, ct).ConfigureAwait(false);
+            CurrentProfile = profile;
+            State = TunnelState.On;
+            LastError = null;
+        }
+        catch (SshTunnelException)
+        {
+            State = TunnelState.Error;
+            CurrentProfile = null;
+            LastError = _ssh.LastResult?.StdErr ?? _ssh.LastResult?.StdOut;
+            throw;
+        }
+        catch (Exception ex)
+        {
+            State = TunnelState.Error;
+            CurrentProfile = null;
+            LastError = ex.Message;
+            throw new SshTunnelConnectionException(&quot;sshtunnel.connection.failed&quot;, &quot;Falha ao iniciar o SSH.&quot;, ex.Message, ex);
+        }
+    }
+
+    public async Task StopAsync(TimeSpan timeout, CancellationToken ct = default)
+    {
+        await _ssh.StopAsync(timeout, ct).ConfigureAwait(false);
+        CurrentProfile = null;
+        State = TunnelState.Off;
+        LastError = null;
+    }
+
+    public void Dispose()
+    {
+        try
+        {
+            StopAsync(TimeSpan.FromSeconds(2)).GetAwaiter().GetResult();
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

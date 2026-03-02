@@ -1,0 +1,54 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Text.RegularExpressions;
+
+namespace DevTools.SearchText.Engine;
+
+internal sealed class TextMatcher
+{
+    private readonly Regex _regex;
+
+    public TextMatcher(string pattern, bool useRegex, bool caseSensitive, bool wholeWord)
+    {
+        if (!useRegex)
+        {
+            pattern = Regex.Escape(pattern);
+            if (wholeWord)
+                pattern = $@&quot;\b{pattern}\b&quot;;
+        }
+        else if (wholeWord)
+        {
+            pattern = $@&quot;\b(?:{pattern})\b&quot;;
+        }
+
+        var options = RegexOptions.Compiled | RegexOptions.CultureInvariant;
+        if (!caseSensitive)
+            options |= RegexOptions.IgnoreCase;
+
+        _regex = new Regex(pattern, options);
+    }
+
+    public IEnumerable&lt;(int Index, int Length)&gt; FindMatches(string line)
+    {
+        foreach (Match match in _regex.Matches(line))
+        {
+            if (!match.Success) continue;
+            yield return (match.Index, match.Length);
+        }
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

@@ -1,0 +1,35 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Net;
+
+namespace DevTools.Ngrok.Engine;
+
+public sealed class NgrokApiException : Exception
+{
+    public NgrokApiException(string code, string message, string? details = null, HttpStatusCode? statusCode = null, Exception? inner = null)
+        : base(message, inner)
+    {
+        Code = code;
+        Details = details;
+        StatusCode = statusCode;
+    }
+
+    public string Code { get; }
+    public string? Details { get; }
+    public HttpStatusCode? StatusCode { get; }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

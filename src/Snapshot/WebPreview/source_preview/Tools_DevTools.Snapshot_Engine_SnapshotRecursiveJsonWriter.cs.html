@@ -1,0 +1,88 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using DevTools.Snapshot.Models;
+
+namespace DevTools.Snapshot.Engine;
+
+internal sealed class SnapshotRecursiveJsonWriter
+{
+    public async Task WriteAsync(string rootPath, string outFile, IReadOnlySet&lt;string&gt; ignoreDirs)
+    {
+        if (string.IsNullOrWhiteSpace(rootPath))
+            throw new ArgumentException(&quot;rootPath is required.&quot;, nameof(rootPath));
+
+        if (!Directory.Exists(rootPath))
+            throw new DirectoryNotFoundException($&quot;RootPath not found: {rootPath}&quot;);
+
+        var root = new DirectoryInfo(rootPath);
+        var node = BuildNode(root, ignoreDirs);
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
+
+        var json = JsonSerializer.Serialize(node, options);
+        Directory.CreateDirectory(Path.GetDirectoryName(outFile)!);
+        await File.WriteAllTextAsync(outFile, json, new UTF8Encoding(false));
+    }
+
+    private static SnapshotRecursiveNode BuildNode(DirectoryInfo dir, IReadOnlySet&lt;string&gt; ignoreDirs)
+    {
+        var entries = new List&lt;SnapshotRecursiveNode&gt;();
+
+        foreach (var item in dir.GetFileSystemInfos()
+                     .Where(e =&gt; !ignoreDirs.Contains(e.Name))
+                     .OrderBy(e =&gt; e is FileInfo ? 1 : 0)
+                     .ThenBy(e =&gt; e.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            if (item is DirectoryInfo subDir)
+            {
+                entries.Add(BuildNode(subDir, ignoreDirs));
+            }
+            else if (item is FileInfo file)
+            {
+                entries.Add(new SnapshotRecursiveNode(file.Name, GetFileKind(file), null));
+            }
+        }
+
+        return new SnapshotRecursiveNode(dir.Name, SnapshotFileKind.Directory, entries.Count == 0 ? null : entries);
+    }
+
+    private static SnapshotFileKind GetFileKind(FileInfo file)
+    {
+        if (string.IsNullOrEmpty(file.Extension))
+            return SnapshotDefaults.TextFilesWithoutExtension.Contains(file.Name)
+                ? SnapshotFileKind.File
+                : SnapshotFileKind.Binary;
+
+        if (SnapshotDefaults.ImageExtensions.Contains(file.Extension))
+            return SnapshotFileKind.Image;
+
+        if (SnapshotDefaults.BinaryExtensions.Contains(file.Extension))
+            return SnapshotFileKind.Binary;
+
+        return SnapshotFileKind.File;
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

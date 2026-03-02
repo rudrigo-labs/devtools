@@ -3,10 +3,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using DevTools.Core.Configuration;
 using DevTools.Presentation.Wpf.Services;
+using DevTools.Presentation.Wpf.Views;
 
 namespace DevTools.Presentation.Wpf;
 
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
     private JobManager _jobManager = null!;
     private SettingsService _settingsService = null!;
@@ -31,14 +32,11 @@ public partial class App : Application
         _profileManager = new ProfileManager();
         _trayService = new TrayService(_jobManager, _settingsService, _configService, _profileManager);
 
-        // Instancia Dashboard (Hub)
-        var dashboard = new DevTools.Presentation.Wpf.Views.DashboardWindow(_trayService, _jobManager, _configService);
-        _trayService.SetDashboardWindow(dashboard);
-
         _trayService.Initialize();
-        
-        // Iniciar com a Dashboard aberta
-        _trayService.ShowDashboard();
+
+        var dashboard = new DashboardWindow(_trayService, _jobManager, _configService);
+        _trayService.SetDashboardWindow(dashboard);
+        dashboard.Show();
     }
 
     protected override void OnExit(ExitEventArgs e)

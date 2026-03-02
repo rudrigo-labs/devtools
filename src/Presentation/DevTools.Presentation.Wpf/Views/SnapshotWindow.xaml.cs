@@ -1,139 +1,135 @@
-using System;
-using System.Linq;
 using System.Windows;
-using System.Windows.Input;
-using System.Collections.Generic;
-using DevTools.Presentation.Wpf.Services;
 using DevTools.Snapshot.Engine;
 using DevTools.Snapshot.Models;
+using DevTools.Presentation.Wpf.Services;
+using DevTools.Presentation.Wpf.Utilities;
 using DevTools.Core.Models;
-using Microsoft.Win32;
+using DevTools.Presentation.Wpf.Components;
 
 namespace DevTools.Presentation.Wpf.Views;
 
 public partial class SnapshotWindow : Window
 {
-    private readonly JobManager _jobManager;
     private readonly SettingsService _settingsService;
 
-    public SnapshotWindow(JobManager jobManager, SettingsService settingsService)
+    public SnapshotRequest? Result { get; private set; }
+
+    public SnapshotWindow(SettingsService settingsService)
     {
         InitializeComponent();
-        _jobManager = jobManager;
         _settingsService = settingsService;
 
-        ProfileSelector.GetOptionsFunc = GetCurrentOptions;
-        ProfileSelector.ProfileLoaded += LoadProfile;
-
+        // Load Settings
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastSnapshotRootPath))
-            RootPathBox.Text = _settingsService.Settings.LastSnapshotRootPath;
-
-        /* Position handled by TrayService
-        if (_settingsService.Settings.SnapshotWindowTop.HasValue)
-        {
-            Top = _settingsService.Settings.SnapshotWindowTop.Value;
-            Left = _settingsService.Settings.SnapshotWindowLeft.Value;
-        }
-        else
-        {
-            var screen = SystemParameters.WorkArea;
-            Left = screen.Right - Width - 20;
-            Top = screen.Bottom - Height - 20;
-        }
-
-        var workArea = SystemParameters.WorkArea;
-        if (Top < 0 || Top > workArea.Height) Top = workArea.Height - Height - 20;
-        if (Left < 0 || Left > workArea.Width) Left = workArea.Width - Width - 20;
-        */
-
-        /*
-        Closed += (s, e) =>
-        {
-            _settingsService.Settings.SnapshotWindowTop = Top;
-            _settingsService.Settings.SnapshotWindowLeft = Left;
-            _settingsService.Save();
-        };
-        */
-    }
-
-    private Dictionary<string, string> GetCurrentOptions()
-    {
-        var options = new Dictionary<string, string>();
-        options["root"] = RootPathBox.Text;
-        options["text"] = (TextCheck.IsChecked ?? true).ToString().ToLowerInvariant();
-        options["html"] = (HtmlCheck.IsChecked ?? false).ToString().ToLowerInvariant();
-        options["json-nested"] = (JsonNestedCheck.IsChecked ?? false).ToString().ToLowerInvariant();
-        options["json-recursive"] = (JsonRecursiveCheck.IsChecked ?? false).ToString().ToLowerInvariant();
-        return options;
-    }
-
-    private void LoadProfile(ToolProfile profile)
-    {
-        if (profile.Options.TryGetValue("root", out var root)) RootPathBox.Text = root;
+            RootPathSelector.SelectedPath = _settingsService.Settings.LastSnapshotRootPath;
         
-        if (profile.Options.TryGetValue("text", out var text)) 
-            TextCheck.IsChecked = bool.TryParse(text, out var t) ? t : true;
-            
-        if (profile.Options.TryGetValue("html", out var html)) 
-            HtmlCheck.IsChecked = bool.TryParse(html, out var h) ? h : false;
-            
-        if (profile.Options.TryGetValue("json-nested", out var jn)) 
-            JsonNestedCheck.IsChecked = bool.TryParse(jn, out var n) ? n : false;
-            
-        if (profile.Options.TryGetValue("json-recursive", out var jr)) 
-            JsonRecursiveCheck.IsChecked = bool.TryParse(jr, out var r) ? r : false;
+        if (!string.IsNullOrEmpty(_settingsService.Settings.LastSnapshotOutputPath))
+            OutputPathSelector.SelectedPath = _settingsService.Settings.LastSnapshotOutputPath;
+
+        if (!string.IsNullOrEmpty(_settingsService.Settings.LastSnapshotIgnored))
+            IgnoredBox.Text = _settingsService.Settings.LastSnapshotIgnored;
+
+        if (_settingsService.Settings.LastSnapshotMaxKb.HasValue)
+            MaxKbBox.Text = _settingsService.Settings.LastSnapshotMaxKb.Value.ToString();
+
+        if (_settingsService.Settings.LastSnapshotText.HasValue)
+            TextCheck.IsChecked = _settingsService.Settings.LastSnapshotText.Value;
+
+        if (_settingsService.Settings.LastSnapshotJsonNested.HasValue)
+            JsonNestedCheck.IsChecked = _settingsService.Settings.LastSnapshotJsonNested.Value;
+
+        if (_settingsService.Settings.LastSnapshotJsonRecursive.HasValue)
+            JsonRecursiveCheck.IsChecked = _settingsService.Settings.LastSnapshotJsonRecursive.Value;
+
+        if (_settingsService.Settings.LastSnapshotHtml.HasValue)
+            HtmlCheck.IsChecked = _settingsService.Settings.LastSnapshotHtml.Value;
     }
 
-    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private async void Run_Click(object sender, RoutedEventArgs e)
     {
-        // if (e.ButtonState == MouseButtonState.Pressed) DragMove();
-    }
-
-    private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
-
-    private void BrowseRoot_Click(object sender, RoutedEventArgs e)
-    {
-        var dlg = new OpenFolderDialog { Title = "Selecione a Pasta do Projeto" };
-        if (dlg.ShowDialog() == true)
+        if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
         {
-            RootPathBox.Text = dlg.FolderName;
-            _settingsService.Settings.LastSnapshotRootPath = dlg.FolderName;
-            _settingsService.Save();
-        }
-    }
-
-    private void ProcessButton_Click(object sender, RoutedEventArgs e)
-    {
-        var root = RootPathBox.Text;
-        if (string.IsNullOrWhiteSpace(root))
-        {
-            MessageBox.Show("Pasta do Projeto é obrigatória.", "Dados Incompletos", MessageBoxButton.OK, MessageBoxImage.Warning);
+            DevToolsMessage.Warning("Por favor, selecione um diretório raiz (Source).", "Erro de Validação");
             return;
         }
 
-        var genText = TextCheck.IsChecked ?? true;
-        var genHtml = HtmlCheck.IsChecked ?? false;
-        var genJsonNested = JsonNestedCheck.IsChecked ?? false;
-        var genJsonRecursive = JsonRecursiveCheck.IsChecked ?? false;
-
-        Close();
-
-        _jobManager.StartJob("Snapshot", async (reporter, ct) =>
+        if (!System.IO.Directory.Exists(RootPathSelector.SelectedPath))
         {
-            var engine = new SnapshotEngine();
-            var request = new SnapshotRequest(
-                RootPath: root,
-                GenerateText: genText,
-                GenerateHtmlPreview: genHtml,
-                GenerateJsonNested: genJsonNested,
-                GenerateJsonRecursive: genJsonRecursive
-            );
+            DevToolsMessage.Error("O diretório raiz especificado não existe.", "Diretório Inválido");
+            return;
+        }
 
-            var result = await engine.ExecuteAsync(request, reporter, ct);
+        if (RememberSettingsCheck.IsChecked == true)
+        {
+            _settingsService.Settings.LastSnapshotRootPath = RootPathSelector.SelectedPath;
+            _settingsService.Settings.LastSnapshotOutputPath = OutputPathSelector.SelectedPath;
+            _settingsService.Settings.LastSnapshotIgnored = IgnoredBox.Text;
+            
+            if (int.TryParse(MaxKbBox.Text, out var maxKb))
+                _settingsService.Settings.LastSnapshotMaxKb = maxKb;
 
-            return result.IsSuccess
-                ? $"Snapshot gerado com sucesso na pasta 'Snapshot'!"
-                : $"Falha ao gerar Snapshot: {string.Join(", ", result.Errors.Select(x => x.Message))}";
-        });
+            _settingsService.Settings.LastSnapshotText = TextCheck.IsChecked;
+            _settingsService.Settings.LastSnapshotJsonNested = JsonNestedCheck.IsChecked;
+            _settingsService.Settings.LastSnapshotJsonRecursive = JsonRecursiveCheck.IsChecked;
+            _settingsService.Settings.LastSnapshotHtml = HtmlCheck.IsChecked;
+            _settingsService.Save();
+        }
+
+        var ignored = string.IsNullOrWhiteSpace(IgnoredBox.Text) 
+            ? null 
+            : IgnoredBox.Text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+        int? maxKbVal = int.TryParse(MaxKbBox.Text, out var mk) ? mk : null;
+
+        Result = new SnapshotRequest(
+            RootPath: RootPathSelector.SelectedPath,
+            OutputBasePath: OutputPathSelector.SelectedPath,
+            GenerateText: TextCheck.IsChecked ?? true,
+            GenerateJsonNested: JsonNestedCheck.IsChecked ?? false,
+            GenerateJsonRecursive: JsonRecursiveCheck.IsChecked ?? false,
+            GenerateHtmlPreview: HtmlCheck.IsChecked ?? false,
+            IgnoredDirectories: ignored,
+            MaxFileSizeKb: maxKbVal
+        );
+
+        var engine = new SnapshotEngine();
+        
+        IsEnabled = false;
+        RunSummary.Clear();
+
+        try
+        {
+            var result = await Task.Run(() => engine.ExecuteAsync(Result));
+            RunSummary.BindResult(result);
+            
+            if (result.IsSuccess && HtmlCheck.IsChecked == true && result.Value.Artifacts.Any(a => a.Kind == SnapshotArtifactKind.HtmlPreview))
+            {
+                var htmlArtifact = result.Value.Artifacts.FirstOrDefault(a => a.Kind == SnapshotArtifactKind.HtmlPreview);
+                if (htmlArtifact != null)
+                {
+                    // Could open preview here if we wanted
+                    // Process.Start(new ProcessStartInfo { FileName = Path.Combine(htmlArtifact.Path, "index.html"), UseShellExecute = true });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            AppLogger.Error("Erro crítico ao executar Snapshot", ex);
+            DevToolsMessage.Error($"Erro crítico: {ex.Message}", "Erro");
+        }
+        finally
+        {
+            IsEnabled = true;
+        }
+    }
+
+    private void Header_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        DragMove();
+    }
+
+    private void Cancel_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
     }
 }

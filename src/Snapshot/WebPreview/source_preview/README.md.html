@@ -1,0 +1,121 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-markdown'># &#128640; DevTools
+
+&gt; **Sua su&#237;te de produtividade para engenharia de software.**
+&gt; Um ecossistema modular de ferramentas .NET projetado para automatizar tarefas, organizar arquivos e acelerar o desenvolvimento.
+
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Platform](https://img.shields.io/badge/platform-windows-lightgrey.svg)
+![.NET](https://img.shields.io/badge/.NET-10.0-purple.svg)
+
+---
+
+## &#128203; Vis&#227;o Geral
+
+O **DevTools** &#233; uma cole&#231;&#227;o de utilit&#225;rios essenciais para desenvolvedores, acess&#237;veis via **Linha de Comando (CLI)** ou **Interface Gr&#225;fica (WPF/Tray)**.
+
+O projeto segue uma arquitetura limpa onde cada ferramenta &#233; uma biblioteca isolada (*Engine*), garantindo que a l&#243;gica de neg&#243;cio seja desacoplada da apresenta&#231;&#227;o.
+
+### ✨ Principais Funcionalidades
+
+| Ferramenta | Descri&#231;&#227;o |
+| :--- | :--- |
+| **&#128221; Notes** | Gerenciador de notas r&#225;pido, 100% local (Markdown), com backup ZIP e foco em privacidade. |
+| **&#127806; Harvest** | Coletor de c&#243;digo-fonte para an&#225;lise ou backup, com filtros inteligentes. |
+| **&#128194; Organizer** | Organiza arquivos em pastas automaticamente baseado em regras (extens&#227;o, data, etc). |
+| **&#127991;️ Rename** | Renomea&#231;&#227;o em massa avan&#231;ada com suporte a Regex e preview. |
+| **&#128269; SearchText** | Busca textual r&#225;pida em diret&#243;rios (Grep-like) otimizada para dev. |
+| **&#128248; Snapshot** | Gera &quot;fotos&quot; da estrutura de diret&#243;rios em JSON, HTML ou &#193;rvore de Texto. |
+| **&#128291; Utf8Convert** | Detecta e converte codifica&#231;&#227;o de arquivos para UTF-8 em lote. |
+| **&#128444;️ Image** | Utilit&#225;rios de imagem, incluindo fatiamento (split) para datasets/web. |
+| **&#128274; SSHTunnel** | Gerenciador de t&#250;neis SSH para port forwarding local/remoto. |
+| **&#127760; Ngrok** | Wrapper para gerenciamento f&#225;cil de t&#250;neis HTTP/TCP via Ngrok. |
+| **&#128452;️ Migrations** | Auxiliar para comandos do Entity Framework Core. |
+
+---
+
+## &#128640; Como Usar
+
+### Pr&#233;-requisitos
+*   Windows 10 ou 11
+*   .NET SDK 10.0+
+
+### Instala&#231;&#227;o e Build
+
+Clone o reposit&#243;rio e compile o projeto:
+
+```powershell
+git clone https://github.com/seu-usuario/devtools.git
+cd devtools
+dotnet build
+```
+
+### &#128421;️ Interface Gr&#225;fica (WPF)
+A maneira mais f&#225;cil de usar. O aplicativo fica na bandeja do sistema (Tray Icon).
+
+Execute:
+`.\src\Presentation\DevTools.Presentation.Wpf\bin\Debug\net10.0\DevTools.Presentation.Wpf.exe`
+
+*   **Clique duplo** no &#237;cone da bandeja para abrir o Dashboard.
+*   **Clique direito** para acesso r&#225;pido &#224;s ferramentas.
+
+### ⌨️ Linha de Comando (CLI)
+Para automa&#231;&#227;o e scripts.
+
+Execute:
+`.\src\Cli\DevTools.Cli\bin\Debug\net10.0\DevTools.Cli.exe [comando]`
+
+Exemplos:
+```powershell
+# Criar uma nota
+devcli notes
+
+# Converter arquivos para UTF-8
+devcli utf8convert --path &quot;C:\Projetos\Legacy&quot; --pattern &quot;*.cs&quot;
+```
+
+---
+
+## &#127959;️ Arquitetura
+
+O projeto &#233; estruturado em camadas para m&#225;xima reutiliza&#231;&#227;o:
+
+1.  **Core (`DevTools.Core`)**: Contratos, interfaces e utilit&#225;rios base.
+2.  **Tools (`DevTools.*`)**: Bibliotecas independentes contendo a l&#243;gica de cada ferramenta (Engines).
+3.  **Presentation**:
+    *   **CLI (`DevTools.Cli`)**: Interface de terminal.
+    *   **WPF (`DevTools.Presentation.Wpf`)**: Interface gr&#225;fica moderna.
+
+---
+
+## &#128218; Documenta&#231;&#227;o
+
+Para detalhes completos de cada ferramenta, consulte o [Manual do Usu&#225;rio](MANUAL.md).
+
+---
+
+## &#128196; Licen&#231;a
+
+Este projeto est&#225; licenciado sob a licen&#231;a MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+---
+
+&lt;p align=&quot;center&quot;&gt;
+  Desenvolvido com ❤️ por &lt;b&gt;Rudrigo Labs&lt;/b&gt;
+&lt;/p&gt;
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

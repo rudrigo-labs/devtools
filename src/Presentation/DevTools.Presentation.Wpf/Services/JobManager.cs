@@ -150,7 +150,7 @@ public sealed class JobManager
     private void RunOnUi(Action action)
     {
         // Se já estiver na UI thread, roda direto
-        if (Application.Current?.Dispatcher?.CheckAccess() == true)
+        if (System.Windows.Application.Current?.Dispatcher?.CheckAccess() == true)
         {
             action();
             return;

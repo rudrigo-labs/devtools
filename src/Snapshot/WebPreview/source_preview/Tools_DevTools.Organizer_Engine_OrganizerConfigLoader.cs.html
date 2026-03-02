@@ -1,0 +1,53 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using System.Text.Json;
+using DevTools.Organizer.Models;
+
+namespace DevTools.Organizer.Engine;
+
+internal static class OrganizerConfigLoader
+{
+    public static OrganizerConfig Load(string? configPath, string outputPath)
+    {
+        var path = ResolvePath(configPath, outputPath);
+        if (path is null)
+            return new OrganizerConfig();
+
+        try
+        {
+            var json = File.ReadAllText(path);
+            return JsonSerializer.Deserialize&lt;OrganizerConfig&gt;(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }) ?? new OrganizerConfig();
+        }
+        catch
+        {
+            return new OrganizerConfig();
+        }
+    }
+
+    private static string? ResolvePath(string? configPath, string outputPath)
+    {
+        if (!string.IsNullOrWhiteSpace(configPath))
+            return configPath;
+
+        var candidate = Path.Combine(outputPath, &quot;devtools.docs.json&quot;);
+        return File.Exists(candidate) ? candidate : null;
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

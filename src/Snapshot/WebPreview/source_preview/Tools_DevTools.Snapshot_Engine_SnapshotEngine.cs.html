@@ -1,0 +1,183 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Core.Abstractions;
+using DevTools.Core.Models;
+using DevTools.Core.Results;
+using DevTools.Snapshot.Models;
+using DevTools.Core.Providers;
+using DevTools.Snapshot.Validation;
+
+namespace DevTools.Snapshot.Engine;
+
+public sealed class SnapshotEngine : IDevToolEngine&lt;SnapshotRequest, SnapshotResponse&gt;
+{
+    private readonly IFileSystem _fs;
+    private readonly SnapshotTextWriter _textWriter = new();
+    private readonly SnapshotNestedJsonWriter _nestedWriter = new();
+    private readonly SnapshotRecursiveJsonWriter _recursiveWriter = new();
+    private readonly SnapshotHtmlWriter _htmlWriter = new();
+
+    public SnapshotEngine(IFileSystem? fileSystem = null)
+    {
+        _fs = fileSystem ?? new SystemFileSystem();
+    }
+
+    public async Task&lt;RunResult&lt;SnapshotResponse&gt;&gt; ExecuteAsync(
+        SnapshotRequest request,
+        IProgressReporter? progress = null,
+        CancellationToken ct = default)
+    {
+        var errors = SnapshotRequestValidator.Validate(request, _fs);
+        if (errors.Count &gt; 0)
+            return RunResult&lt;SnapshotResponse&gt;.Fail(errors);
+
+        var rootPath = Path.GetFullPath(request.RootPath);
+        var outputBase = string.IsNullOrWhiteSpace(request.OutputBasePath)
+            ? Path.Combine(rootPath, &quot;Snapshot&quot;)
+            : Path.GetFullPath(request.OutputBasePath);
+
+        _fs.CreateDirectory(outputBase);
+
+        var ignoreDirs = BuildIgnoreSet(request, outputBase);
+
+        progress?.Report(new ProgressEvent(&quot;Scanning&quot;, 10, &quot;scan&quot;));
+        var stats = CountStats(rootPath, ignoreDirs, ct);
+
+        var artifacts = new List&lt;SnapshotArtifact&gt;();
+
+        if (request.GenerateText)
+        {
+            progress?.Report(new ProgressEvent(&quot;Writing text snapshot&quot;, 30, &quot;text&quot;));
+            var outFile = Path.Combine(outputBase, &quot;Text&quot;, &quot;snapshot.txt&quot;);
+            await _textWriter.WriteAsync(rootPath, outFile, ignoreDirs).ConfigureAwait(false);
+            artifacts.Add(new SnapshotArtifact(SnapshotArtifactKind.Text, outFile));
+        }
+
+        if (request.GenerateJsonNested)
+        {
+            progress?.Report(new ProgressEvent(&quot;Writing nested JSON snapshot&quot;, 50, &quot;json&quot;));
+            var outFile = Path.Combine(outputBase, &quot;JsonNested&quot;, &quot;snapshot-nested.json&quot;);
+            await _nestedWriter.WriteAsync(rootPath, outFile, ignoreDirs).ConfigureAwait(false);
+            artifacts.Add(new SnapshotArtifact(SnapshotArtifactKind.JsonNested, outFile));
+        }
+
+        if (request.GenerateJsonRecursive)
+        {
+            progress?.Report(new ProgressEvent(&quot;Writing recursive JSON snapshot&quot;, 70, &quot;json&quot;));
+            var outFile = Path.Combine(outputBase, &quot;JsonRecursive&quot;, &quot;snapshot-recursive.json&quot;);
+            await _recursiveWriter.WriteAsync(rootPath, outFile, ignoreDirs).ConfigureAwait(false);
+            artifacts.Add(new SnapshotArtifact(SnapshotArtifactKind.JsonRecursive, outFile));
+        }
+
+        if (request.GenerateHtmlPreview)
+        {
+            progress?.Report(new ProgressEvent(&quot;Writing HTML preview&quot;, 85, &quot;html&quot;));
+            var outDir = Path.Combine(outputBase, &quot;WebPreview&quot;);
+            long? maxBytes = request.MaxFileSizeKb.HasValue
+                ? request.MaxFileSizeKb.Value * 1024L
+                : null;
+
+            await _htmlWriter.WriteAsync(
+                Path.GetFileName(rootPath.TrimEnd(Path.DirectorySeparatorChar)),
+                rootPath,
+                outDir,
+                ignoreDirs,
+                maxBytes).ConfigureAwait(false);
+
+            artifacts.Add(new SnapshotArtifact(SnapshotArtifactKind.HtmlPreview, outDir));
+        }
+
+        progress?.Report(new ProgressEvent(&quot;Done&quot;, 100, &quot;done&quot;));
+
+        var response = new SnapshotResponse(rootPath, outputBase, stats, artifacts);
+        return RunResult&lt;SnapshotResponse&gt;.Success(response);
+    }
+
+    private static SnapshotStats CountStats(string rootPath, IReadOnlySet&lt;string&gt; ignoreDirs, CancellationToken ct)
+    {
+        var fileCount = 0;
+        var dirCount = 0;
+
+        var stack = new Stack&lt;string&gt;();
+        stack.Push(rootPath);
+
+        while (stack.Count &gt; 0)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var dir = stack.Pop();
+            dirCount++;
+
+            IEnumerable&lt;string&gt; subDirs;
+            IEnumerable&lt;string&gt; files;
+
+            try
+            {
+                subDirs = Directory.EnumerateDirectories(dir);
+                files = Directory.EnumerateFiles(dir);
+            }
+            catch
+            {
+                continue;
+            }
+
+            foreach (var sd in subDirs)
+            {
+                var name = Path.GetFileName(sd);
+                if (ignoreDirs.Contains(name))
+                    continue;
+                stack.Push(sd);
+            }
+
+            foreach (var f in files)
+            {
+                var name = Path.GetFileName(f);
+                if (ignoreDirs.Contains(name))
+                    continue;
+                fileCount++;
+            }
+        }
+
+        return new SnapshotStats(fileCount, Math.Max(0, dirCount - 1));
+    }
+
+    private static IReadOnlySet&lt;string&gt; BuildIgnoreSet(SnapshotRequest request, string outputBase)
+    {
+        var ignore = new HashSet&lt;string&gt;(StringComparer.OrdinalIgnoreCase);
+
+        if (request.IgnoredDirectories is { Count: &gt; 0 })
+        {
+            foreach (var dir in request.IgnoredDirectories)
+            {
+                if (!string.IsNullOrWhiteSpace(dir))
+                    ignore.Add(dir.Trim().TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            }
+        }
+        else
+        {
+            foreach (var dir in SnapshotDefaults.IgnoredDirectories)
+                ignore.Add(dir);
+        }
+
+        var outputDirName = new DirectoryInfo(outputBase).Name;
+        if (!string.IsNullOrWhiteSpace(outputDirName))
+            ignore.Add(outputDirName);
+
+        return ignore;
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

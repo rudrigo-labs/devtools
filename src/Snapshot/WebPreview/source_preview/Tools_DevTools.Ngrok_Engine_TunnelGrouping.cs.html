@@ -1,0 +1,62 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Ngrok.Models;
+
+namespace DevTools.Ngrok.Engine;
+
+public static class TunnelGrouping
+{
+    public static IReadOnlyList&lt;TunnelGroup&gt; GroupByBaseName(IEnumerable&lt;TunnelInfo&gt; tunnels)
+    {
+        var map = new Dictionary&lt;string, (TunnelInfo? http, TunnelInfo? https)&gt;(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var t in tunnels)
+        {
+            var baseName = ExtractBaseName(t.Name);
+
+            map.TryGetValue(baseName, out var g);
+            if (t.Proto.Equals(&quot;https&quot;, StringComparison.OrdinalIgnoreCase)) g.https = t;
+            else if (t.Proto.Equals(&quot;http&quot;, StringComparison.OrdinalIgnoreCase)) g.http = t;
+
+            map[baseName] = g;
+        }
+
+        return map
+            .Select(kv =&gt; new TunnelGroup(kv.Key, kv.Value.http, kv.Value.https))
+            .OrderBy(x =&gt; x.BaseName, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    public static string ExtractBaseName(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return &quot;(tunnel)&quot;;
+        var idx = name.IndexOf(&quot; (&quot;, StringComparison.Ordinal);
+        return idx &gt; 0 ? name[..idx] : name;
+    }
+
+    public static bool TryExtractPort(string? addr, out int port)
+    {
+        port = 0;
+        if (string.IsNullOrWhiteSpace(addr)) return false;
+        if (!Uri.TryCreate(addr, UriKind.Absolute, out var uri)) return false;
+
+        if (uri.Port &gt; 0) { port = uri.Port; return true; }
+        port = uri.Scheme.Equals(&quot;https&quot;, StringComparison.OrdinalIgnoreCase) ? 443 : 80;
+        return true;
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

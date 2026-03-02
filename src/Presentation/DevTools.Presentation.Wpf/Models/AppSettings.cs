@@ -2,21 +2,24 @@ namespace DevTools.Presentation.Wpf.Models;
 
 public class AppSettings
 {
+    // Harvest Persistence
     public string? LastHarvestSourcePath { get; set; }
     public string? LastHarvestOutputPath { get; set; }
     public int? LastHarvestMinScore { get; set; }
     public bool? LastHarvestCopyFiles { get; set; }
     public string? LastHarvestConfigPath { get; set; }
+    
+    // Organizer Persistence
     public string? LastOrganizerInputPath { get; set; }
     
-    // Notes Window Persistence
+    // Notes Persistence
     public double? NotesWindowTop { get; set; }
     public double? NotesWindowLeft { get; set; }
     public double? NotesWindowWidth { get; set; }
     public double? NotesWindowHeight { get; set; }
     public string? NotesStoragePath { get; set; }
 
-    // SshTunnel Persistence
+    // ImageSplit Persistence
     public string? LastImageSplitInputPath { get; set; }
     public string? LastImageSplitOutputDir { get; set; }
     public double? ImageSplitWindowTop { get; set; }
@@ -30,23 +33,50 @@ public class AppSettings
     public double? RenameWindowTop { get; set; }
     public double? RenameWindowLeft { get; set; }
 
-    // Snapshot Persistence
-    public string? LastSnapshotRootPath { get; set; }
-    public double? SnapshotWindowTop { get; set; }
-    public double? SnapshotWindowLeft { get; set; }
-
     // Utf8Convert Persistence
     public string? LastUtf8RootPath { get; set; }
+    public bool? LastUtf8Recursive { get; set; }
+    public bool? LastUtf8DryRun { get; set; }
+    public bool? LastUtf8Backup { get; set; }
+    public bool? LastUtf8Bom { get; set; }
+    public string? LastUtf8Includes { get; set; }
+    public string? LastUtf8Excludes { get; set; }
     public double? Utf8WindowTop { get; set; }
     public double? Utf8WindowLeft { get; set; }
+
+    // Snapshot Persistence
+    public string? LastSnapshotRootPath { get; set; }
+    public string? LastSnapshotOutputPath { get; set; }
+    public string? LastSnapshotIgnored { get; set; }
+    public int? LastSnapshotMaxKb { get; set; }
+    public bool? LastSnapshotText { get; set; }
+    public bool? LastSnapshotJsonNested { get; set; }
+    public bool? LastSnapshotJsonRecursive { get; set; }
+    public bool? LastSnapshotHtml { get; set; }
+    public double? SnapshotWindowTop { get; set; }
+    public double? SnapshotWindowLeft { get; set; }
 
     // SshTunnel Persistence
     public double? SshWindowTop { get; set; }
     public double? SshWindowLeft { get; set; }
+    public string? LastSshHost { get; set; }
+    public int? LastSshPort { get; set; }
+    public string? LastSshUser { get; set; }
+    public string? LastSshKeyPath { get; set; }
+    public string? LastSshRemoteHost { get; set; }
+    public int? LastSshRemotePort { get; set; }
+    public string? LastSshLocalBind { get; set; }
+    public int? LastSshLocalPort { get; set; }
+    public bool? LastSshCompression { get; set; }
+    public bool? LastSshVerbose { get; set; }
 
     // Ngrok Persistence
     public double? NgrokWindowTop { get; set; }
     public double? NgrokWindowLeft { get; set; }
+    public int? LastNgrokPort { get; set; }
+    public string? LastNgrokSubdomain { get; set; }
+    public string? LastNgrokTunnelName { get; set; }
+    public string? LastNgrokAuthToken { get; set; }
 
     // SearchText Persistence
     public string? LastSearchTextRootPath { get; set; }

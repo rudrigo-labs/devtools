@@ -1,0 +1,58 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Cli.App;
+using DevTools.Cli.Commands;
+using DevTools.Cli.Ui;
+
+using DevTools.Core.Configuration;
+
+CliConsole.ConfigureEncoding();
+
+var theme = new CliTheme();
+var state = new CliState();
+var ui = new CliConsole(theme, state);
+var input = new CliInput(ui);
+var menu = new CliMenu(ui, input);
+var profileManager = new ProfileManager();
+
+var commands = new List&lt;ICliCommand&gt;
+{
+    new HarvestCliCommand(ui, input),
+    new SnapshotCliCommand(ui, input),
+    new SearchTextCliCommand(ui, input),
+    new RenameCliCommand(ui, input),
+    new Utf8ConvertCliCommand(ui, input),
+    new OrganizerCliCommand(ui, input),
+    new ImageSplitCliCommand(ui, input),
+    new MigrationsCliCommand(ui, input),
+    new NgrokCliCommand(ui, input),
+    new SshTunnelCliCommand(ui, input),
+    new NotesCliCommand(ui, input)
+};
+
+var orderedCommands = commands
+    .OrderBy(c =&gt; c.Key, StringComparer.OrdinalIgnoreCase)
+    .ToList();
+
+state.MenuItems = orderedCommands
+    .Select((cmd, index) =&gt; $&quot;{index + 1} - {cmd.Key.ToLowerInvariant()}&quot;)
+    .ToList();
+
+var options = ArgParser.Parse(args);
+var app = new CliApp(ui, menu, input, orderedCommands, profileManager);
+return await app.RunAsync(options, CancellationToken.None);
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

@@ -1,0 +1,438 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Core.Abstractions;
+using DevTools.Core.Models;
+using DevTools.Core.Results;
+using DevTools.Rename.Abstractions;
+using DevTools.Rename.Models;
+using DevTools.Rename.Providers;
+using DevTools.Core.Utilities;
+using DevTools.Rename.Validation;
+
+namespace DevTools.Rename.Engine;
+
+public sealed class RenameEngine : IDevToolEngine&lt;RenameRequest, RenameResponse&gt;
+{
+    private readonly IRenameFileSystem _fs;
+    private readonly DirectoryScanner _scanner;
+
+    public RenameEngine(IRenameFileSystem? fileSystem = null)
+    {
+        _fs = fileSystem ?? new SystemRenameFileSystem();
+        _scanner = new DirectoryScanner(_fs);
+    }
+
+    public async Task&lt;RunResult&lt;RenameResponse&gt;&gt; ExecuteAsync(
+        RenameRequest request,
+        IProgressReporter? progress = null,
+        CancellationToken ct = default)
+    {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var validationErrors = RenameRequestValidator.Validate(request);
+        if (validationErrors.Count &gt; 0)
+            return RunResult&lt;RenameResponse&gt;.Fail(validationErrors);
+
+        var rootPath = Path.GetFullPath(request.RootPath);
+        var filter = new PathFilter(request.IncludeGlobs, request.ExcludeGlobs);
+        var scan = _scanner.Scan(rootPath, filter);
+
+        var changes = new List&lt;RenameChange&gt;();
+        var diffs = new List&lt;FileDiffSummary&gt;();
+        var errors = new List&lt;ErrorDetail&gt;();
+
+        var filesScanned = 0;
+        var directoriesScanned = 0;
+        var filesUpdated = 0;
+        var filesRenamed = 0;
+        var directoriesRenamed = 0;
+        var skippedBinary = 0;
+        var skippedExists = 0;
+
+        var includeFilter = new PathFilter(request.IncludeGlobs, Array.Empty&lt;string&gt;());
+
+        var total = scan.Files.Count + scan.Directories.Count;
+        var step = 0;
+
+        foreach (var file in scan.Files)
+        {
+            ct.ThrowIfCancellationRequested();
+            filesScanned++;
+            step++;
+            progress?.Report(new ProgressEvent(&quot;Processing file&quot;, Percent(step, total), &quot;file&quot;));
+
+            var relative = Normalize(Path.GetRelativePath(rootPath, file));
+            if (!includeFilter.IsIncluded(relative))
+                continue;
+
+            try
+            {
+                var stats = await ProcessFileAsync(request, rootPath, file, changes, diffs, ct).ConfigureAwait(false);
+                filesUpdated += stats.FilesUpdated;
+                filesRenamed += stats.FilesRenamed;
+                skippedBinary += stats.SkippedBinary;
+                skippedExists += stats.SkippedExists;
+            }
+            catch (Exception ex)
+            {
+                errors.Add(new ErrorDetail(&quot;rename.file.failed&quot;, &quot;Failed to process file.&quot;, Cause: relative, Exception: ex));
+            }
+        }
+
+        var dirList = scan.Directories
+            .OrderByDescending(d =&gt; d.Length)
+            .ToList();
+
+        var segmentMap = BuildNamespaceSegmentMap(request);
+
+        foreach (var dir in dirList)
+        {
+            ct.ThrowIfCancellationRequested();
+            directoriesScanned++;
+            step++;
+            progress?.Report(new ProgressEvent(&quot;Processing directory&quot;, Percent(step, total), &quot;dir&quot;));
+
+            var relative = Normalize(Path.GetRelativePath(rootPath, dir));
+            if (!includeFilter.IsIncluded(relative))
+                continue;
+
+            try
+            {
+                if (TryRenameDirectory(request, rootPath, dir, segmentMap, out var newPath))
+                {
+                    if (request.DryRun)
+                    {
+                        changes.Add(new RenameChange(
+                            RenameChangeType.DirectoryRenamed,
+                            dir,
+                            newPath));
+                        directoriesRenamed++;
+                    }
+                    else
+                    {
+                        if (_fs.DirectoryExists(newPath))
+                        {
+                            skippedExists++;
+                            errors.Add(new ErrorDetail(&quot;rename.dir.exists&quot;, &quot;Target directory exists.&quot;, Cause: newPath));
+                        }
+                        else
+                        {
+                            _fs.MoveDirectory(dir, newPath);
+                            changes.Add(new RenameChange(
+                                RenameChangeType.DirectoryRenamed,
+                                dir,
+                                newPath));
+                            directoriesRenamed++;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                errors.Add(new ErrorDetail(&quot;rename.dir.failed&quot;, &quot;Failed to rename directory.&quot;, Cause: relative, Exception: ex));
+            }
+        }
+
+        progress?.Report(new ProgressEvent(&quot;Done&quot;, 100, &quot;done&quot;));
+        sw.Stop();
+
+        var summaryOld = new RenameSummary(
+            filesScanned,
+            directoriesScanned,
+            filesUpdated,
+            filesRenamed,
+            directoriesRenamed,
+            skippedBinary,
+            skippedExists,
+            errors.Count);
+
+        string? undoLogPath = null;
+        if (request.WriteUndoLog)
+        {
+            undoLogPath = ResolveUndoLogPath(request.UndoLogPath, rootPath);
+            try
+            {
+                var undoLog = new RenameUndoLog(DateTimeOffset.UtcNow, changes
+                    .Where(c =&gt; c.Type is RenameChangeType.ContentUpdated or RenameChangeType.FileRenamed or RenameChangeType.DirectoryRenamed)
+                    .Select(c =&gt; new RenameUndoOperation(c.Type, c.Path, c.NewPath, c.BackupPath))
+                    .ToList());
+
+                RenameReportWriter.WriteUndoLog(undoLogPath, undoLog);
+            }
+            catch (Exception ex)
+            {
+                errors.Add(new ErrorDetail(&quot;rename.undo.failed&quot;, &quot;Failed to write undo log.&quot;, Cause: undoLogPath, Exception: ex));
+            }
+        }
+
+        string? reportPath = null;
+        if (!string.IsNullOrWhiteSpace(request.ReportPath))
+        {
+            reportPath = Path.GetFullPath(request.ReportPath);
+            try
+            {
+                var report = new RenameReport(
+                    DateTimeOffset.UtcNow,
+                    request,
+                    summaryOld,
+                    changes,
+                    diffs,
+                    errors.Select(e =&gt; new RenameReportError(e.Code, e.Message, e.Details)).ToList(),
+                    undoLogPath);
+
+                RenameReportWriter.Write(reportPath, report);
+            }
+            catch (Exception ex)
+            {
+                errors.Add(new ErrorDetail(&quot;rename.report.failed&quot;, &quot;Failed to write report.&quot;, Cause: reportPath, Exception: ex));
+            }
+        }
+
+        var response = new RenameResponse(summaryOld, changes, diffs, reportPath, undoLogPath);
+
+        var summary = new RunSummary(
+            ToolName: &quot;Rename&quot;,
+            Mode: request.DryRun ? &quot;DryRun&quot; : &quot;Real&quot;,
+            MainInput: request.RootPath,
+            OutputLocation: null, // In-place
+            Processed: filesScanned + directoriesScanned,
+            Changed: filesUpdated + filesRenamed + directoriesRenamed,
+            Ignored: skippedBinary + skippedExists,
+            Failed: errors.Count,
+            Duration: sw.Elapsed
+        );
+
+        return RunResult&lt;RenameResponse&gt;.Success(response)
+            .WithSummary(summary);
+    }
+
+    private async Task&lt;FileProcessStats&gt; ProcessFileAsync(
+        RenameRequest request,
+        string rootPath,
+        string file,
+        List&lt;RenameChange&gt; changes,
+        List&lt;FileDiffSummary&gt; diffs,
+        CancellationToken ct)
+    {
+        var stats = new FileProcessStats();
+        var detected = await TextFileHelper.ReadAsync(_fs, file, ct).ConfigureAwait(false);
+        if (detected.IsBinary)
+        {
+            changes.Add(new RenameChange(RenameChangeType.SkippedBinary, file));
+            stats.SkippedBinary++;
+            return stats;
+        }
+
+        var content = detected.Content;
+        var newContent = ApplyRenameToContent(request, file, content);
+
+        if (!string.Equals(content, newContent, StringComparison.Ordinal))
+        {
+            var relative = Path.GetRelativePath(rootPath, file);
+            diffs.Add(DiffGenerator.Generate(relative, content, newContent, request.MaxDiffLinesPerFile));
+
+            if (!request.DryRun)
+            {
+                string? backupPath = null;
+                if (request.BackupEnabled)
+                {
+                    backupPath = CreateBackupPath(file);
+                    _fs.CopyFile(file, backupPath, overwrite: false);
+                }
+
+                await TextFileHelper.WriteAsync(_fs, file, newContent, detected, ct).ConfigureAwait(false);
+                changes.Add(new RenameChange(RenameChangeType.ContentUpdated, file, BackupPath: backupPath));
+            }
+            else
+            {
+                changes.Add(new RenameChange(RenameChangeType.ContentUpdated, file));
+            }
+
+            stats.FilesUpdated++;
+        }
+
+        if (TryRenameFile(request, file, out var newPath))
+        {
+            if (request.DryRun)
+            {
+                changes.Add(new RenameChange(RenameChangeType.FileRenamed, file, newPath));
+                stats.FilesRenamed++;
+            }
+            else if (_fs.FileExists(newPath))
+            {
+                changes.Add(new RenameChange(RenameChangeType.SkippedExists, file, newPath));
+                stats.SkippedExists++;
+            }
+            else
+            {
+                _fs.MoveFile(file, newPath);
+                changes.Add(new RenameChange(RenameChangeType.FileRenamed, file, newPath));
+                stats.FilesRenamed++;
+            }
+        }
+
+        return stats;
+    }
+
+    private static string ApplyRenameToContent(RenameRequest request, string file, string content)
+    {
+        var extension = Path.GetExtension(file);
+        var isCSharp = extension.Equals(&quot;.cs&quot;, StringComparison.OrdinalIgnoreCase);
+
+        if (isCSharp)
+            return RoslynRenamer.Rename(content, request.OldText, request.NewText, request.Mode);
+
+        if (request.Mode == RenameMode.NamespaceOnly)
+        {
+            if (IsNamespaceFile(extension))
+                return content.Replace(request.OldText, request.NewText, StringComparison.Ordinal);
+
+            return content;
+        }
+
+        return content.Replace(request.OldText, request.NewText, StringComparison.Ordinal);
+    }
+
+    private static bool IsNamespaceFile(string extension)
+    {
+        return extension.Equals(&quot;.csproj&quot;, StringComparison.OrdinalIgnoreCase)
+               || extension.Equals(&quot;.sln&quot;, StringComparison.OrdinalIgnoreCase)
+               || extension.Equals(&quot;.props&quot;, StringComparison.OrdinalIgnoreCase)
+               || extension.Equals(&quot;.targets&quot;, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool TryRenameFile(RenameRequest request, string file, out string newPath)
+    {
+        newPath = file;
+        var fileName = Path.GetFileName(file);
+        var extension = Path.GetExtension(file);
+
+        if (request.Mode == RenameMode.NamespaceOnly)
+        {
+            if (!extension.Equals(&quot;.csproj&quot;, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            if (!fileName.Contains(request.OldText, StringComparison.Ordinal))
+                return false;
+
+            var newFileName = fileName.Replace(request.OldText, request.NewText, StringComparison.Ordinal);
+            newPath = Path.Combine(Path.GetDirectoryName(file)!, newFileName);
+            return !string.Equals(newPath, file, StringComparison.Ordinal);
+        }
+
+        if (!fileName.Contains(request.OldText, StringComparison.Ordinal))
+            return false;
+
+        var replaced = fileName.Replace(request.OldText, request.NewText, StringComparison.Ordinal);
+        newPath = Path.Combine(Path.GetDirectoryName(file)!, replaced);
+        return !string.Equals(newPath, file, StringComparison.Ordinal);
+    }
+
+    private static bool TryRenameDirectory(
+        RenameRequest request,
+        string rootPath,
+        string dir,
+        IReadOnlyDictionary&lt;string, string&gt; segmentMap,
+        out string newPath)
+    {
+        newPath = dir;
+        var dirName = Path.GetFileName(dir);
+
+        if (request.Mode == RenameMode.NamespaceOnly)
+        {
+            if (!segmentMap.TryGetValue(dirName, out var mapped))
+                return false;
+
+            if (string.Equals(dirName, mapped, StringComparison.Ordinal))
+                return false;
+
+            var parent = Path.GetDirectoryName(dir) ?? rootPath;
+            newPath = Path.Combine(parent, mapped);
+            return !string.Equals(newPath, dir, StringComparison.Ordinal);
+        }
+
+        if (!dirName.Contains(request.OldText, StringComparison.Ordinal))
+            return false;
+
+        var newName = dirName.Replace(request.OldText, request.NewText, StringComparison.Ordinal);
+        var parentDir = Path.GetDirectoryName(dir) ?? rootPath;
+        newPath = Path.Combine(parentDir, newName);
+        return !string.Equals(newPath, dir, StringComparison.Ordinal);
+    }
+
+    private static IReadOnlyDictionary&lt;string, string&gt; BuildNamespaceSegmentMap(RenameRequest request)
+    {
+        if (request.Mode != RenameMode.NamespaceOnly &amp;&amp; !request.OldText.Contains(&#39;.&#39;))
+            return new Dictionary&lt;string, string&gt;();
+
+        var oldParts = request.OldText.Split(&#39;.&#39;, StringSplitOptions.RemoveEmptyEntries);
+        var newParts = request.NewText.Split(&#39;.&#39;, StringSplitOptions.RemoveEmptyEntries);
+
+        var map = new Dictionary&lt;string, string&gt;(StringComparer.Ordinal);
+        var count = Math.Min(oldParts.Length, newParts.Length);
+        for (int i = 0; i &lt; count; i++)
+        {
+            var oldPart = oldParts[i];
+            var newPart = newParts[i];
+            if (!map.ContainsKey(oldPart))
+                map[oldPart] = newPart;
+        }
+
+        return map;
+    }
+
+    private static string ResolveUndoLogPath(string? path, string rootPath)
+    {
+        if (!string.IsNullOrWhiteSpace(path))
+            return Path.GetFullPath(path);
+
+        return Path.Combine(rootPath, &quot;rename-undo.json&quot;);
+    }
+
+    private static string CreateBackupPath(string path)
+    {
+        var basePath = path + &quot;.bak&quot;;
+        if (!File.Exists(basePath))
+            return basePath;
+
+        var index = 1;
+        while (true)
+        {
+            var candidate = basePath + index;
+            if (!File.Exists(candidate))
+                return candidate;
+            index++;
+        }
+    }
+
+    private static int? Percent(int step, int total)
+    {
+        if (total &lt;= 0) return null;
+        return (int)Math.Round(step * 100d / total);
+    }
+
+    private static string Normalize(string path)
+        =&gt; path.Replace(&#39;\\&#39;, &#39;/&#39;);
+
+    private sealed class FileProcessStats
+    {
+        public int FilesUpdated { get; set; }
+        public int FilesRenamed { get; set; }
+        public int SkippedBinary { get; set; }
+        public int SkippedExists { get; set; }
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

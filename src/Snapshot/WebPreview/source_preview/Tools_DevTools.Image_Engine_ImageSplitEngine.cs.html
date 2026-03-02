@@ -1,0 +1,125 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Core.Abstractions;
+using DevTools.Core.Models;
+using DevTools.Core.Results;
+using DevTools.Image.Models;
+using DevTools.Core.Providers;
+using DevTools.Image.Validation;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+
+namespace DevTools.Image.Engine;
+
+public sealed class ImageSplitEngine : IDevToolEngine&lt;ImageSplitRequest, ImageSplitResponse&gt;
+{
+    private readonly IFileSystem _fs;
+
+    public ImageSplitEngine(IFileSystem? fileSystem = null)
+    {
+        _fs = fileSystem ?? new SystemFileSystem();
+    }
+
+    public async Task&lt;RunResult&lt;ImageSplitResponse&gt;&gt; ExecuteAsync(
+        ImageSplitRequest request,
+        IProgressReporter? progress = null,
+        CancellationToken ct = default)
+    {
+        var errors = ImageSplitRequestValidator.Validate(request, _fs);
+        if (errors.Count &gt; 0)
+            return RunResult&lt;ImageSplitResponse&gt;.Fail(errors);
+
+        var inputFull = Path.GetFullPath(request.InputPath);
+        var outputDir = ResolveOutputDirectory(request, inputFull);
+        _fs.CreateDirectory(outputDir);
+
+        var baseName = ResolveBaseName(request, inputFull);
+        var extension = ResolveExtension(request, inputFull);
+
+        progress?.Report(new ProgressEvent(&quot;Loading image&quot;, 5, &quot;load&quot;));
+
+        using var image = await SixLabors.ImageSharp.Image.LoadAsync&lt;Rgba32&gt;(inputFull, ct).ConfigureAwait(false);
+
+        var splitter = new ImageSplitter { AlphaThreshold = request.AlphaThreshold };
+        progress?.Report(new ProgressEvent(&quot;Detecting components&quot;, 20, &quot;scan&quot;));
+
+        var components = splitter.FindConnectedComponents(image, ct)
+            .Where(r =&gt; r.Width &gt;= request.MinRegionWidth &amp;&amp; r.Height &gt;= request.MinRegionHeight)
+            .ToList();
+        var outputs = new List&lt;ImageSplitOutput&gt;();
+
+        if (components.Count == 0)
+        {
+            var empty = new ImageSplitResponse(inputFull, outputDir, 0, outputs);
+            return RunResult&lt;ImageSplitResponse&gt;.Success(empty);
+        }
+
+        var total = components.Count;
+        for (int i = 0; i &lt; total; i++)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var rect = components[i];
+            var index = request.StartIndex + i;
+            var outputPath = Path.Combine(outputDir, $&quot;{baseName}_{index}{extension}&quot;);
+
+            progress?.Report(new ProgressEvent($&quot;Saving {index}/{request.StartIndex + total - 1}&quot;,
+                20 + (int)((i + 1) * 70.0 / total), &quot;save&quot;));
+
+            if (!request.Overwrite &amp;&amp; _fs.FileExists(outputPath))
+                continue;
+
+            using var cropped = image.Clone(ctx =&gt; ctx.Crop(new SixLabors.ImageSharp.Rectangle(rect.X, rect.Y, rect.Width, rect.Height)));
+            await cropped.SaveAsync(outputPath, ct).ConfigureAwait(false);
+
+            outputs.Add(new ImageSplitOutput(index, outputPath, rect));
+        }
+
+        progress?.Report(new ProgressEvent(&quot;Done&quot;, 100, &quot;done&quot;));
+
+        var response = new ImageSplitResponse(inputFull, outputDir, components.Count, outputs);
+        return RunResult&lt;ImageSplitResponse&gt;.Success(response);
+    }
+
+    private static string ResolveOutputDirectory(ImageSplitRequest request, string inputFull)
+    {
+        if (!string.IsNullOrWhiteSpace(request.OutputDirectory))
+            return Path.GetFullPath(request.OutputDirectory);
+
+        var dir = Path.GetDirectoryName(inputFull);
+        return string.IsNullOrWhiteSpace(dir) ? Directory.GetCurrentDirectory() : dir;
+    }
+
+    private static string ResolveBaseName(ImageSplitRequest request, string inputFull)
+    {
+        if (!string.IsNullOrWhiteSpace(request.OutputBaseName))
+            return request.OutputBaseName.Trim();
+
+        return Path.GetFileNameWithoutExtension(inputFull);
+    }
+
+    private static string ResolveExtension(ImageSplitRequest request, string inputFull)
+    {
+        if (!string.IsNullOrWhiteSpace(request.OutputExtension))
+            return request.OutputExtension;
+
+        var ext = Path.GetExtension(inputFull);
+        return string.IsNullOrWhiteSpace(ext) ? &quot;.png&quot; : ext;
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

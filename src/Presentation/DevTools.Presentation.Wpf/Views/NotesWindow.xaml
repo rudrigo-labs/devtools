@@ -51,7 +51,16 @@
 
             <!-- Header (Draggable) -->
             <Border Grid.Row="0" Background="Transparent" Padding="15,10" MouseLeftButtonDown="Header_MouseLeftButtonDown">
-                <TextBlock x:Name="HeaderTitle" Text="NOTAS" FontFamily="Segoe UI Light" FontSize="24" Foreground="{StaticResource PhoneForegroundBrush}" IsHitTestVisible="False"/>
+                <Grid>
+                    <TextBlock x:Name="HeaderTitle" Text="NOTAS" FontFamily="Segoe UI Light" FontSize="24" Foreground="{StaticResource PhoneForegroundBrush}" IsHitTestVisible="False"/>
+                    <Button HorizontalAlignment="Right" VerticalAlignment="Top" 
+                            Style="{StaticResource AppBarButtonStyle}" 
+                            Width="32" Height="32"
+                            ToolTip="Fechar Janela" 
+                            Click="CloseButton_Click">
+                        <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="12"/>
+                    </Button>
+                </Grid>
             </Border>
 
             <!-- List View -->
@@ -73,7 +82,7 @@
                             <Border BorderThickness="0,0,0,1" BorderBrush="#333333" Padding="5,10">
                                 <StackPanel>
                                     <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Text="{Binding UpdatedUtc}" FontSize="12" Opacity="0.6"/>
+                                    <TextBlock Text="{Binding FileName}" FontSize="12" Opacity="0.6"/>
                                 </StackPanel>
                             </Border>
                         </DataTemplate>

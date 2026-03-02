@@ -1,0 +1,52 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Core.Abstractions;
+
+namespace DevTools.Core.Providers;
+
+public sealed class SystemFileSystem : IFileSystem
+{
+    public bool FileExists(string path) =&gt; File.Exists(path);
+    public bool DirectoryExists(string path) =&gt; Directory.Exists(path);
+
+    public string ReadAllText(string path) =&gt; File.ReadAllText(path);
+
+    public Task&lt;string&gt; ReadAllTextAsync(string path, CancellationToken ct = default)
+        =&gt; File.ReadAllTextAsync(path, ct);
+
+    public byte[] ReadAllBytes(string path) =&gt; File.ReadAllBytes(path);
+
+    public Task&lt;byte[]&gt; ReadAllBytesAsync(string path, CancellationToken ct = default)
+        =&gt; File.ReadAllBytesAsync(path, ct);
+
+    public void WriteAllText(string path, string content) =&gt; File.WriteAllText(path, content);
+
+    public Task WriteAllTextAsync(string path, string content, CancellationToken ct = default)
+        =&gt; File.WriteAllTextAsync(path, content, ct);
+
+    public IEnumerable&lt;string&gt; EnumerateFiles(string path, string searchPattern, SearchOption option)
+        =&gt; Directory.EnumerateFiles(path, searchPattern, option);
+
+    public IEnumerable&lt;string&gt; EnumerateDirectories(string path, string searchPattern, SearchOption option)
+        =&gt; Directory.EnumerateDirectories(path, searchPattern, option);
+
+    public void CreateDirectory(string path) =&gt; Directory.CreateDirectory(path);
+
+    public void CopyFile(string sourcePath, string destinationPath, bool overwrite)
+        =&gt; File.Copy(sourcePath, destinationPath, overwrite);
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>

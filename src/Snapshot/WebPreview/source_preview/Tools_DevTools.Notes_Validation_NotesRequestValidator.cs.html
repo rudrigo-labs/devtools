@@ -1,0 +1,73 @@
+﻿<html><head><meta charset='UTF-8'>
+<link rel='stylesheet' href='../prism-tomorrow.min.css'>
+<style>
+body { background: #1d1d1d; margin: 0; padding: 10px; font-size: 14px; }
+pre { border-radius: 6px; }
+</style>
+</head><body>
+<pre><code class='language-csharp'>using DevTools.Core.Results;
+using DevTools.Notes.Models;
+
+namespace DevTools.Notes.Validation;
+
+public static class NotesRequestValidator
+{
+    public static IReadOnlyList&lt;ErrorDetail&gt; Validate(NotesRequest request)
+    {
+        var errors = new List&lt;ErrorDetail&gt;();
+
+        if (request is null)
+        {
+            errors.Add(new ErrorDetail(&quot;notes.request.null&quot;, &quot;Request is null.&quot;));
+            return errors;
+        }
+
+        if (!Enum.IsDefined(typeof(NotesAction), request.Action))
+        {
+            errors.Add(new ErrorDetail(&quot;notes.action.invalid&quot;, &quot;Action is invalid.&quot;));
+            return errors;
+        }
+
+        if (request.Action is NotesAction.LoadNote or NotesAction.SaveNote)
+        {
+            if (string.IsNullOrWhiteSpace(request.NoteKey))
+                errors.Add(new ErrorDetail(&quot;notes.key.required&quot;, &quot;NoteKey is required.&quot;));
+        }
+
+        if (request.Action == NotesAction.SaveNote &amp;&amp; request.Content is null)
+            errors.Add(new ErrorDetail(&quot;notes.content.required&quot;, &quot;Content is required for SaveNote.&quot;));
+
+        if (request.Action == NotesAction.CreateItem)
+        {
+            if (string.IsNullOrWhiteSpace(request.Title))
+                errors.Add(new ErrorDetail(&quot;notes.title.required&quot;, &quot;Title is required for CreateItem.&quot;));
+            if (request.Content is null)
+                errors.Add(new ErrorDetail(&quot;notes.content.required&quot;, &quot;Content is required for CreateItem.&quot;));
+        }
+
+        if (request.Action == NotesAction.ImportZip)
+        {
+            if (string.IsNullOrWhiteSpace(request.ZipPath))
+                errors.Add(new ErrorDetail(&quot;notes.zip.required&quot;, &quot;ZipPath is required for ImportZip.&quot;));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.NotesRootPath))
+        {
+            var trimmed = request.NotesRootPath.Trim();
+            if (trimmed.Length == 0)
+                errors.Add(new ErrorDetail(&quot;notes.root.invalid&quot;, &quot;NotesRootPath is invalid.&quot;));
+        }
+
+        return errors;
+    }
+}
+</code></pre>
+<script src='../prism.min.js'></script>
+<script src='../prism-csharp.min.js'></script>
+<script src='../prism-json.min.js'></script>
+<script src='../prism-markdown.min.js'></script>
+<script src='../prism-markup.min.js'></script>
+<script src='../prism-powershell.min.js'></script>
+<script src='../prism-yaml.min.js'></script>
+
+</body></html>
