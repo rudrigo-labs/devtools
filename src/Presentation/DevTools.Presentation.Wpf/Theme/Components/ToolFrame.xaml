@@ -28,7 +28,7 @@
                                     Background="{DynamicResource DevToolsSurface}"
                                     BorderBrush="{DynamicResource DevToolsBrushBorder}"
                                     BorderThickness="0,0,0,1"
-                                    Padding="20,14">
+                                    Padding="20,10">
                                 <DockPanel>
                                     <Button x:Name="PART_CloseButton"
                                             Content="✕"
@@ -40,11 +40,25 @@
                                             Margin="10,-5,-5,-5"
                                             Width="30" Height="30"/>
 
-                                    <TextBlock Text="{TemplateBinding Title}"
-                                               FontSize="{DynamicResource DevToolsFontSize.WindowTitle}"
-                                               Foreground="{DynamicResource DevToolsTextPrimary}"
-                                               FontWeight="SemiBold"
-                                               DockPanel.Dock="Left"/>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{TemplateBinding Title}"
+                                                   FontSize="{DynamicResource DevToolsFontSize.WindowTitle}"
+                                                   Foreground="{DynamicResource DevToolsTextPrimary}"
+                                                   FontWeight="SemiBold"/>
+                                        
+                                        <Border x:Name="StatusBadge" 
+                                                Margin="15,0,0,0" 
+                                                Padding="8,2" 
+                                                CornerRadius="10"
+                                                Background="{DynamicResource DevToolsStatusIdle}"
+                                                Visibility="Collapsed">
+                                            <TextBlock Text="{TemplateBinding StatusText}"
+                                                       Foreground="White"
+                                                       FontSize="10"
+                                                       FontWeight="Bold"
+                                                       VerticalAlignment="Center"/>
+                                        </Border>
+                                    </StackPanel>
                                 </DockPanel>
                             </Border>
 
@@ -85,17 +99,22 @@
                                 </Grid>
                             </Border>
 
-                            <!-- Status Strip -->
+                            <!-- Footer (Rodapé mantido, mas sem o status que foi para o header) -->
                             <Border Grid.Row="3"
-                                    Background="{DynamicResource DevToolsStatusIdle}">
-                                <TextBlock Text="{TemplateBinding StatusText}"
-                                           Foreground="{DynamicResource DevToolsTextPrimary}"
-                                           FontSize="{DynamicResource DevToolsFontSize.Status}"
-                                           VerticalAlignment="Center"
-                                           Margin="10,0"/>
-                            </Border>
+                                    Background="{DynamicResource DevToolsStatusIdle}"/>
                         </Grid>
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="StatusText" Value="{x:Null}">
+                            <Setter TargetName="StatusBadge" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <DataTrigger Binding="{Binding StatusText, RelativeSource={RelativeSource Self}}" Value="">
+                            <Setter TargetName="StatusBadge" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding StatusText, RelativeSource={RelativeSource Self}, Converter={x:Static c:StringVisibilityConverter.Instance}}" Value="Visible">
+                            <Setter TargetName="StatusBadge" Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

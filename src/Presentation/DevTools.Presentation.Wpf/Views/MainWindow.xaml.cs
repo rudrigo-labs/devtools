@@ -37,6 +37,8 @@ public partial class MainWindow : Window
         _jobManager = jobManager;
         _configService = configService;
 
+        _trayService.SetMainWindow(this);
+
         // Binding direto da coleção de Jobs
         JobsDataGrid.ItemsSource = _jobManager.Jobs;
 
@@ -97,7 +99,7 @@ public partial class MainWindow : Window
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
-        this.Hide();
+        MaterialDesignThemes.Wpf.DialogHost.Show(RootDialog.DialogContent, "RootDialog");
     }
 
     private void MinimizeButton_Click(object sender, RoutedEventArgs e)
@@ -297,8 +299,8 @@ public partial class MainWindow : Window
             double.TryParse(HarvestWeightDensity.Text, out double density); _currentHarvestConfig.Weights.KeywordDensityWeight = density;
             double.TryParse(HarvestWeightDeadCode.Text, out double deadCode); _currentHarvestConfig.Weights.DeadCodePenalty = deadCode;
 
-        _configService.SaveSection("Harvest", _currentHarvestConfig);
-        UiMessageService.ShowInfo("Configuração do Harvest salva com sucesso!", "Sucesso");
+            _configService.SaveSection("Harvest", _currentHarvestConfig);
+            UiMessageService.ShowInfo("Configuração do Harvest salva com sucesso!", "Sucesso");
         }
         catch (Exception ex)
         {

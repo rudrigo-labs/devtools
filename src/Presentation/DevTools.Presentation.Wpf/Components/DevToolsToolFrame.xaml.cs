@@ -99,7 +99,11 @@ public class DevToolsToolFrame : ContentControl
 
         if (GetTemplateChild("PART_CloseButton") is System.Windows.Controls.Button closeBtn)
         {
-            closeBtn.Click += (s, e) => CloseButtonClick?.Invoke(this, e);
+            closeBtn.Click += (s, e) => 
+            {
+                CloseButtonClick?.Invoke(this, e);
+                Window.GetWindow(this)?.Close();
+            };
         }
 
         if (GetTemplateChild("PART_Header") is Border header)

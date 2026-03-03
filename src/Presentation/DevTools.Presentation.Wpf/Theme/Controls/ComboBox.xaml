@@ -30,7 +30,7 @@
 
                                 <!-- Texto selecionado -->
                                 <ContentPresenter x:Name="ContentSite"
-                                                  Margin="8,4,30,4"
+                                                  Margin="8,0,30,0"
                                                   VerticalAlignment="Center"
                                                   HorizontalAlignment="Left"
                                                   Content="{TemplateBinding SelectionBoxItem}"
@@ -45,7 +45,7 @@
                                          Foreground="{DynamicResource PrimaryTextBrush}"
                                          FontSize="{TemplateBinding FontSize}"
                                          Padding="0"
-                                         Margin="8,4,30,4"
+                                         Margin="8,0,30,0"
                                          VerticalContentAlignment="Center"
                                          Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
 

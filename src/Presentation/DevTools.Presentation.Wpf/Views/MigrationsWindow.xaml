@@ -6,14 +6,14 @@
         xmlns:components="clr-namespace:DevTools.Presentation.Wpf.Components"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="EF Core Migrations" Height="640" Width="900" WindowStartupLocation="CenterScreen"
+        Title="EF Core Migrations" Height="720" Width="900" WindowStartupLocation="CenterScreen"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
-        ResizeMode="CanResizeWithGrip">
+        ResizeMode="NoResize">
 
     <c:DevToolsToolFrame x:Name="MainFrame"
                          Title="EF Core Migrations"
                          HelpText="Cria/aplica migrations para contextos EF Core."
-                         PrimaryButtonContent="Executar comando"
+                         PrimaryButtonContent="Executar"
                          SecondaryButtonContent="Cancelar"
                          PrimaryButtonClick="Execute_Click"
                          SecondaryButtonClick="Close_Click"

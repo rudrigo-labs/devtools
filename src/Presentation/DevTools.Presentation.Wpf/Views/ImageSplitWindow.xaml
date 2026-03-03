@@ -26,12 +26,10 @@
         <StackPanel Margin="0,10,0,0">
             
             <!-- Input File -->
-            <Label Content="Imagem de Entrada:"/>
-                <c:PathSelector x:Name="InputPathSelector" Title="Imagem de Entrada" IsFolderPicker="False" />
+                <c:PathSelector x:Name="InputPathSelector" Title="Imagem de Entrada" IsFolderPicker="False" Margin="0,0,0,15"/>
 
                 <!-- Output Directory -->
-                <Label Content="Pasta de Saída (Opcional - Padrão: Mesma da Entrada):"/>
-                <c:PathSelector x:Name="OutputPathSelector" Title="Pasta de Saída" IsFolderPicker="True" />
+                <c:PathSelector x:Name="OutputPathSelector" Title="Pasta de Saída (Opcional - Padrão: Mesma da Entrada)" IsFolderPicker="True" />
 
                 <!-- Settings -->
                 <Grid Margin="0,15,0,0">

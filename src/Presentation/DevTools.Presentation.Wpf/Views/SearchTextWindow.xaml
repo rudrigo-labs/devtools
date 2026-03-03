@@ -12,7 +12,7 @@
     <c:DevToolsToolFrame x:Name="MainFrame"
                          Title="Buscar Texto em Arquivos"
                          HelpText="Busca rápida com regex opcional e filtros."
-                         PrimaryButtonContent="Buscar"
+                         PrimaryButtonContent="Executar"
                          SecondaryButtonContent="Cancelar"
                          PrimaryButtonClick="Execute_Click"
                          SecondaryButtonClick="Close_Click"
@@ -65,7 +65,8 @@
                              FontFamily="Consolas"
                              FontSize="12"
                              VerticalScrollBarVisibility="Auto"
-                             Style="{StaticResource ModernTextBoxStyle}"/>
+                             Style="{StaticResource ModernTextBoxStyle}"
+                             Foreground="{DynamicResource DevToolsTextPrimary}"/>
                 </Expander>
 
             </StackPanel>

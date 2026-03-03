@@ -10,7 +10,7 @@
 
     <c:DevToolsToolFrame Title="Coletor de Arquivos"
                          HelpText="Copia arquivos filtrados por regras para pasta de saída"
-                         PrimaryButtonContent="EXECUTAR HARVEST"
+                         PrimaryButtonContent="Executar"
                          SecondaryButtonContent="Cancelar"
                          PrimaryButtonClick="Run_Click"
                          SecondaryButtonClick="Cancel_Click"

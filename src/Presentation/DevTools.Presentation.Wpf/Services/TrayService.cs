@@ -22,7 +22,7 @@ public class TrayService : IDisposable
     private TaskbarIcon _taskbarIcon = null!;
     private Window? _jobCenterWindow;
     private NotesWindow? _notesWindow;
-    private MainWindow? _dashboardWindow;
+    private MainWindow? _mainWindow;
 
     // Tool Windows References
     private Window? _currentToolWindow;
@@ -38,9 +38,9 @@ public class TrayService : IDisposable
     private HarvestWindow? _harvestWindow;
     private LogsWindow? _logsWindow;
 
-    public void SetDashboardWindow(MainWindow dashboardWindow)
+    public void SetMainWindow(MainWindow mainWindow)
     {
-        _dashboardWindow = dashboardWindow;
+        _mainWindow = mainWindow;
     }
 
     public bool HasOpenToolWindow => _currentToolWindow != null && _currentToolWindow.IsVisible;
@@ -75,6 +75,12 @@ public class TrayService : IDisposable
             window = factory();
             setWindow(window);
             _currentToolWindow = window;
+
+            // Set owner to the main window
+            if (_mainWindow != null && window != _mainWindow)
+            {
+                window.Owner = _mainWindow;
+            }
 
             window.Closed += (_, __) => 
             {
@@ -117,13 +123,13 @@ public class TrayService : IDisposable
 
     public void ShowDashboard()
     {
-        if (_dashboardWindow != null)
+        if (_mainWindow != null)
         {
-            _dashboardWindow.ResetToHome();
-            _dashboardWindow.Show();
-            _dashboardWindow.Activate();
-            if (_dashboardWindow.WindowState == WindowState.Minimized)
-                _dashboardWindow.WindowState = WindowState.Normal;
+            _mainWindow.ResetToHome();
+            _mainWindow.Show();
+            _mainWindow.Activate();
+            if (_mainWindow.WindowState == WindowState.Minimized)
+                _mainWindow.WindowState = WindowState.Normal;
         }
     }
 

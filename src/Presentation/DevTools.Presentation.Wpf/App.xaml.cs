@@ -33,7 +33,7 @@ public partial class App : System.Windows.Application
 
         // Instancia MainWindow (Hub)
         var mainWindow = new DevTools.Presentation.Wpf.Views.MainWindow(_trayService, _jobManager, _configService);
-        _trayService.SetDashboardWindow(mainWindow);
+        _trayService.SetMainWindow(mainWindow);
 
         _trayService.Initialize();
         

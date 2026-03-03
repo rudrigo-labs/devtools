@@ -25,10 +25,12 @@
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="6">
+                            CornerRadius="6"
+                            SnapsToDevicePixels="True">
                         <ScrollViewer x:Name="PART_ContentHost"
+                                      VerticalAlignment="Center"
                                       Margin="{TemplateBinding Padding}"
-                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

@@ -15,8 +15,7 @@
                          CloseButtonClick="CloseButton_Click">
         <StackPanel Margin="0,20,0,0">
             
-            <Label Content="Pasta do Projeto:"/>
-            <c:PathSelector x:Name="RootPathSelector" IsFolderPicker="True" />
+            <c:PathSelector x:Name="RootPathSelector" Title="Pasta do Projeto:" IsFolderPicker="True" />
 
             <Label Content="Formatos de Saída:" Margin="0,15,0,5"/>
             <Grid>

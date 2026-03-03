@@ -17,8 +17,7 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,5,0">
         <StackPanel Margin="0,10,0,0">
             
-            <Label Content="Pasta Raiz:"/>
-                <c:PathSelector x:Name="RootPathSelector" Title="Pasta Raiz" IsFolderPicker="True" />
+                <c:PathSelector x:Name="RootPathSelector" Title="Pasta Raiz:" IsFolderPicker="True" />
 
                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                     <CheckBox x:Name="RecursiveCheck" Content="Recursivo" IsChecked="True" Margin="0,0,15,0"/>
