@@ -16,6 +16,7 @@ public partial class RenameWindow : Window
     private readonly JobManager _jobManager;
     private readonly SettingsService _settingsService;
     private readonly ProfileManager _profileManager;
+    private ToolProfile? _currentProfile;
 
     public RenameWindow(JobManager jobManager, SettingsService settingsService, ProfileManager profileManager)
     {        InitializeComponent();
@@ -33,12 +34,12 @@ public partial class RenameWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {        // Tentar carregar perfil padrão
-        var defaultProfile = _profileManager?.GetDefaultProfile("Rename");
-        if (defaultProfile != null)
-        {            if (defaultProfile.Options.TryGetValue("old-text", out var old)) OldTextBox.Text = old;
-            if (defaultProfile.Options.TryGetValue("new-text", out var newText)) NewTextBox.Text = newText;
-            if (defaultProfile.Options.TryGetValue("include", out var inc)) IncludeBox.Text = inc;
-            if (defaultProfile.Options.TryGetValue("exclude", out var exc)) ExcludeBox.Text = exc;
+        _currentProfile = _profileManager?.GetDefaultProfile("Rename");
+        if (_currentProfile != null)
+        {            if (_currentProfile.Options.TryGetValue("old-text", out var old)) OldTextBox.Text = old;
+            if (_currentProfile.Options.TryGetValue("new-text", out var newText)) NewTextBox.Text = newText;
+            if (_currentProfile.Options.TryGetValue("include", out var inc)) IncludeBox.Text = inc;
+            if (_currentProfile.Options.TryGetValue("exclude", out var exc)) ExcludeBox.Text = exc;
         }
         else
         {            // Fallback para configurações salvas anteriormente (comportamento original)
@@ -81,6 +82,16 @@ public partial class RenameWindow : Window
             _settingsService.Settings.LastRenameExclude = exclude;
             _settingsService.Settings.LastRenameDryRun = dryRun;
             _settingsService.Save();
+
+            // Sincronizar com o perfil padrão se estiver em uso
+            if (_currentProfile != null)
+            {
+                _currentProfile.Options["old-text"] = oldText ?? "";
+                _currentProfile.Options["new-text"] = newText ?? "";
+                _currentProfile.Options["include"] = include ?? "";
+                _currentProfile.Options["exclude"] = exclude ?? "";
+                _profileManager.SaveProfile("Rename", _currentProfile);
+            }
         }
 
         var request = new RenameRequest(

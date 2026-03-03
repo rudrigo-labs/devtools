@@ -17,6 +17,7 @@ public partial class SearchTextWindow : Window
     private readonly JobManager _jobManager;
     private readonly SettingsService _settings;
     private readonly ProfileManager _profileManager;
+    private ToolProfile? _currentProfile;
 
     public SearchTextWindow(JobManager jobManager, SettingsService settings, ProfileManager profileManager)
     {
@@ -38,13 +39,13 @@ public partial class SearchTextWindow : Window
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         // Tentar carregar perfil padrão
-        var defaultProfile = _profileManager?.GetDefaultProfile("SearchText");
-        if (defaultProfile != null)
+        _currentProfile = _profileManager?.GetDefaultProfile("SearchText");
+        if (_currentProfile != null)
         {
-            if (defaultProfile.Options.TryGetValue("root-path", out var root)) PathSelector.SelectedPath = root;
-            if (defaultProfile.Options.TryGetValue("search-pattern", out var pattern)) SearchTextInput.Text = pattern;
-            if (defaultProfile.Options.TryGetValue("include", out var inc)) IncludePatternInput.Text = inc;
-            if (defaultProfile.Options.TryGetValue("exclude", out var exc)) ExcludePatternInput.Text = exc;
+            if (_currentProfile.Options.TryGetValue("root-path", out var root)) PathSelector.SelectedPath = root;
+            if (_currentProfile.Options.TryGetValue("search-pattern", out var pattern)) SearchTextInput.Text = pattern;
+            if (_currentProfile.Options.TryGetValue("include", out var inc)) IncludePatternInput.Text = inc;
+            if (_currentProfile.Options.TryGetValue("exclude", out var exc)) ExcludePatternInput.Text = exc;
         }
         else
         {
@@ -85,6 +86,16 @@ public partial class SearchTextWindow : Window
 
         var root = PathSelector.SelectedPath;
         var text = SearchTextInput.Text;
+
+        // Sincronizar com o perfil padrão se estiver em uso
+        if (_currentProfile != null)
+        {
+            _currentProfile.Options["root-path"] = root ?? "";
+            _currentProfile.Options["search-pattern"] = text ?? "";
+            _currentProfile.Options["include"] = IncludePatternInput.Text ?? "";
+            _currentProfile.Options["exclude"] = ExcludePatternInput.Text ?? "";
+            _profileManager.SaveProfile("SearchText", _currentProfile);
+        }
 
         var request = new SearchTextRequest(
             RootPath: root,

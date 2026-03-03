@@ -18,6 +18,7 @@ public partial class MigrationsWindow : Window
     private readonly SettingsService _settings;
     private readonly ConfigService _config;
     private readonly ProfileManager _profileManager;
+    private ToolProfile? _currentProfile;
 
     public MigrationsWindow(JobManager jobManager, SettingsService settings, ConfigService config, ProfileManager profileManager)
     {
@@ -40,12 +41,12 @@ public partial class MigrationsWindow : Window
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         // Tentar carregar perfil padrão
-        var defaultProfile = _profileManager?.GetDefaultProfile("Migrations");
-        if (defaultProfile != null)
+        _currentProfile = _profileManager?.GetDefaultProfile("Migrations");
+        if (_currentProfile != null)
         {
-            if (defaultProfile.Options.TryGetValue("root-path", out var root)) ProjectSelector.SelectedPath = root;
-            if (defaultProfile.Options.TryGetValue("startup-path", out var startup)) StartupSelector.SelectedPath = startup;
-            if (defaultProfile.Options.TryGetValue("dbcontext", out var context)) DbContextInput.Text = context;
+            if (_currentProfile.Options.TryGetValue("root-path", out var root)) ProjectSelector.SelectedPath = root;
+            if (_currentProfile.Options.TryGetValue("startup-path", out var startup)) StartupSelector.SelectedPath = startup;
+            if (_currentProfile.Options.TryGetValue("dbcontext", out var context)) DbContextInput.Text = context;
         }
         else
         {
@@ -112,6 +113,15 @@ public partial class MigrationsWindow : Window
             DryRun: DryRunCheck.IsChecked == true,
             WorkingDirectory: root
         );
+
+        // Sincronizar com o perfil padrão se estiver em uso
+        if (_currentProfile != null)
+        {
+            _currentProfile.Options["root-path"] = root ?? "";
+            _currentProfile.Options["startup-path"] = startup ?? "";
+            _currentProfile.Options["dbcontext"] = DbContextInput.Text ?? "";
+            _profileManager.SaveProfile("Migrations", _currentProfile);
+        }
 
         OutputText.Text = "Iniciando...";
 

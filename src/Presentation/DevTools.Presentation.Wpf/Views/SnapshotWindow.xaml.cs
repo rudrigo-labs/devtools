@@ -18,6 +18,7 @@ public partial class SnapshotWindow : Window
     private readonly JobManager _jobManager;
     private readonly SettingsService _settingsService;
     private readonly ProfileManager _profileManager;
+    private ToolProfile? _currentProfile;
 
     public SnapshotWindow(JobManager jobManager, SettingsService settingsService, ProfileManager profileManager)
     {
@@ -38,10 +39,10 @@ public partial class SnapshotWindow : Window
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         // Tentar carregar perfil padrão
-        var defaultProfile = _profileManager?.GetDefaultProfile("Snapshot");
-        if (defaultProfile != null)
+        _currentProfile = _profileManager?.GetDefaultProfile("Snapshot");
+        if (_currentProfile != null)
         {
-            if (defaultProfile.Options.TryGetValue("project-path", out var proj)) RootPathSelector.SelectedPath = proj;
+            if (_currentProfile.Options.TryGetValue("project-path", out var proj)) RootPathSelector.SelectedPath = proj;
         }
         else
         {
@@ -78,6 +79,13 @@ public partial class SnapshotWindow : Window
 
         _settingsService.Settings.LastSnapshotRootPath = root;
         _settingsService.Save();
+
+        // Sincronizar com o perfil padrão se estiver em uso
+        if (_currentProfile != null)
+        {
+            _currentProfile.Options["project-path"] = root ?? "";
+            _profileManager.SaveProfile("Snapshot", _currentProfile);
+        }
 
         _jobManager.StartJob("Snapshot", async (reporter, ct) =>
         {
