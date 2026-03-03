@@ -11,6 +11,7 @@ using DevTools.Ngrok.Models;
 using System.Collections.Generic;
 using System.Linq;
 using DevTools.Core.Models;
+using System.Windows.Media;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -21,14 +22,12 @@ public partial class MainWindow : Window
     private readonly ConfigService _configService;
 
     // Config Objects
-    private SshConfigSection _currentSshConfig = new();
     private HarvestConfig _currentHarvestConfig = new();
     private OrganizerConfig _currentOrganizerConfig = new();
     private MigrationsSettings _currentMigrationsConfig = new();
     private NgrokSettings _currentNgrokConfig = new();
 
     // State
-    private TunnelProfile? _selectedProfile;
     private OrganizerCategory? _selectedCategory;
     private string? _currentToolForProfiles;
     private ToolProfile? _selectedToolProfile;
@@ -49,6 +48,28 @@ public partial class MainWindow : Window
 
         this.Loaded += MainWindow_Loaded;
         this.Closing += MainWindow_Closing;
+        this.IsVisibleChanged += MainWindow_IsVisibleChanged;
+        this.StateChanged += MainWindow_StateChanged;
+    }
+
+    private void MainWindow_StateChanged(object? sender, EventArgs e)
+    {
+        // Se a principal minimizar, a ferramenta aberta deve acompanhar (se houver)
+        if (_trayService.HasOpenToolWindow)
+        {
+            // O WPF já lida com Owner minimizando junto se WindowState mudar
+            // mas garantimos que a lógica de Hide/Show funcione
+        }
+    }
+
+    private void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        // Se a MainWindow for escondida (Hide), temos que esconder a ferramenta atual também
+        // para que ela não fique "orfã" na tela
+        if (this.Visibility != Visibility.Visible)
+        {
+            _trayService.OpenTool("HIDE_CURRENT"); // Comando interno para esconder se necessário
+        }
     }
 
     // Construtor para o Designer
@@ -118,6 +139,11 @@ public partial class MainWindow : Window
         this.WindowState = WindowState.Minimized;
     }
 
+    private void MinimizeToTray_Click(object sender, RoutedEventArgs e)
+    {
+        Hide();
+    }
+
     private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton == MouseButton.Left)
@@ -127,14 +153,13 @@ public partial class MainWindow : Window
     private void DialogNoButton_Click(object sender, RoutedEventArgs e)
     {
         MaterialDesignThemes.Wpf.DialogHost.Close("RootDialog");
-
-        Hide();
     }
 
     private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
+        // Se o usuário clicar no X ou Alt+F4, mostramos o diálogo em vez de esconder
         e.Cancel = true;
-        Hide();
+        CloseButton_Click(this, new RoutedEventArgs());
     }
 
     // --- Settings Navigation Logic ---
@@ -143,7 +168,7 @@ public partial class MainWindow : Window
     {
         SettingsListPanel.Visibility = Visibility.Visible;
         
-        SshSettingsPanel.Visibility = Visibility.Collapsed;
+
         HarvestSettingsPanel.Visibility = Visibility.Collapsed;
         OrganizerSettingsPanel.Visibility = Visibility.Collapsed;
         MigrationsSettingsPanel.Visibility = Visibility.Collapsed;
@@ -224,22 +249,34 @@ public partial class MainWindow : Window
         _selectedToolProfile.Name = ToolProfileNameInput.Text;
         _selectedToolProfile.IsDefault = ToolProfileIsDefaultCheck.IsChecked == true;
 
-        // Coletar valores dos campos dinâmicos
-        foreach (var child in ToolProfileFieldsContainer.Children)
-        {
-            if (child is System.Windows.Controls.TextBox tb && tb.Tag is string key)
-            {
-                _selectedToolProfile.Options[key] = tb.Text;
-            }
-            else if (child is Components.PathSelector ps && ps.Tag is string pathKey)
-            {
-                _selectedToolProfile.Options[pathKey] = ps.SelectedPath;
-            }
-        }
+        // Coletar valores dos campos dinâmicos recursivamente
+        CollectProfileOptions(ToolProfileFieldsContainer, _selectedToolProfile.Options);
 
         _profileUIService.SaveProfile(_currentToolForProfiles, _selectedToolProfile);
         ToolProfilesList.Items.Refresh();
         UiMessageService.ShowInfo("Perfil salvo com sucesso!", "Sucesso");
+    }
+
+    private void CollectProfileOptions(DependencyObject container, Dictionary<string, string> options)
+    {
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(container); i++)
+        {
+            var child = VisualTreeHelper.GetChild(container, i);
+
+            if (child is System.Windows.Controls.TextBox tb && tb.Tag is string key)
+            {
+                options[key] = tb.Text;
+            }
+            else if (child is Components.PathSelector ps && ps.Tag is string pathKey)
+            {
+                options[pathKey] = ps.SelectedPath;
+            }
+            else if (child is DependencyObject depObj)
+            {
+                // Busca recursiva em containers (Grid, StackPanel, Card, etc.)
+                CollectProfileOptions(depObj, options);
+            }
+        }
     }
 
     private void DeleteToolProfile_Click(object sender, RoutedEventArgs e)
@@ -253,98 +290,7 @@ public partial class MainWindow : Window
         }
     }
 
-    // --- SSH Settings ---
 
-    private void OpenSshSettings_Click(object sender, RoutedEventArgs e)
-    {
-        SettingsListPanel.Visibility = Visibility.Collapsed;
-        SshSettingsPanel.Visibility = Visibility.Visible;
-        LoadSshProfiles();
-    }
-
-    private void LoadSshProfiles()
-    {
-        _currentSshConfig = _configService.GetSection<SshConfigSection>("Ssh");
-        SshProfilesList.ItemsSource = null;
-        SshProfilesList.ItemsSource = _currentSshConfig.Profiles;
-        
-        SshEditForm.Visibility = Visibility.Collapsed;
-        SshProfilesList.SelectedItem = null;
-    }
-
-    private void AddSshProfile_Click(object sender, RoutedEventArgs e)
-    {
-        var newProfile = new TunnelProfile 
-        { 
-            Name = "Novo Perfil " + (_currentSshConfig.Profiles.Count + 1),
-            SshPort = 22,
-            LocalPort = 1433,
-            RemotePort = 1433
-        };
-        _currentSshConfig.Profiles.Add(newProfile);
-        
-        SshProfilesList.ItemsSource = null;
-        SshProfilesList.ItemsSource = _currentSshConfig.Profiles;
-        SshProfilesList.SelectedItem = newProfile;
-    }
-
-    private void SshProfile_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (SshProfilesList.SelectedItem is TunnelProfile profile)
-        {
-            _selectedProfile = profile;
-            
-            SshProfileName.Text = profile.Name;
-            SshHost.Text = profile.SshHost;
-            SshPort.Text = profile.SshPort.ToString();
-            SshUser.Text = profile.SshUser;
-            SshKeyFileSelector.SelectedPath = profile.IdentityFile ?? string.Empty;
-            LocalBind.Text = profile.LocalBindHost;
-            LocalPort.Text = profile.LocalPort.ToString();
-            RemoteHost.Text = profile.RemoteHost;
-            RemotePort.Text = profile.RemotePort.ToString();
-
-            SshEditForm.Visibility = Visibility.Visible;
-        }
-        else
-        {
-            _selectedProfile = null;
-            SshEditForm.Visibility = Visibility.Collapsed;
-        }
-    }
-
-    private void SaveSshProfile_Click(object sender, RoutedEventArgs e)
-    {
-        if (_selectedProfile == null) return;
-
-        _selectedProfile.Name = SshProfileName.Text;
-        _selectedProfile.SshHost = SshHost.Text;
-        int.TryParse(SshPort.Text, out int sshPort); _selectedProfile.SshPort = sshPort;
-        _selectedProfile.SshUser = SshUser.Text;
-        _selectedProfile.IdentityFile = SshKeyFileSelector.SelectedPath;
-        _selectedProfile.LocalBindHost = LocalBind.Text;
-        int.TryParse(LocalPort.Text, out int localPort); _selectedProfile.LocalPort = localPort;
-        _selectedProfile.RemoteHost = RemoteHost.Text;
-        int.TryParse(RemotePort.Text, out int remotePort); _selectedProfile.RemotePort = remotePort;
-
-        _configService.SaveSection("Ssh", _currentSshConfig);
-        SshProfilesList.Items.Refresh();
-        UiMessageService.ShowInfo("Configuração salva com sucesso!", "Sucesso");
-    }
-
-    private void DeleteSshProfile_Click(object sender, RoutedEventArgs e)
-    {
-        if (_selectedProfile == null) return;
-
-        if (UiMessageService.Confirm($"Tem certeza que deseja excluir o perfil '{_selectedProfile.Name}'?", "Confirmar Exclusão"))
-        {
-            _currentSshConfig.Profiles.Remove(_selectedProfile);
-            _configService.SaveSection("Ssh", _currentSshConfig);
-            LoadSshProfiles();
-        }
-    }
-
-    private void BrowseSshKey_Click(object sender, RoutedEventArgs e) { }
 
     // --- Harvest Settings ---
 

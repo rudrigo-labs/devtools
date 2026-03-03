@@ -22,4 +22,5 @@
     <SolidColorBrush x:Key="DevToolsStatusIdle" Color="{DynamicResource  DevToolsStatusIdleColor}"/>
     <SolidColorBrush x:Key="DevToolsStatusOk" Color="{DynamicResource  DevToolsStatusOkColor}"/>
     <SolidColorBrush x:Key="DevToolsStatusError" Color="{DynamicResource  DevToolsStatusErrorColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignCardBackground" Color="{DynamicResource MaterialDesignCardBackgroundColor}"/>
 </ResourceDictionary>

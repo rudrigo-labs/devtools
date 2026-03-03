@@ -20,4 +20,5 @@
     <Color x:Key="DevToolsStatusIdleColor">#2D2D2D</Color>
     <Color x:Key="DevToolsStatusOkColor">#1B5E20</Color>
     <Color x:Key="DevToolsStatusErrorColor">#B71C1C</Color>
+    <Color x:Key="MaterialDesignCardBackgroundColor">#3C3C3C</Color>
 </ResourceDictionary>
