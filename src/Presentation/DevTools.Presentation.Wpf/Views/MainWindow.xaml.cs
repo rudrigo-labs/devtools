@@ -8,6 +8,7 @@ using DevTools.Harvest.Configuration;
 using DevTools.Organizer.Models;
 using DevTools.Migrations.Models;
 using DevTools.Ngrok.Models;
+using DevTools.Presentation.Wpf.Models;
 using System.Collections.Generic;
 using System.Linq;
 using DevTools.Core.Models;
@@ -26,6 +27,8 @@ public partial class MainWindow : Window
     private OrganizerConfig _currentOrganizerConfig = new();
     private MigrationsSettings _currentMigrationsConfig = new();
     private NgrokSettings _currentNgrokConfig = new();
+    private NotesSettings _currentNotesSettings = new();
+    private GoogleDriveSettings _currentGoogleDriveSettings = new();
 
     // State
     private OrganizerCategory? _selectedCategory;
@@ -173,6 +176,7 @@ public partial class MainWindow : Window
         OrganizerSettingsPanel.Visibility = Visibility.Collapsed;
         MigrationsSettingsPanel.Visibility = Visibility.Collapsed;
         NgrokSettingsPanel.Visibility = Visibility.Collapsed;
+        NotesCloudSettingsPanel.Visibility = Visibility.Collapsed;
         ToolProfilesSettingsPanel.Visibility = Visibility.Collapsed;
     }
 
@@ -497,5 +501,117 @@ public partial class MainWindow : Window
 
         _configService.SaveSection("Ngrok", _currentNgrokConfig);
         UiMessageService.ShowInfo("Configurações do Ngrok salvas!", "Sucesso");
+    }
+
+    // --- Notes and Cloud Settings ---
+
+    private void OpenNotesCloudSettings_Click(object sender, RoutedEventArgs e)
+    {
+        SettingsListPanel.Visibility = Visibility.Collapsed;
+        NotesCloudSettingsPanel.Visibility = Visibility.Visible;
+        LoadNotesCloudConfig();
+    }
+
+    private void LoadNotesCloudConfig()
+    {
+        _currentNotesSettings = _configService.GetSection<NotesSettings>("Notes") ?? new();
+        _currentGoogleDriveSettings = _configService.GetSection<GoogleDriveSettings>("GoogleDrive") ?? new();
+
+        // Local Storage
+        NotesStoragePathSelector.SelectedPath = _currentNotesSettings.StoragePath;
+        NotesAutoCloudSyncCheck.IsChecked = _currentNotesSettings.AutoCloudSync;
+        
+        // Selecionar formato no combo
+        foreach (ComboBoxItem item in NotesFormatCombo.Items)
+        {
+            if (item.Content.ToString() == _currentNotesSettings.DefaultFormat)
+            {
+                NotesFormatCombo.SelectedItem = item;
+                break;
+            }
+        }
+
+        // Google Drive
+        GDriveEnabledCheck.IsChecked = _currentGoogleDriveSettings.IsEnabled;
+        GDriveClientId.Text = _currentGoogleDriveSettings.ClientId;
+        GDriveClientSecret.Text = _currentGoogleDriveSettings.ClientSecret;
+        GDriveProjectId.Text = _currentGoogleDriveSettings.ProjectId;
+        GDriveFolderName.Text = string.IsNullOrEmpty(_currentGoogleDriveSettings.FolderName) ? "DevToolsNotes" : _currentGoogleDriveSettings.FolderName;
+        
+        // Atualiza estado visual do grid
+        GDriveEnabledCheck_Changed(null!, null!);
+    }
+
+    private void SaveNotesCloudSettings_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            // Local Storage
+            _currentNotesSettings.StoragePath = NotesStoragePathSelector.SelectedPath;
+            _currentNotesSettings.AutoCloudSync = NotesAutoCloudSyncCheck.IsChecked == true;
+            _currentNotesSettings.DefaultFormat = (NotesFormatCombo.SelectedItem as ComboBoxItem)?.Content.ToString() ?? ".txt";
+
+            // Google Drive
+            _currentGoogleDriveSettings.IsEnabled = GDriveEnabledCheck.IsChecked == true;
+            _currentGoogleDriveSettings.ClientId = GDriveClientId.Text;
+            _currentGoogleDriveSettings.ClientSecret = GDriveClientSecret.Text;
+            _currentGoogleDriveSettings.ProjectId = GDriveProjectId.Text;
+            _currentGoogleDriveSettings.FolderName = GDriveFolderName.Text;
+
+            _configService.SaveSection("Notes", _currentNotesSettings);
+            _configService.SaveSection("GoogleDrive", _currentGoogleDriveSettings);
+
+            UiMessageService.ShowInfo("Configurações de Notas e Nuvem salvas com sucesso!", "Sucesso");
+        }
+        catch (Exception ex)
+        {
+            UiMessageService.ShowError("Erro ao salvar configurações de Notas.", "Erro ao salvar", ex);
+        }
+    }
+
+    private void GDriveEnabledCheck_Changed(object sender, RoutedEventArgs e)
+    {
+        if (GDriveConfigGrid != null && GDriveEnabledCheck != null)
+        {
+            GDriveConfigGrid.IsEnabled = GDriveEnabledCheck.IsChecked == true;
+        }
+    }
+
+    private void OpenHelp_Click(object sender, RoutedEventArgs e)
+    {
+        var helpWindow = new HelpWindow();
+        helpWindow.Owner = this;
+        helpWindow.ShowDialog();
+    }
+
+    private async void TestConnection_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var tempSettings = new GoogleDriveSettings
+            {
+                IsEnabled = true,
+                ClientId = GDriveClientId.Text,
+                ClientSecret = GDriveClientSecret.Text,
+                ProjectId = GDriveProjectId.Text,
+                FolderName = GDriveFolderName.Text
+            };
+
+            if (string.IsNullOrWhiteSpace(tempSettings.ClientId) || string.IsNullOrWhiteSpace(tempSettings.ClientSecret))
+            {
+                UiMessageService.ShowWarning("Client ID e Client Secret são obrigatórios para testar a conexão.", "Campos Faltando");
+                return;
+            }
+
+            var gDriveService = new GoogleDriveService();
+            // Precisamos atualizar o serviço para aceitar as configurações em memória
+            await gDriveService.TestConnectionAsync(tempSettings);
+            
+            UiMessageService.ShowInfo("Conexão com Google Drive estabelecida com sucesso!", "Sucesso");
+        }
+        catch (Exception ex)
+        {
+            UiMessageService.ShowError("Falha ao conectar com Google Drive. Verifique as credenciais.", "Erro de Conexão", ex);
+        }
     }
 }

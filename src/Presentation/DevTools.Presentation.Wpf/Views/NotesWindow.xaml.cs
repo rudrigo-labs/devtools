@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using DevTools.Notes.Engine;
 using DevTools.Notes.Models;
+using DevTools.Presentation.Wpf.Models;
 using DevTools.Presentation.Wpf.Services;
 using Microsoft.Win32;
 
@@ -16,13 +17,20 @@ namespace DevTools.Presentation.Wpf.Views
     public partial class NotesWindow : Window
     {
         private readonly SettingsService _settings;
+        private readonly ConfigService _config;
+        private readonly GoogleDriveService _googleDriveService;
         private readonly NotesEngine _engine;
         private string? _currentNoteKey; 
 
-        public NotesWindow(SettingsService settings)
+        private NotesSettings GetNotesSettings() => _config.GetSection<NotesSettings>("Notes") ?? new();
+        private GoogleDriveSettings GetGDriveSettings() => _config.GetSection<GoogleDriveSettings>("GoogleDrive") ?? new();
+
+        public NotesWindow(SettingsService settings, GoogleDriveService googleDriveService, ConfigService config)
         {
             InitializeComponent();
             _settings = settings;
+            _config = config;
+            _googleDriveService = googleDriveService;
             _engine = new NotesEngine();
             
             Loaded += OnLoaded;
@@ -30,7 +38,106 @@ namespace DevTools.Presentation.Wpf.Views
 
         private async void OnLoaded(object sender, RoutedEventArgs e)
         {
+            CheckGoogleDriveStatus();
             await LoadList();
+        }
+
+        private void CheckGoogleDriveStatus()
+        {
+            var gdrive = GetGDriveSettings();
+            bool driveEnabled = gdrive != null && gdrive.IsEnabled && !string.IsNullOrEmpty(gdrive.ClientId);
+            
+            CloudSyncButton.Visibility = driveEnabled ? Visibility.Visible : Visibility.Collapsed;
+            CloudUploadNoteButton.Visibility = driveEnabled ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private async void CloudUploadNoteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(NotesContent.Text)) return;
+
+            try
+            {
+                var settings = GetGDriveSettings();
+                if (!settings.IsEnabled) return;
+
+                UiMessageService.ShowInfo("Subindo nota para o Google Drive...", "Google Drive");
+                
+                string safeTitle = string.IsNullOrWhiteSpace(NoteTitle.Text) ? "NotaSemTitulo" : NoteTitle.Text;
+                // Remove caracteres inválidos para nome de arquivo
+                foreach (char c in Path.GetInvalidFileNameChars())
+                {
+                    safeTitle = safeTitle.Replace(c, '_');
+                }
+                
+                var notesSettings = GetNotesSettings();
+                string extension = notesSettings.DefaultFormat ?? ".txt";
+                string fileName = $"{safeTitle}{extension}";
+
+                await _googleDriveService.UploadNoteAsync(NotesContent.Text, fileName, settings);
+                
+                UiMessageService.ShowInfo($"Nota '{fileName}' sincronizada com sucesso!", "Google Drive");
+            }
+            catch (Exception ex)
+            {
+                UiMessageService.ShowError($"Erro ao subir nota: {ex.Message}", "Erro Upload");
+            }
+        }
+
+        private async void CloudSyncButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var settings = GetGDriveSettings();
+                if (!settings.IsEnabled) return;
+
+                UiMessageService.ShowInfo("Sincronizando todas as notas com o Google Drive...", "Google Drive");
+                
+                var notesSettings = GetNotesSettings();
+                string storagePath = string.IsNullOrEmpty(notesSettings.StoragePath) ? _settings.Settings.NotesStoragePath : notesSettings.StoragePath;
+
+                // Buscar todas as notas
+                var request = new NotesRequest(
+                    Action: NotesAction.ListItems, 
+                    NotesRootPath: storagePath
+                );
+
+                var listResult = await _engine.ExecuteAsync(request);
+                if (!listResult.IsSuccess || listResult.Value?.ListResult == null)
+                {
+                    UiMessageService.ShowError("Não foi possível carregar a lista de notas para sincronização.", "Erro");
+                    return;
+                }
+
+                // Carregar conteúdo de cada nota e concatenar para um único arquivo de backup
+                var allNotesContent = new System.Text.StringBuilder();
+                allNotesContent.AppendLine($"=== BACKUP CONSOLIDADO - {DateTime.Now:dd/MM/yyyy HH:mm:ss} ===\n");
+
+                foreach (var item in listResult.Value.ListResult.Items)
+                {
+                    var readRequest = new NotesRequest(
+                        Action: NotesAction.LoadNote,
+                        NotesRootPath: storagePath,
+                        NoteKey: item.FileName
+                    );
+                    var readResult = await _engine.ExecuteAsync(readRequest);
+                    if (readResult.IsSuccess && readResult.Value?.ReadResult != null)
+                    {
+                        allNotesContent.AppendLine($"--- TITULO: {item.Title} ---");
+                        allNotesContent.AppendLine($"ARQUIVO: {item.FileName}");
+                        allNotesContent.AppendLine($"ATUALIZADO EM: {item.UpdatedUtc}");
+                        allNotesContent.AppendLine(readResult.Value.ReadResult.Content);
+                        allNotesContent.AppendLine("\n" + new string('=', 40) + "\n");
+                    }
+                }
+
+                await _googleDriveService.UploadNoteAsync(allNotesContent.ToString(), "DevTools_All_Notes_Consolidated.txt", settings);
+                
+                UiMessageService.ShowInfo("Sincronização concluída com sucesso!", "Google Drive");
+            }
+            catch (Exception ex)
+            {
+                UiMessageService.ShowError($"Erro ao sincronizar com Google Drive: {ex.Message}", "Erro Sync");
+            }
         }
 
         private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -40,14 +147,17 @@ namespace DevTools.Presentation.Wpf.Views
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            Hide();
+            this.Close();
         }
 
         private async Task LoadList()
         {
+            var notesSettings = GetNotesSettings();
+            string storagePath = string.IsNullOrEmpty(notesSettings.StoragePath) ? _settings.Settings.NotesStoragePath : notesSettings.StoragePath;
+
             var request = new NotesRequest(
                 Action: NotesAction.ListItems, 
-                NotesRootPath: _settings.Settings.NotesStoragePath
+                NotesRootPath: storagePath
             );
 
             var result = await _engine.ExecuteAsync(request);
@@ -75,9 +185,12 @@ namespace DevTools.Presentation.Wpf.Views
             {
                 _currentNoteKey = item.FileName; 
                 
+                var notesSettings = GetNotesSettings();
+                string storagePath = string.IsNullOrEmpty(notesSettings.StoragePath) ? _settings.Settings.NotesStoragePath : notesSettings.StoragePath;
+
                 var request = new NotesRequest(
                     Action: NotesAction.LoadNote, 
-                    NotesRootPath: _settings.Settings.NotesStoragePath,
+                    NotesRootPath: storagePath,
                     NoteKey: item.FileName 
                 );
 
@@ -104,11 +217,14 @@ namespace DevTools.Presentation.Wpf.Views
                 return;
             }
 
+            var notesSettings = GetNotesSettings();
+            string storagePath = string.IsNullOrEmpty(notesSettings.StoragePath) ? _settings.Settings.NotesStoragePath : notesSettings.StoragePath;
+
             var action = _currentNoteKey == null ? NotesAction.CreateItem : NotesAction.SaveNote; 
             
             var request = new NotesRequest(
                 Action: action,
-                NotesRootPath: _settings.Settings.NotesStoragePath,
+                NotesRootPath: storagePath,
                 Title: NoteTitle.Text,
                 Content: NotesContent.Text,
                 NoteKey: _currentNoteKey 
@@ -117,6 +233,12 @@ namespace DevTools.Presentation.Wpf.Views
             var result = await _engine.ExecuteAsync(request);
             if (result.IsSuccess)
             {
+                // Backup automático na nuvem se habilitado
+                if (notesSettings.AutoCloudSync)
+                {
+                    CloudUploadNoteButton_Click(this, new RoutedEventArgs());
+                }
+
                 ShowEditMode(false);
                 await LoadList();
             }
@@ -137,9 +259,12 @@ namespace DevTools.Presentation.Wpf.Views
 
             if (dialog.ShowDialog() == true)
             {
+                var notesSettings = GetNotesSettings();
+                string storagePath = string.IsNullOrEmpty(notesSettings.StoragePath) ? _settings.Settings.NotesStoragePath : notesSettings.StoragePath;
+
                 var request = new NotesRequest(
                     Action: NotesAction.ExportZip, 
-                    NotesRootPath: _settings.Settings.NotesStoragePath,
+                    NotesRootPath: storagePath,
                     OutputPath: dialog.FileName 
                 );
 
@@ -165,9 +290,12 @@ namespace DevTools.Presentation.Wpf.Views
 
             if (dialog.ShowDialog() == true)
             {
+                var notesSettings = GetNotesSettings();
+                string storagePath = string.IsNullOrEmpty(notesSettings.StoragePath) ? _settings.Settings.NotesStoragePath : notesSettings.StoragePath;
+
                 var request = new NotesRequest(
                     Action: NotesAction.ImportZip, 
-                    NotesRootPath: _settings.Settings.NotesStoragePath,
+                    NotesRootPath: storagePath,
                     ZipPath: dialog.FileName 
                 );
 

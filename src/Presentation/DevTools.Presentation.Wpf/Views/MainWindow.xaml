@@ -317,6 +317,9 @@
 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Ngrok}" Content="Ngrok" 
                                                 ToolTip="Caminho do executável e token" Width="200" Click="OpenNgrokSettings_Click"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Notes}" Content="Notas e Nuvem" 
+                                                ToolTip="Local de armazenamento e backup no Google Drive" Width="200" Click="OpenNotesCloudSettings_Click"/>
                                         </WrapPanel>
 
                                         <!-- Seção: Perfis de Ferramentas -->
@@ -456,6 +459,117 @@
                                 </Grid>
 
 
+
+                                <!-- Painel: Configuração Notas e Nuvem -->
+                                <Grid x:Name="NotesCloudSettingsPanel" Visibility="Collapsed">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                        <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
+                                            Foreground="White" Background="Transparent" BorderThickness="0"
+                                            Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
+                                        <TextBlock Text="Configuração: Notas e Nuvem" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                        <StackPanel Margin="0,0,20,0">
+                                            
+                                            <!-- Grupo: Armazenamento Local -->
+                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="#2D2D30">
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                                        <materialDesign:PackIcon Kind="Folder" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                        <TextBlock Text="Armazenamento Local" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                    </StackPanel>
+
+                                                    <c:PathSelector x:Name="NotesStoragePathSelector" Title="Pasta de Armazenamento" IsFolderPicker="True" Margin="0,0,0,20"/>
+
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <StackPanel>
+                                                            <Label Content="Formato Padrão" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <ComboBox x:Name="NotesFormatCombo" Foreground="White" Background="#1E1E1E" BorderThickness="0" Padding="10,5">
+                                                                <ComboBoxItem Content=".txt"/>
+                                                                <ComboBoxItem Content=".md"/>
+                                                            </ComboBox>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                                                            <CheckBox x:Name="NotesAutoCloudSyncCheck" Content="Backup Automático na Nuvem ao Salvar" Foreground="White"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </materialDesign:Card>
+
+                                            <!-- Grupo: Google Drive (Backup) -->
+                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="#2D2D30">
+                                                <StackPanel>
+                                                    <DockPanel LastChildFill="False" Margin="0,0,0,20">
+                                                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                                                            <materialDesign:PackIcon Kind="GoogleDrive" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                            <TextBlock Text="Backup Google Drive" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                        </StackPanel>
+                                                        <Button DockPanel.Dock="Right" Content="Como configurar?" Style="{DynamicResource SecondaryButtonStyle}" 
+                                                            Padding="10,2" Height="25" FontSize="11" Click="OpenHelp_Click"/>
+                                                    </DockPanel>
+
+                                                    <CheckBox x:Name="GDriveEnabledCheck" Content="Habilitar Backup no Google Drive" 
+                                                              Foreground="White" Margin="0,0,0,20" Cursor="Hand"
+                                                              Checked="GDriveEnabledCheck_Changed" Unchecked="GDriveEnabledCheck_Changed"/>
+
+                                                    <Grid x:Name="GDriveConfigGrid" IsEnabled="{Binding IsChecked, ElementName=GDriveEnabledCheck}">
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                        </Grid.RowDefinitions>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <StackPanel Grid.Row="0" Grid.Column="0">
+                                                            <Label Content="Client ID" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBox x:Name="GDriveClientId" Foreground="White" FontFamily="Consolas"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Row="0" Grid.Column="2">
+                                                            <Label Content="Client Secret" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBox x:Name="GDriveClientSecret" Foreground="White" FontFamily="Consolas"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,20,0,0">
+                                                            <Label Content="Project ID" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBox x:Name="GDriveProjectId" Foreground="White" FontFamily="Consolas"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,20,0,0">
+                                                            <Label Content="Nome da Pasta no Drive" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBox x:Name="GDriveFolderName" Foreground="White" FontFamily="Consolas"/>
+                                                        </StackPanel>
+
+                                                        <Button Grid.Row="2" Grid.Column="0" Content="Testar Conexão" Click="TestConnection_Click" 
+                                                            Style="{DynamicResource SecondaryButtonStyle}" Width="150" HorizontalAlignment="Left" Margin="0,20,0,0"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </materialDesign:Card>
+
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
+                                                <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
+                                                <Button Content="Salvar" Click="SaveNotesCloudSettings_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="120"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Grid>
 
                                 <!-- Painel: Configuração Harvest -->
                                 <Grid x:Name="HarvestSettingsPanel" Visibility="Collapsed">

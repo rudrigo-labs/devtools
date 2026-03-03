@@ -13,6 +13,7 @@ public partial class App : System.Windows.Application
     private ConfigService _configService = null!;
     private ProfileManager _profileManager = null!;
     private TrayService _trayService = null!;
+    private GoogleDriveService _googleDriveService = null!;
 
     public App()
     {
@@ -29,8 +30,10 @@ public partial class App : System.Windows.Application
         _settingsService = new SettingsService();
         _configService = new ConfigService();
         _profileManager = new ProfileManager();
+        _googleDriveService = new GoogleDriveService();
+
         var profileUIService = new ProfileUIService(_profileManager);
-        _trayService = new TrayService(_jobManager, _settingsService, _configService, _profileManager);
+        _trayService = new TrayService(_jobManager, _settingsService, _configService, _profileManager, _googleDriveService);
 
         // Instancia MainWindow (Hub)
         var mainWindow = new DevTools.Presentation.Wpf.Views.MainWindow(_trayService, _jobManager, _configService, profileUIService);
