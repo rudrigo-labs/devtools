@@ -31,9 +31,9 @@ public partial class App : System.Windows.Application
         _profileManager = new ProfileManager();
         _trayService = new TrayService(_jobManager, _settingsService, _configService, _profileManager);
 
-        // Instancia Dashboard (Hub)
-        var dashboard = new DevTools.Presentation.Wpf.Views.DashboardWindow(_trayService, _jobManager, _configService);
-        _trayService.SetDashboardWindow(dashboard);
+        // Instancia MainWindow (Hub)
+        var mainWindow = new DevTools.Presentation.Wpf.Views.MainWindow(_trayService, _jobManager, _configService);
+        _trayService.SetDashboardWindow(mainWindow);
 
         _trayService.Initialize();
         

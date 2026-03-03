@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace DevTools.Presentation.Wpf.Views;
 
-public partial class DashboardWindow : Window
+public partial class MainWindow : Window
 {
     private readonly TrayService _trayService;
     private readonly JobManager _jobManager;
@@ -30,7 +30,7 @@ public partial class DashboardWindow : Window
     private TunnelProfile? _selectedProfile;
     private OrganizerCategory? _selectedCategory;
 
-    public DashboardWindow(TrayService trayService, JobManager jobManager, ConfigService configService)
+    public MainWindow(TrayService trayService, JobManager jobManager, ConfigService configService)
     {
         InitializeComponent();
         _trayService = trayService;
@@ -40,11 +40,11 @@ public partial class DashboardWindow : Window
         // Binding direto da coleção de Jobs
         JobsDataGrid.ItemsSource = _jobManager.Jobs;
 
-        this.Loaded += DashboardWindow_Loaded;
-        this.Closing += DashboardWindow_Closing;
+        this.Loaded += MainWindow_Loaded;
+        this.Closing += MainWindow_Closing;
     }
 
-    private void DashboardWindow_Loaded(object sender, RoutedEventArgs e)
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         // Posiciona no canto inferior direito (WorkArea)
         var workArea = SystemParameters.WorkArea;
@@ -118,7 +118,7 @@ public partial class DashboardWindow : Window
         Hide();
     }
 
-    private void DashboardWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+    private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         e.Cancel = true;
         Hide();

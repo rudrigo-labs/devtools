@@ -22,7 +22,7 @@ public class TrayService : IDisposable
     private TaskbarIcon _taskbarIcon = null!;
     private Window? _jobCenterWindow;
     private NotesWindow? _notesWindow;
-    private DashboardWindow? _dashboardWindow;
+    private MainWindow? _dashboardWindow;
 
     // Tool Windows References
     private Window? _currentToolWindow;
@@ -38,7 +38,7 @@ public class TrayService : IDisposable
     private HarvestWindow? _harvestWindow;
     private LogsWindow? _logsWindow;
 
-    public void SetDashboardWindow(DashboardWindow dashboardWindow)
+    public void SetDashboardWindow(MainWindow dashboardWindow)
     {
         _dashboardWindow = dashboardWindow;
     }
