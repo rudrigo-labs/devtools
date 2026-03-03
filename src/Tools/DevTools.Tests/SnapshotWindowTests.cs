@@ -3,6 +3,7 @@ using System.Threading;
 using System.Windows;
 using DevTools.Presentation.Wpf.Services;
 using DevTools.Presentation.Wpf.Views;
+using DevTools.Core.Configuration;
 using Xunit;
 
 namespace DevTools.Tests;
@@ -42,7 +43,8 @@ public class SnapshotWindowTests
                 settings.Save();
 
                 var jobManager = new JobManager();
-                var window = new SnapshotWindow(jobManager, settings);
+                var profileManager = new ProfileManager();
+                var window = new SnapshotWindow(jobManager, settings, profileManager);
 
                 var pathField = typeof(SnapshotWindow).GetField("RootPathSelector", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
                 var selector = (DevTools.Presentation.Wpf.Components.PathSelector?)pathField?.GetValue(window);

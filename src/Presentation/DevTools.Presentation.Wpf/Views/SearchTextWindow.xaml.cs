@@ -8,43 +8,56 @@ using DevTools.SearchText.Engine;
 using DevTools.SearchText.Models;
 using DevTools.Core.Models;
 
+using DevTools.Core.Configuration;
+
 namespace DevTools.Presentation.Wpf.Views;
 
 public partial class SearchTextWindow : Window
 {
     private readonly JobManager _jobManager;
     private readonly SettingsService _settings;
+    private readonly ProfileManager _profileManager;
 
-    public SearchTextWindow(JobManager jobManager, SettingsService settings)
+    public SearchTextWindow(JobManager jobManager, SettingsService settings, ProfileManager profileManager)
     {
         InitializeComponent();
         _jobManager = jobManager;
         _settings = settings;
+        _profileManager = profileManager;
 
         Loaded += OnLoaded;
         Closing += OnClosing;
     }
 
+    // Construtor para o Designer
+    public SearchTextWindow()
+    {
+        InitializeComponent();
+    }
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // Restore Position disabled to enforce TrayService placement
-        /*
-        if (_settings.Settings.SearchTextWindowTop.HasValue)
+        // Tentar carregar perfil padrão
+        var defaultProfile = _profileManager?.GetDefaultProfile("SearchText");
+        if (defaultProfile != null)
         {
-            Top = _settings.Settings.SearchTextWindowTop.Value;
-            Left = _settings.Settings.SearchTextWindowLeft.Value;
+            if (defaultProfile.Options.TryGetValue("root-path", out var root)) PathSelector.SelectedPath = root;
+            if (defaultProfile.Options.TryGetValue("search-pattern", out var pattern)) SearchTextInput.Text = pattern;
+            if (defaultProfile.Options.TryGetValue("include", out var inc)) IncludePatternInput.Text = inc;
+            if (defaultProfile.Options.TryGetValue("exclude", out var exc)) ExcludePatternInput.Text = exc;
         }
-        */
+        else
+        {
+            // Fallback para configurações salvas anteriormente (comportamento original)
+            if (!string.IsNullOrEmpty(_settings?.Settings.LastSearchTextRootPath))
+                PathSelector.SelectedPath = _settings.Settings.LastSearchTextRootPath;
 
-        // Restore Inputs
-        if (!string.IsNullOrEmpty(_settings.Settings.LastSearchTextRootPath))
-            PathSelector.SelectedPath = _settings.Settings.LastSearchTextRootPath;
+            if (!string.IsNullOrEmpty(_settings?.Settings.LastSearchTextInclude))
+                IncludePatternInput.Text = _settings.Settings.LastSearchTextInclude;
 
-        if (!string.IsNullOrEmpty(_settings.Settings.LastSearchTextInclude))
-            IncludePatternInput.Text = _settings.Settings.LastSearchTextInclude;
-
-        if (!string.IsNullOrEmpty(_settings.Settings.LastSearchTextExclude))
-            ExcludePatternInput.Text = _settings.Settings.LastSearchTextExclude;
+            if (!string.IsNullOrEmpty(_settings?.Settings.LastSearchTextExclude))
+                ExcludePatternInput.Text = _settings.Settings.LastSearchTextExclude;
+        }
     }
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)

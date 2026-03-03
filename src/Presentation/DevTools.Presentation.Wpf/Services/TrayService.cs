@@ -304,15 +304,15 @@ public class TrayService : IDisposable
 
     private void ShowUtf8Window() => ShowWindow(() => _utf8ConvertWindow, w => _utf8ConvertWindow = w, () => new Utf8ConvertWindow(_jobManager, _settingsService));
 
-    private void ShowSnapshotWindow() => ShowWindow(() => _snapshotWindow, w => _snapshotWindow = w, () => new SnapshotWindow(_jobManager, _settingsService));
+    private void ShowSnapshotWindow() => ShowWindow(() => _snapshotWindow, w => _snapshotWindow = w, () => new SnapshotWindow(_jobManager, _settingsService, _profileManager));
 
     private void ShowSshTunnelWindow() => ShowWindow(() => _sshTunnelWindow, w => _sshTunnelWindow = w, () => new SshTunnelWindow(_jobManager, _settingsService, _configService));
 
     private void ShowNgrokWindow() => ShowWindow(() => _ngrokWindow, w => _ngrokWindow = w, () => new NgrokWindow(_jobManager, _settingsService));
 
-    private void ShowSearchTextWindow() => ShowWindow(() => _searchTextWindow, w => _searchTextWindow = w, () => new SearchTextWindow(_jobManager, _settingsService));
+    private void ShowSearchTextWindow() => ShowWindow(() => _searchTextWindow, w => _searchTextWindow = w, () => new SearchTextWindow(_jobManager, _settingsService, _profileManager));
 
-    private void ShowMigrationsWindow() => ShowWindow(() => _migrationsWindow, w => _migrationsWindow = w, () => new MigrationsWindow(_jobManager, _settingsService, _configService));
+    private void ShowMigrationsWindow() => ShowWindow(() => _migrationsWindow, w => _migrationsWindow = w, () => new MigrationsWindow(_jobManager, _settingsService, _configService, _profileManager));
 
     private void ShowNotesWindow() => ShowWindow(() => _notesWindow, w => _notesWindow = w, () => new NotesWindow(_settingsService));
 
@@ -320,7 +320,7 @@ public class TrayService : IDisposable
 
     private void OnHarvestClick(object sender, RoutedEventArgs e)
     {
-        ShowWindow(() => _harvestWindow, w => _harvestWindow = w, () => new HarvestWindow(_jobManager, _settingsService));
+        ShowWindow(() => _harvestWindow, w => _harvestWindow = w, () => new HarvestWindow(_jobManager, _settingsService, _profileManager));
     }
 
     private void ShowLogsWindow() => ShowWindow(() => _logsWindow, w => _logsWindow = w, () => new LogsWindow(_settingsService));
