@@ -1,6 +1,8 @@
+using System.Diagnostics;
+using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
-using System.Windows;
+using System.Windows.Navigation;
 
 namespace DevTools.Presentation.Wpf.Services
 {
@@ -8,48 +10,61 @@ namespace DevTools.Presentation.Wpf.Services
     {
         public static FlowDocument GetGoogleDriveHelp()
         {
-            var document = new FlowDocument();
+            var accentBrush = TryGetBrush("AccentBrush", System.Windows.Media.Brushes.DeepSkyBlue);
+            var primaryTextBrush = TryGetBrush("PrimaryTextBrush", System.Windows.Media.Brushes.WhiteSmoke);
+            var secondaryTextBrush = TryGetBrush("SecondaryTextBrush", new SolidColorBrush(System.Windows.Media.Color.FromRgb(220, 220, 220)));
+            var borderBrush = TryGetBrush("BorderBrush", new SolidColorBrush(System.Windows.Media.Color.FromRgb(63, 63, 70)));
+            var codeBackgroundBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(30, 30, 30));
 
-            // Estilos
+            var document = new FlowDocument
+            {
+                Background = System.Windows.Media.Brushes.Transparent,
+                Foreground = secondaryTextBrush,
+                FontFamily = new System.Windows.Media.FontFamily("Segoe UI"),
+                FontSize = 14.0,
+                LineHeight = 22.0,
+                PagePadding = new Thickness(0),
+                ColumnWidth = 2200
+            };
+
             var titleStyle = new Style(typeof(Paragraph));
-            titleStyle.Setters.Add(new Setter(Paragraph.FontSizeProperty, 24.0));
+            titleStyle.Setters.Add(new Setter(Paragraph.FontSizeProperty, 22.0));
             titleStyle.Setters.Add(new Setter(Paragraph.FontWeightProperty, FontWeights.Bold));
-            titleStyle.Setters.Add(new Setter(Paragraph.ForegroundProperty, System.Windows.Media.Brushes.White));
-            titleStyle.Setters.Add(new Setter(Paragraph.MarginProperty, new Thickness(0, 0, 0, 20)));
+            titleStyle.Setters.Add(new Setter(Paragraph.ForegroundProperty, primaryTextBrush));
+            titleStyle.Setters.Add(new Setter(Paragraph.MarginProperty, new Thickness(0, 0, 0, 18)));
 
             var h2Style = new Style(typeof(Paragraph));
-            h2Style.Setters.Add(new Setter(Paragraph.FontSizeProperty, 20.0));
+            h2Style.Setters.Add(new Setter(Paragraph.FontSizeProperty, 18.0));
             h2Style.Setters.Add(new Setter(Paragraph.FontWeightProperty, FontWeights.SemiBold));
-            h2Style.Setters.Add(new Setter(Paragraph.ForegroundProperty, (System.Windows.Media.Brush)System.Windows.Application.Current.FindResource("AccentBrush")));
-            h2Style.Setters.Add(new Setter(Paragraph.MarginProperty, new Thickness(0, 15, 0, 10)));
+            h2Style.Setters.Add(new Setter(Paragraph.ForegroundProperty, accentBrush));
+            h2Style.Setters.Add(new Setter(Paragraph.MarginProperty, new Thickness(0, 14, 0, 10)));
 
             var bodyStyle = new Style(typeof(Paragraph));
             bodyStyle.Setters.Add(new Setter(Paragraph.FontSizeProperty, 14.0));
-            bodyStyle.Setters.Add(new Setter(Paragraph.LineHeightProperty, 22.0));
-            bodyStyle.Setters.Add(new Setter(Paragraph.ForegroundProperty, new SolidColorBrush(System.Windows.Media.Color.FromRgb(220, 220, 220))));
+            bodyStyle.Setters.Add(new Setter(Paragraph.LineHeightProperty, 21.0));
+            bodyStyle.Setters.Add(new Setter(Paragraph.ForegroundProperty, secondaryTextBrush));
             bodyStyle.Setters.Add(new Setter(Paragraph.MarginProperty, new Thickness(0, 0, 0, 8)));
 
             var codeBlockStyle = new Style(typeof(Paragraph));
             codeBlockStyle.Setters.Add(new Setter(Paragraph.FontFamilyProperty, new System.Windows.Media.FontFamily("Consolas")));
             codeBlockStyle.Setters.Add(new Setter(Paragraph.FontSizeProperty, 13.0));
-            codeBlockStyle.Setters.Add(new Setter(Paragraph.BackgroundProperty, new SolidColorBrush(System.Windows.Media.Color.FromRgb(30, 30, 30))));
-            codeBlockStyle.Setters.Add(new Setter(Paragraph.ForegroundProperty, (System.Windows.Media.Brush)System.Windows.Application.Current.FindResource("AccentBrush")));
+            codeBlockStyle.Setters.Add(new Setter(Paragraph.BackgroundProperty, codeBackgroundBrush));
+            codeBlockStyle.Setters.Add(new Setter(Paragraph.ForegroundProperty, primaryTextBrush));
             codeBlockStyle.Setters.Add(new Setter(Paragraph.PaddingProperty, new Thickness(12)));
-            codeBlockStyle.Setters.Add(new Setter(Paragraph.MarginProperty, new Thickness(0, 10, 0, 15)));
-            codeBlockStyle.Setters.Add(new Setter(Paragraph.BorderBrushProperty, new SolidColorBrush(System.Windows.Media.Color.FromRgb(63, 63, 70))));
+            codeBlockStyle.Setters.Add(new Setter(Paragraph.MarginProperty, new Thickness(0, 10, 0, 14)));
+            codeBlockStyle.Setters.Add(new Setter(Paragraph.BorderBrushProperty, borderBrush));
             codeBlockStyle.Setters.Add(new Setter(Paragraph.BorderThicknessProperty, new Thickness(1)));
 
-            // Adicionando conteúdo
             document.Blocks.Add(new Paragraph(new Run("Guia de Configuração: Ativando seu Backup Pessoal no Google Drive")) { Style = titleStyle });
             document.Blocks.Add(new Paragraph(new Run("Este guia orienta você a criar sua própria \"Chave de Comunicação\" com o Google. Ao fazer isso, suas notas serão enviadas do seu computador diretamente para o seu Google Drive, sem passar por servidores de terceiros. 100% privado e seguro.")) { Style = bodyStyle });
-            
+
             document.Blocks.Add(new Paragraph(new Run("Informações Importantes sobre Custos e Privacidade")) { Style = h2Style });
             document.Blocks.Add(new Paragraph(new Run("Custo Zero: O uso da API do Google Drive é gratuito para uso pessoal. Você não precisa inserir cartões de crédito.")) { Style = bodyStyle });
             document.Blocks.Add(new Paragraph(new Run("Espaço de Armazenamento: Seus backups usarão os 15GB gratuitos que o Google oferece em toda conta Gmail.")) { Style = bodyStyle });
             document.Blocks.Add(new Paragraph(new Run("Privacidade: Como você criará sua própria chave, ninguém (nem o desenvolvedor deste software) terá acesso aos seus arquivos ou senhas.")) { Style = bodyStyle });
 
             document.Blocks.Add(new Paragraph(new Run("Passo 1: Criar seu Projeto no Google Cloud")) { Style = h2Style });
-            document.Blocks.Add(new Paragraph(new Run("1. Acesse o https://console.cloud.google.com/")) { Style = bodyStyle });
+            document.Blocks.Add(CreateParagraphWithLink("1. Acesse o ", "https://console.cloud.google.com/", bodyStyle, accentBrush));
             document.Blocks.Add(new Paragraph(new Run("2. Entre com sua conta do Gmail.")) { Style = bodyStyle });
             document.Blocks.Add(new Paragraph(new Run("3. No topo da página, clique em \"Selecionar um projeto\" (ou no nome do projeto atual).")) { Style = bodyStyle });
             document.Blocks.Add(new Paragraph(new Run("4. Escolha \"NOVO PROJETO\".")) { Style = bodyStyle });
@@ -63,7 +78,7 @@ namespace DevTools.Presentation.Wpf.Services
             document.Blocks.Add(new Paragraph(new Run("Google Drive API")) { Style = codeBlockStyle });
             document.Blocks.Add(new Paragraph(new Run("3. Clique no ícone do Google Drive.")) { Style = bodyStyle });
             document.Blocks.Add(new Paragraph(new Run("4. Clique no botão azul ATIVAR.")) { Style = bodyStyle });
-            document.Blocks.Add(new Paragraph(new Run("🔎 Acesso direto à API: https://console.cloud.google.com/apis/library/drive.googleapis.com")) { Style = bodyStyle });
+            document.Blocks.Add(CreateParagraphWithLink("🔎 Acesso direto à API: ", "https://console.cloud.google.com/apis/library/drive.googleapis.com", bodyStyle, accentBrush));
 
             document.Blocks.Add(new Paragraph(new Run("Passo 3: Configurar seu Acesso Pessoal (Vital)")) { Style = h2Style });
             document.Blocks.Add(new Paragraph(new Run("Como o projeto é seu, você precisa se dar permissão de uso.")) { Style = bodyStyle });
@@ -109,14 +124,51 @@ namespace DevTools.Presentation.Wpf.Services
             document.Blocks.Add(new Paragraph(new Run("3. Clique em \"Continuar\" para autorizar o envio dos arquivos.")) { Style = bodyStyle });
 
             document.Blocks.Add(new Paragraph(new Run("Links Oficiais")) { Style = h2Style });
-            document.Blocks.Add(new Paragraph(new Run("Console Google Cloud: https://console.cloud.google.com/")) { Style = bodyStyle });
-            document.Blocks.Add(new Paragraph(new Run("Biblioteca de APIs: https://console.cloud.google.com/apis/library")) { Style = bodyStyle });
-            document.Blocks.Add(new Paragraph(new Run("Google Drive API: https://console.cloud.google.com/apis/library/drive.googleapis.com")) { Style = bodyStyle });
-            document.Blocks.Add(new Paragraph(new Run("Documentação Oficial Drive API: https://developers.google.com/drive")) { Style = bodyStyle });
+            document.Blocks.Add(CreateParagraphWithLink("Console Google Cloud: ", "https://console.cloud.google.com/", bodyStyle, accentBrush));
+            document.Blocks.Add(CreateParagraphWithLink("Biblioteca de APIs: ", "https://console.cloud.google.com/apis/library", bodyStyle, accentBrush));
+            document.Blocks.Add(CreateParagraphWithLink("Google Drive API: ", "https://console.cloud.google.com/apis/library/drive.googleapis.com", bodyStyle, accentBrush));
+            document.Blocks.Add(CreateParagraphWithLink("Documentação Oficial Drive API: ", "https://developers.google.com/drive", bodyStyle, accentBrush));
 
             document.Blocks.Add(new Paragraph(new Run("Pronto! Suas notas agora estão protegidas na sua nuvem particular.")) { Style = bodyStyle });
-
             return document;
+        }
+
+        private static Paragraph CreateParagraphWithLink(string prefix, string url, Style paragraphStyle, System.Windows.Media.Brush linkBrush)
+        {
+            var paragraph = new Paragraph { Style = paragraphStyle };
+            paragraph.Inlines.Add(new Run(prefix));
+            paragraph.Inlines.Add(CreateHyperlink(url, linkBrush));
+            return paragraph;
+        }
+
+        private static Hyperlink CreateHyperlink(string url, System.Windows.Media.Brush linkBrush)
+        {
+            var hyperlink = new Hyperlink(new Run(url))
+            {
+                NavigateUri = new Uri(url),
+                Foreground = linkBrush,
+                TextDecorations = TextDecorations.Underline
+            };
+
+            hyperlink.RequestNavigate += (_, e) =>
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+                }
+                catch
+                {
+                }
+
+                e.Handled = true;
+            };
+
+            return hyperlink;
+        }
+
+        private static System.Windows.Media.Brush TryGetBrush(string key, System.Windows.Media.Brush fallback)
+        {
+            return System.Windows.Application.Current?.TryFindResource(key) as System.Windows.Media.Brush ?? fallback;
         }
     }
 }

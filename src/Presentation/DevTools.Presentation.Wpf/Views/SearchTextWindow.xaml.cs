@@ -144,6 +144,18 @@ public partial class SearchTextWindow : Window
 
     private bool ValidateInputs(out string errorMessage)
     {
+        var missing = new List<string>();
+        if (string.IsNullOrWhiteSpace(PathSelector.SelectedPath))
+            missing.Add("Diretório de Busca");
+        if (string.IsNullOrWhiteSpace(SearchTextInput.Text))
+            missing.Add("Texto de Pesquisa");
+
+        if (missing.Count > 0)
+        {
+            errorMessage = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
+            return false;
+        }
+
         if (string.IsNullOrWhiteSpace(PathSelector.SelectedPath))
         {
             errorMessage = "Selecione o diretório de busca.";

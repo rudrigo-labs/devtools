@@ -19,7 +19,8 @@ namespace DevTools.Presentation.Wpf.Views
         {
             try
             {
-                HelpContentScrollViewer.Document = HelpContentProvider.GetGoogleDriveHelp();
+                HelpContentViewer.Document = HelpContentProvider.GetGoogleDriveHelp();
+                HelpContentViewer.ScrollToHome();
             }
             catch (Exception ex)
             {

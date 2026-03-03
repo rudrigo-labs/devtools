@@ -552,11 +552,12 @@ public partial class MainWindow : Window
             _currentNotesSettings.DefaultFormat = (NotesFormatCombo.SelectedItem as ComboBoxItem)?.Content.ToString() ?? ".txt";
 
             // Google Drive
-            _currentGoogleDriveSettings.IsEnabled = GDriveEnabledCheck.IsChecked == true;
-            _currentGoogleDriveSettings.ClientId = GDriveClientId.Text;
-            _currentGoogleDriveSettings.ClientSecret = GDriveClientSecret.Text;
-            _currentGoogleDriveSettings.ProjectId = GDriveProjectId.Text;
-            _currentGoogleDriveSettings.FolderName = GDriveFolderName.Text;
+            _currentGoogleDriveSettings = ReadGoogleDriveSettingsFromUi();
+            if (_currentGoogleDriveSettings.IsEnabled && !ValidateGoogleDriveSettings(_currentGoogleDriveSettings, out var validationMessage))
+            {
+                UiMessageService.ShowWarning(validationMessage, "Campos Obrigatórios");
+                return;
+            }
 
             _configService.SaveSection("Notes", _currentNotesSettings);
             _configService.SaveSection("GoogleDrive", _currentGoogleDriveSettings);
@@ -586,32 +587,87 @@ public partial class MainWindow : Window
 
     private async void TestConnection_Click(object sender, RoutedEventArgs e)
     {
+        var tempSettings = ReadGoogleDriveSettingsFromUi();
+        tempSettings.IsEnabled = true; // Teste deve funcionar mesmo com o toggle desligado.
+
+        if (!ValidateGoogleDriveSettings(tempSettings, out var validationMessage))
+        {
+            UiMessageService.ShowError(validationMessage, "Erro de Validação");
+            return;
+        }
+
+        SetGDriveTestUiState(isTesting: true, statusText: "Testando conexão com Google Drive...");
         try
         {
-            var tempSettings = new GoogleDriveSettings
-            {
-                IsEnabled = true,
-                ClientId = GDriveClientId.Text,
-                ClientSecret = GDriveClientSecret.Text,
-                ProjectId = GDriveProjectId.Text,
-                FolderName = GDriveFolderName.Text
-            };
-
-            if (string.IsNullOrWhiteSpace(tempSettings.ClientId) || string.IsNullOrWhiteSpace(tempSettings.ClientSecret))
-            {
-                UiMessageService.ShowWarning("Client ID e Client Secret são obrigatórios para testar a conexão.", "Campos Faltando");
-                return;
-            }
-
             var gDriveService = new GoogleDriveService();
-            // Precisamos atualizar o serviço para aceitar as configurações em memória
-            await gDriveService.TestConnectionAsync(tempSettings);
+            // Executa fora do thread de UI para evitar travamento durante o fluxo OAuth/browser.
+            await Task.Run(() => gDriveService.TestConnectionAsync(tempSettings));
             
+            SetGDriveTestUiState(isTesting: false, statusText: "Conexão validada com sucesso.");
             UiMessageService.ShowInfo("Conexão com Google Drive estabelecida com sucesso!", "Sucesso");
         }
         catch (Exception ex)
         {
+            SetGDriveTestUiState(isTesting: false, statusText: "Falha ao validar conexão.", isError: true);
             UiMessageService.ShowError("Falha ao conectar com Google Drive. Verifique as credenciais.", "Erro de Conexão", ex);
         }
+        finally
+        {
+            SetGDriveTestUiState(isTesting: false, statusText: GDriveTestConnectionStatus?.Text, isError: false, preserveStatus: true);
+        }
+    }
+
+    private GoogleDriveSettings ReadGoogleDriveSettingsFromUi()
+    {
+        return new GoogleDriveSettings
+        {
+            IsEnabled = GDriveEnabledCheck.IsChecked == true,
+            ClientId = (GDriveClientId.Text ?? string.Empty).Trim(),
+            ClientSecret = (GDriveClientSecret.Text ?? string.Empty).Trim(),
+            ProjectId = (GDriveProjectId.Text ?? string.Empty).Trim(),
+            FolderName = (GDriveFolderName.Text ?? string.Empty).Trim()
+        };
+    }
+
+    private static bool ValidateGoogleDriveSettings(GoogleDriveSettings settings, out string message)
+    {
+        var missing = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(settings.ClientId))
+            missing.Add("Client ID");
+        if (string.IsNullOrWhiteSpace(settings.ClientSecret))
+            missing.Add("Client Secret");
+        if (string.IsNullOrWhiteSpace(settings.ProjectId))
+            missing.Add("Project ID");
+        if (string.IsNullOrWhiteSpace(settings.FolderName))
+            missing.Add("Nome da Pasta no Drive");
+
+        if (missing.Count == 0)
+        {
+            message = string.Empty;
+            return true;
+        }
+
+        message = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
+        return false;
+    }
+
+    private void SetGDriveTestUiState(bool isTesting, string? statusText = null, bool isError = false, bool preserveStatus = false)
+    {
+        if (GDriveTestConnectionButton != null)
+        {
+            GDriveTestConnectionButton.IsEnabled = !isTesting;
+            GDriveTestConnectionButton.Content = isTesting ? "Testando..." : "Testar Conexão";
+        }
+
+        if (GDriveTestConnectionStatus != null && !preserveStatus)
+        {
+            GDriveTestConnectionStatus.Text = statusText ?? string.Empty;
+            GDriveTestConnectionStatus.Foreground = isError
+                ? (System.Windows.Media.Brush)FindResource("ErrorBrush")
+                : (System.Windows.Media.Brush)FindResource("SecondaryTextBrush");
+        }
+
+        Mouse.OverrideCursor = isTesting ? System.Windows.Input.Cursors.Wait : null;
     }
 }

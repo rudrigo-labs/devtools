@@ -431,7 +431,7 @@
 
                                                         <StackPanel>
                                                             <Label Content="Nome do Perfil" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="ToolProfileNameInput" Foreground="White"/>
+                                                            <TextBox x:Name="ToolProfileNameInput" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
 
                                                         <!-- Container para campos específicos injetados -->
@@ -439,9 +439,8 @@
 
                                                         <CheckBox x:Name="ToolProfileIsDefaultCheck" 
                                                               Content="Usar como perfil padrão" 
-                                                              Margin="0,24,0,0" 
-                                                              Foreground="White"
-                                                              Cursor="Hand"/>
+                                                              Margin="0,24,0,0"
+                                                              Style="{DynamicResource DevToolsCheckBox}"/>
                                                     </StackPanel>
                                                 </materialDesign:Card>
 
@@ -496,14 +495,14 @@
 
                                                         <StackPanel>
                                                             <Label Content="Formato Padrão" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                            <ComboBox x:Name="NotesFormatCombo" Foreground="White" Background="#1E1E1E" BorderThickness="0" Padding="10,5">
+                                                            <ComboBox x:Name="NotesFormatCombo" Style="{DynamicResource DevToolsSelectInput}">
                                                                 <ComboBoxItem Content=".txt"/>
                                                                 <ComboBoxItem Content=".md"/>
                                                             </ComboBox>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
-                                                            <CheckBox x:Name="NotesAutoCloudSyncCheck" Content="Backup Automático na Nuvem ao Salvar" Foreground="White"/>
+                                                            <CheckBox x:Name="NotesAutoCloudSyncCheck" Content="Backup Automático na Nuvem ao Salvar" Style="{DynamicResource DevToolsCheckBox}"/>
                                                         </StackPanel>
                                                     </Grid>
                                                 </StackPanel>
@@ -522,7 +521,7 @@
                                                     </DockPanel>
 
                                                     <CheckBox x:Name="GDriveEnabledCheck" Content="Habilitar Backup no Google Drive" 
-                                                              Foreground="White" Margin="0,0,0,20" Cursor="Hand"
+                                                              Margin="0,0,0,20" Style="{DynamicResource DevToolsCheckBox}"
                                                               Checked="GDriveEnabledCheck_Changed" Unchecked="GDriveEnabledCheck_Changed"/>
 
                                                     <Grid x:Name="GDriveConfigGrid" IsEnabled="{Binding IsChecked, ElementName=GDriveEnabledCheck}">
@@ -539,26 +538,29 @@
 
                                                         <StackPanel Grid.Row="0" Grid.Column="0">
                                                             <Label Content="Client ID" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="GDriveClientId" Foreground="White" FontFamily="Consolas"/>
+                                                            <TextBox x:Name="GDriveClientId" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Row="0" Grid.Column="2">
                                                             <Label Content="Client Secret" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="GDriveClientSecret" Foreground="White" FontFamily="Consolas"/>
+                                                            <TextBox x:Name="GDriveClientSecret" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,20,0,0">
                                                             <Label Content="Project ID" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="GDriveProjectId" Foreground="White" FontFamily="Consolas"/>
+                                                            <TextBox x:Name="GDriveProjectId" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,20,0,0">
                                                             <Label Content="Nome da Pasta no Drive" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="GDriveFolderName" Foreground="White" FontFamily="Consolas"/>
+                                                            <TextBox x:Name="GDriveFolderName" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                         </StackPanel>
 
-                                                        <Button Grid.Row="2" Grid.Column="0" Content="Testar Conexão" Click="TestConnection_Click" 
+                                                        <Button x:Name="GDriveTestConnectionButton" Grid.Row="2" Grid.Column="0" Content="Testar Conexão" Click="TestConnection_Click" 
                                                             Style="{DynamicResource SecondaryButtonStyle}" Width="150" HorizontalAlignment="Left" Margin="0,20,0,0"/>
+                                                        <TextBlock x:Name="GDriveTestConnectionStatus" Grid.Row="2" Grid.Column="2" Margin="0,24,0,0"
+                                                                   Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11"
+                                                                   TextWrapping="Wrap" VerticalAlignment="Center"/>
                                                     </Grid>
                                                 </StackPanel>
                                             </materialDesign:Card>
@@ -606,19 +608,19 @@
                                                         <StackPanel>
                                                             <Label Content="Extensões Permitidas (ex: .cs, .ts)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="HarvestExtensions" 
-                                                                 Foreground="White" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
+                                                                 Style="{DynamicResource DevToolsTextInput}" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="2">
                                                             <Label Content="Pastas Ignoradas (ex: bin, obj)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="HarvestExcludeDirs" 
-                                                                 Foreground="White" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
+                                                                 Style="{DynamicResource DevToolsTextInput}" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
                                                         </StackPanel>
                                                     </Grid>
 
                                                     <StackPanel Margin="0,20,0,0" Width="200" HorizontalAlignment="Left">
                                                         <Label Content="Tamanho Máximo de Arquivo (KB)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                        <TextBox x:Name="HarvestMaxFileSizeInput" Foreground="White"/>
+                                                        <TextBox x:Name="HarvestMaxFileSizeInput" Style="{DynamicResource DevToolsTextInput}"/>
                                                     </StackPanel>
                                                 </StackPanel>
                                             </materialDesign:Card>
@@ -640,12 +642,12 @@
                                                         
                                                         <StackPanel>
                                                             <Label Content="Score Mínimo (0-100)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="HarvestMinScore" Foreground="White"/>
+                                                            <TextBox x:Name="HarvestMinScore" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
                                                         
                                                         <StackPanel Grid.Column="2">
                                                             <Label Content="Top Arquivos (Quantidade)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="HarvestTopDefault" Foreground="White"/>
+                                                            <TextBox x:Name="HarvestTopDefault" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
                                                     </Grid>
                                                 </StackPanel>
@@ -668,18 +670,18 @@
 
                                                         <StackPanel>
                                                             <Label Content="Fan-In (Entradas)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="HarvestWeightFanIn" Foreground="White"/>
+                                                            <TextBox x:Name="HarvestWeightFanIn" Style="{DynamicResource DevToolsTextInput}"/>
 
                                                             <Label Content="Densidade de Keywords" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,20,0,6"/>
-                                                            <TextBox x:Name="HarvestWeightDensity" Foreground="White"/>
+                                                            <TextBox x:Name="HarvestWeightDensity" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="2">
                                                             <Label Content="Fan-Out (Saídas)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="HarvestWeightFanOut" Foreground="White"/>
+                                                            <TextBox x:Name="HarvestWeightFanOut" Style="{DynamicResource DevToolsTextInput}"/>
 
                                                             <Label Content="Penalidade Dead Code" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,20,0,6"/>
-                                                            <TextBox x:Name="HarvestWeightDeadCode" Foreground="White"/>
+                                                            <TextBox x:Name="HarvestWeightDeadCode" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
                                                     </Grid>
                                                 </StackPanel>
@@ -765,17 +767,17 @@
 
                                                         <StackPanel>
                                                             <Label Content="Nome da Categoria" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
-                                                            <TextBox x:Name="OrgCatName" Foreground="White"/>
+                                                            <TextBox x:Name="OrgCatName" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
 
                                                         <StackPanel Margin="0,16,0,0">
                                                             <Label Content="Nome da Pasta Destino" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
-                                                            <TextBox x:Name="OrgCatFolder" Foreground="White"/>
+                                                            <TextBox x:Name="OrgCatFolder" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
 
                                                         <StackPanel Margin="0,16,0,0">
                                                             <Label Content="Palavras-Chave (separadas por vírgula)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
-                                                            <TextBox x:Name="OrgCatKeywords" Foreground="White" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
+                                                            <TextBox x:Name="OrgCatKeywords" Style="{DynamicResource DevToolsTextInput}" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
                                                         </StackPanel>
                                                     </StackPanel>
                                                 </materialDesign:Card>
@@ -838,12 +840,12 @@
 
                                                 <StackPanel>
                                                     <Label Content="Nome Completo do DbContext (ex: MyApp.Data.AppDbContext)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                    <TextBox x:Name="MigContextInput" Foreground="White" FontFamily="Consolas"/>
+                                                    <TextBox x:Name="MigContextInput" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                 </StackPanel>
 
                                                 <StackPanel Margin="0,20,0,0">
                                                     <Label Content="Argumentos Adicionais (dotnet ef ...)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                    <TextBox x:Name="MigArgsInput" Foreground="White" FontFamily="Consolas"/>
+                                                    <TextBox x:Name="MigArgsInput" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </materialDesign:Card>
@@ -896,12 +898,12 @@
 
                                                 <StackPanel>
                                                     <Label Content="Auth Token (Opcional - via --authtoken)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                    <TextBox x:Name="NgrokAuthTokenInput" Foreground="White" FontFamily="Consolas"/>
+                                                    <TextBox x:Name="NgrokAuthTokenInput" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                 </StackPanel>
 
                                                 <StackPanel Margin="0,20,0,0">
                                                     <Label Content="Argumentos Adicionais" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
-                                                    <TextBox x:Name="NgrokArgsInput" Foreground="White" FontFamily="Consolas"/>
+                                                    <TextBox x:Name="NgrokArgsInput" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </materialDesign:Card>

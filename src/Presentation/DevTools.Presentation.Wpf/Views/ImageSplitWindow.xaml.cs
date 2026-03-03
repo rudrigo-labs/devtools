@@ -141,6 +141,16 @@ public partial class ImageSplitWindow : Window
 
     private bool ValidateInputs(out string errorMessage)
     {
+        var missing = new List<string>();
+        if (string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath))
+            missing.Add("Imagem de Entrada");
+
+        if (missing.Count > 0)
+        {
+            errorMessage = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
+            return false;
+        }
+
         if (string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath))
         {
             errorMessage = "Por favor, selecione uma imagem de entrada.";

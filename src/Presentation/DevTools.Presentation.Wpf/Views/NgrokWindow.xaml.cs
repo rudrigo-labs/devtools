@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -56,15 +56,15 @@ public partial class NgrokWindow : Window
             }
             else
             {
-                // Ngrok pode não estar rodando
+                // Ngrok pode nÃ£o estar rodando
                 TunnelsList.ItemsSource = null;
                 EmptyStateText.Visibility = Visibility.Visible;
-                MainFrame.StatusText = "Ngrok inativo ou API inacessível";
+                MainFrame.StatusText = "Ngrok inativo ou API inacessÃ­vel";
             }
         }
         catch
         {
-            // Ignora erros de conexão silenciosamente no timer
+            // Ignora erros de conexÃ£o silenciosamente no timer
         }
     }
 
@@ -72,6 +72,12 @@ public partial class NgrokWindow : Window
     {
         var startButton = MainFrame.PrimaryButton;
         if (startButton == null) return;
+
+        if (string.IsNullOrWhiteSpace(PortInput.Text))
+        {
+            UiMessageService.ShowError("Os campos abaixo nÃ£o podem ficar em branco:\n- Porta Local", "Erro de ValidaÃ§Ã£o");
+            return;
+        }
 
         if (int.TryParse(PortInput.Text, out int port))
         {
@@ -107,13 +113,13 @@ public partial class NgrokWindow : Window
         }
         else
         {
-            UiMessageService.ShowError("Porta inválida!", "Erro");
+            UiMessageService.ShowError("Porta inválida.", "Erro de Validacao");
         }
     }
 
     private async void KillAll_Click(object sender, RoutedEventArgs e)
     {
-        if (UiMessageService.Confirm("Isso fechará TODOS os túneis Ngrok abertos. Continuar?", "Confirmar"))
+        if (UiMessageService.Confirm("Isso fecharÃ¡ TODOS os tÃºneis Ngrok abertos. Continuar?", "Confirmar"))
         {
             var request = new NgrokRequest(NgrokAction.KillAll);
             await _engine.ExecuteAsync(request);
@@ -131,7 +137,7 @@ public partial class NgrokWindow : Window
         if (sender is System.Windows.Controls.Button btn && btn.Tag is string url)
         {
             System.Windows.Clipboard.SetText(url);
-            // Feedback visual rápido seria legal, mas tooltip serve
+            // Feedback visual rÃ¡pido seria legal, mas tooltip serve
         }
     }
 
@@ -169,3 +175,5 @@ public partial class NgrokWindow : Window
         _settingsService.Save();
     }
 }
+
+

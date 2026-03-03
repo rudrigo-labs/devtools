@@ -53,34 +53,7 @@ namespace DevTools.Presentation.Wpf.Views
 
         private async void CloudUploadNoteButton_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(NotesContent.Text)) return;
-
-            try
-            {
-                var settings = GetGDriveSettings();
-                if (!settings.IsEnabled) return;
-
-                UiMessageService.ShowInfo("Subindo nota para o Google Drive...", "Google Drive");
-                
-                string safeTitle = string.IsNullOrWhiteSpace(NoteTitle.Text) ? "NotaSemTitulo" : NoteTitle.Text;
-                // Remove caracteres inválidos para nome de arquivo
-                foreach (char c in Path.GetInvalidFileNameChars())
-                {
-                    safeTitle = safeTitle.Replace(c, '_');
-                }
-                
-                var notesSettings = GetNotesSettings();
-                string extension = notesSettings.DefaultFormat ?? ".txt";
-                string fileName = $"{safeTitle}{extension}";
-
-                await _googleDriveService.UploadNoteAsync(NotesContent.Text, fileName, settings);
-                
-                UiMessageService.ShowInfo($"Nota '{fileName}' sincronizada com sucesso!", "Google Drive");
-            }
-            catch (Exception ex)
-            {
-                UiMessageService.ShowError($"Erro ao subir nota: {ex.Message}", "Erro Upload");
-            }
+            await UploadCurrentNoteAsync(showSuccessMessage: true);
         }
 
         private async void CloudSyncButton_Click(object sender, RoutedEventArgs e)
@@ -90,7 +63,7 @@ namespace DevTools.Presentation.Wpf.Views
                 var settings = GetGDriveSettings();
                 if (!settings.IsEnabled) return;
 
-                UiMessageService.ShowInfo("Sincronizando todas as notas com o Google Drive...", "Google Drive");
+                UiMessageService.ShowInfo("Sincronizando notas com o Google Drive...", "Google Drive");
                 
                 var notesSettings = GetNotesSettings();
                 string storagePath = string.IsNullOrEmpty(notesSettings.StoragePath) ? _settings.Settings.NotesStoragePath : notesSettings.StoragePath;
@@ -108,9 +81,8 @@ namespace DevTools.Presentation.Wpf.Views
                     return;
                 }
 
-                // Carregar conteúdo de cada nota e concatenar para um único arquivo de backup
-                var allNotesContent = new System.Text.StringBuilder();
-                allNotesContent.AppendLine($"=== BACKUP CONSOLIDADO - {DateTime.Now:dd/MM/yyyy HH:mm:ss} ===\n");
+                int synced = 0;
+                int failed = 0;
 
                 foreach (var item in listResult.Value.ListResult.Items)
                 {
@@ -122,17 +94,22 @@ namespace DevTools.Presentation.Wpf.Views
                     var readResult = await _engine.ExecuteAsync(readRequest);
                     if (readResult.IsSuccess && readResult.Value?.ReadResult != null)
                     {
-                        allNotesContent.AppendLine($"--- TITULO: {item.Title} ---");
-                        allNotesContent.AppendLine($"ARQUIVO: {item.FileName}");
-                        allNotesContent.AppendLine($"ATUALIZADO EM: {item.UpdatedUtc}");
-                        allNotesContent.AppendLine(readResult.Value.ReadResult.Content);
-                        allNotesContent.AppendLine("\n" + new string('=', 40) + "\n");
+                        try
+                        {
+                            await _googleDriveService.UploadNoteAsync(
+                                readResult.Value.ReadResult.Content ?? string.Empty,
+                                item.FileName,
+                                settings);
+                            synced++;
+                        }
+                        catch
+                        {
+                            failed++;
+                        }
                     }
                 }
-
-                await _googleDriveService.UploadNoteAsync(allNotesContent.ToString(), "DevTools_All_Notes_Consolidated.txt", settings);
                 
-                UiMessageService.ShowInfo("Sincronização concluída com sucesso!", "Google Drive");
+                UiMessageService.ShowInfo($"Sincronização concluída. Sucesso: {synced} | Falhas: {failed}", "Google Drive");
             }
             catch (Exception ex)
             {
@@ -219,6 +196,7 @@ namespace DevTools.Presentation.Wpf.Views
 
             var notesSettings = GetNotesSettings();
             string storagePath = string.IsNullOrEmpty(notesSettings.StoragePath) ? _settings.Settings.NotesStoragePath : notesSettings.StoragePath;
+            bool useMarkdown = string.Equals(NormalizeExtension(notesSettings.DefaultFormat), ".md", StringComparison.OrdinalIgnoreCase);
 
             var action = _currentNoteKey == null ? NotesAction.CreateItem : NotesAction.SaveNote; 
             
@@ -227,16 +205,20 @@ namespace DevTools.Presentation.Wpf.Views
                 NotesRootPath: storagePath,
                 Title: NoteTitle.Text,
                 Content: NotesContent.Text,
-                NoteKey: _currentNoteKey 
+                NoteKey: _currentNoteKey,
+                UseMarkdown: useMarkdown
             );
 
             var result = await _engine.ExecuteAsync(request);
             if (result.IsSuccess)
             {
+                // Atualiza key local para uploads individuais consistentes
+                _currentNoteKey = result.Value?.CreateResult?.FileName ?? result.Value?.WriteResult?.Key ?? _currentNoteKey;
+
                 // Backup automático na nuvem se habilitado
                 if (notesSettings.AutoCloudSync)
                 {
-                    CloudUploadNoteButton_Click(this, new RoutedEventArgs());
+                    _ = UploadCurrentNoteAsync(showSuccessMessage: false);
                 }
 
                 ShowEditMode(false);
@@ -322,6 +304,59 @@ namespace DevTools.Presentation.Wpf.Views
         {
             ListGrid.Visibility = edit ? Visibility.Collapsed : Visibility.Visible;
             EditGrid.Visibility = edit ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private async Task UploadCurrentNoteAsync(bool showSuccessMessage)
+        {
+            if (string.IsNullOrWhiteSpace(NotesContent.Text))
+                return;
+
+            try
+            {
+                var settings = GetGDriveSettings();
+                if (!settings.IsEnabled)
+                    return;
+
+                var notesSettings = GetNotesSettings();
+                string fileName = ResolveUploadFileName(notesSettings);
+
+                if (showSuccessMessage)
+                    UiMessageService.ShowInfo("Subindo nota para o Google Drive...", "Google Drive");
+
+                await _googleDriveService.UploadNoteAsync(NotesContent.Text, fileName, settings);
+
+                if (showSuccessMessage)
+                    UiMessageService.ShowInfo($"Nota '{fileName}' sincronizada com sucesso!", "Google Drive");
+            }
+            catch (Exception ex)
+            {
+                UiMessageService.ShowError($"Erro ao subir nota: {ex.Message}", "Erro Upload");
+            }
+        }
+
+        private string ResolveUploadFileName(NotesSettings notesSettings)
+        {
+            if (!string.IsNullOrWhiteSpace(_currentNoteKey))
+            {
+                var keyFileName = Path.GetFileName(_currentNoteKey);
+                if (!string.IsNullOrWhiteSpace(keyFileName))
+                    return keyFileName;
+            }
+
+            string safeTitle = string.IsNullOrWhiteSpace(NoteTitle.Text) ? "NotaSemTitulo" : NoteTitle.Text;
+            foreach (char c in Path.GetInvalidFileNameChars())
+                safeTitle = safeTitle.Replace(c, '_');
+
+            string extension = NormalizeExtension(notesSettings.DefaultFormat);
+            return $"{safeTitle}{extension}";
+        }
+
+        private static string NormalizeExtension(string? extension)
+        {
+            if (string.Equals(extension, ".md", StringComparison.OrdinalIgnoreCase))
+                return ".md";
+
+            return ".txt";
         }
     }
 }

@@ -198,6 +198,7 @@ public class ProfileUIService
             { 
                 Text = value,
                 Tag = key,
+                Style = (Style)Application.Current.FindResource("DevToolsTextInput"),
                 Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("PrimaryTextBrush")
             };
             container.Children.Add(textBox);
@@ -237,6 +238,7 @@ public class ProfileUIService
         {
             Text = options.TryGetValue(key, out var val) ? val : "",
             Tag = key,
+            Style = (Style)Application.Current.FindResource("DevToolsTextInput"),
             Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("PrimaryTextBrush")
         };
         stack.Children.Add(textBox);

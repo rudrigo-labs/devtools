@@ -172,6 +172,22 @@ public partial class MigrationsWindow : Window
             _ => DatabaseProvider.SqlServer
         };
 
+        var missing = new List<string>();
+        if (string.IsNullOrWhiteSpace(root))
+            missing.Add("Diretório do Projeto");
+        if (string.IsNullOrWhiteSpace(startup))
+            missing.Add("Diretório do Startup Project");
+        if (action == MigrationsAction.AddMigration && string.IsNullOrWhiteSpace(migrationName))
+            missing.Add("Nome da Migration");
+        if (string.IsNullOrWhiteSpace(DbContextInput.Text))
+            missing.Add("Nome completo do DbContext");
+
+        if (missing.Count > 0)
+        {
+            errorMessage = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
+            return false;
+        }
+
         if (string.IsNullOrWhiteSpace(root) || string.IsNullOrWhiteSpace(startup))
         {
             errorMessage = "Selecione os diretórios do Projeto e do Startup Project.";
