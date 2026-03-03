@@ -28,7 +28,7 @@
 
                 <!-- Termo de Busca -->
                 <StackPanel Margin="0,0,0,15">
-                    <TextBlock Text="Texto para buscar" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                    <TextBlock Text="Texto para buscar" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,5"/>
                     <TextBox x:Name="SearchTextInput" Style="{StaticResource ModernTextBoxStyle}" />
                 </StackPanel>
 
@@ -46,18 +46,18 @@
                     </Grid.ColumnDefinitions>
                     
                     <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                        <TextBlock Text="Incluir (glob patterns)" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                        <TextBlock Text="Incluir (glob patterns)" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,5"/>
                         <TextBox x:Name="IncludePatternInput" ToolTip="Ex: *.cs, *.ts" Style="{StaticResource ModernTextBoxStyle}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                        <TextBlock Text="Excluir (glob patterns)" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                        <TextBlock Text="Excluir (glob patterns)" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,5"/>
                         <TextBox x:Name="ExcludePatternInput" ToolTip="Ex: bin, obj, node_modules" Style="{StaticResource ModernTextBoxStyle}"/>
                     </StackPanel>
                 </Grid>
 
                 <!-- Output Area -->
-                <Expander Header="Resultados" IsExpanded="True" BorderBrush="{DynamicResource BorderBrush}">
+                <Expander Header="Resultados" IsExpanded="True" BorderBrush="{StaticResource BorderBrush}">
                     <TextBox x:Name="OutputText" 
                              Height="120" 
                              TextWrapping="Wrap" 

@@ -3,6 +3,14 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components">
     
+    <!-- Tamanhos de fonte (devem estar disponíveis antes dos estilos que os utilizam) -->
+    <sys:Double x:Key="DevToolsFontSize.WindowTitle">18</sys:Double>
+    <sys:Double x:Key="DevToolsFontSize.SectionTitle">14</sys:Double>
+    <sys:Double x:Key="DevToolsFontSize.Label">14</sys:Double>
+    <sys:Double x:Key="DevToolsFontSize.Input">14</sys:Double>
+    <sys:Double x:Key="DevToolsFontSize.Button">14</sys:Double>
+    <sys:Double x:Key="DevToolsFontSize.Status">12</sys:Double>
+
     <!-- Palette -->
     <Color x:Key="WindowBackgroundColor">#1E1E1E</Color>
     <Color x:Key="ControlBackgroundColor">#2D2D2D</Color>
@@ -12,6 +20,11 @@
     <Color x:Key="AccentColor">#007ACC</Color>
     <Color x:Key="AccentHoverColor">#0098FF</Color>
     <Color x:Key="ErrorColor">#FF4444</Color>
+    
+    <!-- SAFE NAMESPACE: DevTools.* -->
+    <Color x:Key="DevTools.Color.Border">#4A4A4A</Color>
+    
+    <!-- COMPATIBILITY ALIASES (Deprecated) -->
     <Color x:Key="BorderColor">#333333</Color>
 
     <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}"/>
@@ -21,26 +34,38 @@
     <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}"/>
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
     <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}"/>
+    
+    <!-- SAFE NAMESPACE: DevTools.* -->
+    <SolidColorBrush x:Key="DevTools.Brush.Border" Color="{StaticResource DevTools.Color.Border}"/>
+    
+    <!-- COMPATIBILITY ALIASES (Deprecated) -->
     <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+
+    <!-- Garantir BorderBrush padrão para todos os controles para evitar DependencyProperty.UnsetValue -->
+    <Style TargetType="Control">
+        <Setter Property="BorderBrush" Value="{StaticResource DevTools.Brush.Border}"/>
+    </Style>
 
     <!-- Modern Button Style (Primary) -->
     <Style x:Key="ModernButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
         <Setter Property="Foreground" Value="White"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="MinHeight" Value="36"/>
-        <Setter Property="MinWidth" Value="120"/>
-        <Setter Property="Padding" Value="20,10"/>
+        <Setter Property="MinHeight" Value="30"/>
+        <Setter Property="MinWidth" Value="100"/>
+        <Setter Property="Padding" Value="16,6"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Cursor" Value="Hand"/>
+        <!-- ADICIONADO: garante um BorderBrush válido para o TemplatedParent -->
+        <Setter Property="BorderBrush" Value="{StaticResource DevTools.Brush.Border}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="border" Background="{TemplateBinding Background}" 
                             CornerRadius="6" 
                             Padding="{TemplateBinding Padding}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource TemplatedParent}, FallbackValue={StaticResource DevTools.Brush.Border}}"
                             BorderThickness="{TemplateBinding BorderThickness}">
                         <Border.Effect>
                             <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
@@ -130,9 +155,9 @@
         <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource ControlHighlightBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="MinHeight" Value="36"/>
-        <Setter Property="MinWidth" Value="120"/>
-        <Setter Property="Padding" Value="15,8"/>
+        <Setter Property="MinHeight" Value="30"/>
+        <Setter Property="MinWidth" Value="100"/>
+        <Setter Property="Padding" Value="12,6"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
@@ -163,6 +188,8 @@
     <Style x:Key="IconButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}"/>
+        <!-- ADICIONADO: default BorderBrush para evitar UnsetValue em templates -->
+        <Setter Property="BorderBrush" Value="{StaticResource DevTools.Brush.Border}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="5"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -194,13 +221,13 @@
     <Style x:Key="ModernTextBoxStyle" TargetType="{x:Type TextBox}">
         <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}"/>
         <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DevTools.Brush.Border}"/>
         <Setter Property="BorderThickness" Value="1"/>
 
         <!-- conforto + padrão -->
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="MinHeight" Value="40"/>
-        <Setter Property="Padding" Value="12,10"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="MinHeight" Value="30"/>
+        <Setter Property="Padding" Value="8,4"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="CaretBrush" Value="White"/>
 
@@ -287,11 +314,11 @@
         <!-- Padrão visual igual ao TextBox -->
         <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}"/>
         <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DevTools.Brush.Border}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="MinHeight" Value="40"/>
-        <Setter Property="Padding" Value="12,10"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="MinHeight" Value="30"/>
+        <Setter Property="Padding" Value="8,4"/>
         <Setter Property="Cursor" Value="Hand"/>
 
         <Setter Property="Template">
@@ -418,7 +445,7 @@
     <Style x:Key="ToolCardStyle" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource DevToolsTextPrimary}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorder}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DevTools.Brush.Border}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Margin" Value="0,0,15,15"/>
         <Setter Property="Height" Value="140"/>
@@ -571,13 +598,6 @@
     <SolidColorBrush x:Key="DevToolsStatusOk" Color="{StaticResource DevToolsStatusOkColor}"/>
     <SolidColorBrush x:Key="DevToolsStatusError" Color="{StaticResource DevToolsStatusErrorColor}"/>
 
-    <sys:Double x:Key="DevToolsFontSize.WindowTitle">20</sys:Double>
-    <sys:Double x:Key="DevToolsFontSize.SectionTitle">16</sys:Double>
-    <sys:Double x:Key="DevToolsFontSize.Label">16</sys:Double>
-    <sys:Double x:Key="DevToolsFontSize.Input">16</sys:Double>
-    <sys:Double x:Key="DevToolsFontSize.Button">16</sys:Double>
-    <sys:Double x:Key="DevToolsFontSize.Status">12</sys:Double>
-
     <sys:Double x:Key="DevToolsSpacing.LabelToField">8</sys:Double>
     <sys:Double x:Key="DevToolsSpacing.FieldGroup">16</sys:Double>
     <sys:Double x:Key="DevToolsFormMaxWidth">700</sys:Double>
@@ -587,11 +607,11 @@
     <Style x:Key="DevToolsTextInput" TargetType="TextBox">
         <Setter Property="Background" Value="{StaticResource DevToolsWindowBackground}"/>
         <Setter Property="Foreground" Value="{StaticResource DevToolsTextPrimary}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorder}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DevTools.Brush.Border}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="Padding" Value="8,4"/>
         <Setter Property="FontSize" Value="{StaticResource DevToolsFontSize.Input}"/>
-        <Setter Property="MinHeight" Value="36"/>
+        <Setter Property="MinHeight" Value="30"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
@@ -611,11 +631,11 @@
     <Style x:Key="DevToolsSelectInput" TargetType="ComboBox">
         <Setter Property="Background" Value="{StaticResource DevToolsWindowBackground}"/>
         <Setter Property="Foreground" Value="{StaticResource DevToolsTextPrimary}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorder}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DevTools.Brush.Border}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="Padding" Value="8,4"/>
         <Setter Property="FontSize" Value="{StaticResource DevToolsFontSize.Input}"/>
-        <Setter Property="MinHeight" Value="36"/>
+        <Setter Property="MinHeight" Value="30"/>
     </Style>
 
     <!-- DevTools CheckBox -->
@@ -631,9 +651,11 @@
         <Setter Property="Background" Value="{StaticResource DevToolsAccent}"/>
         <Setter Property="Foreground" Value="White"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="20,10"/>
+        <!-- ADICIONADO: default BorderBrush para evitar UnsetValue em templates -->
+        <Setter Property="BorderBrush" Value="{StaticResource DevTools.Brush.Border}"/>
+        <Setter Property="Padding" Value="16,6"/>
         <Setter Property="FontSize" Value="{StaticResource DevToolsFontSize.Button}"/>
-        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="MinHeight" Value="30"/>
         <Setter Property="MinWidth" Value="{StaticResource DevToolsActionButtonWidth}"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
@@ -664,11 +686,11 @@
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource DevToolsTextPrimary}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorder}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DevTools.Brush.Border}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="18,9"/>
+        <Setter Property="Padding" Value="12,6"/>
         <Setter Property="FontSize" Value="{StaticResource DevToolsFontSize.Button}"/>
-        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="MinHeight" Value="30"/>
         <Setter Property="MinWidth" Value="{StaticResource DevToolsActionButtonWidth}"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
@@ -699,7 +721,7 @@
     <Style x:Key="DevToolsCardButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource DevToolsTextPrimary}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorder}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DevTools.Brush.Border}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="0"/>
         <Setter Property="Margin" Value="10"/>
@@ -748,7 +770,7 @@
                         <Border Grid.Row="0"
                                 x:Name="PART_Header"
                                 Background="{StaticResource DevToolsSurface}"
-                                BorderBrush="{StaticResource DevToolsBorder}"
+                                BorderBrush="{StaticResource DevTools.Brush.Border}"
                                 BorderThickness="0,0,0,1"
                                 Padding="20,14">
                             <DockPanel>
@@ -776,7 +798,7 @@
                         <!-- Action Bar -->
                         <Border Grid.Row="2"
                                 Background="{StaticResource DevToolsSurface}"
-                                BorderBrush="{StaticResource DevToolsBorder}"
+                                BorderBrush="{StaticResource DevTools.Brush.Border}"
                                 BorderThickness="0,1,0,0"
                                 Padding="20,10">
                             <Grid IsSharedSizeScope="True">

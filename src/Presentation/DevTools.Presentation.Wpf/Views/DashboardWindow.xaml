@@ -11,35 +11,40 @@
         ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
-        <SolidColorBrush x:Key="SidebarBackground" Color="#252526"/>
-        <SolidColorBrush x:Key="ContentBackground" Color="#1E1E1E"/>
-        <SolidColorBrush x:Key="BorderColor" Color="#3F3F46"/>
-        <SolidColorBrush x:Key="AccentColor" Color="#007ACC"/>
-        
-        <Style TargetType="Button" x:Key="SidebarButtonStyle">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#CCCCCC"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Padding" Value="15,0,0,0"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}">
-                            <ContentPresenter VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#3E3E42"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Theme/DarkTheme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            
+            <SolidColorBrush x:Key="SidebarBackground" Color="#252526"/>
+            <SolidColorBrush x:Key="ContentBackground" Color="#1E1E1E"/>
+            <SolidColorBrush x:Key="AccentColor" Color="#007ACC"/>
+            
+            <Style TargetType="Button" x:Key="SidebarButtonStyle">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="#CCCCCC"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Height" Value="40"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="Padding" Value="15,0,0,0"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}">
+                                <ContentPresenter VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#3E3E42"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
     </Window.Resources>
 
     <materialDesign:DialogHost x:Name="RootDialog" Identifier="RootDialog" DialogTheme="Dark">
@@ -68,7 +73,7 @@
         </materialDesign:DialogHost.DialogContent>
 
         <Border Background="{StaticResource ContentBackground}" 
-            BorderBrush="{StaticResource BorderColor}" 
+            BorderBrush="{StaticResource DevTools.Brush.Border}" 
             BorderThickness="1" 
             CornerRadius="8">
             <Grid>
@@ -107,31 +112,58 @@
                     </Grid.RowDefinitions>
 
                     <!-- Window Drag/Close -->
-                    <Grid Grid.Row="0" Background="Transparent">
-                        <Button HorizontalAlignment="Right" Click="CloseButton_Click"
-                            Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="12"
-                            Width="40" Height="40" Background="Transparent" Foreground="#999999"
-                            BorderThickness="0">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}">
-                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#C42B1C"/>
-                                                        <Setter Property="Foreground" Value="White"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </Button.Style>
-                        </Button>
+                    <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Click="MinimizeButton_Click"
+                                Content="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                Width="40" Height="40" Background="Transparent" Foreground="#999999"
+                                BorderThickness="0">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#3E3E42"/>
+                                                            <Setter Property="Foreground" Value="White"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
+                            <Button Click="CloseButton_Click"
+                                Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                Width="40" Height="40" Background="Transparent" Foreground="#999999"
+                                BorderThickness="0">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#C42B1C"/>
+                                                            <Setter Property="Foreground" Value="White"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
                     </Grid>
 
                     <!-- Dynamic Content Area -->
@@ -191,7 +223,7 @@
                                 <TextBlock DockPanel.Dock="Top" Text="Centro de Execuções" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
 
                                 <!-- Detalhes / Logs (Bottom) -->
-                                <Expander DockPanel.Dock="Bottom" Header="Detalhes / Logs" Margin="0,10,0,0" IsExpanded="True" BorderBrush="{StaticResource BorderColor}">
+                                <Expander DockPanel.Dock="Bottom" Header="Detalhes / Logs" Margin="0,10,0,0" IsExpanded="True" BorderBrush="{StaticResource DevTools.Brush.Border}">
                                     <TextBox Text="{Binding SelectedItem.Logs, ElementName=JobsDataGrid, Mode=OneWay}" 
                                          Height="150" 
                                          Background="#1E1E1E" 
@@ -314,7 +346,7 @@
                                         </Grid.ColumnDefinitions>
 
                                         <!-- Lista de Perfis -->
-                                        <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,1,0" Padding="0,0,10,0">
+                                        <Border BorderBrush="{StaticResource DevTools.Brush.Border}" BorderThickness="0" Padding="0,0,10,0">
                                             <DockPanel>
                                                 <Button DockPanel.Dock="Bottom" Content="+ Novo Perfil" Style="{StaticResource SecondaryButtonStyle}" 
                                                     Height="35" Margin="0,10,0,0" Click="AddSshProfile_Click"/>
@@ -547,7 +579,7 @@
                                         </Grid.ColumnDefinitions>
 
                                         <!-- Lista de Categorias -->
-                                        <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,1,0" Padding="0,0,10,0">
+                                        <Border BorderBrush="{StaticResource DevTools.Brush.Border}" BorderThickness="0" Padding="0,0,10,0">
                                             <DockPanel>
                                                 <Button DockPanel.Dock="Bottom" Content="+ Nova Categoria" Style="{StaticResource SecondaryButtonStyle}" 
                                                     Height="35" Margin="0,10,0,0" Click="AddOrganizerCategory_Click"/>

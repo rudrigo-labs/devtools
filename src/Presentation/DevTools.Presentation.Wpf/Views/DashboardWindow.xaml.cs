@@ -97,7 +97,18 @@ public partial class DashboardWindow : Window
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
-        Hide();
+        this.Hide();
+    }
+
+    private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+    {
+        this.WindowState = WindowState.Minimized;
+    }
+
+    private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton == MouseButton.Left)
+            this.DragMove();
     }
 
     private void DialogNoButton_Click(object sender, RoutedEventArgs e)
