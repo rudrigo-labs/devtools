@@ -9,45 +9,47 @@ using DevTools.Snapshot.Models;
 using DevTools.Core.Models;
 using Microsoft.Win32;
 
+using DevTools.Core.Configuration;
+
 namespace DevTools.Presentation.Wpf.Views;
 
 public partial class SnapshotWindow : Window
 {
     private readonly JobManager _jobManager;
     private readonly SettingsService _settingsService;
+    private readonly ProfileManager _profileManager;
+    private ToolProfile? _currentProfile;
 
-    public SnapshotWindow(JobManager jobManager, SettingsService settingsService)
+    public SnapshotWindow(JobManager jobManager, SettingsService settingsService, ProfileManager profileManager)
     {
         InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
+        _profileManager = profileManager;
 
-        /* Position handled by TrayService
-        if (_settingsService.Settings.SnapshotWindowTop.HasValue)
+        Loaded += OnLoaded;
+    }
+
+    // Construtor para o Designer
+    public SnapshotWindow()
+    {
+        InitializeComponent();
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        // Tentar carregar perfil padrão
+        _currentProfile = _profileManager?.GetDefaultProfile("Snapshot");
+        if (_currentProfile != null)
         {
-            Top = _settingsService.Settings.SnapshotWindowTop.Value;
-            Left = _settingsService.Settings.SnapshotWindowLeft.Value;
+            if (_currentProfile.Options.TryGetValue("project-path", out var proj)) RootPathSelector.SelectedPath = proj;
         }
         else
         {
-            var screen = SystemParameters.WorkArea;
-            Left = screen.Right - Width - 20;
-            Top = screen.Bottom - Height - 20;
+            // Fallback para configurações salvas anteriormente
+            if (!string.IsNullOrEmpty(_settingsService?.Settings.LastSnapshotRootPath))
+                RootPathSelector.SelectedPath = _settingsService.Settings.LastSnapshotRootPath;
         }
-
-        var workArea = SystemParameters.WorkArea;
-        if (Top < 0 || Top > workArea.Height) Top = workArea.Height - Height - 20;
-        if (Left < 0 || Left > workArea.Width) Left = workArea.Width - Width - 20;
-        */
-
-        /*
-        Closed += (s, e) =>
-        {
-            _settingsService.Settings.SnapshotWindowTop = Top;
-            _settingsService.Settings.SnapshotWindowLeft = Left;
-            _settingsService.Save();
-        };
-        */
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -77,6 +79,13 @@ public partial class SnapshotWindow : Window
 
         _settingsService.Settings.LastSnapshotRootPath = root;
         _settingsService.Save();
+
+        // Sincronizar com o perfil padrão se estiver em uso
+        if (_currentProfile != null)
+        {
+            _currentProfile.Options["project-path"] = root ?? "";
+            _profileManager.SaveProfile("Snapshot", _currentProfile);
+        }
 
         _jobManager.StartJob("Snapshot", async (reporter, ct) =>
         {

@@ -7,6 +7,7 @@ using DevTools.Rename.Engine;
 using DevTools.Rename.Models;
 using System.Collections.Generic;
 using DevTools.Core.Models;
+using DevTools.Core.Configuration;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -14,51 +15,37 @@ public partial class RenameWindow : Window
 {
     private readonly JobManager _jobManager;
     private readonly SettingsService _settingsService;
+    private readonly ProfileManager _profileManager;
+    private ToolProfile? _currentProfile;
 
-    public RenameWindow(JobManager jobManager, SettingsService settingsService)
-    {
-        InitializeComponent();
+    public RenameWindow(JobManager jobManager, SettingsService settingsService, ProfileManager profileManager)
+    {        InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
-        
-        if (!string.IsNullOrEmpty(_settingsService.Settings.LastRenameRootPath))
-            RootPathSelector.SelectedPath = _settingsService.Settings.LastRenameRootPath;
+        _profileManager = profileManager;
 
-        if (!string.IsNullOrEmpty(_settingsService.Settings.LastRenameInclude))
-            IncludeBox.Text = _settingsService.Settings.LastRenameInclude;
-            
-        if (!string.IsNullOrEmpty(_settingsService.Settings.LastRenameExclude))
-            ExcludeBox.Text = _settingsService.Settings.LastRenameExclude;
+        Loaded += OnLoaded;
+    }
 
-        if (_settingsService.Settings.LastRenameDryRun.HasValue)
-            DryRunCheck.IsChecked = _settingsService.Settings.LastRenameDryRun.Value;
+    // Construtor para o Designer
+    public RenameWindow()
+    {        InitializeComponent();
+    }
 
-        /* Position handled by TrayService
-        if (_settingsService.Settings.RenameWindowTop.HasValue)
-        {
-            Top = _settingsService.Settings.RenameWindowTop.Value;
-            Left = _settingsService.Settings.RenameWindowLeft.Value;
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {        // Tentar carregar perfil padrão
+        _currentProfile = _profileManager?.GetDefaultProfile("Rename");
+        if (_currentProfile != null)
+        {            if (_currentProfile.Options.TryGetValue("old-text", out var old)) OldTextBox.Text = old;
+            if (_currentProfile.Options.TryGetValue("new-text", out var newText)) NewTextBox.Text = newText;
+            if (_currentProfile.Options.TryGetValue("include", out var inc)) IncludeBox.Text = inc;
+            if (_currentProfile.Options.TryGetValue("exclude", out var exc)) ExcludeBox.Text = exc;
         }
         else
-        {
-            var screen = SystemParameters.WorkArea;
-            Left = screen.Right - Width - 20;
-            Top = screen.Bottom - Height - 20;
+        {            // Fallback para configurações salvas anteriormente (comportamento original)
+            if (!string.IsNullOrEmpty(_settingsService?.Settings.LastRenameRootPath))
+                RootPathSelector.SelectedPath = _settingsService.Settings.LastRenameRootPath;
         }
-
-        var workArea = SystemParameters.WorkArea;
-        if (Top < 0 || Top > workArea.Height) Top = workArea.Height - Height - 20;
-        if (Left < 0 || Left > workArea.Width) Left = workArea.Width - Width - 20;
-        */
-
-        /*
-        Closed += (s, e) =>
-        {
-            _settingsService.Settings.RenameWindowTop = Top;
-            _settingsService.Settings.RenameWindowLeft = Left;
-            _settingsService.Save();
-        };
-        */
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -95,6 +82,16 @@ public partial class RenameWindow : Window
             _settingsService.Settings.LastRenameExclude = exclude;
             _settingsService.Settings.LastRenameDryRun = dryRun;
             _settingsService.Save();
+
+            // Sincronizar com o perfil padrão se estiver em uso
+            if (_currentProfile != null)
+            {
+                _currentProfile.Options["old-text"] = oldText ?? "";
+                _currentProfile.Options["new-text"] = newText ?? "";
+                _currentProfile.Options["include"] = include ?? "";
+                _currentProfile.Options["exclude"] = exclude ?? "";
+                _profileManager.SaveProfile("Rename", _currentProfile);
+            }
         }
 
         var request = new RenameRequest(

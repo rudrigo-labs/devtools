@@ -15,17 +15,22 @@ public partial class SshTunnelWindow : Window
     private readonly JobManager _jobManager;
     private readonly SettingsService _settingsService;
     private readonly ConfigService _configService;
+    private readonly ProfileManager _profileManager;
     private readonly TunnelService _tunnelService;
+    private ToolProfile? _currentProfile;
     
-    public SshTunnelWindow(JobManager jobManager, SettingsService settingsService, ConfigService configService)
+    public SshTunnelWindow(JobManager jobManager, SettingsService settingsService, ConfigService configService, ProfileManager profileManager)
     {
         InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
         _configService = configService;
+        _profileManager = profileManager;
         
         // Inicializa serviços do SSH Tunnel
         _tunnelService = new TunnelService(new SystemProcessRunner());
+
+        Loaded += OnLoaded;
 
         // Monitora fechamento para salvar posição
         Closing += (s, e) => SavePosition();
@@ -35,6 +40,20 @@ public partial class SshTunnelWindow : Window
         timer.Tick += (s, e) => UpdateStatusUI();
         timer.Interval = TimeSpan.FromSeconds(1);
         timer.Start();
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        // Tentar carregar perfil padrão
+        _currentProfile = _profileManager?.GetDefaultProfile("SSHTunnel");
+        if (_currentProfile != null)
+        {
+            LoadProfile(_currentProfile);
+        }
+        else
+        {
+            // Fallback para configurações salvas anteriormente se houver (opcional)
+        }
     }
 
     private void LoadProfile(ToolProfile profile)
@@ -49,18 +68,16 @@ public partial class SshTunnelWindow : Window
         if (profile.Options.TryGetValue("remote-port", out var remotePort)) RemotePortInput.Text = remotePort;
     }
 
-    private Dictionary<string, string> GetCurrentOptions()
+    private void UpdateProfileFromUi(ToolProfile profile)
     {
-        var options = new Dictionary<string, string>();
-        options["ssh-host"] = SshHostInput.Text;
-        options["ssh-port"] = SshPortInput.Text;
-        options["ssh-user"] = SshUserInput.Text;
-        options["identity-file"] = IdentityFileInput.Text;
-        options["local-bind"] = LocalBindInput.Text;
-        options["local-port"] = LocalPortInput.Text;
-        options["remote-host"] = RemoteHostInput.Text;
-        options["remote-port"] = RemotePortInput.Text;
-        return options;
+        profile.Options["ssh-host"] = SshHostInput.Text;
+        profile.Options["ssh-port"] = SshPortInput.Text;
+        profile.Options["ssh-user"] = SshUserInput.Text;
+        profile.Options["identity-file"] = IdentityFileInput.Text;
+        profile.Options["local-bind"] = LocalBindInput.Text;
+        profile.Options["local-port"] = LocalPortInput.Text;
+        profile.Options["remote-host"] = RemoteHostInput.Text;
+        profile.Options["remote-port"] = RemotePortInput.Text;
     }
 
     private async void ToggleTunnel_Click(object sender, RoutedEventArgs e)
@@ -85,6 +102,13 @@ public partial class SshTunnelWindow : Window
             {
                 UiMessageService.ShowError("Host SSH é obrigatório.", "Erro");
                 return;
+            }
+
+            // Sincronizar com o perfil padrão se estiver em uso
+            if (_currentProfile != null)
+            {
+                UpdateProfileFromUi(_currentProfile);
+                _profileManager.SaveProfile("SSHTunnel", _currentProfile);
             }
 
             primaryButton.IsEnabled = false;

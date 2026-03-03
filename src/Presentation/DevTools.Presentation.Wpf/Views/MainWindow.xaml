@@ -17,6 +17,8 @@
             <SolidColorBrush x:Key="ContentBackground" Color="#1E1E1E"/>
             <SolidColorBrush x:Key="AccentColor" Color="#007ACC"/>
             
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            
             <Style TargetType="Button" x:Key="SidebarButtonStyle">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="#CCCCCC"/>
@@ -91,7 +93,7 @@
                         <Button Content="Execuções (Jobs)" Style="{DynamicResource SidebarButtonStyle}" Tag="Jobs" Click="NavButton_Click" Margin="0,0,0,5"/>
                         <Button Content="Configurações" Style="{DynamicResource SidebarButtonStyle}" Tag="Settings" Click="NavButton_Click" Margin="0,0,0,20"/>
 
-                        <Button Content="Minimizar para Bandeja" Style="{DynamicResource SidebarButtonStyle}" Click="CloseButton_Click" Margin="0,0,0,5"/>
+                        <Button Content="Minimizar para Bandeja" Style="{DynamicResource SidebarButtonStyle}" Click="MinimizeToTray_Click" Margin="0,0,0,5"/>
                         <Button Content="Encerrar"
                             Style="{DynamicResource SidebarButtonStyle}"
                             Foreground="#E81123"
@@ -295,33 +297,54 @@
                         <TabItem x:Name="TabSettings">
                             <Grid>
                                 <!-- Lista de Configurações (Cards) -->
-                                <StackPanel x:Name="SettingsListPanel" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,10">
-                                    <TextBlock Text="Configurações do Projeto" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
-                                    <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
-                                        <!-- Card: SSH -->
-                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.SSHTunnel}" Content="Túnel SSH" 
-                                            ToolTip="Gerenciar perfis e chaves SSH" Width="200" Click="OpenSshSettings_Click"/>
+                                <ScrollViewer x:Name="SettingsListPanel" VerticalScrollBarVisibility="Auto">
+                                    <StackPanel Margin="0,10">
+                                        <TextBlock Text="Configurações do Projeto" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
 
-                                        <!-- Card: Harvest -->
-                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Harvest}" Content="Harvest" 
-                                            ToolTip="Configurar regras de extração e IA" Width="200" Click="OpenHarvestSettings_Click"/>
+                                        <!-- Seção: Configurações Gerais -->
+                                        <TextBlock Text="Configurações Gerais" FontSize="18" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
+                                        <WrapPanel Orientation="Horizontal" Margin="0,0,-15,20">
+    
 
-                                        <!-- Card: Organizer -->
-                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Organizer}" Content="Organizer" 
-                                            ToolTip="Categorias e regras de organização" Width="200" Click="OpenOrganizerSettings_Click"/>
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Harvest}" Content="Harvest" 
+                                                ToolTip="Configurar regras de extração e IA" Width="200" Click="OpenHarvestSettings_Click"/>
 
-                                        <!-- Card: Migrations -->
-                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="Migrations" 
-                                            ToolTip="Caminhos e contextos do EF Core" Width="200" Click="OpenMigrationsSettings_Click"/>
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Organizer}" Content="Organizer" 
+                                                ToolTip="Categorias e regras de organização" Width="200" Click="OpenOrganizerSettings_Click"/>
 
-                                        <!-- Card: Ngrok -->
-                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Ngrok}" Content="Ngrok" 
-                                            ToolTip="Caminho do executável e token" Width="200" Click="OpenNgrokSettings_Click"/>
-                                    </WrapPanel>
-                                </StackPanel>
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="Migrations" 
+                                                ToolTip="Caminhos e contextos do EF Core" Width="200" Click="OpenMigrationsSettings_Click"/>
 
-                                <!-- Painel: Configuração SSH -->
-                                <Grid x:Name="SshSettingsPanel" Visibility="Collapsed">
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Ngrok}" Content="Ngrok" 
+                                                ToolTip="Caminho do executável e token" Width="200" Click="OpenNgrokSettings_Click"/>
+                                        </WrapPanel>
+
+                                        <!-- Seção: Perfis de Ferramentas -->
+                                        <TextBlock Text="Perfis de Ferramentas" FontSize="18" Foreground="{DynamicResource AccentColor}" Margin="0,20,0,10"/>
+                                        <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Rename}" Content="Renomeação" 
+                                                ToolTip="Perfis de renomeação de projeto" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Rename"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="EF Migrations" 
+                                                ToolTip="Perfis de execução de migrations" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Migrations"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Harvest}" Content="Harvest" 
+                                                ToolTip="Perfis de coleta de arquivos" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Harvest"/>
+                                                
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.SearchText}" Content="Busca de Texto" 
+                                                ToolTip="Perfis de busca de texto em arquivos" Width="200" Click="OpenToolProfiles_Click" CommandParameter="SearchText"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Snapshot}" Content="Snapshot" 
+                                                ToolTip="Perfis de snapshot de projeto" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Snapshot"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.SSHTunnel}" Content="Túnel SSH" 
+                                                ToolTip="Perfis de conexão e túnel SSH" Width="200" Click="OpenToolProfiles_Click" CommandParameter="SSHTunnel"/>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </ScrollViewer>
+
+                                <!-- Painel: Gestão de Perfis de Ferramenta -->
+                                <Grid x:Name="ToolProfilesSettingsPanel" Visibility="Collapsed">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="*"/>
@@ -332,10 +355,10 @@
                                         <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
                                             Foreground="White" Background="Transparent" BorderThickness="0"
                                             Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Configuração: Túnel SSH" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock x:Name="ToolProfilesTitle" Text="Perfis: [Ferramenta]" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
                                     </StackPanel>
 
-                                    <!-- Conteúdo SSH -->
+                                    <!-- Conteúdo Gestão de Perfis -->
                                     <Grid Grid.Row="1">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="250"/>
@@ -346,9 +369,23 @@
                                         <Border BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="0" Padding="0,0,10,0">
                                             <DockPanel>
                                                 <Button DockPanel.Dock="Bottom" Content="+ Novo Perfil" Style="{DynamicResource SecondaryButtonStyle}" 
-                                                    Height="35" Margin="0,10,0,0" Click="AddSshProfile_Click"/>
-                                                <ListBox x:Name="SshProfilesList" Background="Transparent" BorderThickness="0" 
-                                                     Foreground="White" DisplayMemberPath="Name" SelectionChanged="SshProfile_SelectionChanged">
+                                                    Height="35" Margin="0,10,0,0" Click="AddToolProfile_Click"/>
+                                                <ListBox x:Name="ToolProfilesList" Background="Transparent" BorderThickness="0" 
+                                                     Foreground="White" SelectionChanged="ToolProfile_SelectionChanged">
+                                                    <ListBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid Margin="0,2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                                                <TextBlock Grid.Column="1" Text="⭐" Foreground="Gold" 
+                                                                           Visibility="{Binding IsDefault, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                                                           ToolTip="Perfil Padrão" Margin="5,0,0,0"/>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ListBox.ItemTemplate>
                                                     <ListBox.ItemContainerStyle>
                                                         <Style TargetType="ListBoxItem">
                                                             <Setter Property="Padding" Value="10,8"/>
@@ -378,83 +415,43 @@
                                             </DockPanel>
                                         </Border>
 
-                                        <!-- Formulário de Edição -->
+                                        <!-- Editor de Perfil -->
                                         <ScrollViewer Grid.Column="1" Margin="20,0,0,0" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
-                                            <StackPanel x:Name="SshEditForm" Visibility="Collapsed">
-                                                <TextBlock Text="Dados de Conexão (SSH)" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
-
-                                                <Label Content="Nome do Perfil"/>
-                                                <TextBox x:Name="SshProfileName" Style="{DynamicResource InputStyle}"/>
-
-                                                <Grid Margin="0,10,0,0">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="3*"/>
-                                                        <ColumnDefinition Width="1*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <StackPanel Margin="0,0,10,0">
-                                                        <Label Content="Host SSH (Servidor)"/>
-                                                        <TextBox x:Name="SshHost" Style="{DynamicResource InputStyle}"/>
-                                                    </StackPanel>
-                                                    <StackPanel Grid.Column="1">
-                                                        <Label Content="Porta"/>
-                                                        <TextBox x:Name="SshPort" Style="{DynamicResource InputStyle}"/>
-                                                    </StackPanel>
-                                                </Grid>
-
-                                                <Label Content="Usuário SSH" Margin="0,10,0,0"/>
-                                                <TextBox x:Name="SshUser" Style="{DynamicResource InputStyle}"/>
-
-                                                <Label Content="Caminho da Chave Privada (Private Key) - .pem/.ppk" Margin="0,10,0,0"/>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <c:PathSelector x:Name="SshKeyFileSelector" Title="Arquivo de chave" IsFolderPicker="False"/>
-                                                </Grid>
-
-                                                <TextBlock Text="Mapeamento do Túnel" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,20,0,10"/>
-
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                        <ColumnDefinition Width="20"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-
-                                                    <!-- Local -->
+                                            <StackPanel x:Name="ToolProfileEditForm" Visibility="Collapsed">
+                                                
+                                                <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="#2D2D30">
                                                     <StackPanel>
-                                                        <Label Content="Bind Local (IP)" Foreground="#CCCCCC"/>
-                                                        <TextBox x:Name="LocalBind" Style="{DynamicResource InputStyle}"/>
-                                                    </StackPanel>
-                                                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                                                        <Label Content="Porta Local" Foreground="#CCCCCC"/>
-                                                        <TextBox x:Name="LocalPort" Style="{DynamicResource InputStyle}" Width="80"/>
-                                                    </StackPanel>
+                                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                                            <materialDesign:PackIcon Kind="Settings" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                            <TextBlock Text="Configurações do Perfil" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                        </StackPanel>
 
-                                                    <TextBlock Grid.Column="2" Text="→" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#666" FontSize="16" Margin="0,20,0,0"/>
+                                                        <StackPanel>
+                                                            <Label Content="Nome do Perfil" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                            <TextBox x:Name="ToolProfileNameInput" Foreground="White"/>
+                                                        </StackPanel>
 
-                                                    <!-- Remoto -->
-                                                    <StackPanel Grid.Column="3">
-                                                        <Label Content="Host Remoto (Destino)" Foreground="#CCCCCC"/>
-                                                        <TextBox x:Name="RemoteHost" Style="{DynamicResource InputStyle}"/>
-                                                    </StackPanel>
-                                                    <StackPanel Grid.Column="4" Margin="5,0,0,0">
-                                                        <Label Content="Porta Remota" Foreground="#CCCCCC"/>
-                                                        <TextBox x:Name="RemotePort" Style="{DynamicResource InputStyle}" Width="80"/>
-                                                    </StackPanel>
-                                                </Grid>
+                                                        <!-- Container para campos específicos injetados -->
+                                                        <StackPanel x:Name="ToolProfileFieldsContainer" Margin="0,16,0,0"/>
 
-                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                                                    <Button Content="Remover Perfil" Click="DeleteSshProfile_Click" Background="Transparent" Foreground="#E81123" BorderThickness="0" Margin="0,0,10,0"/>
-                                                    <Button Content="Salvar Alterações" Click="SaveSshProfile_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="150"/>
+                                                        <CheckBox x:Name="ToolProfileIsDefaultCheck" 
+                                                              Content="Usar como perfil padrão" 
+                                                              Margin="0,20,0,0" 
+                                                              Foreground="White"
+                                                              Cursor="Hand"/>
+                                                    </StackPanel>
+                                                </materialDesign:Card>
+
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,20">
+                                                    <Button Content="Remover Perfil" Click="DeleteToolProfile_Click" Background="Transparent" Foreground="#E81123" BorderThickness="0" Margin="0,0,10,0"/>
+                                                    <Button Content="Salvar Perfil" Click="SaveToolProfile_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="150"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </ScrollViewer>
                                     </Grid>
                                 </Grid>
+
+
 
                                 <!-- Painel: Configuração Harvest -->
                                 <Grid x:Name="HarvestSettingsPanel" Visibility="Collapsed">
@@ -472,85 +469,106 @@
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
-                                            <TextBlock Text="Regras de Filtragem" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
-
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="20"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-
+                                            
+                                            <!-- Grupo: Regras de Filtragem -->
+                                            <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="#2D2D30">
                                                 <StackPanel>
-                                                    <Label Content="Extensões Permitidas (separadas por vírgula)" Foreground="#CCCCCC"/>
-                                                    <TextBox x:Name="HarvestExtensions" Style="{DynamicResource ModernTextBoxStyle}" 
-                                                         Height="100" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
-                                                </StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                                        <materialDesign:PackIcon Kind="FilterVariant" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="Regras de Filtragem" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                    </StackPanel>
 
-                                                <StackPanel Grid.Column="2">
-                                                    <Label Content="Pastas Ignoradas (separadas por vírgula)" Foreground="#CCCCCC"/>
-                                                    <TextBox x:Name="HarvestExcludeDirs" Style="{DynamicResource ModernTextBoxStyle}" 
-                                                         Height="100" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
-                                                </StackPanel>
-                                            </Grid>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
 
-                                            <Grid Margin="0,10,0,0">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="20"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
+                                                        <StackPanel>
+                                                            <Label Content="Extensões Permitidas (ex: .cs, .ts)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                            <TextBox x:Name="HarvestExtensions" 
+                                                                 Foreground="White" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="2">
+                                                            <Label Content="Pastas Ignoradas (ex: bin, obj)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                            <TextBox x:Name="HarvestExcludeDirs" 
+                                                                 Foreground="White" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
+                                                        </StackPanel>
+                                                    </Grid>
+
+                                                    <StackPanel Margin="0,16,0,0" Width="200" HorizontalAlignment="Left">
+                                                        <Label Content="Tamanho Máximo de Arquivo (KB)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                        <TextBox x:Name="HarvestMaxFileSizeInput" Foreground="White"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </materialDesign:Card>
+
+                                            <!-- Grupo: Limites e Top -->
+                                            <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="#2D2D30">
                                                 <StackPanel>
-                                                    <Label Content="Tamanho Máximo de Arquivo (KB)" Foreground="#CCCCCC"/>
-                                                    <TextBox x:Name="HarvestMaxFileSizeInput" Style="{DynamicResource InputStyle}"/>
-                                                </StackPanel>
-                                            </Grid>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                                        <materialDesign:PackIcon Kind="ChartLine" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="Limites Padrão" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                    </StackPanel>
 
-                                            <TextBlock Text="Limites Padrão" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,20,0,10"/>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="20"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        
+                                                        <StackPanel>
+                                                            <Label Content="Score Mínimo (0-100)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                            <TextBox x:Name="HarvestMinScore" Foreground="White"/>
+                                                        </StackPanel>
+                                                        
+                                                        <StackPanel Grid.Column="2">
+                                                            <Label Content="Top Arquivos (Quantidade)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                            <TextBox x:Name="HarvestTopDefault" Foreground="White"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </materialDesign:Card>
+
+                                            <!-- Grupo: Pesos de IA -->
+                                            <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="#2D2D30">
                                                 <StackPanel>
-                                                    <Label Content="Score Mínimo (0-100)" Foreground="#CCCCCC"/>
-                                                    <TextBox x:Name="HarvestMinScore" Style="{DynamicResource InputStyle}"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                                        <materialDesign:PackIcon Kind="Robot" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="Pesos de Relevância (IA)" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                    </StackPanel>
+
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="20"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <StackPanel>
+                                                            <Label Content="Fan-In (Entradas)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                            <TextBox x:Name="HarvestWeightFanIn" Foreground="White"/>
+
+                                                            <Label Content="Densidade de Keywords" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,16,0,2"/>
+                                                            <TextBox x:Name="HarvestWeightDensity" Foreground="White"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="2">
+                                                            <Label Content="Fan-Out (Saídas)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                            <TextBox x:Name="HarvestWeightFanOut" Foreground="White"/>
+
+                                                            <Label Content="Penalidade Dead Code" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,16,0,2"/>
+                                                            <TextBox x:Name="HarvestWeightDeadCode" Foreground="White"/>
+                                                        </StackPanel>
+                                                    </Grid>
                                                 </StackPanel>
-                                                <StackPanel Grid.Column="2">
-                                                    <Label Content="Top Arquivos (Qtd)" Foreground="#CCCCCC"/>
-                                                    <TextBox x:Name="HarvestTopDefault" Style="{DynamicResource InputStyle}"/>
-                                                </StackPanel>
-                                            </Grid>
+                                            </materialDesign:Card>
 
-                                            <TextBlock Text="Pesos de Relevância (IA)" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,20,0,10"/>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="20"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-
-                                                <StackPanel>
-                                                    <Label Content="Fan-In (Dependências Entrando)" Foreground="#CCCCCC"/>
-                                                    <TextBox x:Name="HarvestWeightFanIn" Style="{DynamicResource InputStyle}"/>
-
-                                                    <Label Content="Densidade de Keywords" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                                                    <TextBox x:Name="HarvestWeightDensity" Style="{DynamicResource InputStyle}"/>
-                                                </StackPanel>
-
-                                                <StackPanel Grid.Column="2">
-                                                    <Label Content="Fan-Out (Dependências Saindo)" Foreground="#CCCCCC"/>
-                                                    <TextBox x:Name="HarvestWeightFanOut" Style="{DynamicResource InputStyle}"/>
-
-                                                    <Label Content="Penalidade de Código Morto" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                                                    <TextBox x:Name="HarvestWeightDeadCode" Style="{DynamicResource InputStyle}"/>
-                                                </StackPanel>
-                                            </Grid>
-
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                                                <Button Content="Salvar Alterações" Click="SaveHarvestSettings_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="150"/>
-                                            </StackPanel>
+                                            <Button Content="Salvar Alterações" Click="SaveHarvestSettings_Click" 
+                                                Style="{DynamicResource PrimaryButtonStyle}" Width="180" HorizontalAlignment="Right" Margin="0,8,0,20"/>
                                         </StackPanel>
                                     </ScrollViewer>
                                 </Grid>
@@ -614,19 +632,33 @@
                                         <!-- Form Organizer -->
                                         <ScrollViewer Grid.Column="1" Margin="20,0,0,0" VerticalScrollBarVisibility="Auto">
                                             <StackPanel x:Name="OrganizerEditForm" Visibility="Collapsed">
-                                                <TextBlock Text="Detalhes da Categoria" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
+                                                
+                                                <!-- Grupo: Detalhes da Categoria -->
+                                                <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="#2D2D30">
+                                                    <StackPanel>
+                                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                                            <materialDesign:PackIcon Kind="Category" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                            <TextBlock Text="Detalhes da Categoria" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                        </StackPanel>
 
-                                                <Label Content="Nome da Categoria" Foreground="#CCCCCC"/>
-                                                <TextBox x:Name="OrgCatName" Style="{DynamicResource InputStyle}"/>
+                                                        <TextBox x:Name="OrgCatName" 
+                                                             materialDesign:HintAssist.Hint="Nome da Categoria"
+                                                             Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
+                                                             Foreground="White"/>
 
-                                                <Label Content="Nome da Pasta Destino" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                                                <TextBox x:Name="OrgCatFolder" Style="{DynamicResource InputStyle}"/>
+                                                        <TextBox x:Name="OrgCatFolder" 
+                                                             materialDesign:HintAssist.Hint="Nome da Pasta Destino"
+                                                             Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
+                                                             Foreground="White" Margin="0,16,0,0"/>
 
-                                                <Label Content="Palavras-Chave (separadas por vírgula)" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                                                <TextBox x:Name="OrgCatKeywords" Style="{DynamicResource ModernTextBoxStyle}" 
-                                                     Height="80" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
+                                                        <TextBox x:Name="OrgCatKeywords" 
+                                                             materialDesign:HintAssist.Hint="Palavras-Chave (separadas por vírgula)"
+                                                             Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
+                                                             Foreground="White" Height="80" AcceptsReturn="True" TextWrapping="Wrap" Margin="0,16,0,0"/>
+                                                    </StackPanel>
+                                                </materialDesign:Card>
 
-                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,20">
                                                     <Button Content="Remover" Click="DeleteOrganizerCategory_Click" Background="Transparent" Foreground="#E81123" BorderThickness="0" Margin="0,0,10,0"/>
                                                     <Button Content="Salvar Alterações" Click="SaveOrganizerCategory_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="150"/>
                                                 </StackPanel>
@@ -650,26 +682,50 @@
                                     </StackPanel>
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                                        <StackPanel Margin="0,0,20,0" MaxWidth="600" HorizontalAlignment="Left">
-                                            <TextBlock Text="Caminhos do Projeto" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
+                                        <StackPanel Margin="0,0,20,0">
+                                            
+                                            <!-- Grupo: Caminhos do Projeto -->
+                                            <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="#2D2D30">
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                                        <materialDesign:PackIcon Kind="Folder" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="Caminhos do Projeto" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                    </StackPanel>
 
-                                            <Label Content="Caminho Raiz do Projeto (Root Path)" Foreground="#CCCCCC"/>
-                                            <c:PathSelector x:Name="MigRootPathSelector" Title="Caminho Raiz do Projeto (Root Path)" IsFolderPicker="True"/>
+                                                    <StackPanel Margin="0,0,0,16">
+                                                        <Label Content="Caminho Raiz do Projeto (Root Path)" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,4"/>
+                                                        <c:PathSelector x:Name="MigRootPathSelector" Title="Caminho Raiz do Projeto (Root Path)" IsFolderPicker="True"/>
+                                                    </StackPanel>
 
-                                            <Label Content="Caminho do Projeto de Startup (Startup Project)" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                                            <c:PathSelector x:Name="MigStartupPathSelector" Title="Caminho do Projeto de Startup (Startup Project)" IsFolderPicker="True"/>
+                                                    <StackPanel>
+                                                        <Label Content="Caminho do Projeto de Startup (Startup Project)" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,4"/>
+                                                        <c:PathSelector x:Name="MigStartupPathSelector" Title="Caminho do Projeto de Startup (Startup Project)" IsFolderPicker="True"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </materialDesign:Card>
 
-                                            <TextBlock Text="Configuração do Contexto" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,30,0,10"/>
+                                            <!-- Grupo: Configuração do Contexto -->
+                                            <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="#2D2D30">
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                                        <materialDesign:PackIcon Kind="DatabaseSettings" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="Configuração do Contexto" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                    </StackPanel>
 
-                                            <Label Content="Nome Completo do DbContext" Foreground="#CCCCCC"/>
-                                            <TextBox x:Name="MigContextInput" Style="{DynamicResource InputStyle}" FontFamily="Consolas"/>
+                                                    <StackPanel>
+                                                        <Label Content="Nome Completo do DbContext (ex: MyApp.Data.AppDbContext)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                        <TextBox x:Name="MigContextInput" Foreground="White" FontFamily="Consolas"/>
+                                                    </StackPanel>
 
-                                            <Label Content="Argumentos Adicionais (dotnet ef ...)" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                                            <TextBox x:Name="MigArgsInput" Style="{DynamicResource InputStyle}" FontFamily="Consolas"/>
+                                                    <StackPanel Margin="0,16,0,0">
+                                                        <Label Content="Argumentos Adicionais (dotnet ef ...)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                        <TextBox x:Name="MigArgsInput" Foreground="White" FontFamily="Consolas"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </materialDesign:Card>
 
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                                                <Button Content="Salvar Alterações" Click="SaveMigrationsSettings_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="150"/>
-                                            </StackPanel>
+                                            <Button Content="Salvar Alterações" Click="SaveMigrationsSettings_Click" 
+                                                Style="{DynamicResource PrimaryButtonStyle}" Width="180" HorizontalAlignment="Right" Margin="0,8,0,20"/>
                                         </StackPanel>
                                     </ScrollViewer>
                                 </Grid>
@@ -689,23 +745,43 @@
                                     </StackPanel>
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                                        <StackPanel Margin="0,0,20,0" MaxWidth="600" HorizontalAlignment="Left">
-                                            <TextBlock Text="Execução Local" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
+                                        <StackPanel Margin="0,0,20,0">
+                                            
+                                            <!-- Grupo: Execução Local -->
+                                            <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="#2D2D30">
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                                        <materialDesign:PackIcon Kind="PlayCircle" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="Execução Local" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                    </StackPanel>
 
-                                            <Label Content="Caminho do Executável (ngrok.exe)" Foreground="#CCCCCC"/>
-                                            <c:PathSelector x:Name="NgrokExeSelector" Title="Caminho do Executável do Ngrok" IsFolderPicker="False"/>
+                                                    <Label Content="Caminho do Executável (ngrok.exe)" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,4"/>
+                                                    <c:PathSelector x:Name="NgrokExeSelector" Title="Caminho do Executável do Ngrok" IsFolderPicker="False"/>
+                                                </StackPanel>
+                                            </materialDesign:Card>
 
-                                            <TextBlock Text="Autenticação e Argumentos" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,30,0,10"/>
+                                            <!-- Grupo: Autenticação e Argumentos -->
+                                            <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="#2D2D30">
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                                        <materialDesign:PackIcon Kind="KeyVariant" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="Autenticação e Argumentos" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                    </StackPanel>
 
-                                            <Label Content="Auth Token (Opcional - via --authtoken)" Foreground="#CCCCCC"/>
-                                            <TextBox x:Name="NgrokAuthTokenInput" Style="{DynamicResource InputStyle}" FontFamily="Consolas"/>
+                                                    <StackPanel>
+                                                        <Label Content="Auth Token (Opcional - via --authtoken)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                        <TextBox x:Name="NgrokAuthTokenInput" Foreground="White" FontFamily="Consolas"/>
+                                                    </StackPanel>
 
-                                            <Label Content="Argumentos Adicionais" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                                            <TextBox x:Name="NgrokArgsInput" Style="{DynamicResource InputStyle}" FontFamily="Consolas"/>
+                                                    <StackPanel Margin="0,16,0,0">
+                                                        <Label Content="Argumentos Adicionais" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                        <TextBox x:Name="NgrokArgsInput" Foreground="White" FontFamily="Consolas"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </materialDesign:Card>
 
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                                                <Button Content="Salvar Alterações" Click="SaveNgrokSettings_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="150"/>
-                                            </StackPanel>
+                                            <Button Content="Salvar Alterações" Click="SaveNgrokSettings_Click" 
+                                                Style="{DynamicResource PrimaryButtonStyle}" Width="180" HorizontalAlignment="Right" Margin="0,8,0,20"/>
                                         </StackPanel>
                                     </ScrollViewer>
                                 </Grid>

@@ -8,6 +8,8 @@ using DevTools.Migrations.Engine;
 using DevTools.Migrations.Models;
 using DevTools.Presentation.Wpf.Services;
 
+using DevTools.Core.Configuration;
+
 namespace DevTools.Presentation.Wpf.Views;
 
 public partial class MigrationsWindow : Window
@@ -15,38 +17,49 @@ public partial class MigrationsWindow : Window
     private readonly JobManager _jobManager;
     private readonly SettingsService _settings;
     private readonly ConfigService _config;
+    private readonly ProfileManager _profileManager;
+    private ToolProfile? _currentProfile;
 
-    public MigrationsWindow(JobManager jobManager, SettingsService settings, ConfigService config)
+    public MigrationsWindow(JobManager jobManager, SettingsService settings, ConfigService config, ProfileManager profileManager)
     {
         InitializeComponent();
         _jobManager = jobManager;
         _settings = settings;
         _config = config;
+        _profileManager = profileManager;
 
         Loaded += OnLoaded;
         Closing += OnClosing;
     }
 
+    // Construtor para o Designer
+    public MigrationsWindow()
+    {
+        InitializeComponent();
+    }
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // Restore Position disabled to enforce TrayService placement
-        /*
-        if (_settings.Settings.MigrationsWindowTop.HasValue)
+        // Tentar carregar perfil padrão
+        _currentProfile = _profileManager?.GetDefaultProfile("Migrations");
+        if (_currentProfile != null)
         {
-            Top = _settings.Settings.MigrationsWindowTop.Value;
-            Left = _settings.Settings.MigrationsWindowLeft.Value;
+            if (_currentProfile.Options.TryGetValue("root-path", out var root)) ProjectSelector.SelectedPath = root;
+            if (_currentProfile.Options.TryGetValue("startup-path", out var startup)) StartupSelector.SelectedPath = startup;
+            if (_currentProfile.Options.TryGetValue("dbcontext", out var context)) DbContextInput.Text = context;
         }
-        */
+        else
+        {
+            // Fallback para configurações salvas anteriormente (comportamento original)
+            if (!string.IsNullOrEmpty(_settings?.Settings.LastMigrationsRootPath))
+                ProjectSelector.SelectedPath = _settings.Settings.LastMigrationsRootPath;
 
-        // Restore Inputs
-        if (!string.IsNullOrEmpty(_settings.Settings.LastMigrationsRootPath))
-            ProjectSelector.SelectedPath = _settings.Settings.LastMigrationsRootPath;
+            if (!string.IsNullOrEmpty(_settings?.Settings.LastMigrationsStartupPath))
+                StartupSelector.SelectedPath = _settings.Settings.LastMigrationsStartupPath;
 
-        if (!string.IsNullOrEmpty(_settings.Settings.LastMigrationsStartupPath))
-            StartupSelector.SelectedPath = _settings.Settings.LastMigrationsStartupPath;
-
-        if (!string.IsNullOrEmpty(_settings.Settings.LastMigrationsDbContext))
-            DbContextInput.Text = _settings.Settings.LastMigrationsDbContext;
+            if (!string.IsNullOrEmpty(_settings?.Settings.LastMigrationsDbContext))
+                DbContextInput.Text = _settings.Settings.LastMigrationsDbContext;
+        }
     }
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
@@ -100,6 +113,15 @@ public partial class MigrationsWindow : Window
             DryRun: DryRunCheck.IsChecked == true,
             WorkingDirectory: root
         );
+
+        // Sincronizar com o perfil padrão se estiver em uso
+        if (_currentProfile != null)
+        {
+            _currentProfile.Options["root-path"] = root ?? "";
+            _currentProfile.Options["startup-path"] = startup ?? "";
+            _currentProfile.Options["dbcontext"] = DbContextInput.Text ?? "";
+            _profileManager.SaveProfile("Migrations", _currentProfile);
+        }
 
         OutputText.Text = "Iniciando...";
 

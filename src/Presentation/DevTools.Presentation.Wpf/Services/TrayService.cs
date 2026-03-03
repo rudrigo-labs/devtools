@@ -81,7 +81,10 @@ public class TrayService : IDisposable
             {
                 window.Owner = _mainWindow;
                 window.ShowInTaskbar = false;
-                window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                window.WindowStartupLocation = WindowStartupLocation.Manual;
+                
+                // Modal behavior: Disable MainWindow while tool is open
+                _mainWindow.IsEnabled = false;
             }
 
             window.Closed += (_, __) => 
@@ -89,18 +92,22 @@ public class TrayService : IDisposable
                 setWindow(null);
                 if (_currentToolWindow == window)
                     _currentToolWindow = null;
+
+                // Restore MainWindow when tool is closed
+                if (_mainWindow != null)
+                {
+                    _mainWindow.IsEnabled = true;
+                    _mainWindow.Activate();
+                }
             };
 
-            // Enforce Bottom-Right Positioning (Optional: only if not centered)
-            if (window.WindowStartupLocation != WindowStartupLocation.CenterOwner)
+            // Enforce Bottom-Right Positioning for all tool windows
+            window.Loaded += (s, e) =>
             {
-                window.Loaded += (s, e) =>
-                {
-                     var screen = SystemParameters.WorkArea;
-                     window.Left = screen.Right - window.ActualWidth - 20;
-                     window.Top = screen.Bottom - window.ActualHeight - 20;
-                };
-            }
+                 var screen = SystemParameters.WorkArea;
+                 window.Left = screen.Right - window.ActualWidth - 20;
+                 window.Top = screen.Bottom - window.ActualHeight - 20;
+            };
 
             window.Show();
         });
@@ -110,6 +117,12 @@ public class TrayService : IDisposable
     {
         switch (tag)
         {
+            case "HIDE_CURRENT":
+                if (_currentToolWindow != null && _currentToolWindow.IsVisible)
+                {
+                    _currentToolWindow.Close();
+                }
+                break;
             case "Notes": ShowNotesWindow(); break;
             case "Organizer": ShowOrganizerWindow(); break;
             case "Harvest": OnHarvestClick(this, new RoutedEventArgs()); break;
@@ -300,19 +313,19 @@ public class TrayService : IDisposable
 
     private void ShowImageSplitWindow() => ShowWindow(() => _imageSplitWindow, w => _imageSplitWindow = w, () => new ImageSplitWindow(_jobManager, _settingsService));
 
-    private void ShowRenameWindow() => ShowWindow(() => _renameWindow, w => _renameWindow = w, () => new RenameWindow(_jobManager, _settingsService));
+    private void ShowRenameWindow() => ShowWindow(() => _renameWindow, w => _renameWindow = w, () => new RenameWindow(_jobManager, _settingsService, _profileManager));
 
     private void ShowUtf8Window() => ShowWindow(() => _utf8ConvertWindow, w => _utf8ConvertWindow = w, () => new Utf8ConvertWindow(_jobManager, _settingsService));
 
-    private void ShowSnapshotWindow() => ShowWindow(() => _snapshotWindow, w => _snapshotWindow = w, () => new SnapshotWindow(_jobManager, _settingsService));
+    private void ShowSnapshotWindow() => ShowWindow(() => _snapshotWindow, w => _snapshotWindow = w, () => new SnapshotWindow(_jobManager, _settingsService, _profileManager));
 
-    private void ShowSshTunnelWindow() => ShowWindow(() => _sshTunnelWindow, w => _sshTunnelWindow = w, () => new SshTunnelWindow(_jobManager, _settingsService, _configService));
+    private void ShowSshTunnelWindow() => ShowWindow(() => _sshTunnelWindow, w => _sshTunnelWindow = w, () => new SshTunnelWindow(_jobManager, _settingsService, _configService, _profileManager));
 
     private void ShowNgrokWindow() => ShowWindow(() => _ngrokWindow, w => _ngrokWindow = w, () => new NgrokWindow(_jobManager, _settingsService));
 
-    private void ShowSearchTextWindow() => ShowWindow(() => _searchTextWindow, w => _searchTextWindow = w, () => new SearchTextWindow(_jobManager, _settingsService));
+    private void ShowSearchTextWindow() => ShowWindow(() => _searchTextWindow, w => _searchTextWindow = w, () => new SearchTextWindow(_jobManager, _settingsService, _profileManager));
 
-    private void ShowMigrationsWindow() => ShowWindow(() => _migrationsWindow, w => _migrationsWindow = w, () => new MigrationsWindow(_jobManager, _settingsService, _configService));
+    private void ShowMigrationsWindow() => ShowWindow(() => _migrationsWindow, w => _migrationsWindow = w, () => new MigrationsWindow(_jobManager, _settingsService, _configService, _profileManager));
 
     private void ShowNotesWindow() => ShowWindow(() => _notesWindow, w => _notesWindow = w, () => new NotesWindow(_settingsService));
 
@@ -320,7 +333,7 @@ public class TrayService : IDisposable
 
     private void OnHarvestClick(object sender, RoutedEventArgs e)
     {
-        ShowWindow(() => _harvestWindow, w => _harvestWindow = w, () => new HarvestWindow(_jobManager, _settingsService));
+        ShowWindow(() => _harvestWindow, w => _harvestWindow = w, () => new HarvestWindow(_jobManager, _settingsService, _profileManager));
     }
 
     private void ShowLogsWindow() => ShowWindow(() => _logsWindow, w => _logsWindow = w, () => new LogsWindow(_settingsService));
