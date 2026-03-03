@@ -300,7 +300,7 @@ public class TrayService : IDisposable
 
     private void ShowImageSplitWindow() => ShowWindow(() => _imageSplitWindow, w => _imageSplitWindow = w, () => new ImageSplitWindow(_jobManager, _settingsService));
 
-    private void ShowRenameWindow() => ShowWindow(() => _renameWindow, w => _renameWindow = w, () => new RenameWindow(_jobManager, _settingsService));
+    private void ShowRenameWindow() => ShowWindow(() => _renameWindow, w => _renameWindow = w, () => new RenameWindow(_jobManager, _settingsService, _profileManager));
 
     private void ShowUtf8Window() => ShowWindow(() => _utf8ConvertWindow, w => _utf8ConvertWindow = w, () => new Utf8ConvertWindow(_jobManager, _settingsService));
 

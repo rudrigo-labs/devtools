@@ -64,7 +64,12 @@ public class ProfileManager
         
         SaveProfilesInternal(toolName, profiles);
     }
-    
+
+    public void SaveProfiles(string toolName, List<ToolProfile> profiles)
+    {
+        SaveProfilesInternal(toolName, profiles);
+    }
+
     public void DeleteProfile(string toolName, string profileName)
     {
         var profiles = LoadProfiles(toolName);
@@ -81,6 +86,12 @@ public class ProfileManager
     {
         var profiles = LoadProfiles(toolName);
         return profiles.FirstOrDefault(p => p.Name.Equals(profileName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public ToolProfile? GetDefaultProfile(string toolName)
+    {
+        var profiles = LoadProfiles(toolName);
+        return profiles.FirstOrDefault(p => p.IsDefault);
     }
 
     private void SaveProfilesInternal(string toolName, List<ToolProfile> profiles)

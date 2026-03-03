@@ -29,10 +29,11 @@ public partial class App : System.Windows.Application
         _settingsService = new SettingsService();
         _configService = new ConfigService();
         _profileManager = new ProfileManager();
+        var profileUIService = new ProfileUIService(_profileManager);
         _trayService = new TrayService(_jobManager, _settingsService, _configService, _profileManager);
 
         // Instancia MainWindow (Hub)
-        var mainWindow = new DevTools.Presentation.Wpf.Views.MainWindow(_trayService, _jobManager, _configService);
+        var mainWindow = new DevTools.Presentation.Wpf.Views.MainWindow(_trayService, _jobManager, _configService, profileUIService);
         _trayService.SetMainWindow(mainWindow);
 
         _trayService.Initialize();

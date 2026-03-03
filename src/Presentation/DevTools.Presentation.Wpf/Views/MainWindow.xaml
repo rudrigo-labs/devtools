@@ -17,6 +17,8 @@
             <SolidColorBrush x:Key="ContentBackground" Color="#1E1E1E"/>
             <SolidColorBrush x:Key="AccentColor" Color="#007ACC"/>
             
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            
             <Style TargetType="Button" x:Key="SidebarButtonStyle">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="#CCCCCC"/>
@@ -295,30 +297,143 @@
                         <TabItem x:Name="TabSettings">
                             <Grid>
                                 <!-- Lista de Configurações (Cards) -->
-                                <StackPanel x:Name="SettingsListPanel" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,10">
-                                    <TextBlock Text="Configurações do Projeto" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
-                                    <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
-                                        <!-- Card: SSH -->
-                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.SSHTunnel}" Content="Túnel SSH" 
-                                            ToolTip="Gerenciar perfis e chaves SSH" Width="200" Click="OpenSshSettings_Click"/>
+                                <ScrollViewer x:Name="SettingsListPanel" VerticalScrollBarVisibility="Auto">
+                                    <StackPanel Margin="0,10">
+                                        <TextBlock Text="Configurações do Projeto" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
 
-                                        <!-- Card: Harvest -->
-                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Harvest}" Content="Harvest" 
-                                            ToolTip="Configurar regras de extração e IA" Width="200" Click="OpenHarvestSettings_Click"/>
+                                        <!-- Seção: Configurações Gerais -->
+                                        <TextBlock Text="Configurações Gerais" FontSize="18" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
+                                        <WrapPanel Orientation="Horizontal" Margin="0,0,-15,20">
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.SSHTunnel}" Content="Túnel SSH" 
+                                                ToolTip="Gerenciar perfis e chaves SSH" Width="200" Click="OpenSshSettings_Click"/>
 
-                                        <!-- Card: Organizer -->
-                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Organizer}" Content="Organizer" 
-                                            ToolTip="Categorias e regras de organização" Width="200" Click="OpenOrganizerSettings_Click"/>
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Harvest}" Content="Harvest" 
+                                                ToolTip="Configurar regras de extração e IA" Width="200" Click="OpenHarvestSettings_Click"/>
 
-                                        <!-- Card: Migrations -->
-                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="Migrations" 
-                                            ToolTip="Caminhos e contextos do EF Core" Width="200" Click="OpenMigrationsSettings_Click"/>
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Organizer}" Content="Organizer" 
+                                                ToolTip="Categorias e regras de organização" Width="200" Click="OpenOrganizerSettings_Click"/>
 
-                                        <!-- Card: Ngrok -->
-                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Ngrok}" Content="Ngrok" 
-                                            ToolTip="Caminho do executável e token" Width="200" Click="OpenNgrokSettings_Click"/>
-                                    </WrapPanel>
-                                </StackPanel>
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="Migrations" 
+                                                ToolTip="Caminhos e contextos do EF Core" Width="200" Click="OpenMigrationsSettings_Click"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Ngrok}" Content="Ngrok" 
+                                                ToolTip="Caminho do executável e token" Width="200" Click="OpenNgrokSettings_Click"/>
+                                        </WrapPanel>
+
+                                        <!-- Seção: Perfis de Ferramentas -->
+                                        <TextBlock Text="Perfis de Ferramentas" FontSize="18" Foreground="{DynamicResource AccentColor}" Margin="0,20,0,10"/>
+                                        <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Rename}" Content="Renomeação" 
+                                                ToolTip="Perfis de renomeação de projeto" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Rename"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="EF Migrations" 
+                                                ToolTip="Perfis de execução de migrations" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Migrations"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Harvest}" Content="Harvest" 
+                                                ToolTip="Perfis de coleta de arquivos" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Harvest"/>
+                                                
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.SearchText}" Content="Busca de Texto" 
+                                                ToolTip="Perfis de busca de texto em arquivos" Width="200" Click="OpenToolProfiles_Click" CommandParameter="SearchText"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Snapshot}" Content="Snapshot" 
+                                                ToolTip="Perfis de snapshot de projeto" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Snapshot"/>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </ScrollViewer>
+
+                                <!-- Painel: Gestão de Perfis de Ferramenta -->
+                                <Grid x:Name="ToolProfilesSettingsPanel" Visibility="Collapsed">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Header com Voltar -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                        <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
+                                            Foreground="White" Background="Transparent" BorderThickness="0"
+                                            Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
+                                        <TextBlock x:Name="ToolProfilesTitle" Text="Perfis: [Ferramenta]" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <!-- Conteúdo Gestão de Perfis -->
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="250"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Lista de Perfis -->
+                                        <Border BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="0" Padding="0,0,10,0">
+                                            <DockPanel>
+                                                <Button DockPanel.Dock="Bottom" Content="+ Novo Perfil" Style="{DynamicResource SecondaryButtonStyle}" 
+                                                    Height="35" Margin="0,10,0,0" Click="AddToolProfile_Click"/>
+                                                <ListBox x:Name="ToolProfilesList" Background="Transparent" BorderThickness="0" 
+                                                     Foreground="White" SelectionChanged="ToolProfile_SelectionChanged">
+                                                    <ListBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid Margin="0,2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                                                <TextBlock Grid.Column="1" Text="⭐" Foreground="Gold" 
+                                                                           Visibility="{Binding IsDefault, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                                                           ToolTip="Perfil Padrão" Margin="5,0,0,0"/>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ListBox.ItemTemplate>
+                                                    <ListBox.ItemContainerStyle>
+                                                        <Style TargetType="ListBoxItem">
+                                                            <Setter Property="Padding" Value="10,8"/>
+                                                            <Setter Property="Margin" Value="0,0,0,2"/>
+                                                            <Setter Property="Background" Value="#2D2D30"/>
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                                            <ContentPresenter/>
+                                                                        </Border>
+                                                                        <ControlTemplate.Triggers>
+                                                                            <Trigger Property="IsSelected" Value="True">
+                                                                                <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
+                                                                            </Trigger>
+                                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                                <Setter Property="Cursor" Value="Hand"/>
+                                                                                <Setter Property="Background" Value="#3E3E42"/>
+                                                                            </Trigger>
+                                                                        </ControlTemplate.Triggers>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Style>
+                                                    </ListBox.ItemContainerStyle>
+                                                </ListBox>
+                                            </DockPanel>
+                                        </Border>
+
+                                        <!-- Editor de Perfil -->
+                                        <ScrollViewer Grid.Column="1" Margin="20,0,0,0" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
+                                            <StackPanel x:Name="ToolProfileEditForm" Visibility="Collapsed">
+                                                <TextBlock Text="Campos do Perfil" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
+
+                                                <Label Content="Nome do Perfil"/>
+                                                <TextBox x:Name="ToolProfileNameInput" Style="{DynamicResource InputStyle}"/>
+
+                                                <!-- Container para campos específicos injetados -->
+                                                <StackPanel x:Name="ToolProfileFieldsContainer" Margin="0,10,0,0"/>
+
+                                                <CheckBox x:Name="ToolProfileIsDefaultCheck" Content="Usar como perfil padrão" Margin="0,20,0,0" Foreground="White"/>
+
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,30,0,0">
+                                                    <Button Content="Remover Perfil" Click="DeleteToolProfile_Click" Background="Transparent" Foreground="#E81123" BorderThickness="0" Margin="0,0,10,0"/>
+                                                    <Button Content="Salvar Perfil" Click="SaveToolProfile_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="150"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </ScrollViewer>
+                                    </Grid>
+                                </Grid>
 
                                 <!-- Painel: Configuração SSH -->
                                 <Grid x:Name="SshSettingsPanel" Visibility="Collapsed">

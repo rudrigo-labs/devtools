@@ -10,6 +10,7 @@ using DevTools.Migrations.Models;
 using DevTools.Ngrok.Models;
 using System.Collections.Generic;
 using System.Linq;
+using DevTools.Core.Models;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -29,13 +30,17 @@ public partial class MainWindow : Window
     // State
     private TunnelProfile? _selectedProfile;
     private OrganizerCategory? _selectedCategory;
+    private string? _currentToolForProfiles;
+    private ToolProfile? _selectedToolProfile;
+    private readonly ProfileUIService _profileUIService;
 
-    public MainWindow(TrayService trayService, JobManager jobManager, ConfigService configService)
+    public MainWindow(TrayService trayService, JobManager jobManager, ConfigService configService, ProfileUIService profileUIService)
     {
         InitializeComponent();
         _trayService = trayService;
         _jobManager = jobManager;
         _configService = configService;
+        _profileUIService = profileUIService;
 
         _trayService.SetMainWindow(this);
 
@@ -44,6 +49,12 @@ public partial class MainWindow : Window
 
         this.Loaded += MainWindow_Loaded;
         this.Closing += MainWindow_Closing;
+    }
+
+    // Construtor para o Designer
+    public MainWindow()
+    {
+        InitializeComponent();
     }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -137,11 +148,109 @@ public partial class MainWindow : Window
         OrganizerSettingsPanel.Visibility = Visibility.Collapsed;
         MigrationsSettingsPanel.Visibility = Visibility.Collapsed;
         NgrokSettingsPanel.Visibility = Visibility.Collapsed;
+        ToolProfilesSettingsPanel.Visibility = Visibility.Collapsed;
     }
 
     private void BackToSettingsList_Click(object sender, RoutedEventArgs e)
     {
         ShowSettingsList();
+    }
+
+    // --- Generic Tool Profiles Management ---
+
+    private void OpenToolProfiles_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.Button btn && btn.CommandParameter is string toolKey)
+        {
+            _currentToolForProfiles = toolKey;
+            ToolProfilesTitle.Text = $"Perfis: {btn.Content}";
+            SettingsListPanel.Visibility = Visibility.Collapsed;
+            ToolProfilesSettingsPanel.Visibility = Visibility.Visible;
+            LoadToolProfiles();
+        }
+    }
+
+    private void LoadToolProfiles()
+    {
+        if (string.IsNullOrEmpty(_currentToolForProfiles)) return;
+
+        var profiles = _profileUIService.LoadProfiles(_currentToolForProfiles);
+        ToolProfilesList.ItemsSource = null;
+        ToolProfilesList.ItemsSource = profiles;
+        
+        ToolProfileEditForm.Visibility = Visibility.Collapsed;
+        ToolProfilesList.SelectedItem = null;
+    }
+
+    private void AddToolProfile_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(_currentToolForProfiles)) return;
+
+        var newProfile = new ToolProfile 
+        { 
+            Name = "Novo Perfil " + (ToolProfilesList.Items.Count + 1)
+        };
+        
+        var list = (ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>();
+        list.Add(newProfile);
+        
+        ToolProfilesList.ItemsSource = null;
+        ToolProfilesList.ItemsSource = list;
+        ToolProfilesList.SelectedItem = newProfile;
+    }
+
+    private void ToolProfile_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ToolProfilesList.SelectedItem is ToolProfile profile)
+        {
+            _selectedToolProfile = profile;
+            ToolProfileNameInput.Text = profile.Name;
+            ToolProfileIsDefaultCheck.IsChecked = profile.IsDefault;
+            
+            _profileUIService.GenerateUIForProfile(_currentToolForProfiles!, ToolProfileFieldsContainer, profile);
+            ToolProfileEditForm.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            _selectedToolProfile = null;
+            ToolProfileEditForm.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private void SaveToolProfile_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedToolProfile == null || string.IsNullOrEmpty(_currentToolForProfiles)) return;
+
+        _selectedToolProfile.Name = ToolProfileNameInput.Text;
+        _selectedToolProfile.IsDefault = ToolProfileIsDefaultCheck.IsChecked == true;
+
+        // Coletar valores dos campos dinâmicos
+        foreach (var child in ToolProfileFieldsContainer.Children)
+        {
+            if (child is System.Windows.Controls.TextBox tb && tb.Tag is string key)
+            {
+                _selectedToolProfile.Options[key] = tb.Text;
+            }
+            else if (child is Components.PathSelector ps && ps.Tag is string pathKey)
+            {
+                _selectedToolProfile.Options[pathKey] = ps.SelectedPath;
+            }
+        }
+
+        _profileUIService.SaveProfile(_currentToolForProfiles, _selectedToolProfile);
+        ToolProfilesList.Items.Refresh();
+        UiMessageService.ShowInfo("Perfil salvo com sucesso!", "Sucesso");
+    }
+
+    private void DeleteToolProfile_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedToolProfile == null || string.IsNullOrEmpty(_currentToolForProfiles)) return;
+
+        if (UiMessageService.Confirm($"Excluir perfil '{_selectedToolProfile.Name}'?", "Confirmar"))
+        {
+            _profileUIService.DeleteProfile(_currentToolForProfiles, _selectedToolProfile.Name);
+            LoadToolProfiles();
+        }
     }
 
     // --- SSH Settings ---
