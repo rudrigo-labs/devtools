@@ -26,17 +26,17 @@
                 <Grid Margin="0,15,0,0">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                        <Label Content="Texto Antigo:"/>
+                        <Label Content="Texto Antigo:" Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBox x:Name="OldTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                        <Label Content="Texto Novo:"/>
+                        <Label Content="Texto Novo:" Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBox x:Name="NewTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
                     </StackPanel>
                 </Grid>
 
                 <StackPanel Margin="0,15,0,0">
-                    <Label Content="Modo de Renomeação:"/>
+                    <Label Content="Modo de Renomeação:" Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <ComboBox x:Name="ModeCombo" SelectedIndex="0" Style="{StaticResource ModernComboBoxStyle}">
                         <ComboBoxItem Content="Geral (Texto Simples)"/>
                         <ComboBoxItem Content="Namespace C# (Inteligente)"/>
@@ -46,20 +46,20 @@
                 <Grid Margin="0,15,0,0">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                        <Label Content="Include (Glob):"/>
+                        <Label Content="Include (Glob):" Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBox x:Name="IncludeBox" Style="{StaticResource ModernTextBoxStyle}" ToolTip="Ex: *.cs, **/*.txt"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                        <Label Content="Exclude (Glob):"/>
+                        <Label Content="Exclude (Glob):" Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBox x:Name="ExcludeBox" Style="{StaticResource ModernTextBoxStyle}" ToolTip="Ex: obj/*, bin/*"/>
                     </StackPanel>
                 </Grid>
                 
                 <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
-                    <CheckBox x:Name="BackupCheck" Content="Criar Backup" IsChecked="True" Margin="0,0,15,0"/>
-                    <CheckBox x:Name="UndoLogCheck" Content="Log de Reversão" IsChecked="True"/>
-                    <CheckBox x:Name="DryRunCheck" Content="Dry Run (Teste)" IsChecked="False" Margin="15,0,0,0"/>
-                    <CheckBox x:Name="RememberSettingsCheck" Content="Lembrar" IsChecked="False" Margin="15,0,0,0"/>
+                    <CheckBox x:Name="BackupCheck" Content="Criar Backup" IsChecked="True" Margin="0,0,15,0" Foreground="White"/>
+                    <CheckBox x:Name="UndoLogCheck" Content="Log de Reversão" IsChecked="True" Foreground="White"/>
+                    <CheckBox x:Name="DryRunCheck" Content="Dry Run (Teste)" IsChecked="False" Margin="15,0,0,0" Foreground="White"/>
+                    <CheckBox x:Name="RememberSettingsCheck" Content="Lembrar" IsChecked="False" Margin="15,0,0,0" Foreground="White"/>
                 </StackPanel>
                 
                 <c:RunSummaryControl x:Name="RunSummary" Margin="0,15,0,0"/>

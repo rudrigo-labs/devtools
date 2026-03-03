@@ -179,8 +179,8 @@ public class ProfileUIService
 
         if (isPath)
         {
-            var label = new System.Windows.Controls.Label { Content = labelText, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("SecondaryTextBrush"), FontSize = 12, Margin = new Thickness(0, 0, 0, 4) };
-            container.Children.Add(label);
+            var textBlock = new TextBlock { Text = labelText, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("SecondaryTextBrush"), FontSize = 12, Margin = new Thickness(0, 0, 0, 6) };
+            container.Children.Add(textBlock);
             var selector = new PathSelector 
             { 
                 Title = labelText, 
@@ -192,8 +192,8 @@ public class ProfileUIService
         }
         else
         {
-            var label = new System.Windows.Controls.Label { Content = labelText, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("SecondaryTextBrush"), FontSize = 12, Margin = new Thickness(0, 0, 0, 4) };
-            container.Children.Add(label);
+            var textBlock = new TextBlock { Text = labelText, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("SecondaryTextBrush"), FontSize = 12, Margin = new Thickness(0, 0, 0, 6) };
+            container.Children.Add(textBlock);
             var textBox = new System.Windows.Controls.TextBox 
             { 
                 Text = value,
@@ -209,17 +209,19 @@ public class ProfileUIService
     {
         return new Border
         {
-            Padding = new Thickness(16),
-            Margin = new Thickness(0, 0, 0, 16),
+            Padding = new Thickness(20),
+            Margin = new Thickness(0, 0, 0, 24),
             Background = (System.Windows.Media.Brush)Application.Current.FindResource("MaterialDesignCardBackground"),
-            CornerRadius = new CornerRadius(8)
+            CornerRadius = new CornerRadius(8),
+            BorderBrush = (System.Windows.Media.Brush)Application.Current.FindResource("DevToolsBrushBorder"),
+            BorderThickness = new Thickness(1)
         };
     }
 
     private StackPanel CreateCardHeader(string iconKind, string title)
     {
-        var headerStack = new StackPanel { Orientation = System.Windows.Controls.Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 16) };
-        headerStack.Children.Add(new PackIcon { Kind = (PackIconKind)System.Enum.Parse(typeof(PackIconKind), iconKind), Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("AccentBrush"), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) });
+        var headerStack = new StackPanel { Orientation = System.Windows.Controls.Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 20) };
+        headerStack.Children.Add(new PackIcon { Kind = (PackIconKind)System.Enum.Parse(typeof(PackIconKind), iconKind), Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("AccentBrush"), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 10, 0), Width = 20, Height = 20 });
         headerStack.Children.Add(new TextBlock { Text = title, FontSize = 16, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("PrimaryTextBrush"), FontWeight = FontWeights.SemiBold });
         return headerStack;
     }
@@ -229,7 +231,7 @@ public class ProfileUIService
         var stack = new StackPanel();
         if (margin.HasValue) stack.Margin = margin.Value;
 
-        stack.Children.Add(new System.Windows.Controls.Label { Content = labelText, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("SecondaryTextBrush"), FontSize = 11, Margin = new Thickness(0, 0, 0, 2) });
+        stack.Children.Add(new TextBlock { Text = labelText, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("SecondaryTextBrush"), FontSize = 11, Margin = new Thickness(0, 0, 0, 6) });
         
         var textBox = new System.Windows.Controls.TextBox
         {
@@ -243,7 +245,7 @@ public class ProfileUIService
 
     private UIElement CreatePathSelector(string title, string key, Dictionary<string, string> options, bool isFolderPicker, Thickness? margin = null)
     {
-        var label = new System.Windows.Controls.Label { Content = title, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("SecondaryTextBrush"), FontSize = 12, Margin = new Thickness(0, 0, 0, 4) };
+        var textBlock = new TextBlock { Text = title, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("SecondaryTextBrush"), FontSize = 12, Margin = new Thickness(0, 0, 0, 6) };
         var selector = new PathSelector
         {
             Title = title,
@@ -253,7 +255,7 @@ public class ProfileUIService
         selector.Tag = key;
         var stack = new StackPanel();
         if (margin.HasValue) stack.Margin = margin.Value;
-        stack.Children.Add(label);
+        stack.Children.Add(textBlock);
         stack.Children.Add(selector);
         return stack; 
     }

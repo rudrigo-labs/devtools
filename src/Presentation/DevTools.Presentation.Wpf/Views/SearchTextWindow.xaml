@@ -29,14 +29,14 @@
 
                 <!-- Termo de Busca -->
                 <StackPanel Margin="0,10,0,0">
-                    <Label Content="Texto para Pesquisar:"/>
+                    <Label Content="Texto para Pesquisar:" Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <TextBox x:Name="SearchTextInput" Style="{StaticResource ModernTextBoxStyle}" />
                 </StackPanel>
 
                 <!-- Opções -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                    <CheckBox x:Name="UseRegexCheck" Content="Usar Regex" Margin="0,0,20,0"/>
-                    <CheckBox x:Name="CaseSensitiveCheck" Content="Case Sensitive"/>
+                <StackPanel Orientation="Horizontal" Margin="0,15,0,15">
+                    <CheckBox x:Name="UseRegexCheck" Content="Usar Regex" Margin="0,0,20,0" Foreground="White"/>
+                    <CheckBox x:Name="CaseSensitiveCheck" Content="Case Sensitive" Foreground="White"/>
                 </StackPanel>
 
                 <!-- Filtros -->
@@ -47,12 +47,12 @@
                     </Grid.ColumnDefinitions>
                     
                     <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                        <Label Content="Incluir (glob patterns)"/>
+                        <Label Content="Incluir (glob patterns)" Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBox x:Name="IncludePatternInput" ToolTip="Ex: *.cs, *.ts" Style="{StaticResource ModernTextBoxStyle}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                        <Label Content="Excluir (glob patterns)"/>
+                        <Label Content="Excluir (glob patterns)" Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBox x:Name="ExcludePatternInput" ToolTip="Ex: bin, obj, node_modules" Style="{StaticResource ModernTextBoxStyle}"/>
                     </StackPanel>
                 </Grid>
