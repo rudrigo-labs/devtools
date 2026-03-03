@@ -76,10 +76,12 @@ public class TrayService : IDisposable
             setWindow(window);
             _currentToolWindow = window;
 
-            // Set owner to the main window
+            // Set owner and child behavior
             if (_mainWindow != null && window != _mainWindow)
             {
                 window.Owner = _mainWindow;
+                window.ShowInTaskbar = false;
+                window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             }
 
             window.Closed += (_, __) => 
@@ -89,13 +91,16 @@ public class TrayService : IDisposable
                     _currentToolWindow = null;
             };
 
-            // Enforce Bottom-Right Positioning
-            window.Loaded += (s, e) =>
+            // Enforce Bottom-Right Positioning (Optional: only if not centered)
+            if (window.WindowStartupLocation != WindowStartupLocation.CenterOwner)
             {
-                 var screen = SystemParameters.WorkArea;
-                 window.Left = screen.Right - window.ActualWidth - 20;
-                 window.Top = screen.Bottom - window.ActualHeight - 20;
-            };
+                window.Loaded += (s, e) =>
+                {
+                     var screen = SystemParameters.WorkArea;
+                     window.Left = screen.Right - window.ActualWidth - 20;
+                     window.Top = screen.Bottom - window.ActualHeight - 20;
+                };
+            }
 
             window.Show();
         });

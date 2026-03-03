@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Ngrok Controller" Height="640" Width="900" WindowStartupLocation="CenterScreen"
+        Title="Ngrok Local Tunnel" Height="640" Width="900" WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
 
     <Window.Resources>

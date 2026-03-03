@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Gerenciador de Túneis SSH" Height="640" Width="900" WindowStartupLocation="CenterScreen"
-        Style="{StaticResource ModernWindowStyle}">
+        Title="Túnel SSH" Height="640" Width="900" WindowStartupLocation="CenterOwner"
+         ShowInTaskbar="False"
+         Style="{StaticResource ModernWindowStyle}">
 
     <Window.Resources>
         <Style TargetType="ListBox">

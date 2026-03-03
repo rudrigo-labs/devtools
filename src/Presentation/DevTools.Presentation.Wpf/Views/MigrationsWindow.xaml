@@ -6,7 +6,8 @@
         xmlns:components="clr-namespace:DevTools.Presentation.Wpf.Components"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="EF Core Migrations" Height="720" Width="900" WindowStartupLocation="CenterScreen"
+        Title="EF Core Migrations" Height="720" Width="900" WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize">
 

@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="DevTools — Jobs" Height="640" Width="900"
+        Title="Centro de Execuções (Jobs)" Height="640" Width="900" WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
 
     <c:DevToolsToolFrame x:Name="MainFrame"

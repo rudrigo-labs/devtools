@@ -6,7 +6,8 @@
         xmlns:components="clr-namespace:DevTools.Presentation.Wpf.Components"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Buscar Texto em Arquivos" Height="640" Width="900" WindowStartupLocation="CenterScreen"
+        Title="Buscar Texto em Arquivos" Height="640" Width="900" WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
 
     <c:DevToolsToolFrame x:Name="MainFrame"
