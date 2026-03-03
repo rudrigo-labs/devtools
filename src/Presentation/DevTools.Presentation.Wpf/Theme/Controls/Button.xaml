@@ -18,7 +18,7 @@
                     <Border x:Name="border" Background="{TemplateBinding Background}" 
                             CornerRadius="6" 
                             Padding="{TemplateBinding Padding}"
-                            BorderBrush="{Binding BorderBrush, RelativeSource={RelativeSource TemplatedParent}, FallbackValue={StaticResource DevToolsBrushBorder}}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}">
                         <Border.Effect>
                             <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>

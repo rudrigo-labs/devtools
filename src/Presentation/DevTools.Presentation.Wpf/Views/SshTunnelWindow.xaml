@@ -45,9 +45,9 @@
                          PrimaryButtonClick="ToggleTunnel_Click"
                          SecondaryButtonClick="CloseButton_Click"
                          CloseButtonClick="CloseButton_Click">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,20,0,0">
-            <StackPanel>
-                <Grid Margin="0,10,0,0">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,10,0,0">
+            <StackPanel Margin="0,0,20,0">
+                <Grid Margin="0,0,0,15">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="10"/>
@@ -63,46 +63,58 @@
                         </StackPanel>
                     </Grid>
 
-                    <Label Content="Usuário SSH"/>
-                    <TextBox x:Name="SshUserInput" Style="{StaticResource ModernTextBoxStyle}"/>
+                    <StackPanel Margin="0,0,0,15">
+                        <Label Content="Usuário SSH"/>
+                        <TextBox x:Name="SshUserInput" Style="{StaticResource ModernTextBoxStyle}"/>
+                    </StackPanel>
 
-                    <Label Content="Arquivo de Identidade (Chave Privada)"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" x:Name="IdentityFileInput" Style="{StaticResource ModernTextBoxStyle}"/>
-                        <Button Grid.Column="2" Content="Procurar" Click="BrowseKey_Click" Style="{StaticResource SecondaryButtonStyle}" />
-                    </Grid>
+                    <StackPanel Margin="0,0,0,15">
+                        <Label Content="Arquivo de Identidade (Chave Privada)"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" x:Name="IdentityFileInput" Style="{StaticResource ModernTextBoxStyle}"/>
+                            <Button Grid.Column="2" Content="Procurar" Click="BrowseKey_Click" Style="{StaticResource SecondaryButtonStyle}" />
+                        </Grid>
+                    </StackPanel>
 
                     <Separator Background="#3F3F46" Margin="0,15"/>
-                    <TextBlock Text="Mapeamento de Túnel" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10" Foreground="{StaticResource AccentBrush}"/>
+                    <TextBlock Text="Mapeamento de Túnel" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,15" Foreground="{StaticResource AccentBrush}"/>
 
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="30"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         
                         <!-- Local -->
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Local (Sua Máquina)" FontWeight="Bold" Margin="0,0,0,10" Foreground="{StaticResource PrimaryTextBrush}"/>
-                            <Label Content="Host Local (Bind)"/>
-                            <TextBox x:Name="LocalBindInput" Style="{StaticResource ModernTextBoxStyle}"/>
-                            <Label Content="Porta Local"/>
-                            <TextBox x:Name="LocalPortInput" Style="{StaticResource ModernTextBoxStyle}"/>
+                            <TextBlock Text="Local (Sua Máquina)" FontWeight="Bold" Margin="0,0,0,15" Foreground="{StaticResource PrimaryTextBrush}"/>
+                            <StackPanel Margin="0,0,0,15">
+                                <Label Content="Host Local (Bind)"/>
+                                <TextBox x:Name="LocalBindInput" Style="{StaticResource ModernTextBoxStyle}"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <Label Content="Porta Local"/>
+                                <TextBox x:Name="LocalPortInput" Style="{StaticResource ModernTextBoxStyle}"/>
+                            </StackPanel>
                         </StackPanel>
 
                         <!-- Remote -->
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Remoto (Destino)" FontWeight="Bold" Margin="0,0,0,10" Foreground="{StaticResource PrimaryTextBrush}"/>
-                            <Label Content="Host Remoto"/>
-                            <TextBox x:Name="RemoteHostInput" Style="{StaticResource ModernTextBoxStyle}"/>
-                            <Label Content="Porta Remota"/>
-                            <TextBox x:Name="RemotePortInput" Style="{StaticResource ModernTextBoxStyle}"/>
+                            <TextBlock Text="Remoto (Destino)" FontWeight="Bold" Margin="0,0,0,15" Foreground="{StaticResource PrimaryTextBrush}"/>
+                            <StackPanel Margin="0,0,0,15">
+                                <Label Content="Host Remoto"/>
+                                <TextBox x:Name="RemoteHostInput" Style="{StaticResource ModernTextBoxStyle}"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <Label Content="Porta Remota"/>
+                                <TextBox x:Name="RemotePortInput" Style="{StaticResource ModernTextBoxStyle}"/>
+                            </StackPanel>
                         </StackPanel>
                     </Grid>
                 </StackPanel>
