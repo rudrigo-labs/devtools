@@ -91,10 +91,14 @@ public class TrayService : IDisposable
                 if (_currentToolWindow == window)
                     _currentToolWindow = null;
 
-                // Restore MainWindow focus when tool is closed
-                if (_mainWindow != null && _mainWindow.IsVisible)
+                // Restore MainWindow when tool is closed
+                if (_mainWindow != null)
                 {
-                    _mainWindow.Activate();
+                    _mainWindow.IsEnabled = true; // Ensure it's enabled
+                    if (_mainWindow.IsVisible)
+                    {
+                        _mainWindow.Activate();
+                    }
                 }
             };
 
