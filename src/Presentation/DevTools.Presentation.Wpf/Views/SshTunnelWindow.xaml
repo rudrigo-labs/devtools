@@ -54,19 +54,19 @@
                             <ColumnDefinition Width="80"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Host SSH (Bastion)" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
+                            <Label Content="Host SSH (Bastion)"/>
                             <TextBox x:Name="SshHostInput" Style="{StaticResource ModernTextBoxStyle}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Porta" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
+                            <Label Content="Porta"/>
                             <TextBox x:Name="SshPortInput" Style="{StaticResource ModernTextBoxStyle}"/>
                         </StackPanel>
                     </Grid>
 
-                    <TextBlock Text="Usuário SSH" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
+                    <Label Content="Usuário SSH"/>
                     <TextBox x:Name="SshUserInput" Style="{StaticResource ModernTextBoxStyle}"/>
 
-                    <TextBlock Text="Arquivo de Identidade (Chave Privada)" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
+                    <Label Content="Arquivo de Identidade (Chave Privada)"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -74,7 +74,7 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Grid.Column="0" x:Name="IdentityFileInput" Style="{StaticResource ModernTextBoxStyle}"/>
-                        <Button Grid.Column="2" Content="Procurar" Click="BrowseKey_Click" VerticalAlignment="Top" Style="{StaticResource SecondaryButtonStyle}" />
+                        <Button Grid.Column="2" Content="Procurar" Click="BrowseKey_Click" Style="{StaticResource SecondaryButtonStyle}" />
                     </Grid>
 
                     <Separator Background="#3F3F46" Margin="0,15"/>
@@ -90,18 +90,18 @@
                         <!-- Local -->
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Local (Sua Máquina)" FontWeight="Bold" Margin="0,0,0,10" Foreground="{StaticResource PrimaryTextBrush}"/>
-                            <TextBlock Text="Host Local (Bind)" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
+                            <Label Content="Host Local (Bind)"/>
                             <TextBox x:Name="LocalBindInput" Style="{StaticResource ModernTextBoxStyle}"/>
-                            <TextBlock Text="Porta Local" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
+                            <Label Content="Porta Local"/>
                             <TextBox x:Name="LocalPortInput" Style="{StaticResource ModernTextBoxStyle}"/>
                         </StackPanel>
 
                         <!-- Remote -->
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Remoto (Destino)" FontWeight="Bold" Margin="0,0,0,10" Foreground="{StaticResource PrimaryTextBrush}"/>
-                            <TextBlock Text="Host Remoto" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
+                            <Label Content="Host Remoto"/>
                             <TextBox x:Name="RemoteHostInput" Style="{StaticResource ModernTextBoxStyle}"/>
-                            <TextBlock Text="Porta Remota" Margin="0,0,0,5" Foreground="{StaticResource SecondaryTextBrush}"/>
+                            <Label Content="Porta Remota"/>
                             <TextBox x:Name="RemotePortInput" Style="{StaticResource ModernTextBoxStyle}"/>
                         </StackPanel>
                     </Grid>

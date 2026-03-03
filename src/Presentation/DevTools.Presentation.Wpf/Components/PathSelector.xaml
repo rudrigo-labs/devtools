@@ -5,11 +5,24 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="400">
     <StackPanel>
-        <TextBlock x:Name="TitleBlock"
-                   Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                   Foreground="#AAAAAA"
-                   Margin="0,0,0,5"
-                   FontSize="12"/>
+        <Label x:Name="TitleBlock"
+               Content="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
+               Padding="0"
+               Margin="0,0,0,5"
+               FontSize="12">
+            <Label.Style>
+                <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+                    <Style.Triggers>
+                        <Trigger Property="Content" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="Content" Value="">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -19,9 +32,8 @@
                      Text="{Binding SelectedPath, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource ModernTextBoxStyle}"
                      IsReadOnly="True"
-                     ToolTip="{Binding SelectedPath, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"
-                     Margin="0,0,10,0"/>
-            <Button Grid.Column="1" Content="Procurar" Style="{StaticResource SecondaryButtonStyle}" Click="Browse_Click" ToolTip="Selecionar pasta/arquivo"/>
+                     ToolTip="{Binding SelectedPath, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"/>
+            <Button Grid.Column="1" Content="Procurar" Style="{StaticResource SecondaryButtonStyle}" Click="Browse_Click" ToolTip="Selecionar pasta/arquivo" Margin="10,0,0,0"/>
         </Grid>
     </StackPanel>
 </UserControl>

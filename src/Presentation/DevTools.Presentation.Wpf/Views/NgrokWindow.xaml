@@ -33,9 +33,9 @@
             </Grid.RowDefinitions>
 
             <!-- New Tunnel Form -->
-            <Border Grid.Row="0" Background="#252526" Padding="20" Margin="0,0,0,10" CornerRadius="4">
+            <Border Grid.Row="0" Background="{DynamicResource DevToolsSurface}" Padding="20" Margin="0,0,0,10" CornerRadius="4">
                 <StackPanel>
-                    <TextBlock Text="Porta Local (ex: 5000)" Margin="0,0,0,5" Foreground="{StaticResource PrimaryTextBrush}"/>
+                    <Label Content="Porta Local (ex: 5000)"/>
                     <TextBox x:Name="PortInput" Text="5000" PreviewTextInput="NumberValidationTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
                 </StackPanel>
             </Border>

@@ -12,10 +12,7 @@
 
     <Window.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="../Theme/DarkTheme.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-            
+            <!-- Recursos locais para esta janela -->
             <SolidColorBrush x:Key="SidebarBackground" Color="#252526"/>
             <SolidColorBrush x:Key="ContentBackground" Color="#1E1E1E"/>
             <SolidColorBrush x:Key="AccentColor" Color="#007ACC"/>
@@ -72,8 +69,8 @@
             </Border>
         </materialDesign:DialogHost.DialogContent>
 
-        <Border Background="{StaticResource ContentBackground}" 
-            BorderBrush="{StaticResource DevTools.Brush.Border}" 
+        <Border Background="{DynamicResource ContentBackground}" 
+            BorderBrush="{DynamicResource DevToolsBrushBorder}" 
             BorderThickness="1" 
             CornerRadius="8">
             <Grid>
@@ -83,20 +80,20 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Sidebar -->
-                <Border Grid.Column="0" Background="{StaticResource SidebarBackground}" CornerRadius="8,0,0,8">
+                <Border Grid.Column="0" Background="{DynamicResource SidebarBackground}" CornerRadius="8,0,0,8">
                     <StackPanel Margin="0,20,0,0">
                         <StackPanel Orientation="Horizontal" Margin="20,0,0,30">
-                            <TextBlock Text="&#xE80F;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="{StaticResource AccentColor}" Margin="0,2,10,0"/>
+                            <TextBlock Text="&#xE80F;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="{DynamicResource AccentColor}" Margin="0,2,10,0"/>
                             <TextBlock Text="DevTools" FontSize="18" FontWeight="Bold" Foreground="White"/>
                         </StackPanel>
 
-                        <Button Content="Ferramentas" Style="{StaticResource SidebarButtonStyle}" Tag="Tools" Click="NavButton_Click" Margin="0,0,0,5"/>
-                        <Button Content="Execuções (Jobs)" Style="{StaticResource SidebarButtonStyle}" Tag="Jobs" Click="NavButton_Click" Margin="0,0,0,5"/>
-                        <Button Content="Configurações" Style="{StaticResource SidebarButtonStyle}" Tag="Settings" Click="NavButton_Click" Margin="0,0,0,20"/>
+                        <Button Content="Ferramentas" Style="{DynamicResource SidebarButtonStyle}" Tag="Tools" Click="NavButton_Click" Margin="0,0,0,5"/>
+                        <Button Content="Execuções (Jobs)" Style="{DynamicResource SidebarButtonStyle}" Tag="Jobs" Click="NavButton_Click" Margin="0,0,0,5"/>
+                        <Button Content="Configurações" Style="{DynamicResource SidebarButtonStyle}" Tag="Settings" Click="NavButton_Click" Margin="0,0,0,20"/>
 
-                        <Button Content="Minimizar para Bandeja" Style="{StaticResource SidebarButtonStyle}" Click="CloseButton_Click" Margin="0,0,0,5"/>
+                        <Button Content="Minimizar para Bandeja" Style="{DynamicResource SidebarButtonStyle}" Click="CloseButton_Click" Margin="0,0,0,5"/>
                         <Button Content="Encerrar"
-                            Style="{StaticResource SidebarButtonStyle}"
+                            Style="{DynamicResource SidebarButtonStyle}"
                             Foreground="#E81123"
                             Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
                             CommandTarget="{Binding ElementName=RootDialog}"/>
@@ -170,7 +167,7 @@
                     <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="30,0,30,30" x:Name="MainTabControl">
                         <TabControl.Resources>
                             <Style TargetType="TabItem">
-                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <!-- Removemos a visibilidade Collapsed aqui para garantir que os cards apareçam se selecionado -->
                             </Style>
                         </TabControl.Resources>
 
@@ -182,35 +179,35 @@
 
                                     <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
                                         <!-- Cards de Ferramentas -->
-                                        <Button Style="{StaticResource ToolCardStyle}" Content="Notas Rápidas" 
-                                            Tag="{StaticResource Icon.Notes}" ToolTip="Anotações flutuantes always-on-top" Click="OpenTool_Click" CommandParameter="Notes"/>
+                                        <Button Style="{DynamicResource ToolCardStyle}" Content="Notas Rápidas" 
+                                            Tag="{DynamicResource Icon.Notes}" ToolTip="Anotações flutuantes always-on-top" Click="OpenTool_Click" CommandParameter="Notes"/>
 
-                                        <Button Style="{StaticResource ToolCardStyle}" Content="Organizador de Arquivos" 
-                                            Tag="{StaticResource Icon.Organizer}" ToolTip="Move/organiza por extensão/data conforme categorias" Click="OpenTool_Click" CommandParameter="Organizer"/>
+                                        <Button Style="{DynamicResource ToolCardStyle}" Content="Organizador de Arquivos" 
+                                            Tag="{DynamicResource Icon.Organizer}" ToolTip="Move/organiza por extensão/data conforme categorias" Click="OpenTool_Click" CommandParameter="Organizer"/>
 
-                                        <Button Style="{StaticResource ToolCardStyle}" Content="Renomear Projeto .NET" 
-                                            Tag="{StaticResource Icon.Rename}" ToolTip="Renomeia projeto/solution e namespaces C# com backup" Click="OpenTool_Click" CommandParameter="Rename"/>
+                                        <Button Style="{DynamicResource ToolCardStyle}" Content="Renomear Projeto .NET" 
+                                            Tag="{DynamicResource Icon.Rename}" ToolTip="Renomeia projeto/solution e namespaces C# com backup" Click="OpenTool_Click" CommandParameter="Rename"/>
 
-                                        <Button Style="{StaticResource ToolCardStyle}" Content="Snapshot do Projeto" 
-                                            Tag="{StaticResource Icon.Snapshot}" ToolTip="Gera ZIP do projeto com filtros" Click="OpenTool_Click" CommandParameter="Snapshot"/>
+                                        <Button Style="{DynamicResource ToolCardStyle}" Content="Snapshot do Projeto" 
+                                            Tag="{DynamicResource Icon.Snapshot}" ToolTip="Gera ZIP do projeto com filtros" Click="OpenTool_Click" CommandParameter="Snapshot"/>
 
-                                        <Button Style="{StaticResource ToolCardStyle}" Content="Dividir Imagens" 
-                                            Tag="{StaticResource Icon.ImageSplitter}" ToolTip="Divide imagens em grade configurável" Click="OpenTool_Click" CommandParameter="ImageSplitter"/>
+                                        <Button Style="{DynamicResource ToolCardStyle}" Content="Dividir Imagens" 
+                                            Tag="{DynamicResource Icon.ImageSplitter}" ToolTip="Divide imagens em grade configurável" Click="OpenTool_Click" CommandParameter="ImageSplitter"/>
 
-                                        <Button Style="{StaticResource ToolCardStyle}" Content="Converter para UTF‑8" 
-                                            Tag="{StaticResource Icon.Utf8Convert}" ToolTip="Converte arquivos para UTF‑8 preservando conteúdo" Click="OpenTool_Click" CommandParameter="Utf8Convert"/>
+                                        <Button Style="{DynamicResource ToolCardStyle}" Content="Converter para UTF‑8" 
+                                            Tag="{DynamicResource Icon.Utf8Convert}" ToolTip="Converte arquivos para UTF‑8 preservando conteúdo" Click="OpenTool_Click" CommandParameter="Utf8Convert"/>
 
-                                        <Button Style="{StaticResource ToolCardStyle}" Content="Buscar Texto em Arquivos" 
-                                            Tag="{StaticResource Icon.SearchText}" ToolTip="Busca rápida com regex e filtros" Click="OpenTool_Click" CommandParameter="SearchText"/>
+                                        <Button Style="{DynamicResource ToolCardStyle}" Content="Buscar Texto em Arquivos" 
+                                            Tag="{DynamicResource Icon.SearchText}" ToolTip="Busca rápida com regex e filtros" Click="OpenTool_Click" CommandParameter="SearchText"/>
 
-                                        <Button Style="{StaticResource ToolCardStyle}" Content="EF Core Migrations" 
-                                            Tag="{StaticResource Icon.Migrations}" ToolTip="Cria/aplica migrations em contextos EF Core" Click="OpenTool_Click" CommandParameter="Migrations"/>
+                                        <Button Style="{DynamicResource ToolCardStyle}" Content="EF Core Migrations" 
+                                            Tag="{DynamicResource Icon.Migrations}" ToolTip="Cria/aplica migrations em contextos EF Core" Click="OpenTool_Click" CommandParameter="Migrations"/>
 
-                                        <Button Style="{StaticResource ToolCardStyle}" Content="Coletor de Arquivos" 
-                                            Tag="{StaticResource Icon.Harvest}" ToolTip="Copia arquivos filtrados para pasta de saída" Click="OpenTool_Click" CommandParameter="Harvest"/>
+                                        <Button Style="{DynamicResource ToolCardStyle}" Content="Coletor de Arquivos" 
+                                            Tag="{DynamicResource Icon.Harvest}" ToolTip="Copia arquivos filtrados para pasta de saída" Click="OpenTool_Click" CommandParameter="Harvest"/>
 
-                                        <Button Style="{StaticResource ToolCardStyle}" Content="Túnel SSH" 
-                                            Tag="{StaticResource Icon.SSHTunnel}" ToolTip="Gerenciador de túneis SSH" Click="OpenTool_Click" CommandParameter="SSHTunnel"/>
+                                        <Button Style="{DynamicResource ToolCardStyle}" Content="Túnel SSH" 
+                                            Tag="{DynamicResource Icon.SSHTunnel}" ToolTip="Gerenciador de túneis SSH" Click="OpenTool_Click" CommandParameter="SSHTunnel"/>
 
                                     </WrapPanel>
                                 </StackPanel>
@@ -223,7 +220,7 @@
                                 <TextBlock DockPanel.Dock="Top" Text="Centro de Execuções" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
 
                                 <!-- Detalhes / Logs (Bottom) -->
-                                <Expander DockPanel.Dock="Bottom" Header="Detalhes / Logs" Margin="0,10,0,0" IsExpanded="True" BorderBrush="{StaticResource DevTools.Brush.Border}">
+                                <Expander DockPanel.Dock="Bottom" Header="Detalhes / Logs" Margin="0,10,0,0" IsExpanded="True" BorderBrush="{DynamicResource DevToolsBrushBorder}">
                                     <TextBox Text="{Binding SelectedItem.Logs, ElementName=JobsDataGrid, Mode=OneWay}" 
                                          Height="150" 
                                          Background="#1E1E1E" 
@@ -281,7 +278,7 @@
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <Grid>
-                                                        <ProgressBar Value="{Binding ProgressPercent}" Maximum="100" Height="4" VerticalAlignment="Center" Background="#333333" BorderThickness="0" Foreground="{StaticResource AccentColor}"/>
+                                                        <ProgressBar Value="{Binding ProgressPercent}" Maximum="100" Height="4" VerticalAlignment="Center" Background="#333333" BorderThickness="0" Foreground="{DynamicResource AccentColor}"/>
                                                         <TextBlock Text="{Binding ProgressPercent, StringFormat={}{0}%}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="White" Margin="0,-15,0,0"/>
                                                     </Grid>
                                                 </DataTemplate>
@@ -302,23 +299,23 @@
                                     <TextBlock Text="Configurações do Projeto" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
                                     <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
                                         <!-- Card: SSH -->
-                                        <Button Style="{StaticResource ToolCardStyle}" Tag="{StaticResource Icon.SSHTunnel}" Content="Túnel SSH" 
+                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.SSHTunnel}" Content="Túnel SSH" 
                                             ToolTip="Gerenciar perfis e chaves SSH" Width="200" Click="OpenSshSettings_Click"/>
 
                                         <!-- Card: Harvest -->
-                                        <Button Style="{StaticResource ToolCardStyle}" Tag="{StaticResource Icon.Harvest}" Content="Harvest" 
+                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Harvest}" Content="Harvest" 
                                             ToolTip="Configurar regras de extração e IA" Width="200" Click="OpenHarvestSettings_Click"/>
 
                                         <!-- Card: Organizer -->
-                                        <Button Style="{StaticResource ToolCardStyle}" Tag="{StaticResource Icon.Organizer}" Content="Organizer" 
+                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Organizer}" Content="Organizer" 
                                             ToolTip="Categorias e regras de organização" Width="200" Click="OpenOrganizerSettings_Click"/>
 
                                         <!-- Card: Migrations -->
-                                        <Button Style="{StaticResource ToolCardStyle}" Tag="{StaticResource Icon.Migrations}" Content="Migrations" 
+                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="Migrations" 
                                             ToolTip="Caminhos e contextos do EF Core" Width="200" Click="OpenMigrationsSettings_Click"/>
 
                                         <!-- Card: Ngrok -->
-                                        <Button Style="{StaticResource ToolCardStyle}" Tag="{StaticResource Icon.Ngrok}" Content="Ngrok" 
+                                        <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Ngrok}" Content="Ngrok" 
                                             ToolTip="Caminho do executável e token" Width="200" Click="OpenNgrokSettings_Click"/>
                                     </WrapPanel>
                                 </StackPanel>
@@ -346,9 +343,9 @@
                                         </Grid.ColumnDefinitions>
 
                                         <!-- Lista de Perfis -->
-                                        <Border BorderBrush="{StaticResource DevTools.Brush.Border}" BorderThickness="0" Padding="0,0,10,0">
+                                        <Border BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="0" Padding="0,0,10,0">
                                             <DockPanel>
-                                                <Button DockPanel.Dock="Bottom" Content="+ Novo Perfil" Style="{StaticResource SecondaryButtonStyle}" 
+                                                <Button DockPanel.Dock="Bottom" Content="+ Novo Perfil" Style="{DynamicResource SecondaryButtonStyle}" 
                                                     Height="35" Margin="0,10,0,0" Click="AddSshProfile_Click"/>
                                                 <ListBox x:Name="SshProfilesList" Background="Transparent" BorderThickness="0" 
                                                      Foreground="White" DisplayMemberPath="Name" SelectionChanged="SshProfile_SelectionChanged">
@@ -365,7 +362,7 @@
                                                                         </Border>
                                                                         <ControlTemplate.Triggers>
                                                                             <Trigger Property="IsSelected" Value="True">
-                                                                                <Setter Property="Background" Value="{StaticResource AccentColor}"/>
+                                                                                <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
                                                                             </Trigger>
                                                                             <Trigger Property="IsMouseOver" Value="True">
                                                                                 <Setter Property="Cursor" Value="Hand"/>
@@ -384,10 +381,10 @@
                                         <!-- Formulário de Edição -->
                                         <ScrollViewer Grid.Column="1" Margin="20,0,0,0" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
                                             <StackPanel x:Name="SshEditForm" Visibility="Collapsed">
-                                                <TextBlock Text="Dados de Conexão (SSH)" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,0,0,10"/>
+                                                <TextBlock Text="Dados de Conexão (SSH)" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
 
-                                                <Label Content="Nome do Perfil" Foreground="#CCCCCC"/>
-                                                <TextBox x:Name="SshProfileName" Style="{StaticResource InputStyle}"/>
+                                                <Label Content="Nome do Perfil"/>
+                                                <TextBox x:Name="SshProfileName" Style="{DynamicResource InputStyle}"/>
 
                                                 <Grid Margin="0,10,0,0">
                                                     <Grid.ColumnDefinitions>
@@ -395,19 +392,19 @@
                                                         <ColumnDefinition Width="1*"/>
                                                     </Grid.ColumnDefinitions>
                                                     <StackPanel Margin="0,0,10,0">
-                                                        <Label Content="Host SSH (Servidor)" Foreground="#CCCCCC"/>
-                                                        <TextBox x:Name="SshHost" Style="{StaticResource InputStyle}"/>
+                                                        <Label Content="Host SSH (Servidor)"/>
+                                                        <TextBox x:Name="SshHost" Style="{DynamicResource InputStyle}"/>
                                                     </StackPanel>
                                                     <StackPanel Grid.Column="1">
-                                                        <Label Content="Porta" Foreground="#CCCCCC"/>
-                                                        <TextBox x:Name="SshPort" Style="{StaticResource InputStyle}"/>
+                                                        <Label Content="Porta"/>
+                                                        <TextBox x:Name="SshPort" Style="{DynamicResource InputStyle}"/>
                                                     </StackPanel>
                                                 </Grid>
 
-                                                <Label Content="Usuário SSH" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                                                <TextBox x:Name="SshUser" Style="{StaticResource InputStyle}"/>
+                                                <Label Content="Usuário SSH" Margin="0,10,0,0"/>
+                                                <TextBox x:Name="SshUser" Style="{DynamicResource InputStyle}"/>
 
-                                                <Label Content="Caminho da Chave Privada (Private Key) - .pem/.ppk" Foreground="#CCCCCC" Margin="0,10,0,0"/>
+                                                <Label Content="Caminho da Chave Privada (Private Key) - .pem/.ppk" Margin="0,10,0,0"/>
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*"/>
@@ -416,7 +413,7 @@
                                                     <c:PathSelector x:Name="SshKeyFileSelector" Title="Arquivo de chave" IsFolderPicker="False"/>
                                                 </Grid>
 
-                                                <TextBlock Text="Mapeamento do Túnel" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,20,0,10"/>
+                                                <TextBlock Text="Mapeamento do Túnel" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,20,0,10"/>
 
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
@@ -430,11 +427,11 @@
                                                     <!-- Local -->
                                                     <StackPanel>
                                                         <Label Content="Bind Local (IP)" Foreground="#CCCCCC"/>
-                                                        <TextBox x:Name="LocalBind" Style="{StaticResource InputStyle}"/>
+                                                        <TextBox x:Name="LocalBind" Style="{DynamicResource InputStyle}"/>
                                                     </StackPanel>
                                                     <StackPanel Grid.Column="1" Margin="5,0,0,0">
                                                         <Label Content="Porta Local" Foreground="#CCCCCC"/>
-                                                        <TextBox x:Name="LocalPort" Style="{StaticResource InputStyle}" Width="80"/>
+                                                        <TextBox x:Name="LocalPort" Style="{DynamicResource InputStyle}" Width="80"/>
                                                     </StackPanel>
 
                                                     <TextBlock Grid.Column="2" Text="→" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#666" FontSize="16" Margin="0,20,0,0"/>
@@ -442,17 +439,17 @@
                                                     <!-- Remoto -->
                                                     <StackPanel Grid.Column="3">
                                                         <Label Content="Host Remoto (Destino)" Foreground="#CCCCCC"/>
-                                                        <TextBox x:Name="RemoteHost" Style="{StaticResource InputStyle}"/>
+                                                        <TextBox x:Name="RemoteHost" Style="{DynamicResource InputStyle}"/>
                                                     </StackPanel>
                                                     <StackPanel Grid.Column="4" Margin="5,0,0,0">
                                                         <Label Content="Porta Remota" Foreground="#CCCCCC"/>
-                                                        <TextBox x:Name="RemotePort" Style="{StaticResource InputStyle}" Width="80"/>
+                                                        <TextBox x:Name="RemotePort" Style="{DynamicResource InputStyle}" Width="80"/>
                                                     </StackPanel>
                                                 </Grid>
 
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
                                                     <Button Content="Remover Perfil" Click="DeleteSshProfile_Click" Background="Transparent" Foreground="#E81123" BorderThickness="0" Margin="0,0,10,0"/>
-                                                    <Button Content="Salvar Alterações" Click="SaveSshProfile_Click" Style="{StaticResource PrimaryButtonStyle}" Width="150"/>
+                                                    <Button Content="Salvar Alterações" Click="SaveSshProfile_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="150"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </ScrollViewer>
@@ -475,7 +472,7 @@
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
-                                            <TextBlock Text="Regras de Filtragem" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,0,0,10"/>
+                                            <TextBlock Text="Regras de Filtragem" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
 
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
@@ -486,13 +483,13 @@
 
                                                 <StackPanel>
                                                     <Label Content="Extensões Permitidas (separadas por vírgula)" Foreground="#CCCCCC"/>
-                                                    <TextBox x:Name="HarvestExtensions" Style="{StaticResource ModernTextBoxStyle}" 
+                                                    <TextBox x:Name="HarvestExtensions" Style="{DynamicResource ModernTextBoxStyle}" 
                                                          Height="100" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
                                                 </StackPanel>
 
                                                 <StackPanel Grid.Column="2">
                                                     <Label Content="Pastas Ignoradas (separadas por vírgula)" Foreground="#CCCCCC"/>
-                                                    <TextBox x:Name="HarvestExcludeDirs" Style="{StaticResource ModernTextBoxStyle}" 
+                                                    <TextBox x:Name="HarvestExcludeDirs" Style="{DynamicResource ModernTextBoxStyle}" 
                                                          Height="100" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
                                                 </StackPanel>
                                             </Grid>
@@ -505,11 +502,11 @@
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel>
                                                     <Label Content="Tamanho Máximo de Arquivo (KB)" Foreground="#CCCCCC"/>
-                                                    <TextBox x:Name="HarvestMaxFileSizeInput" Style="{StaticResource InputStyle}"/>
+                                                    <TextBox x:Name="HarvestMaxFileSizeInput" Style="{DynamicResource InputStyle}"/>
                                                 </StackPanel>
                                             </Grid>
 
-                                            <TextBlock Text="Limites Padrão" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,20,0,10"/>
+                                            <TextBlock Text="Limites Padrão" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,20,0,10"/>
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
@@ -518,15 +515,15 @@
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel>
                                                     <Label Content="Score Mínimo (0-100)" Foreground="#CCCCCC"/>
-                                                    <TextBox x:Name="HarvestMinScore" Style="{StaticResource InputStyle}"/>
+                                                    <TextBox x:Name="HarvestMinScore" Style="{DynamicResource InputStyle}"/>
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="2">
                                                     <Label Content="Top Arquivos (Qtd)" Foreground="#CCCCCC"/>
-                                                    <TextBox x:Name="HarvestTopDefault" Style="{StaticResource InputStyle}"/>
+                                                    <TextBox x:Name="HarvestTopDefault" Style="{DynamicResource InputStyle}"/>
                                                 </StackPanel>
                                             </Grid>
 
-                                            <TextBlock Text="Pesos de Relevância (IA)" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,20,0,10"/>
+                                            <TextBlock Text="Pesos de Relevância (IA)" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,20,0,10"/>
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
@@ -536,23 +533,23 @@
 
                                                 <StackPanel>
                                                     <Label Content="Fan-In (Dependências Entrando)" Foreground="#CCCCCC"/>
-                                                    <TextBox x:Name="HarvestWeightFanIn" Style="{StaticResource InputStyle}"/>
+                                                    <TextBox x:Name="HarvestWeightFanIn" Style="{DynamicResource InputStyle}"/>
 
                                                     <Label Content="Densidade de Keywords" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                                                    <TextBox x:Name="HarvestWeightDensity" Style="{StaticResource InputStyle}"/>
+                                                    <TextBox x:Name="HarvestWeightDensity" Style="{DynamicResource InputStyle}"/>
                                                 </StackPanel>
 
                                                 <StackPanel Grid.Column="2">
                                                     <Label Content="Fan-Out (Dependências Saindo)" Foreground="#CCCCCC"/>
-                                                    <TextBox x:Name="HarvestWeightFanOut" Style="{StaticResource InputStyle}"/>
+                                                    <TextBox x:Name="HarvestWeightFanOut" Style="{DynamicResource InputStyle}"/>
 
                                                     <Label Content="Penalidade de Código Morto" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                                                    <TextBox x:Name="HarvestWeightDeadCode" Style="{StaticResource InputStyle}"/>
+                                                    <TextBox x:Name="HarvestWeightDeadCode" Style="{DynamicResource InputStyle}"/>
                                                 </StackPanel>
                                             </Grid>
 
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                                                <Button Content="Salvar Alterações" Click="SaveHarvestSettings_Click" Style="{StaticResource PrimaryButtonStyle}" Width="150"/>
+                                                <Button Content="Salvar Alterações" Click="SaveHarvestSettings_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="150"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </ScrollViewer>
@@ -579,9 +576,9 @@
                                         </Grid.ColumnDefinitions>
 
                                         <!-- Lista de Categorias -->
-                                        <Border BorderBrush="{StaticResource DevTools.Brush.Border}" BorderThickness="0" Padding="0,0,10,0">
+                                        <Border BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="0" Padding="0,0,10,0">
                                             <DockPanel>
-                                                <Button DockPanel.Dock="Bottom" Content="+ Nova Categoria" Style="{StaticResource SecondaryButtonStyle}" 
+                                                <Button DockPanel.Dock="Bottom" Content="+ Nova Categoria" Style="{DynamicResource SecondaryButtonStyle}" 
                                                     Height="35" Margin="0,10,0,0" Click="AddOrganizerCategory_Click"/>
                                                 <ListBox x:Name="OrganizerCategoriesList" Background="Transparent" BorderThickness="0" 
                                                      Foreground="White" DisplayMemberPath="Name" SelectionChanged="OrganizerCategory_SelectionChanged">
@@ -598,7 +595,7 @@
                                                                         </Border>
                                                                         <ControlTemplate.Triggers>
                                                                             <Trigger Property="IsSelected" Value="True">
-                                                                                <Setter Property="Background" Value="{StaticResource AccentColor}"/>
+                                                                                <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
                                                                             </Trigger>
                                                                             <Trigger Property="IsMouseOver" Value="True">
                                                                                 <Setter Property="Cursor" Value="Hand"/>
@@ -617,21 +614,21 @@
                                         <!-- Form Organizer -->
                                         <ScrollViewer Grid.Column="1" Margin="20,0,0,0" VerticalScrollBarVisibility="Auto">
                                             <StackPanel x:Name="OrganizerEditForm" Visibility="Collapsed">
-                                                <TextBlock Text="Detalhes da Categoria" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,0,0,10"/>
+                                                <TextBlock Text="Detalhes da Categoria" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
 
                                                 <Label Content="Nome da Categoria" Foreground="#CCCCCC"/>
-                                                <TextBox x:Name="OrgCatName" Style="{StaticResource InputStyle}"/>
+                                                <TextBox x:Name="OrgCatName" Style="{DynamicResource InputStyle}"/>
 
                                                 <Label Content="Nome da Pasta Destino" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                                                <TextBox x:Name="OrgCatFolder" Style="{StaticResource InputStyle}"/>
+                                                <TextBox x:Name="OrgCatFolder" Style="{DynamicResource InputStyle}"/>
 
                                                 <Label Content="Palavras-Chave (separadas por vírgula)" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                                                <TextBox x:Name="OrgCatKeywords" Style="{StaticResource ModernTextBoxStyle}" 
+                                                <TextBox x:Name="OrgCatKeywords" Style="{DynamicResource ModernTextBoxStyle}" 
                                                      Height="80" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"/>
 
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
                                                     <Button Content="Remover" Click="DeleteOrganizerCategory_Click" Background="Transparent" Foreground="#E81123" BorderThickness="0" Margin="0,0,10,0"/>
-                                                    <Button Content="Salvar Alterações" Click="SaveOrganizerCategory_Click" Style="{StaticResource PrimaryButtonStyle}" Width="150"/>
+                                                    <Button Content="Salvar Alterações" Click="SaveOrganizerCategory_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="150"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </ScrollViewer>
@@ -654,7 +651,7 @@
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0" MaxWidth="600" HorizontalAlignment="Left">
-                                            <TextBlock Text="Caminhos do Projeto" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,0,0,10"/>
+                                            <TextBlock Text="Caminhos do Projeto" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
 
                                             <Label Content="Caminho Raiz do Projeto (Root Path)" Foreground="#CCCCCC"/>
                                             <c:PathSelector x:Name="MigRootPathSelector" Title="Caminho Raiz do Projeto (Root Path)" IsFolderPicker="True"/>
@@ -662,16 +659,16 @@
                                             <Label Content="Caminho do Projeto de Startup (Startup Project)" Foreground="#CCCCCC" Margin="0,10,0,0"/>
                                             <c:PathSelector x:Name="MigStartupPathSelector" Title="Caminho do Projeto de Startup (Startup Project)" IsFolderPicker="True"/>
 
-                                            <TextBlock Text="Configuração do Contexto" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,30,0,10"/>
+                                            <TextBlock Text="Configuração do Contexto" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,30,0,10"/>
 
                                             <Label Content="Nome Completo do DbContext" Foreground="#CCCCCC"/>
-                                            <TextBox x:Name="MigContextInput" Style="{StaticResource InputStyle}" FontFamily="Consolas"/>
+                                            <TextBox x:Name="MigContextInput" Style="{DynamicResource InputStyle}" FontFamily="Consolas"/>
 
                                             <Label Content="Argumentos Adicionais (dotnet ef ...)" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                                            <TextBox x:Name="MigArgsInput" Style="{StaticResource InputStyle}" FontFamily="Consolas"/>
+                                            <TextBox x:Name="MigArgsInput" Style="{DynamicResource InputStyle}" FontFamily="Consolas"/>
 
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                                                <Button Content="Salvar Alterações" Click="SaveMigrationsSettings_Click" Style="{StaticResource PrimaryButtonStyle}" Width="150"/>
+                                                <Button Content="Salvar Alterações" Click="SaveMigrationsSettings_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="150"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </ScrollViewer>
@@ -693,21 +690,21 @@
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0" MaxWidth="600" HorizontalAlignment="Left">
-                                            <TextBlock Text="Execução Local" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,0,0,10"/>
+                                            <TextBlock Text="Execução Local" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
 
                                             <Label Content="Caminho do Executável (ngrok.exe)" Foreground="#CCCCCC"/>
                                             <c:PathSelector x:Name="NgrokExeSelector" Title="Caminho do Executável do Ngrok" IsFolderPicker="False"/>
 
-                                            <TextBlock Text="Autenticação e Argumentos" FontSize="16" Foreground="{StaticResource AccentColor}" Margin="0,30,0,10"/>
+                                            <TextBlock Text="Autenticação e Argumentos" FontSize="16" Foreground="{DynamicResource AccentColor}" Margin="0,30,0,10"/>
 
                                             <Label Content="Auth Token (Opcional - via --authtoken)" Foreground="#CCCCCC"/>
-                                            <TextBox x:Name="NgrokAuthTokenInput" Style="{StaticResource InputStyle}" FontFamily="Consolas"/>
+                                            <TextBox x:Name="NgrokAuthTokenInput" Style="{DynamicResource InputStyle}" FontFamily="Consolas"/>
 
                                             <Label Content="Argumentos Adicionais" Foreground="#CCCCCC" Margin="0,10,0,0"/>
-                                            <TextBox x:Name="NgrokArgsInput" Style="{StaticResource InputStyle}" FontFamily="Consolas"/>
+                                            <TextBox x:Name="NgrokArgsInput" Style="{DynamicResource InputStyle}" FontFamily="Consolas"/>
 
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                                                <Button Content="Salvar Alterações" Click="SaveNgrokSettings_Click" Style="{StaticResource PrimaryButtonStyle}" Width="150"/>
+                                                <Button Content="Salvar Alterações" Click="SaveNgrokSettings_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="150"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </ScrollViewer>

@@ -41,7 +41,7 @@
                     
                     <!-- Ação -->
                     <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                        <TextBlock Text="Ação" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                        <Label Content="Ação"/>
                         <ComboBox x:Name="ActionCombo" SelectionChanged="ActionCombo_SelectionChanged" SelectedIndex="0" Style="{StaticResource ModernComboBoxStyle}" Background="{StaticResource ControlBackgroundBrush}">
                             <ComboBoxItem Content="Add Migration" Tag="Add"/>
                             <ComboBoxItem Content="Remove Migration" Tag="Remove"/>
@@ -51,7 +51,7 @@
                     
                     <!-- Provider -->
                     <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                        <TextBlock Text="Provider" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                        <Label Content="Provider"/>
                         <ComboBox x:Name="ProviderCombo" SelectedIndex="0" Style="{StaticResource ModernComboBoxStyle}" Background="{StaticResource ControlBackgroundBrush}">
                             <ComboBoxItem Content="SQL Server" Tag="SqlServer"/>
                             <ComboBoxItem Content="SQLite" Tag="Sqlite"/>
@@ -62,12 +62,12 @@
 
                 <!-- Campos Específicos -->
                 <StackPanel x:Name="MigrationNamePanel" Margin="0,0,0,15">
-                    <TextBlock Text="Nome da Migration" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                    <Label Content="Nome da Migration"/>
                     <TextBox x:Name="MigrationNameInput" Style="{StaticResource ModernTextBoxStyle}"/>
                 </StackPanel>
 
                 <StackPanel Margin="0,0,0,15">
-                    <TextBlock Text="DbContext Full Name (Opcional)" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,5"/>
+                    <Label Content="DbContext Full Name (Opcional)"/>
                     <TextBox x:Name="DbContextInput" ToolTip="Ex: MyProject.Data.AppDbContext" Style="{StaticResource ModernTextBoxStyle}"/>
                 </StackPanel>
 

@@ -1,0 +1,103 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components">
+    <Style TargetType="{x:Type c:DevToolsToolFrame}">
+        <Setter Property="Background" Value="{DynamicResource DevToolsWindowBackground}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type c:DevToolsToolFrame}">
+                    <Border BorderBrush="{DynamicResource DevToolsBrushBorder}" 
+                            BorderThickness="1" 
+                            CornerRadius="8" 
+                            Background="{TemplateBinding Background}"
+                            ClipToBounds="True">
+                        <Border.Effect>
+                            <DropShadowEffect Color="Black" BlurRadius="15" ShadowDepth="2" Opacity="0.5"/>
+                        </Border.Effect>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="20"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Header -->
+                            <Border Grid.Row="0"
+                                    x:Name="PART_Header"
+                                    Background="{DynamicResource DevToolsSurface}"
+                                    BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="20,14">
+                                <DockPanel>
+                                    <Button x:Name="PART_CloseButton"
+                                            Content="✕"
+                                            DockPanel.Dock="Right"
+                                            Style="{DynamicResource IconButtonStyle}"
+                                            FontSize="14"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            Margin="10,-5,-5,-5"
+                                            Width="30" Height="30"/>
+
+                                    <TextBlock Text="{TemplateBinding Title}"
+                                               FontSize="{DynamicResource DevToolsFontSize.WindowTitle}"
+                                               Foreground="{DynamicResource DevToolsTextPrimary}"
+                                               FontWeight="SemiBold"
+                                               DockPanel.Dock="Left"/>
+                                </DockPanel>
+                            </Border>
+
+                            <!-- Content (no forced scroll - content handles scrolling) -->
+                            <ContentPresenter Grid.Row="1" Margin="30,20"/>
+
+                            <!-- Action Bar -->
+                            <Border Grid.Row="2"
+                                    Background="{DynamicResource DevToolsSurface}"
+                                    BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                    BorderThickness="0,1,0,0"
+                                    Padding="20,10">
+                                <Grid IsSharedSizeScope="True">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="ActionButtonWidth"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="ActionButtonWidth"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Text="{TemplateBinding HelpText}"
+                                               Foreground="{DynamicResource DevToolsTextSecondary}"
+                                               FontSize="{DynamicResource DevToolsFontSize.Label}"
+                                               VerticalAlignment="Center"/>
+
+                                    <Button Grid.Column="1"
+                                            x:Name="PART_SecondaryButton"
+                                            Content="{TemplateBinding SecondaryButtonContent}"
+                                            Command="{TemplateBinding SecondaryCommand}"
+                                            Style="{DynamicResource DevToolsSecondaryButton}"/>
+
+                                    <Button Grid.Column="3"
+                                            x:Name="PART_PrimaryButton"
+                                            Content="{TemplateBinding PrimaryButtonContent}"
+                                            Command="{TemplateBinding PrimaryCommand}"
+                                            Style="{DynamicResource DevToolsPrimaryButton}"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Status Strip -->
+                            <Border Grid.Row="3"
+                                    Background="{DynamicResource DevToolsStatusIdle}">
+                                <TextBlock Text="{TemplateBinding StatusText}"
+                                           Foreground="{DynamicResource DevToolsTextPrimary}"
+                                           FontSize="{DynamicResource DevToolsFontSize.Status}"
+                                           VerticalAlignment="Center"
+                                           Margin="10,0"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

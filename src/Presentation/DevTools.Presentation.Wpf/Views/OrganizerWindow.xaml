@@ -10,7 +10,7 @@
     
     <c:DevToolsToolFrame Title="Organizador de Arquivos"
                          HelpText="Move/organiza por extensão/data conforme categorias"
-                         PrimaryButtonContent="EXECUTAR ORGANIZER"
+                         PrimaryButtonContent="Organizar"
                          SecondaryButtonContent="Cancelar"
                          PrimaryButtonClick="RunButton_Click"
                          SecondaryButtonClick="CloseButton_Click"
