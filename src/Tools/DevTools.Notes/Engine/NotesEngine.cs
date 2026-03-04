@@ -347,17 +347,31 @@ public sealed class NotesEngine : IDevToolEngine<NotesRequest, NotesResponse>
         IProgressReporter? progress,
         CancellationToken ct)
     {
+        if (ShouldUseSimplePathMode(request))
+        {
+            progress?.Report(new ProgressEvent("Loading note", 30, "read"));
+
+            var simpleResult = await _simpleStore.ReadItemAsync(request.NotesRootPath, request.NoteKey!, ct).ConfigureAwait(false);
+            if (!simpleResult.IsSuccess)
+                return RunResult<NotesResponse>.Fail(simpleResult.Errors);
+
+            progress?.Report(new ProgressEvent("Note loaded", 100, "done"));
+            return RunResult<NotesResponse>.Success(new NotesResponse(
+                request.Action,
+                ReadResult: simpleResult.Value));
+        }
+
         var store = ResolveStore(request.NotesRootPath);
         progress?.Report(new ProgressEvent("Loading note", 30, "read"));
 
-        var result = await store.ReadAsync(request.NoteKey!, ct).ConfigureAwait(false);
-        if (!result.IsSuccess)
-            return RunResult<NotesResponse>.Fail(result.Errors);
+        var storeResult = await store.ReadAsync(request.NoteKey!, ct).ConfigureAwait(false);
+        if (!storeResult.IsSuccess)
+            return RunResult<NotesResponse>.Fail(storeResult.Errors);
 
         progress?.Report(new ProgressEvent("Note loaded", 100, "done"));
         return RunResult<NotesResponse>.Success(new NotesResponse(
             request.Action,
-            ReadResult: result.Value));
+            ReadResult: storeResult.Value));
     }
 
     private async Task<RunResult<NotesResponse>> HandleSaveAsync(
@@ -365,20 +379,122 @@ public sealed class NotesEngine : IDevToolEngine<NotesRequest, NotesResponse>
         IProgressReporter? progress,
         CancellationToken ct)
     {
+        if (ShouldUseSimplePathMode(request))
+        {
+            progress?.Report(new ProgressEvent("Saving note", 30, "write"));
+
+            var write = await _simpleStore.WriteItemAsync(
+                request.NotesRootPath,
+                request.NoteKey!,
+                request.Content!,
+                request.Overwrite,
+                ct).ConfigureAwait(false);
+
+            if (!write.IsSuccess || write.Value is null)
+                return RunResult<NotesResponse>.Fail(write.Errors);
+
+            var sync = await SyncIndexAfterSimpleWrite(
+                request.NotesRootPath,
+                request.NoteKey!,
+                request.Content!,
+                ct).ConfigureAwait(false);
+
+            if (!sync.IsSuccess)
+                return RunResult<NotesResponse>.Fail(sync.Errors);
+
+            progress?.Report(new ProgressEvent("Note saved", 100, "done"));
+            return RunResult<NotesResponse>.Success(new NotesResponse(
+                request.Action,
+                WriteResult: write.Value));
+        }
+
         var store = ResolveStore(request.NotesRootPath);
         progress?.Report(new ProgressEvent("Saving note", 30, "write"));
 
-        var result = await store.WriteAsync(request.NoteKey!, request.Content!, request.Overwrite, ct)
+        var storeResult = await store.WriteAsync(request.NoteKey!, request.Content!, request.Overwrite, ct)
             .ConfigureAwait(false);
-        if (!result.IsSuccess)
-            return RunResult<NotesResponse>.Fail(result.Errors);
+        if (!storeResult.IsSuccess)
+            return RunResult<NotesResponse>.Fail(storeResult.Errors);
 
         progress?.Report(new ProgressEvent("Note saved", 100, "done"));
         return RunResult<NotesResponse>.Success(new NotesResponse(
             request.Action,
-            WriteResult: result.Value));
+            WriteResult: storeResult.Value));
     }
 
     private INotesStore ResolveStore(string? rootPath)
         => _store ?? new SystemNotesStore(rootPath ?? string.Empty);
+
+    private async Task<RunResult<bool>> SyncIndexAfterSimpleWrite(
+        string? rootPath,
+        string noteKey,
+        string content,
+        CancellationToken ct)
+    {
+        try
+        {
+            var root = NotesPaths.ResolveRoot(rootPath);
+            var indexStore = new NotesIndexStore();
+            var load = await indexStore.LoadAsync(root, ct).ConfigureAwait(false);
+            if (!load.IsSuccess || load.Value is null)
+                return RunResult<bool>.Fail(load.Errors);
+
+            var index = load.Value;
+            var now = DateTime.UtcNow;
+            var hash = NotesHash.Sha256Hex(content ?? string.Empty);
+            var titleFromFile = InferTitleFromFileName(noteKey);
+
+            var entry = index.Items.FirstOrDefault(
+                x => string.Equals(x.FileName, noteKey, StringComparison.OrdinalIgnoreCase));
+
+            if (entry is null)
+            {
+                entry = new NotesIndexEntry
+                {
+                    Id = Guid.NewGuid().ToString("N"),
+                    Title = titleFromFile,
+                    FileName = noteKey,
+                    CreatedUtc = now,
+                    UpdatedUtc = now,
+                    Sha256 = hash
+                };
+                index.Items.Add(entry);
+            }
+            else
+            {
+                entry.UpdatedUtc = now;
+                entry.Sha256 = hash;
+                if (string.IsNullOrWhiteSpace(entry.Title))
+                    entry.Title = titleFromFile;
+            }
+
+            var save = await indexStore.SaveAsync(root, index, ct).ConfigureAwait(false);
+            if (!save.IsSuccess)
+                return RunResult<bool>.Fail(save.Errors);
+
+            return RunResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return RunResult<bool>.Fail(new ErrorDetail(
+                "notes.simple.index.sync.failed",
+                "Failed to update notes index after save.",
+                Exception: ex));
+        }
+    }
+
+    private static bool ShouldUseSimplePathMode(NotesRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.NoteKey))
+            return false;
+
+        var ext = Path.GetExtension(request.NoteKey);
+        if (string.Equals(ext, ".md", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(ext, ".txt", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return request.NoteKey.Contains('/') || request.NoteKey.Contains('\\');
+    }
 }

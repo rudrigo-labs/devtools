@@ -113,6 +113,73 @@ public sealed class NotesSimpleStore
         return RunResult<NoteListResult>.Success(new NoteListResult(items));
     }
 
+    public async Task<RunResult<NoteReadResult>> ReadItemAsync(
+        string? rootPath,
+        string fileName,
+        CancellationToken ct = default)
+    {
+        var root = NotesPaths.ResolveRoot(rootPath);
+        var resolved = ResolveItemPath(root, fileName);
+        if (!resolved.IsSuccess || resolved.Value is null)
+            return RunResult<NoteReadResult>.Fail(resolved.Errors);
+
+        var path = resolved.Value;
+        try
+        {
+            if (!_fs.FileExists(path))
+                return RunResult<NoteReadResult>.Success(new NoteReadResult(fileName, path, null, false));
+
+            var content = await _fs.ReadAllTextAsync(path, ct).ConfigureAwait(false);
+            return RunResult<NoteReadResult>.Success(new NoteReadResult(fileName, path, content, true));
+        }
+        catch (Exception ex)
+        {
+            return RunResult<NoteReadResult>.Fail(new ErrorDetail(
+                "notes.simple.read.failed",
+                "Failed to read note item.",
+                Cause: path,
+                Exception: ex));
+        }
+    }
+
+    public async Task<RunResult<NoteWriteResult>> WriteItemAsync(
+        string? rootPath,
+        string fileName,
+        string content,
+        bool overwrite = true,
+        CancellationToken ct = default)
+    {
+        var root = NotesPaths.ResolveRoot(rootPath);
+        var resolved = ResolveItemPath(root, fileName);
+        if (!resolved.IsSuccess || resolved.Value is null)
+            return RunResult<NoteWriteResult>.Fail(resolved.Errors);
+
+        var path = resolved.Value;
+        var exists = _fs.FileExists(path);
+
+        if (exists && !overwrite)
+            return RunResult<NoteWriteResult>.Fail(new ErrorDetail("notes.simple.write.exists", "Note already exists.", path));
+
+        try
+        {
+            var dir = Path.GetDirectoryName(path);
+            if (!string.IsNullOrWhiteSpace(dir))
+                _fs.CreateDirectory(dir);
+
+            await _fs.WriteAllTextAsync(path, content ?? string.Empty, ct).ConfigureAwait(false);
+            var bytes = Encoding.UTF8.GetByteCount(content ?? string.Empty);
+            return RunResult<NoteWriteResult>.Success(new NoteWriteResult(fileName, path, bytes, exists));
+        }
+        catch (Exception ex)
+        {
+            return RunResult<NoteWriteResult>.Fail(new ErrorDetail(
+                "notes.simple.write.failed",
+                "Failed to write note item.",
+                Cause: path,
+                Exception: ex));
+        }
+    }
+
     private string EnsureUniqueFileName(string dir, string fileName)
     {
         var candidate = fileName;
@@ -127,6 +194,33 @@ public sealed class NotesSimpleStore
         }
 
         return candidate;
+    }
+
+    private RunResult<string> ResolveItemPath(string root, string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+            return RunResult<string>.Fail(new ErrorDetail("notes.simple.key.required", "Note file name is required."));
+
+        var itemsRoot = Path.GetFullPath(NotesPaths.ItemsDir(root));
+        _fs.CreateDirectory(itemsRoot);
+
+        var normalized = fileName
+            .Replace('/', Path.DirectorySeparatorChar)
+            .Replace('\\', Path.DirectorySeparatorChar)
+            .TrimStart(Path.DirectorySeparatorChar);
+
+        var fullPath = Path.GetFullPath(Path.Combine(itemsRoot, normalized));
+        var rootWithSeparator = itemsRoot.EndsWith(Path.DirectorySeparatorChar)
+            ? itemsRoot
+            : itemsRoot + Path.DirectorySeparatorChar;
+
+        if (!fullPath.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(fullPath, itemsRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            return RunResult<string>.Fail(new ErrorDetail("notes.simple.key.invalid", "Invalid note file path."));
+        }
+
+        return RunResult<string>.Success(fullPath);
     }
 
     private static string NormalizeNoteContent(string title, string content, bool useMarkdown)
