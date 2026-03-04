@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -97,6 +98,12 @@ public partial class SshTunnelWindow : Window
         else
         {
             // Start
+            if (!ValidateInputs(out var validationError))
+            {
+                UiMessageService.ShowError(validationError, "Erro de Validação");
+                return;
+            }
+
             var profile = BuildProfileFromUi();
             if (string.IsNullOrWhiteSpace(profile.SshHost))
             {
@@ -148,6 +155,22 @@ public partial class SshTunnelWindow : Window
             RemoteHost = RemoteHostInput.Text,
             RemotePort = remotePort
         };
+    }
+
+    private bool ValidateInputs(out string errorMessage)
+    {
+        var missing = new List<string>();
+        if (string.IsNullOrWhiteSpace(SshHostInput.Text))
+            missing.Add("Host SSH");
+
+        if (missing.Count > 0)
+        {
+            errorMessage = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
+            return false;
+        }
+
+        errorMessage = string.Empty;
+        return true;
     }
 
     private void UpdateStatusUI()

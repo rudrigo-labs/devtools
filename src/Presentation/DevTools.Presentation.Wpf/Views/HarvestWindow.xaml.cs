@@ -67,6 +67,20 @@ public partial class HarvestWindow : Window
 
     private bool ValidateInputs(out string errorMessage)
     {
+        var missing = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(SourcePathSelector.SelectedPath))
+            missing.Add("Diretório de Origem");
+
+        if (string.IsNullOrWhiteSpace(OutputPathSelector.SelectedPath))
+            missing.Add("Diretório de Destino");
+
+        if (missing.Count > 0)
+        {
+            errorMessage = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
+            return false;
+        }
+
         if (string.IsNullOrWhiteSpace(SourcePathSelector.SelectedPath))
         {
             errorMessage = "Por favor, selecione um diretório de origem.";

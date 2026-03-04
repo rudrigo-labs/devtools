@@ -90,7 +90,7 @@ public partial class OrganizerWindow : Window
     {
         if (string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath))
         {
-            errorMessage = "Por favor, selecione uma pasta de entrada.";
+            errorMessage = "Os campos abaixo não podem ficar em branco:\n- Pasta de Entrada";
             return false;
         }
 

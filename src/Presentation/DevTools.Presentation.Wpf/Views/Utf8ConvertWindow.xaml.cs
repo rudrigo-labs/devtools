@@ -99,6 +99,16 @@ public partial class Utf8ConvertWindow : Window
 
     private bool ValidateInputs(out string errorMessage)
     {
+        var missing = new List<string>();
+        if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
+            missing.Add("Pasta Raiz");
+
+        if (missing.Count > 0)
+        {
+            errorMessage = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
+            return false;
+        }
+
         if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
         {
             errorMessage = "Pasta Raiz é obrigatória.";

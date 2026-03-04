@@ -130,6 +130,18 @@ public partial class RenameWindow : Window
 
     private bool ValidateInputs(out string errorMessage)
     {
+        var missing = new List<string>();
+        if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
+            missing.Add("Pasta Raiz");
+        if (string.IsNullOrWhiteSpace(OldTextBox.Text))
+            missing.Add("Texto Antigo");
+
+        if (missing.Count > 0)
+        {
+            errorMessage = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
+            return false;
+        }
+
         if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
         {
             errorMessage = "Pasta Raiz é obrigatória.";

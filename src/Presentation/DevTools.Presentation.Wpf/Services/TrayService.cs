@@ -18,6 +18,7 @@ public class TrayService : IDisposable
     private readonly SettingsService _settingsService;
     private readonly ConfigService _configService;
     private readonly ProfileManager _profileManager;
+    private readonly GoogleDriveService _googleDriveService;
 
     private TaskbarIcon _taskbarIcon = null!;
     private Window? _jobCenterWindow;
@@ -82,9 +83,6 @@ public class TrayService : IDisposable
                 window.Owner = _mainWindow;
                 window.ShowInTaskbar = false;
                 window.WindowStartupLocation = WindowStartupLocation.Manual;
-                
-                // Modal behavior: Disable MainWindow while tool is open
-                _mainWindow.IsEnabled = false;
             }
 
             window.Closed += (_, __) => 
@@ -96,8 +94,11 @@ public class TrayService : IDisposable
                 // Restore MainWindow when tool is closed
                 if (_mainWindow != null)
                 {
-                    _mainWindow.IsEnabled = true;
-                    _mainWindow.Activate();
+                    _mainWindow.IsEnabled = true; // Ensure it's enabled
+                    if (_mainWindow.IsVisible)
+                    {
+                        _mainWindow.Activate();
+                    }
                 }
             };
 
@@ -151,12 +152,13 @@ public class TrayService : IDisposable
         }
     }
 
-    public TrayService(JobManager jobManager, SettingsService settingsService, ConfigService configService, ProfileManager profileManager)
+    public TrayService(JobManager jobManager, SettingsService settingsService, ConfigService configService, ProfileManager profileManager, GoogleDriveService googleDriveService)
     {
         _jobManager = jobManager;
         _settingsService = settingsService;
         _configService = configService;
         _profileManager = profileManager;
+        _googleDriveService = googleDriveService;
         _jobManager.OnJobCompleted += OnJobCompleted;
     }
 
@@ -327,7 +329,7 @@ public class TrayService : IDisposable
 
     private void ShowMigrationsWindow() => ShowWindow(() => _migrationsWindow, w => _migrationsWindow = w, () => new MigrationsWindow(_jobManager, _settingsService, _configService, _profileManager));
 
-    private void ShowNotesWindow() => ShowWindow(() => _notesWindow, w => _notesWindow = w, () => new NotesWindow(_settingsService));
+    private void ShowNotesWindow() => ShowWindow(() => _notesWindow, w => _notesWindow = w, () => new NotesWindow(_settingsService, _googleDriveService, _configService));
 
     public void ShowJobCenter() => ShowWindow(() => _jobCenterWindow, w => _jobCenterWindow = w, () => new JobCenterWindow(_jobManager));
 

@@ -1,0 +1,97 @@
+<Window x:Class="DevTools.Presentation.Wpf.Views.HelpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Guia de Ajuda"
+        Height="700" Width="800"
+        MinHeight="560" MinWidth="680"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Style="{StaticResource ModernWindowStyle}">
+
+    <Border Background="{DynamicResource WindowBackgroundBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="12">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="25" ShadowDepth="10" Opacity="0.6" Color="Black"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="64"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0"
+                    Background="{DynamicResource ControlBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,0,0,1">
+                <StackPanel Orientation="Horizontal" Margin="20,0">
+                    <materialDesign:PackIcon Kind="HelpCircle"
+                                             Foreground="{DynamicResource AccentBrush}"
+                                             Width="24"
+                                             Height="24"
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,12,0"/>
+                    <TextBlock Text="Guia de Ajuda: Configuração de Backup"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               FontSize="{DynamicResource DevToolsFontSize.WindowTitle}"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <RichTextBox x:Name="HelpContentViewer"
+                         Grid.Row="1"
+                         Margin="22,16,22,16"
+                         Padding="8,2"
+                         Background="Transparent"
+                         Foreground="{DynamicResource PrimaryTextBrush}"
+                         BorderThickness="0"
+                         IsReadOnly="True"
+                         IsDocumentEnabled="True"
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Disabled"/>
+
+            <Border Grid.Row="2"
+                    Background="{DynamicResource ControlBackgroundBrush}"
+                    Padding="20,15"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,1,0,0">
+                <DockPanel LastChildFill="False">
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                        <materialDesign:PackIcon Kind="FilePdfBox"
+                                                 Foreground="{DynamicResource ErrorBrush}"
+                                                 Width="20"
+                                                 Height="20"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,8,0"/>
+                        <TextBlock Text="Deseja levar este guia com você?"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
+                                   VerticalAlignment="Center"
+                                   FontSize="{DynamicResource DevToolsFontSize.Status}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                        <Button x:Name="DownloadPdfButton"
+                                Content="Baixar PDF"
+                                Click="DownloadPdfButton_Click"
+                                Style="{DynamicResource SecondaryButtonStyle}"
+                                Width="120"
+                                Margin="0,0,10,0"/>
+                        <Button x:Name="CloseButton"
+                                Content="Fechar"
+                                Click="CloseButton_Click"
+                                Style="{DynamicResource PrimaryButtonStyle}"
+                                Width="100"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

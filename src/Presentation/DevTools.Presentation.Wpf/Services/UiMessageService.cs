@@ -208,4 +208,72 @@ public static class UiMessageService
         var mb = System.Windows.MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Warning);
         return mb == MessageBoxResult.Yes;
     }
+
+    public static void ShowWarning(string message, string title = "Atenção")
+    {
+        try
+        {
+            var panel = new StackPanel { Width = 360 };
+
+            // Título em Laranja/Amarelo para indicar Warning
+            var titleBlock = new TextBlock
+            {
+                Text = title,
+                FontSize = 18,
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 185, 0)), // Amarelo "Gold"
+                Margin = new Thickness(0, 0, 0, 8)
+            };
+
+            var msgBlock = new TextBlock
+            {
+                Text = message,
+                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 255, 255)),
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(0, 0, 0, 18)
+            };
+
+            var okButton = new System.Windows.Controls.Button
+            {
+                Content = "OK",
+                Padding = new Thickness(14, 6, 14, 6),
+                // Botão com fundo escuro e borda amarela para combinar com o aviso
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(63, 63, 70)),
+                Foreground = System.Windows.Media.Brushes.White,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Right
+            };
+            okButton.Click += (_, _) => MaterialDesignThemes.Wpf.DialogHost.Close("RootDialog");
+
+            var buttons = new StackPanel
+            {
+                Orientation = System.Windows.Controls.Orientation.Horizontal,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Right
+            };
+            buttons.Children.Add(okButton);
+
+            panel.Children.Add(titleBlock);
+            panel.Children.Add(msgBlock);
+            panel.Children.Add(buttons);
+
+            var border = new Border
+            {
+                Padding = new Thickness(20),
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(45, 45, 48)),
+                CornerRadius = new CornerRadius(8),
+                // Borda amarela discreta
+                BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 185, 0)),
+                BorderThickness = new Thickness(1),
+                Child = panel
+            };
+
+            MaterialDesignThemes.Wpf.DialogHost.Show(border, "RootDialog").GetAwaiter().GetResult();
+            return;
+        }
+        catch
+        {
+            // Fallback para MessageBox padrão caso o DialogHost falhe
+        }
+
+        System.Windows.MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Warning);
+    }
 }

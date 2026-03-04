@@ -115,6 +115,10 @@
                         <Button x:Name="ImportButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Importar Backup (ZIP)" Click="ImportButton_Click" Margin="0,0,10,0">
                             <TextBlock Text="&#xE8B5;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                         </Button>
+
+                        <Button x:Name="CloudSyncButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Sincronizar com Google Drive" Click="CloudSyncButton_Click" Margin="0,0,10,0" Visibility="Collapsed">
+                            <TextBlock Text="&#xE83E;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
+                        </Button>
                         
                         <Button x:Name="CloseButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Fechar" Click="CloseButton_Click">
                             <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
@@ -156,6 +160,9 @@
                         </Button>
                         <Button x:Name="SaveButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Salvar (Ctrl+S)" Click="SaveButton_Click">
                             <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
+                        </Button>
+                        <Button x:Name="CloudUploadNoteButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Subir esta nota para o Google Drive" Click="CloudUploadNoteButton_Click" Margin="10,0,0,0" Visibility="Collapsed">
+                            <TextBlock Text="&#xE83E;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                         </Button>
                     </StackPanel>
                 </Border>
