@@ -1,14 +1,28 @@
 name: Build and Test
 
+# Perfis de CI:
+# - quick-dev-check: push em dev (validacao rapida, alvo ~2-5 min)
+# - full-dev-to-main: PR dev -> main (validacao completa, alvo ~8-20 min)
+#
+# Observacao:
+# Tempos variam por cache/restauração de pacotes e carga do runner.
+
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ dev ]
   pull_request:
-    branches: [ main, dev ]
+    branches: [ main ]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-test:
+  # Perfil QUICK (dev): roda apenas testes leves/rapidos para feedback curto.
+  quick-dev-check:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     runs-on: windows-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
@@ -19,11 +33,37 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # Tempo medio esperado: ~2-5 min
+      - name: Quick Tests (dev)
+        run: >
+          dotnet test ./src/Tools/DevTools.Tests/DevTools.Tests.csproj
+          -c Release
+          --verbosity minimal
+          --filter "(FullyQualifiedName~PathFilterTests|FullyQualifiedName~OrganizerEngineTests|FullyQualifiedName~RenameEngineTests|FullyQualifiedName~RoslynRenamerTests|FullyQualifiedName~HarvestEngineTests|FullyQualifiedName~ToolRouterIntegrationTests|FullyQualifiedName~ToolRegistryBehaviorTests)"
+
+  # Perfil FULL: somente PR de dev para main.
+  full-dev-to-main:
+    if: github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev'
+    runs-on: windows-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # Tempo medio esperado: ~1-3 min
       - name: Restore
         run: dotnet restore ./src/DevTools.slnx
 
+      # Tempo medio esperado: ~2-6 min
       - name: Build
         run: dotnet build ./src/DevTools.slnx --no-restore -c Release
 
-      - name: Test
+      # Tempo medio esperado: ~5-12 min
+      - name: Full Tests (dev -> main)
         run: dotnet test ./src/DevTools.slnx --no-build -c Release --verbosity normal
