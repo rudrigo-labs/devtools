@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using DevTools.Presentation.Wpf.Services;
+using DevTools.Presentation.Wpf.ToolRouting;
 using DevTools.SSHTunnel.Models;
 using DevTools.Harvest.Configuration;
 using DevTools.Organizer.Models;
@@ -38,6 +39,7 @@ public partial class MainWindow : Window
     private readonly ProfileUIService _profileUIService;
     private bool _isTestingGoogleDriveConnection;
     private bool _allowCloseForShutdown;
+    private string? _currentEmbeddedToolId;
 
     public MainWindow(TrayService trayService, JobManager jobManager, ConfigService configService, ProfileUIService profileUIService, GoogleDriveService googleDriveService)
     {
@@ -110,36 +112,36 @@ public partial class MainWindow : Window
         _allowCloseForShutdown = true;
     }
 
-    public void ShowEmbeddedTool(string toolTag)
+    public void ShowEmbeddedTool(EmbeddedToolRequest request)
     {
-        switch (toolTag)
+        switch (request.Descriptor.EmbeddedTarget)
         {
-            case "Dashboard":
+            case EmbeddedToolTarget.ToolsHome:
                 ResetToHome();
                 return;
-            case "Jobs":
+            case EmbeddedToolTarget.JobsTab:
                 MainTabControl.SelectedItem = TabJobs;
                 return;
-            case "Logs":
-                EmbeddedToolTitleText.Text = "Logs do Sistema";
-                EmbeddedToolSubtitleText.Text = "Consulta e manutencao de logs no shell principal.";
-                EmbeddedToolContentHost.Content = new EmbeddedLogsView();
-                break;
-            default:
-                EmbeddedToolTitleText.Text = toolTag;
-                EmbeddedToolSubtitleText.Text = "Ferramenta ainda nao migrada para modo embutido.";
-                EmbeddedToolContentHost.Content = new TextBlock
+            case EmbeddedToolTarget.EmbeddedHost:
+                if (request.Descriptor.Singleton
+                    && string.Equals(_currentEmbeddedToolId, request.Descriptor.Id, StringComparison.OrdinalIgnoreCase))
                 {
-                    Text = $"A ferramenta '{toolTag}' ainda sera migrada para EmbeddedTab.",
-                    Foreground = (System.Windows.Media.Brush)FindResource("DevToolsTextSecondary"),
-                    Margin = new Thickness(24),
-                    FontSize = 14,
-                    TextWrapping = TextWrapping.Wrap
-                };
-                break;
-        }
+                    MainTabControl.SelectedItem = TabEmbeddedTool;
+                    return;
+                }
 
-        MainTabControl.SelectedItem = TabEmbeddedTool;
+                _currentEmbeddedToolId = request.Descriptor.Id;
+                EmbeddedToolTitleText.Text = request.Descriptor.Title;
+                EmbeddedToolSubtitleText.Text = string.IsNullOrWhiteSpace(request.Descriptor.Subtitle)
+                    ? "Ferramenta embutida no shell principal."
+                    : request.Descriptor.Subtitle;
+                EmbeddedToolContentHost.Content = request.Content ?? CreateEmbeddedFallback(request.Descriptor.Title);
+                MainTabControl.SelectedItem = TabEmbeddedTool;
+                return;
+            default:
+                ResetToHome();
+                return;
+        }
     }
 
     private void NavButton_Click(object sender, RoutedEventArgs e)
@@ -174,9 +176,21 @@ public partial class MainWindow : Window
         MainTabControl.SelectedItem = TabTools;
     }
 
-    private void TrayService_EmbeddedToolRequested(string toolTag)
+    private void TrayService_EmbeddedToolRequested(EmbeddedToolRequest request)
     {
-        Dispatcher.Invoke(() => ShowEmbeddedTool(toolTag));
+        Dispatcher.Invoke(() => ShowEmbeddedTool(request));
+    }
+
+    private TextBlock CreateEmbeddedFallback(string title)
+    {
+        return new TextBlock
+        {
+            Text = $"A ferramenta '{title}' nao possui conteudo embutido configurado.",
+            Foreground = (System.Windows.Media.Brush)FindResource("DevToolsTextSecondary"),
+            Margin = new Thickness(24),
+            FontSize = 14,
+            TextWrapping = TextWrapping.Wrap
+        };
     }
 
     /// <summary>
