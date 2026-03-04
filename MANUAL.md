@@ -1,171 +1,276 @@
-# Manual do Usuário e Documentação Técnica - DevTools
+# Manual Oficial do DevTools
 
-Bem-vindo ao **DevTools**, uma suíte de ferramentas de desenvolvimento projetada para aumentar a produtividade, automatizar tarefas repetitivas e fornecer utilitários essenciais para o dia a dia de engenharia de software.
+Este manual descreve o uso completo do DevTools na versao atual baseada em WPF.
 
-## 1. Visão Geral
+## 1. Objetivo do sistema
 
-O projeto **DevTools** é composto por uma coleção modular de ferramentas (Tools), acessíveis através de duas interfaces principais:
-1.  **CLI (Command Line Interface)**: Para automação, scripts e uso rápido no terminal.
-2.  **WPF (Windows Presentation Foundation)**: Uma interface gráfica moderna para Windows, com suporte a bandeja do sistema (Tray Icon) e formulários interativos.
+O DevTools e uma suite para acelerar tarefas tecnicas do dia a dia:
 
-### Arquitetura
-O sistema segue uma arquitetura limpa e modular:
--   **Core**: Contém abstrações, modelos comuns e utilitários compartilhados.
--   **Tools**: Cada ferramenta é um projeto independente (ex: `DevTools.Notes`, `DevTools.Ngrok`), garantindo isolamento e facilidade de manutenção.
--   **Presentation**: As camadas de apresentação (CLI e WPF) consomem as ferramentas através de interfaces unificadas (`IDevToolEngine`).
+- processamento de arquivos e texto
+- suporte a manutencao de codigo
+- operacoes de infra (tunel SSH, ngrok, migrations)
+- gestao de notas locais com backup
 
----
+## 2. Como iniciar
 
-## 2. Instalação e Configuração
-
-### Pré-requisitos
--   Windows 10/11
--   .NET SDK (versão mais recente, compatível com o projeto)
-
-### Compilação
-Para compilar todo o projeto, execute na raiz:
+### 2.1 Execucao em desenvolvimento
 
 ```powershell
-dotnet build
+dotnet run --project src/Presentation/DevTools.Presentation.Wpf/DevTools.Presentation.Wpf.csproj
 ```
 
-### Executando a CLI
-A ferramenta de linha de comando pode ser executada diretamente após a compilação:
+### 2.2 Comportamento na bandeja (tray)
+
+- Duplo clique no icone: abre o shell principal
+- Menu de contexto: abre ferramentas diretamente
+- Fechar o shell: oferece minimizar para bandeja ou encerrar
+
+## 3. Shell principal (IDE-style)
+
+O shell possui tres areas principais:
+
+1. Ferramentas
+2. Execucoes (Jobs)
+3. Configuracoes
+
+### 3.1 Ferramentas
+
+Abre as janelas de cada modulo funcional.
+
+### 3.2 Jobs
+
+Mostra tarefas em execucao/concluidas, com status e logs.
+
+### 3.3 Configuracoes
+
+Centraliza configuracoes globais e perfis por ferramenta.
+
+## 4. Ferramentas e uso
+
+## 4.1 Notes
+
+Funcao:
+
+- criar, editar e listar notas
+- salvar em `.txt` ou `.md`
+- exportar/importar backup ZIP
+- sincronizacao opcional com Google Drive
+
+Fluxo de salvamento:
+
+1. salva localmente
+2. se sincronizacao estiver habilitada, envia para nuvem
+
+## 4.2 Organizer
+
+Funcao:
+
+- organizar arquivos em categorias
+- aplicar regras por extensao/palavras-chave
+
+Uso basico:
+
+1. definir pasta de entrada
+2. definir pasta de saida
+3. executar
+
+## 4.3 Harvest
+
+Funcao:
+
+- coletar arquivos de projeto para pasta consolidada
+
+Uso basico:
+
+1. selecionar origem
+2. selecionar destino
+3. ajustar score/filtros
+4. executar
+
+## 4.4 SearchText
+
+Funcao:
+
+- localizar texto em massa em arquivos
+
+Uso basico:
+
+1. informar raiz
+2. informar termo ou padrao
+3. executar busca
+
+## 4.5 Rename
+
+Funcao:
+
+- renomeacao/refatoracao em lote
+
+Uso basico:
+
+1. definir raiz
+2. informar texto antigo/novo
+3. configurar filtros e dry-run
+4. executar
+
+## 4.6 Snapshot
+
+Funcao:
+
+- gerar snapshot estrutural de projeto
+
+Uso basico:
+
+1. selecionar raiz
+2. selecionar formatos
+3. executar
+
+## 4.7 Utf8Convert
+
+Funcao:
+
+- converter arquivos para UTF-8 em lote
+
+Uso basico:
+
+1. selecionar raiz
+2. executar conversao
+
+## 4.8 Image Splitter
+
+Funcao:
+
+- dividir imagem em partes menores
+
+Uso basico:
+
+1. selecionar imagem de entrada
+2. selecionar pasta de saida
+3. ajustar parametros
+4. executar
+
+## 4.9 Migrations
+
+Funcao:
+
+- executar comandos de migration com apoio visual
+
+Uso basico:
+
+1. selecionar projeto
+2. selecionar startup project
+3. informar DbContext
+4. escolher acao
+5. executar
+
+## 4.10 SSH Tunnel
+
+Funcao:
+
+- abrir tunel SSH com perfil
+
+Uso basico:
+
+1. preencher host/usuario/chave/portas
+2. iniciar tunel
+3. encerrar quando finalizar uso
+
+## 4.11 Ngrok
+
+Funcao:
+
+- iniciar e acompanhar tunel ngrok
+
+Uso basico:
+
+1. configurar executavel/token
+2. iniciar tunel
+3. acompanhar URL publica
+
+## 4.12 Logs
+
+Funcao:
+
+- visualizar e limpar logs de aplicacao
+
+## 5. Configuracoes
+
+## 5.1 Perfis por ferramenta
+
+Permite salvar configuracoes recorrentes por ferramenta.
+
+## 5.2 Configuracoes de Notes e Nuvem
+
+- pasta local das notas
+- formato padrao (`.txt`/`.md`)
+- auto sync
+- credenciais Google Drive via UI
+- teste de conexao
+
+## 5.3 Outras configuracoes
+
+- Harvest
+- Organizer
+- Migrations
+- Ngrok
+
+## 6. Persistencia
+
+Modo padrao:
+
+- JSON para configuracoes
+
+Modo opcional:
+
+- SQLite, habilitado por variavel de ambiente:
 
 ```powershell
-# Exemplo de execução
-.\src\Cli\DevTools.Cli\bin\Debug\net10.0\DevTools.Cli.exe [comando]
+$env:DEVTOOLS_STORAGE_BACKEND="sqlite"
 ```
 
-### Executando a Interface Gráfica (WPF)
-O aplicativo WPF pode ser iniciado e ficará residente na bandeja do sistema:
+## 7. Build, testes e release
+
+## 7.1 Build local
 
 ```powershell
-.\src\Presentation\DevTools.Presentation.Wpf\bin\Debug\net10.0\DevTools.Presentation.Wpf.exe
+dotnet build src/DevTools.slnx -c Debug
 ```
 
----
+## 7.2 Testes
 
-## 3. Ferramentas Disponíveis
-
-Abaixo está a documentação detalhada de cada ferramenta incluída na suíte.
-
-### 3.1. Notes (Notas Locais)
-Gerenciador de notas rápido e 100% local. Focado em privacidade e simplicidade.
--   **Funcionalidades**:
-    -   Criar, ler e listar notas em Markdown ou Texto.
-    -   Armazenamento em sistema de arquivos local (JSON index + arquivos).
-    -   **Backup**: Exportação e Importação via arquivos ZIP.
-    -   **Segurança**: Sem dependências de nuvem ou OAuth.
--   **Uso Típico**: Anotações rápidas durante reuniões, snippets de código, logs diários.
-
-### 3.2. Harvest (Colheita de Código)
-Ferramenta para coletar e consolidar arquivos de código fonte de um diretório para análise ou backup.
--   **Funcionalidades**:
-    -   Escaneia um diretório raiz.
-    -   Filtra arquivos baseados em regras (extensões, padrões).
-    -   Copia arquivos relevantes para uma pasta de saída, mantendo ou achatando a estrutura.
-    -   Gera relatórios de "colheita".
-
-### 3.3. Organizer (Organizador de Arquivos)
-Automatiza a organização de arquivos em uma pasta de entrada (Inbox).
--   **Funcionalidades**:
-    -   Analisa arquivos em uma pasta de entrada.
-    -   Aplica regras de classificação (por extensão, data, conteúdo ou palavras-chave).
-    -   Move arquivos para pastas de destino organizadas.
-    -   Suporte a modo "Simulação" (Dry Run) antes de aplicar as mudanças.
-
-### 3.4. Rename (Renomeação em Massa)
-Utilitário avançado para renomear arquivos e diretórios.
--   **Funcionalidades**:
-    -   Renomeação baseada em padrões (Regex).
-    -   Substituição de texto simples.
-    -   **Roslyn Support**: Capacidade de refatoração de símbolos em código C# (se implementado/ativado).
-    -   Preview de alterações antes da execução.
-
-### 3.5. SearchText (Busca Textual)
-Ferramenta de busca de texto em arquivos (similar ao Grep, mas otimizado para o fluxo do DevTools).
--   **Funcionalidades**:
-    -   Busca recursiva em diretórios.
-    -   Suporte a Expressões Regulares (Regex).
-    -   Filtros de inclusão/exclusão de arquivos.
-    -   Relatório detalhado de ocorrências (arquivo, linha, trecho).
-
-### 3.6. Snapshot (Snapshot de Diretório)
-Cria uma "foto" da estrutura de arquivos e pastas.
--   **Funcionalidades**:
-    -   Gera uma representação da árvore de diretórios.
-    -   Formatos de saída: JSON (estruturado), HTML (visualizável), Texto (árvore ASCII).
-    -   Útil para documentar estrutura de projetos ou comparar estados de diretórios.
-
-### 3.7. Utf8Convert (Conversor de Encoding)
-Garante que arquivos de texto estejam na codificação UTF-8.
--   **Funcionalidades**:
-    -   Detecta a codificação atual de arquivos.
-    -   Converte para UTF-8 (com ou sem BOM, configurável).
-    -   Processamento em lote (batch) de diretórios inteiros.
-
-### 3.8. Image (Processamento de Imagem)
-Utilitários para manipulação básica de imagens.
--   **Funcionalidades**:
-    -   **Split**: Divide imagens grandes em partes menores (fatiamento/tiling).
-    -   Útil para processamento de datasets ou otimização de assets web.
-
-### 3.9. SSHTunnel (Túneis SSH)
-Gerenciador de túneis SSH para redirecionamento de portas.
--   **Funcionalidades**:
-    -   Criação e gerenciamento de processos SSH para port forwarding (Local/Remote).
-    -   Monitoramento de status da conexão.
-    -   Reconexão automática (dependendo da configuração).
-
-### 3.10. Ngrok (Gerenciador Ngrok)
-Wrapper para o utilitário Ngrok, facilitando a exposição de portas locais.
--   **Funcionalidades**:
-    -   Inicia túneis HTTP/TCP via Ngrok.
-    -   Gerencia processos do Ngrok.
-    -   Visualização de URLs públicas geradas.
-
-### 3.11. Migrations (EF Core Helper)
-Auxiliar para execução de comandos do Entity Framework Core.
--   **Funcionalidades**:
-    -   Facilita a geração de comandos `dotnet ef`.
-    -   Gerenciamento de migrações de banco de dados.
-
----
-
-## 4. Guia de Uso (Exemplos)
-
-### Exemplo 1: Criando uma nota rápida (CLI)
 ```powershell
-DevTools.Cli.exe notes
-# Selecione a opção "3) Criar nota"
-# Digite o título e o conteúdo
+dotnet test src/Tools/DevTools.Tests/DevTools.Tests.csproj -c Debug
 ```
 
-### Exemplo 2: Convertendo arquivos para UTF-8 (CLI)
+## 7.3 Gerar instalador
+
 ```powershell
-DevTools.Cli.exe utf8convert --path "C:\MeusProjetos\LegacyApp" --pattern "*.cs"
+build\build_installer.bat 1.0.0
 ```
 
-### Exemplo 3: Usando a Interface Gráfica
-1.  Abra o `DevTools.Presentation.Wpf.exe`.
-2.  O ícone aparecerá na bandeja do sistema (perto do relógio).
-3.  Clique com o botão direito para ver o menu rápido ou clique duas vezes para abrir o Dashboard.
-4.  No Dashboard, selecione a ferramenta desejada (ex: **Notes**, **Organizer**) para abrir sua janela de configuração e execução.
+Saida esperada:
 
----
+- `build/out/installer/DevTools_Setup.exe`
 
-## 5. Estrutura de Diretórios (Desenvolvimento)
+## 8. Troubleshooting rapido
 
-Para desenvolvedores que desejam estender o projeto:
+## 8.1 Janela travando ao testar conexao
 
--   `src/Cli`: Ponto de entrada da aplicação Console.
--   `src/Core`: Bibliotecas base.
--   `src/Presentation`: Aplicação WPF.
--   `src/Tools`:
-    -   Cada pasta aqui é uma ferramenta autônoma.
-    -   Para adicionar uma nova ferramenta, crie um novo projeto Class Library em `src/Tools`, implemente `IDevToolEngine` e registre-o no CLI e WPF.
+- validar se campos de credencial estao preenchidos
+- revisar mensagem de validacao no painel de Notes e Nuvem
 
----
+## 8.2 Erro de inicializacao WPF por recurso de tema
 
-*Documentação gerada automaticamente em 12/02/2026.*
+- validar dicionarios de tema carregados
+- rodar build limpo e reabrir
+
+## 8.3 Problemas de permissao de pasta
+
+- testar execucao com pasta de trabalho local do usuario
+- evitar caminhos protegidos sem permissao
+
+## 9. Escopo atual
+
+- Interface oficial: WPF
+- Projeto CLI: obsoleto e fora da solution/instalador
+
+Fim do manual.

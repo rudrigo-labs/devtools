@@ -2,6 +2,8 @@
 
 Data: 2026-03-04
 
+> Nota de contexto (atualizacao posterior): o projeto CLI foi descontinuado e removido da solution e do instalador em ajustes seguintes a este relatorio.
+
 ## 1) Objetivo
 
 Documentar os testes executados no projeto em `src`, registrar o resultado atual e emitir parecer para fechamento da etapa.
@@ -94,4 +96,3 @@ Justificativa:
 2. Melhorias futuras opcionais:
    - testes de carga maior no fluxo ZIP de notas.
    - testes de processo externo real para SSH/ngrok em ambiente dedicado.
-

@@ -1,104 +1,77 @@
-# 🚀 DevTools
+# DevTools
 
-> **Sua suíte de produtividade para engenharia de software.**
-> Um ecossistema modular de ferramentas .NET projetado para automatizar tarefas, organizar arquivos e acelerar o desenvolvimento.
+Suite de produtividade para desenvolvedores, focada em Windows, com shell WPF em estilo IDE, execucao via tray e ferramentas tecnicas para rotina de engenharia.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Platform](https://img.shields.io/badge/platform-windows-lightgrey.svg)
-![.NET](https://img.shields.io/badge/.NET-10.0-purple.svg)
+## Estado atual
 
----
+- Interface oficial: WPF (`src/Presentation/DevTools.Presentation.Wpf`)
+- Projeto CLI: obsoleto (mantido no repositorio apenas para referencia historica)
+- Persistencia: JSON (padrao) ou SQLite (modo opcional)
 
-## 📋 Visão Geral
+## Ferramentas disponiveis
 
-O **DevTools** é uma coleção de utilitários essenciais para desenvolvedores, acessíveis via **Linha de Comando (CLI)** ou **Interface Gráfica (WPF/Tray)**.
+- Notes: notas locais (`.txt`/`.md`), backup ZIP e sincronizacao opcional com Google Drive
+- Organizer: organizacao de arquivos por regras/categorias
+- Harvest: coleta de arquivos para analise
+- SearchText: busca textual em massa com filtros
+- Rename: renomeacao/refatoracao em lote
+- Snapshot: snapshot estrutural de projeto
+- Utf8Convert: conversao de encoding para UTF-8
+- Image Splitter: fatiamento de imagens
+- Migrations: apoio a comandos de migracao
+- SSH Tunnel: tunel SSH com perfis
+- Ngrok: gerenciamento de tunel ngrok
+- Jobs/Logs: acompanhamento de execucoes e diagnostico
 
-O projeto segue uma arquitetura limpa onde cada ferramenta é uma biblioteca isolada (*Engine*), garantindo que a lógica de negócio seja desacoplada da apresentação.
+## Arquitetura
 
-### ✨ Principais Funcionalidades
+- `src/Core`: contratos, modelos e utilitarios base
+- `src/Tools`: engines das ferramentas
+- `src/Presentation/DevTools.Presentation.Wpf`: shell, UI, temas, tray e configuracoes
+- `docs`: documentacao tecnica, operacional e planos
 
-| Ferramenta | Descrição |
-| :--- | :--- |
-| **📝 Notes** | Gerenciador de notas rápido, 100% local (Markdown), com backup ZIP e foco em privacidade. |
-| **🌾 Harvest** | Coletor de código-fonte para análise ou backup, com filtros inteligentes. |
-| **📂 Organizer** | Organiza arquivos em pastas automaticamente baseado em regras (extensão, data, etc). |
-| **🏷️ Rename** | Renomeação em massa avançada com suporte a Regex e preview. |
-| **🔍 SearchText** | Busca textual rápida em diretórios (Grep-like) otimizada para dev. |
-| **📸 Snapshot** | Gera "fotos" da estrutura de diretórios em JSON, HTML ou Árvore de Texto. |
-| **🔣 Utf8Convert** | Detecta e converte codificação de arquivos para UTF-8 em lote. |
-| **🖼️ Image** | Utilitários de imagem, incluindo fatiamento (split) para datasets/web. |
-| **🔒 SSHTunnel** | Gerenciador de túneis SSH para port forwarding local/remoto. |
-| **🌐 Ngrok** | Wrapper para gerenciamento fácil de túneis HTTP/TCP via Ngrok. |
-| **🗄️ Migrations** | Auxiliar para comandos do Entity Framework Core. |
+## Requisitos
 
----
+- Windows 10/11
+- .NET SDK 10.0+
+- Inno Setup 6 (apenas para gerar instalador)
 
-## 🚀 Como Usar
-
-### Pré-requisitos
-*   Windows 10 ou 11
-*   .NET SDK 10.0+
-
-### Instalação e Build
-
-Clone o repositório e compile o projeto:
+## Executar em desenvolvimento
 
 ```powershell
-git clone https://github.com/seu-usuario/devtools.git
-cd devtools
-dotnet build
+dotnet build src/DevTools.slnx -c Debug
+dotnet run --project src/Presentation/DevTools.Presentation.Wpf/DevTools.Presentation.Wpf.csproj
 ```
 
-### 🖥️ Interface Gráfica (WPF)
-A maneira mais fácil de usar. O aplicativo fica na bandeja do sistema (Tray Icon).
+## Testes
 
-Execute:
-`.\src\Presentation\DevTools.Presentation.Wpf\bin\Debug\net10.0\DevTools.Presentation.Wpf.exe`
-
-*   **Clique duplo** no ícone da bandeja para abrir o Dashboard.
-*   **Clique direito** para acesso rápido às ferramentas.
-
-### ⌨️ Linha de Comando (CLI)
-Para automação e scripts.
-
-Execute:
-`.\src\Cli\DevTools.Cli\bin\Debug\net10.0\DevTools.Cli.exe [comando]`
-
-Exemplos:
 ```powershell
-# Criar uma nota
-devcli notes
-
-# Converter arquivos para UTF-8
-devcli utf8convert --path "C:\Projetos\Legacy" --pattern "*.cs"
+dotnet test src/Tools/DevTools.Tests/DevTools.Tests.csproj -c Debug
 ```
 
----
+## Gerar instalador
 
-## 🏗️ Arquitetura
+Script oficial:
 
-O projeto é estruturado em camadas para máxima reutilização:
+```powershell
+build\build_installer.bat 1.0.0
+```
 
-1.  **Core (`DevTools.Core`)**: Contratos, interfaces e utilitários base.
-2.  **Tools (`DevTools.*`)**: Bibliotecas independentes contendo a lógica de cada ferramenta (Engines).
-3.  **Presentation**:
-    *   **CLI (`DevTools.Cli`)**: Interface de terminal.
-    *   **WPF (`DevTools.Presentation.Wpf`)**: Interface gráfica moderna.
+Saida:
 
----
+- `build/out/wpf`
+- `build/out/installer/DevTools_Setup.exe`
 
-## 📚 Documentação
+O instalador inclui o manual oficial em:
 
-Para detalhes completos de cada ferramenta, consulte o [Manual do Usuário](MANUAL.md).
+- `{app}\docs\MANUAL_DEVTOOLS.md`
 
----
+## Documentacao oficial
 
-## 📄 Licença
+- Manual de uso completo: [MANUAL.md](MANUAL.md)
+- Cobertura de testes: [docs/INTEGRATION_TEST_COVERAGE.md](docs/INTEGRATION_TEST_COVERAGE.md)
+- Relatorio de varredura: [docs/RELATORIO_TESTES_E_VARREDURA_GERAL_2026-03-04.md](docs/RELATORIO_TESTES_E_VARREDURA_GERAL_2026-03-04.md)
 
-Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+## Licenca
 
----
-
-<p align="center">
-  Desenvolvido com ❤️ por <b>Rudrigo Labs</b>
-</p>
+MIT. Consulte [LICENSE](LICENSE).
