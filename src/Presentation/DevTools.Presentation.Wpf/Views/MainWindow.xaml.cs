@@ -37,6 +37,7 @@ public partial class MainWindow : Window
     private ToolProfile? _selectedToolProfile;
     private readonly ProfileUIService _profileUIService;
     private bool _isTestingGoogleDriveConnection;
+    private bool _allowCloseForShutdown;
 
     public MainWindow(TrayService trayService, JobManager jobManager, ConfigService configService, ProfileUIService profileUIService, GoogleDriveService googleDriveService)
     {
@@ -48,6 +49,7 @@ public partial class MainWindow : Window
         _googleDriveService = googleDriveService;
 
         _trayService.SetMainWindow(this);
+        _trayService.EmbeddedToolRequested += TrayService_EmbeddedToolRequested;
 
         // Binding direto da coleção de Jobs
         JobsDataGrid.ItemsSource = _jobManager.Jobs;
@@ -103,6 +105,43 @@ public partial class MainWindow : Window
         ShowSettingsList();
     }
 
+    public void AllowCloseForShutdown()
+    {
+        _allowCloseForShutdown = true;
+    }
+
+    public void ShowEmbeddedTool(string toolTag)
+    {
+        switch (toolTag)
+        {
+            case "Dashboard":
+                ResetToHome();
+                return;
+            case "Jobs":
+                MainTabControl.SelectedItem = TabJobs;
+                return;
+            case "Logs":
+                EmbeddedToolTitleText.Text = "Logs do Sistema";
+                EmbeddedToolSubtitleText.Text = "Consulta e manutencao de logs no shell principal.";
+                EmbeddedToolContentHost.Content = new EmbeddedLogsView();
+                break;
+            default:
+                EmbeddedToolTitleText.Text = toolTag;
+                EmbeddedToolSubtitleText.Text = "Ferramenta ainda nao migrada para modo embutido.";
+                EmbeddedToolContentHost.Content = new TextBlock
+                {
+                    Text = $"A ferramenta '{toolTag}' ainda sera migrada para EmbeddedTab.",
+                    Foreground = (System.Windows.Media.Brush)FindResource("DevToolsTextSecondary"),
+                    Margin = new Thickness(24),
+                    FontSize = 14,
+                    TextWrapping = TextWrapping.Wrap
+                };
+                break;
+        }
+
+        MainTabControl.SelectedItem = TabEmbeddedTool;
+    }
+
     private void NavButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is System.Windows.Controls.Button btn && btn.Tag is string tag)
@@ -130,18 +169,30 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BackToToolsFromEmbedded_Click(object sender, RoutedEventArgs e)
+    {
+        MainTabControl.SelectedItem = TabTools;
+    }
+
+    private void TrayService_EmbeddedToolRequested(string toolTag)
+    {
+        Dispatcher.Invoke(() => ShowEmbeddedTool(toolTag));
+    }
+
     /// <summary>
     /// Botão Encerrar escolha:Sim
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private void Shutdown_Click(object sender, RoutedEventArgs e)
+    private async void Shutdown_Click(object sender, RoutedEventArgs e)
     {
-        System.Windows.Application.Current.Shutdown();
+        MaterialDesignThemes.Wpf.DialogHost.Close("RootDialog");
+        await _trayService.RequestExitAsync(skipConfirmation: true);
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
+        CloseDialogMessageText.Text = BuildCloseDialogMessage();
         MaterialDesignThemes.Wpf.DialogHost.Show(RootDialog.DialogContent, "RootDialog");
     }
 
@@ -152,6 +203,12 @@ public partial class MainWindow : Window
 
     private void MinimizeToTray_Click(object sender, RoutedEventArgs e)
     {
+        Hide();
+    }
+
+    private void MinimizeToTrayFromDialog_Click(object sender, RoutedEventArgs e)
+    {
+        MaterialDesignThemes.Wpf.DialogHost.Close("RootDialog");
         Hide();
     }
 
@@ -168,9 +225,42 @@ public partial class MainWindow : Window
 
     private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
+        if (_allowCloseForShutdown)
+        {
+            if (_trayService != null)
+            {
+                _trayService.EmbeddedToolRequested -= TrayService_EmbeddedToolRequested;
+            }
+
+            return;
+        }
+
         // Se o usuário clicar no X ou Alt+F4, mostramos o diálogo em vez de esconder
         e.Cancel = true;
         CloseButton_Click(this, new RoutedEventArgs());
+    }
+
+    private string BuildCloseDialogMessage()
+    {
+        var details = new List<string>();
+        if (_jobManager.RunningJobsCount > 0)
+        {
+            details.Add($"- Jobs em execucao: {_jobManager.RunningJobsCount}");
+        }
+
+        if (_trayService.HasActiveTunnel)
+        {
+            details.Add("- Tunel SSH ativo");
+        }
+
+        if (details.Count == 0)
+        {
+            return "Nenhuma operacao ativa detectada. Escolha uma opcao.";
+        }
+
+        return "Operacoes ativas detectadas:\n"
+            + string.Join("\n", details)
+            + "\n\nEscolha como deseja continuar.";
     }
 
     // --- Settings Navigation Logic ---

@@ -2,7 +2,10 @@ using System;
 using System.Threading.Tasks;
 using System.Windows;
 using DevTools.Core.Configuration;
+using DevTools.Presentation.Wpf.Persistence;
+using DevTools.Presentation.Wpf.Persistence.Stores;
 using DevTools.Presentation.Wpf.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace DevTools.Presentation.Wpf;
 
@@ -14,6 +17,8 @@ public partial class App : System.Windows.Application
     private ProfileManager _profileManager = null!;
     private TrayService _trayService = null!;
     private GoogleDriveService _googleDriveService = null!;
+    private SqliteBootstrapper _sqliteBootstrapper = null!;
+    private StorageBackend _storageBackend;
 
     public App()
     {
@@ -26,10 +31,13 @@ public partial class App : System.Windows.Application
         base.OnStartup(e);
 
         // Bootstrap manual (Pure DI)
+        _storageBackend = StorageBackendResolver.Resolve();
         _jobManager = new JobManager();
         _settingsService = new SettingsService();
         _configService = new ConfigService();
-        _profileManager = new ProfileManager();
+        _sqliteBootstrapper = new SqliteBootstrapper(new SqlitePathProvider());
+        TryInitializeSqlite();
+        _profileManager = CreateProfileManager();
         _googleDriveService = new GoogleDriveService();
 
         var profileUIService = new ProfileUIService(_profileManager);
@@ -76,5 +84,47 @@ public partial class App : System.Windows.Application
             var ex = e.ExceptionObject as Exception;
             AppLogger.Error($"AppDomain Unhandled Exception (Terminating: {e.IsTerminating})", ex);
         };
+    }
+
+    private void TryInitializeSqlite()
+    {
+        if (_storageBackend != StorageBackend.Sqlite)
+        {
+            return;
+        }
+
+        try
+        {
+            _sqliteBootstrapper.EnsureDatabase();
+        }
+        catch (Exception ex)
+        {
+            // Fallback seguro: a aplicacao continua no modo legado baseado em JSON.
+            AppLogger.Error("SQLite bootstrap failed. Continuing with legacy JSON persistence.", ex);
+        }
+    }
+
+    private ProfileManager CreateProfileManager()
+    {
+        if (_storageBackend != StorageBackend.Sqlite)
+        {
+            return new ProfileManager();
+        }
+
+        try
+        {
+            var pathProvider = new SqlitePathProvider();
+            var dbOptions = new DbContextOptionsBuilder<DevToolsDbContext>()
+                .UseSqlite(pathProvider.GetConnectionString())
+                .Options;
+
+            var profileStore = new SqliteProfileStore(dbOptions);
+            return new ProfileManager(profileStore);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.Error("Failed to initialize SQLite profile store. Falling back to JSON profile store.", ex);
+            return new ProfileManager();
+        }
     }
 }

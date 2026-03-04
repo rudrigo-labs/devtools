@@ -1,24 +1,36 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media.Imaging;
 using H.NotifyIcon;
 using System.Drawing; // SystemIcons fallback
 using System.IO;
 using DevTools.Presentation.Wpf.Views;
 using DevTools.Presentation.Wpf.Utilities;
 using DevTools.Core.Configuration;
+using DevTools.SSHTunnel.Engine;
+using DevTools.SSHTunnel.Providers;
 
 namespace DevTools.Presentation.Wpf.Services;
 
 public class TrayService : IDisposable
 {
+    private enum LaunchMode
+    {
+        DetachedWindow,
+        EmbeddedTab,
+        BackgroundOnly
+    }
+
+    private sealed record ToolLaunchDefinition(string Tag, LaunchMode Mode, Action OpenAction);
+
     private readonly JobManager _jobManager;
     private readonly SettingsService _settingsService;
     private readonly ConfigService _configService;
     private readonly ProfileManager _profileManager;
     private readonly GoogleDriveService _googleDriveService;
+    private readonly TunnelService _sharedTunnelService;
+    private readonly Dictionary<string, ToolLaunchDefinition> _toolRegistry = new(StringComparer.OrdinalIgnoreCase);
 
     private TaskbarIcon _taskbarIcon = null!;
     private Window? _jobCenterWindow;
@@ -38,6 +50,7 @@ public class TrayService : IDisposable
     private MigrationsWindow? _migrationsWindow;
     private HarvestWindow? _harvestWindow;
     private LogsWindow? _logsWindow;
+    public event Action<string>? EmbeddedToolRequested;
 
     public void SetMainWindow(MainWindow mainWindow)
     {
@@ -45,6 +58,7 @@ public class TrayService : IDisposable
     }
 
     public bool HasOpenToolWindow => _currentToolWindow != null && _currentToolWindow.IsVisible;
+    public bool HasActiveTunnel => _sharedTunnelService.IsOn;
 
     // Helper to enforce Single Instance and Bottom-Right Positioning
     private void ShowWindow<T>(Func<T?> getWindow, Action<T?> setWindow, Func<T> factory) where T : Window
@@ -116,28 +130,42 @@ public class TrayService : IDisposable
 
     public void OpenTool(string tag)
     {
-        switch (tag)
+        if (string.IsNullOrWhiteSpace(tag))
         {
-            case "HIDE_CURRENT":
+            return;
+        }
+
+        if (string.Equals(tag, "HIDE_CURRENT", StringComparison.OrdinalIgnoreCase))
+        {
+            if (_currentToolWindow != null && _currentToolWindow.IsVisible)
+            {
+                _currentToolWindow.Close();
+            }
+
+            return;
+        }
+
+        if (_toolRegistry.TryGetValue(tag, out var tool))
+        {
+            if (tool.Mode == LaunchMode.EmbeddedTab)
+            {
                 if (_currentToolWindow != null && _currentToolWindow.IsVisible)
                 {
                     _currentToolWindow.Close();
+                    _currentToolWindow = null;
                 }
-                break;
-            case "Notes": ShowNotesWindow(); break;
-            case "Organizer": ShowOrganizerWindow(); break;
-            case "Harvest": OnHarvestClick(this, new RoutedEventArgs()); break;
-            case "SearchText": ShowSearchTextWindow(); break;
-            case "Migrations": ShowMigrationsWindow(); break;
-            case "ImageSplitter": ShowImageSplitWindow(); break;
-            case "Rename": ShowRenameWindow(); break;
-            case "Utf8Convert": ShowUtf8Window(); break;
-            case "Snapshot": ShowSnapshotWindow(); break;
-            case "SSHTunnel": ShowSshTunnelWindow(); break;
-            case "Ngrok": ShowNgrokWindow(); break;
-            case "Jobs": ShowJobCenter(); break;
-            case "Logs": ShowLogsWindow(); break;
+
+                ShowEmbeddedTool(tool.Tag);
+            }
+            else
+            {
+                tool.OpenAction();
+            }
+
+            return;
         }
+
+        AppLogger.Info($"Unknown tool tag received: {tag}");
     }
 
     public void ShowDashboard()
@@ -159,7 +187,101 @@ public class TrayService : IDisposable
         _configService = configService;
         _profileManager = profileManager;
         _googleDriveService = googleDriveService;
+        _sharedTunnelService = new TunnelService(new SystemProcessRunner());
+        RegisterToolDefinitions();
         _jobManager.OnJobCompleted += OnJobCompleted;
+    }
+
+    public async Task RequestExitAsync(bool skipConfirmation = false)
+    {
+        var runningJobs = _jobManager.RunningJobsCount;
+        var hasActiveTunnel = _sharedTunnelService.IsOn;
+
+        if (!skipConfirmation && (runningJobs > 0 || hasActiveTunnel))
+        {
+            var details = new List<string>();
+            if (runningJobs > 0)
+            {
+                details.Add($"- Jobs em execucao: {runningJobs}");
+            }
+
+            if (hasActiveTunnel)
+            {
+                details.Add("- Tunel SSH ativo");
+            }
+
+            var message = "Existem operacoes ativas:\n"
+                + string.Join("\n", details)
+                + "\n\nDeseja encerrar operacoes e sair?";
+
+            System.Windows.MessageBoxResult confirm = System.Windows.MessageBox.Show(
+                message,
+                "Confirmar Saida",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning);
+
+            if (confirm != System.Windows.MessageBoxResult.Yes)
+            {
+                return;
+            }
+        }
+
+        _jobManager.CancelAllRunningJobs();
+
+        if (_sharedTunnelService.IsOn)
+        {
+            try
+            {
+                await _sharedTunnelService.StopAsync(TimeSpan.FromSeconds(5));
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Error("Falha ao encerrar tunel SSH durante saida.", ex);
+            }
+        }
+
+        _mainWindow?.AllowCloseForShutdown();
+        System.Windows.Application.Current.Shutdown();
+    }
+
+    private void RegisterToolDefinitions()
+    {
+        RegisterTool("Dashboard", LaunchMode.EmbeddedTab, ShowDashboard);
+
+        RegisterTool("Notes", LaunchMode.DetachedWindow, ShowNotesWindow);
+        RegisterTool("Organizer", LaunchMode.DetachedWindow, ShowOrganizerWindow);
+        RegisterTool("Harvest", LaunchMode.DetachedWindow, ShowHarvestWindow);
+        RegisterTool("SearchText", LaunchMode.DetachedWindow, ShowSearchTextWindow);
+        RegisterTool("Migrations", LaunchMode.DetachedWindow, ShowMigrationsWindow);
+        RegisterTool("ImageSplitter", LaunchMode.DetachedWindow, ShowImageSplitWindow);
+        RegisterTool("Rename", LaunchMode.DetachedWindow, ShowRenameWindow);
+        RegisterTool("Utf8Convert", LaunchMode.DetachedWindow, ShowUtf8Window);
+        RegisterTool("Snapshot", LaunchMode.DetachedWindow, ShowSnapshotWindow);
+        RegisterTool("SSHTunnel", LaunchMode.DetachedWindow, ShowSshTunnelWindow);
+        RegisterTool("Ngrok", LaunchMode.DetachedWindow, ShowNgrokWindow);
+        RegisterTool("Jobs", LaunchMode.EmbeddedTab, ShowJobCenter);
+        RegisterTool("Logs", LaunchMode.EmbeddedTab, ShowLogsWindow);
+    }
+
+    private void RegisterTool(string tag, LaunchMode mode, Action openAction)
+    {
+        _toolRegistry[tag] = new ToolLaunchDefinition(tag, mode, openAction);
+    }
+
+    private void ShowEmbeddedTool(string tag)
+    {
+        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        {
+            if (_mainWindow != null)
+            {
+                _mainWindow.Show();
+                _mainWindow.Activate();
+                if (_mainWindow.WindowState == WindowState.Minimized)
+                    _mainWindow.WindowState = WindowState.Normal;
+            }
+
+            EmbeddedToolRequested?.Invoke(tag);
+        });
     }
 
     public void Initialize()
@@ -229,67 +351,13 @@ public class TrayService : IDisposable
             {
                 if (item is System.Windows.Controls.MenuItem menuItem && menuItem.Tag is string tag)
                 {
-                    switch (tag)
+                    if (string.Equals(tag, "Exit", StringComparison.OrdinalIgnoreCase))
                     {
-                        case "Dashboard":
-                            menuItem.Click += (s, e) => ShowDashboard();
-                            break;
-
-                        case "Notes":
-                            menuItem.Click += (s, e) => ShowNotesWindow();
-                            break;
-
-                        case "Organizer":
-                            menuItem.Click += (s, e) => ShowOrganizerWindow();
-                            break;
-
-                        case "Harvest":
-                            menuItem.Click += OnHarvestClick;
-                            break;
-
-                        case "SearchText":
-                            menuItem.Click += (s, e) => ShowSearchTextWindow();
-                            break;
-
-                        case "Migrations":
-                            menuItem.Click += (s, e) => ShowMigrationsWindow();
-                            break;
-
-                        case "ImageSplitter":
-                            menuItem.Click += (s, e) => ShowImageSplitWindow();
-                            break;
-
-                        case "Rename":
-                            menuItem.Click += (s, e) => ShowRenameWindow();
-                            break;
-
-                        case "Utf8Convert":
-                            menuItem.Click += (s, e) => ShowUtf8Window();
-                            break;
-
-                        case "Snapshot":
-                            menuItem.Click += (s, e) => ShowSnapshotWindow();
-                            break;
-
-                        case "SSHTunnel":
-                            menuItem.Click += (s, e) => ShowSshTunnelWindow();
-                            break;
-
-                        case "Ngrok":
-                            menuItem.Click += (s, e) => ShowNgrokWindow();
-                            break;
-
-                        case "Jobs":
-                            menuItem.Click += (s, e) => ShowJobCenter();
-                            break;
-
-                        case "Logs":
-                            menuItem.Click += (s, e) => ShowLogsWindow();
-                            break;
-
-                        case "Exit":
-                            menuItem.Click += (s, e) => System.Windows.Application.Current.Shutdown();
-                            break;
+                        menuItem.Click += async (s, e) => await RequestExitAsync();
+                    }
+                    else if (_toolRegistry.ContainsKey(tag))
+                    {
+                        menuItem.Click += (s, e) => OpenTool(tag);
                     }
                 }
             }
@@ -301,11 +369,11 @@ public class TrayService : IDisposable
         var fallbackMenu = new System.Windows.Controls.ContextMenu();
 
         var jobs = new System.Windows.Controls.MenuItem { Header = "Jobs (Fallback)" };
-        jobs.Click += (s, e) => ShowJobCenter();
+        jobs.Click += (s, e) => OpenTool("Jobs");
         fallbackMenu.Items.Add(jobs);
 
         var itemExit = new System.Windows.Controls.MenuItem { Header = "Sair (Fallback)" };
-        itemExit.Click += (s, e) => System.Windows.Application.Current.Shutdown();
+        itemExit.Click += async (s, e) => await RequestExitAsync();
         fallbackMenu.Items.Add(itemExit);
 
         return fallbackMenu;
@@ -321,7 +389,7 @@ public class TrayService : IDisposable
 
     private void ShowSnapshotWindow() => ShowWindow(() => _snapshotWindow, w => _snapshotWindow = w, () => new SnapshotWindow(_jobManager, _settingsService, _profileManager));
 
-    private void ShowSshTunnelWindow() => ShowWindow(() => _sshTunnelWindow, w => _sshTunnelWindow = w, () => new SshTunnelWindow(_jobManager, _settingsService, _configService, _profileManager));
+    private void ShowSshTunnelWindow() => ShowWindow(() => _sshTunnelWindow, w => _sshTunnelWindow = w, () => new SshTunnelWindow(_jobManager, _settingsService, _configService, _profileManager, _sharedTunnelService));
 
     private void ShowNgrokWindow() => ShowWindow(() => _ngrokWindow, w => _ngrokWindow = w, () => new NgrokWindow(_jobManager, _settingsService));
 
@@ -333,10 +401,7 @@ public class TrayService : IDisposable
 
     public void ShowJobCenter() => ShowWindow(() => _jobCenterWindow, w => _jobCenterWindow = w, () => new JobCenterWindow(_jobManager));
 
-    private void OnHarvestClick(object sender, RoutedEventArgs e)
-    {
-        ShowWindow(() => _harvestWindow, w => _harvestWindow = w, () => new HarvestWindow(_jobManager, _settingsService, _profileManager));
-    }
+    private void ShowHarvestWindow() => ShowWindow(() => _harvestWindow, w => _harvestWindow = w, () => new HarvestWindow(_jobManager, _settingsService, _profileManager));
 
     private void ShowLogsWindow() => ShowWindow(() => _logsWindow, w => _logsWindow = w, () => new LogsWindow(_settingsService));
 
@@ -368,5 +433,6 @@ public class TrayService : IDisposable
     public void Dispose()
     {
         _taskbarIcon?.Dispose();
+        _sharedTunnelService?.Dispose();
     }
 }

@@ -18,9 +18,15 @@ public partial class SshTunnelWindow : Window
     private readonly ConfigService _configService;
     private readonly ProfileManager _profileManager;
     private readonly TunnelService _tunnelService;
+    private readonly bool _ownsTunnelService;
     private ToolProfile? _currentProfile;
     
-    public SshTunnelWindow(JobManager jobManager, SettingsService settingsService, ConfigService configService, ProfileManager profileManager)
+    public SshTunnelWindow(
+        JobManager jobManager,
+        SettingsService settingsService,
+        ConfigService configService,
+        ProfileManager profileManager,
+        TunnelService? sharedTunnelService = null)
     {
         InitializeComponent();
         _jobManager = jobManager;
@@ -29,12 +35,20 @@ public partial class SshTunnelWindow : Window
         _profileManager = profileManager;
         
         // Inicializa serviços do SSH Tunnel
-        _tunnelService = new TunnelService(new SystemProcessRunner());
+        _tunnelService = sharedTunnelService ?? new TunnelService(new SystemProcessRunner());
+        _ownsTunnelService = sharedTunnelService == null;
 
         Loaded += OnLoaded;
 
         // Monitora fechamento para salvar posição
         Closing += (s, e) => SavePosition();
+        Closed += (s, e) =>
+        {
+            if (_ownsTunnelService)
+            {
+                _tunnelService.Dispose();
+            }
+        };
         
         // Timer para atualizar status UI (polling simples)
         var timer = new System.Windows.Threading.DispatcherTimer();
