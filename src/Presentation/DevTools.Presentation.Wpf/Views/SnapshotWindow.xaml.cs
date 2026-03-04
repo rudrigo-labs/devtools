@@ -1,15 +1,13 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using System.Collections.Generic;
+using DevTools.Core.Configuration;
+using DevTools.Core.Models;
 using DevTools.Presentation.Wpf.Services;
 using DevTools.Snapshot.Engine;
 using DevTools.Snapshot.Models;
-using DevTools.Core.Models;
-using Microsoft.Win32;
-
-using DevTools.Core.Configuration;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -38,18 +36,15 @@ public partial class SnapshotWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // Tentar carregar perfil padrão
         _currentProfile = _profileManager?.GetDefaultProfile("Snapshot");
         if (_currentProfile != null)
         {
             if (_currentProfile.Options.TryGetValue("project-path", out var proj)) RootPathSelector.SelectedPath = proj;
+            return;
         }
-        else
-        {
-            // Fallback para configurações salvas anteriormente
-            if (!string.IsNullOrEmpty(_settingsService?.Settings.LastSnapshotRootPath))
-                RootPathSelector.SelectedPath = _settingsService.Settings.LastSnapshotRootPath;
-        }
+
+        if (!string.IsNullOrEmpty(_settingsService?.Settings.LastSnapshotRootPath))
+            RootPathSelector.SelectedPath = _settingsService.Settings.LastSnapshotRootPath;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -65,11 +60,13 @@ public partial class SnapshotWindow : Window
     {
         if (!ValidateInputs(out var errorMessage))
         {
-            UiMessageService.ShowError(errorMessage, "Erro de Validação");
+            ValidationUiService.ShowInline(MainFrame, errorMessage);
             return;
         }
 
-        var root = RootPathSelector.SelectedPath;
+        ValidationUiService.ClearInline(MainFrame);
+
+        string root = RootPathSelector.SelectedPath ?? string.Empty;
         var genText = TextCheck.IsChecked ?? true;
         var genHtml = HtmlCheck.IsChecked ?? false;
         var genJsonNested = JsonNestedCheck.IsChecked ?? false;
@@ -80,10 +77,9 @@ public partial class SnapshotWindow : Window
         _settingsService.Settings.LastSnapshotRootPath = root;
         _settingsService.Save();
 
-        // Sincronizar com o perfil padrão se estiver em uso
         if (_currentProfile != null)
         {
-            _currentProfile.Options["project-path"] = root ?? "";
+            _currentProfile.Options["project-path"] = root;
             _profileManager.SaveProfile("Snapshot", _currentProfile);
         }
 
@@ -101,26 +97,16 @@ public partial class SnapshotWindow : Window
             var result = await engine.ExecuteAsync(request, reporter, ct);
 
             return result.IsSuccess
-                ? $"Snapshot gerado com sucesso na pasta 'Snapshot'!"
+                ? "Snapshot gerado com sucesso na pasta 'Snapshot'!"
                 : $"Falha ao gerar Snapshot: {string.Join(", ", result.Errors.Select(x => x.Message))}";
         });
     }
 
     private bool ValidateInputs(out string errorMessage)
     {
-        var missing = new List<string>();
-        if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
-            missing.Add("Pasta do Projeto");
-
-        if (missing.Count > 0)
-        {
-            errorMessage = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
-            return false;
-        }
-
         if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
         {
-            errorMessage = "Pasta do Projeto é obrigatória.";
+            errorMessage = "Os campos abaixo nao podem ficar em branco:\n- Pasta do Projeto";
             return false;
         }
 

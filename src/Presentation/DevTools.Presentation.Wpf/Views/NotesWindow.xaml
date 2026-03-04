@@ -148,11 +148,21 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBox x:Name="NoteTitle" Grid.Row="0" Margin="0,12,0,10"
-                         Style="{StaticResource DevToolsTextInput}"
-                         Height="Auto"
-                         FontSize="18" FontFamily="Segoe UI" FontWeight="SemiBold"
-                         Padding="12,10"/>
+                <StackPanel Grid.Row="0" Margin="0,12,0,10">
+                    <TextBox x:Name="NoteTitle"
+                             Style="{StaticResource DevToolsTextInput}"
+                             Height="Auto"
+                             FontSize="18"
+                             FontFamily="Segoe UI"
+                             FontWeight="SemiBold"
+                             Padding="12,10"/>
+                    <TextBlock x:Name="EditValidationText"
+                               Margin="2,6,2,0"
+                               Foreground="{DynamicResource ErrorBrush}"
+                               FontSize="{DynamicResource DevToolsFontSize.Status}"
+                               TextWrapping="Wrap"
+                               Visibility="Collapsed"/>
+                </StackPanel>
 
                 <TextBox x:Name="NotesContent" Grid.Row="1"
                          Style="{StaticResource DevToolsTextInput}"

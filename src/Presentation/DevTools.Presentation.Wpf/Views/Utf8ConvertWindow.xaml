@@ -10,7 +10,8 @@
         ShowInTaskbar="False"
         Topmost="True">
 
-    <c:DevToolsToolFrame Title="Converter para UTF-8"
+    <c:DevToolsToolFrame x:Name="MainFrame"
+                         Title="Converter para UTF-8"
                          HelpText="Converte arquivos para UTF-8 preservando conteudo."
                          PrimaryButtonContent="Converter"
                          SecondaryButtonContent="Cancelar"

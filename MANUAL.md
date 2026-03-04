@@ -21,8 +21,9 @@ dotnet run --project src/Presentation/DevTools.Presentation.Wpf/DevTools.Present
 
 ### 2.2 Comportamento na bandeja (tray)
 
-- Duplo clique no icone: abre o shell principal
-- Menu de contexto: abre ferramentas diretamente
+- O icone da bandeja e inicializado quando voce usa "Minimizar para Bandeja" ou ao abrir o SSH Tunnel
+- Duplo clique no icone (quando ativo): abre o shell principal
+- Menu de contexto (quando ativo): abre ferramentas diretamente
 - Fechar o shell: oferece minimizar para bandeja ou encerrar
 
 ## 3. Shell principal (IDE-style)
@@ -208,6 +209,7 @@ Permite salvar configuracoes recorrentes por ferramenta.
 
 ## 5.3 Outras configuracoes
 
+- Armazenamento (backend de configuracoes): JSON ou SQLite
 - Harvest
 - Organizer
 - Migrations
@@ -221,7 +223,11 @@ Modo padrao:
 
 Modo opcional:
 
-- SQLite, habilitado por variavel de ambiente:
+- SQLite, selecionavel na UI em Configuracoes > Configuracoes Gerais > Armazenamento
+
+Opcao avancada (manual):
+
+- SQLite via variavel de ambiente:
 
 ```powershell
 $env:DEVTOOLS_STORAGE_BACKEND="sqlite"

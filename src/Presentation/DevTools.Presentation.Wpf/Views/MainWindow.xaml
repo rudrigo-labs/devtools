@@ -396,6 +396,8 @@
                                         <TextBlock Text="Configurações Gerais" Style="{DynamicResource DevToolsSectionTitle}"/>
                                         <WrapPanel Orientation="Horizontal" Margin="0,0,-15,20">
     
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="Armazenamento" 
+                                                ToolTip="Selecionar backend de configuracoes: JSON ou SQLite" Width="200" Click="OpenStorageSettings_Click"/>
 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Harvest}" Content="Harvest" 
                                                 ToolTip="Configurar regras de extração e IA" Width="200" Click="OpenHarvestSettings_Click"/>
@@ -436,6 +438,69 @@
                                         </WrapPanel>
                                     </StackPanel>
                                 </ScrollViewer>
+
+                                <!-- Painel: Configuracao de Armazenamento -->
+                                <Grid x:Name="StorageSettingsPanel" Visibility="Collapsed">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                        <Button Style="{DynamicResource SettingsBackButtonStyle}" Click="BackToSettingsList_Click" />
+                                        <TextBlock Text="Configuracao: Armazenamento" Style="{DynamicResource DevToolsPanelTitle}"/>
+                                    </StackPanel>
+
+                                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                        <StackPanel Margin="0,0,20,0">
+                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                                        <materialDesign:PackIcon Kind="Database" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                        <TextBlock Text="Backend de Configuracoes" Style="{DynamicResource DevToolsCardTitle}"/>
+                                                    </StackPanel>
+
+                                                    <TextBlock Text="Selecione onde as configuracoes e perfis serao persistidos."
+                                                               Foreground="{DynamicResource DevToolsTextSecondary}"
+                                                               Margin="0,0,0,12"
+                                                               TextWrapping="Wrap"/>
+
+                                                    <StackPanel Width="360">
+                                                        <TextBlock Text="Modo de Armazenamento" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <ComboBox x:Name="StorageBackendCombo"
+                                                                  Style="{DynamicResource DevToolsSelectInput}"
+                                                                  SelectionChanged="StorageBackendCombo_SelectionChanged">
+                                                            <ComboBoxItem Tag="json" Content="Arquivo JSON (appsettings.json)"/>
+                                                            <ComboBoxItem Tag="sqlite" Content="Banco SQLite (devtools.db)"/>
+                                                        </ComboBox>
+                                                    </StackPanel>
+
+                                                    <TextBlock x:Name="StorageBackendHintText"
+                                                               Margin="0,12,0,0"
+                                                               Foreground="{DynamicResource SecondaryTextBrush}"
+                                                               TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                            </materialDesign:Card>
+
+                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                                        <materialDesign:PackIcon Kind="InformationOutline" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                        <TextBlock Text="Observacao" Style="{DynamicResource DevToolsCardTitle}"/>
+                                                    </StackPanel>
+                                                    <TextBlock Text="A troca de backend exige reiniciar o DevTools para ser aplicada."
+                                                               Foreground="{DynamicResource DevToolsTextSecondary}"
+                                                               TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                            </materialDesign:Card>
+
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
+                                                <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
+                                                <Button Content="Salvar" Click="SaveStorageSettings_Click" Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Grid>
 
                                 <!-- Painel: Gestão de Perfis de Ferramenta -->
                                 <Grid x:Name="ToolProfilesSettingsPanel" Visibility="Collapsed">
@@ -976,7 +1041,7 @@
                                                 </StackPanel>
 
                                                 <StackPanel>
-                                                    <TextBlock Text="Auth Token (Opcional - via --authtoken)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                    <TextBlock Text="Auth Token (via --authtoken)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                     <TextBox x:Name="NgrokAuthTokenInput" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                 </StackPanel>
 
@@ -1013,7 +1078,8 @@
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="MainFooterButton"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0"
+                            <TextBlock x:Name="MainStatusText"
+                                       Grid.Column="0"
                                        Text="DevTools Hub pronto."
                                        Foreground="{DynamicResource DevToolsTextSecondary}"
                                        FontSize="{DynamicResource DevToolsFontSize.Status}"

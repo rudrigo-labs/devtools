@@ -136,13 +136,8 @@ public class TrayService : IDisposable
                 + string.Join("\n", details)
                 + "\n\nDeseja encerrar operacoes e sair?";
 
-            var confirm = System.Windows.MessageBox.Show(
-                message,
-                "Confirmar Saida",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
-
-            if (confirm != MessageBoxResult.Yes)
+            var confirm = UiMessageService.Confirm(message, "Confirmar Saida");
+            if (!confirm)
             {
                 return;
             }

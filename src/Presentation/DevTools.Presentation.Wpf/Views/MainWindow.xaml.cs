@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,6 +10,7 @@ using DevTools.Organizer.Models;
 using DevTools.Migrations.Models;
 using DevTools.Ngrok.Models;
 using DevTools.Presentation.Wpf.Models;
+using DevTools.Presentation.Wpf.Persistence;
 using System.Collections.Generic;
 using System.Linq;
 using DevTools.Core.Models;
@@ -19,6 +20,8 @@ namespace DevTools.Presentation.Wpf.Views;
 
 public partial class MainWindow : Window
 {
+    private const string StorageBackendEnvVar = "DEVTOOLS_STORAGE_BACKEND";
+
     private readonly TrayService _trayService;
     private readonly JobManager _jobManager;
     private readonly ConfigService _configService;
@@ -53,7 +56,7 @@ public partial class MainWindow : Window
         _trayService.SetMainWindow(this);
         _trayService.EmbeddedToolRequested += TrayService_EmbeddedToolRequested;
 
-        // Binding direto da coleção de Jobs
+        // Binding direto da colecao de Jobs
         JobsDataGrid.ItemsSource = _jobManager.Jobs;
 
         this.Loaded += MainWindow_Loaded;
@@ -67,18 +70,18 @@ public partial class MainWindow : Window
         // Se a principal minimizar, a ferramenta aberta deve acompanhar (se houver)
         if (_trayService.HasOpenToolWindow)
         {
-            // O WPF já lida com Owner minimizando junto se WindowState mudar
-            // mas garantimos que a lógica de Hide/Show funcione
+            // O WPF ja lida com Owner minimizando junto se WindowState mudar
+            // mas garantimos que a logica de Hide/Show funcione
         }
     }
 
     private void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        // Se a MainWindow for escondida (Hide), temos que esconder a ferramenta atual também
-        // para que ela não fique "orfã" na tela
+        // Se a MainWindow for escondida (Hide), temos que esconder a ferramenta atual tambem
+        // para que ela nao fique "orfa" na tela
         if (this.Visibility != Visibility.Visible)
         {
-            _trayService.OpenTool("HIDE_CURRENT"); // Comando interno para esconder se necessário
+            _trayService.OpenTool("HIDE_CURRENT"); // Comando interno para esconder se necessario
         }
     }
 
@@ -194,7 +197,7 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Botão Encerrar escolha:Sim
+    /// Botao Encerrar escolha:Sim
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
@@ -207,7 +210,8 @@ public partial class MainWindow : Window
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
         CloseDialogMessageText.Text = BuildCloseDialogMessage();
-        MaterialDesignThemes.Wpf.DialogHost.Show(RootDialog.DialogContent, "RootDialog");
+        var dialogContent = RootDialog.DialogContent ?? RootDialog;
+        MaterialDesignThemes.Wpf.DialogHost.Show(dialogContent, "RootDialog");
     }
 
     private void MinimizeButton_Click(object sender, RoutedEventArgs e)
@@ -251,7 +255,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        // Se o usuário clicar no X ou Alt+F4, mostramos o diálogo em vez de esconder
+        // Se o usuario clicar no X ou Alt+F4, mostramos o dialogo em vez de esconder
         e.Cancel = true;
         CloseButton_Click(this, new RoutedEventArgs());
     }
@@ -286,12 +290,101 @@ public partial class MainWindow : Window
         SettingsListPanel.Visibility = Visibility.Visible;
         
 
+        StorageSettingsPanel.Visibility = Visibility.Collapsed;
         HarvestSettingsPanel.Visibility = Visibility.Collapsed;
         OrganizerSettingsPanel.Visibility = Visibility.Collapsed;
         MigrationsSettingsPanel.Visibility = Visibility.Collapsed;
         NgrokSettingsPanel.Visibility = Visibility.Collapsed;
         NotesCloudSettingsPanel.Visibility = Visibility.Collapsed;
         ToolProfilesSettingsPanel.Visibility = Visibility.Collapsed;
+    }
+
+    private void OpenStorageSettings_Click(object sender, RoutedEventArgs e)
+    {
+        SettingsListPanel.Visibility = Visibility.Collapsed;
+        StorageSettingsPanel.Visibility = Visibility.Visible;
+        LoadStorageSettingsConfig();
+    }
+
+    private void LoadStorageSettingsConfig()
+    {
+        var currentBackend = StorageBackendResolver.Resolve() == StorageBackend.Sqlite
+            ? "sqlite"
+            : "json";
+
+        foreach (ComboBoxItem item in StorageBackendCombo.Items)
+        {
+            if (string.Equals(item.Tag?.ToString(), currentBackend, StringComparison.OrdinalIgnoreCase))
+            {
+                StorageBackendCombo.SelectedItem = item;
+                break;
+            }
+        }
+
+        UpdateStorageBackendHint(currentBackend);
+    }
+
+    private void StorageBackendCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        UpdateStorageBackendHint(GetSelectedStorageBackend());
+    }
+
+    private string GetSelectedStorageBackend()
+    {
+        var selectedTag = (StorageBackendCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+        return string.Equals(selectedTag, "sqlite", StringComparison.OrdinalIgnoreCase)
+            ? "sqlite"
+            : "json";
+    }
+
+    private void UpdateStorageBackendHint(string backend)
+    {
+        if (StorageBackendHintText == null)
+            return;
+
+        if (string.Equals(backend, "sqlite", StringComparison.OrdinalIgnoreCase))
+        {
+            var dbPath = new SqlitePathProvider().GetDatabasePath();
+            StorageBackendHintText.Text = $"SQLite selecionado. Banco em: {dbPath}";
+            return;
+        }
+
+        var jsonPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json");
+        StorageBackendHintText.Text = $"Arquivo JSON selecionado. Config em: {jsonPath}";
+    }
+
+    private void SaveStorageSettings_Click(object sender, RoutedEventArgs e)
+    {
+        if (StorageBackendCombo.SelectedItem == null)
+        {
+            ShowRequiredFieldsWarning("Os campos abaixo nao podem ficar em branco:\n- Backend de Armazenamento");
+            return;
+        }
+
+        var selectedBackend = GetSelectedStorageBackend();
+        var currentBackend = StorageBackendResolver.Resolve() == StorageBackend.Sqlite
+            ? "sqlite"
+            : "json";
+
+        try
+        {
+            Environment.SetEnvironmentVariable(StorageBackendEnvVar, selectedBackend, EnvironmentVariableTarget.User);
+            Environment.SetEnvironmentVariable(StorageBackendEnvVar, selectedBackend, EnvironmentVariableTarget.Process);
+
+            if (string.Equals(selectedBackend, currentBackend, StringComparison.OrdinalIgnoreCase))
+            {
+                UiMessageService.ShowInfo("Backend mantido com sucesso.", "Sucesso");
+                ShowMainStatusInfo("Configuracao salva com sucesso.");
+                return;
+            }
+
+            UiMessageService.ShowInfo("Backend salvo. Reinicie o DevTools para aplicar a troca entre JSON e SQLite.", "Reinicio necessario");
+            ShowMainStatusInfo("Backend salvo. Reinicie o DevTools para aplicar a troca.");
+        }
+        catch (Exception ex)
+        {
+            UiMessageService.ShowError("Nao foi possivel salvar o backend de armazenamento.", "Erro ao salvar", ex);
+        }
     }
 
     private void BackToSettingsList_Click(object sender, RoutedEventArgs e)
@@ -364,15 +457,22 @@ public partial class MainWindow : Window
     {
         if (_selectedToolProfile == null || string.IsNullOrEmpty(_currentToolForProfiles)) return;
 
-        _selectedToolProfile.Name = ToolProfileNameInput.Text;
+        if (string.IsNullOrWhiteSpace(ToolProfileNameInput.Text))
+        {
+            ShowRequiredFieldsWarning("Os campos abaixo nao podem ficar em branco:\n- Nome do Perfil");
+            return;
+        }
+
+        _selectedToolProfile.Name = ToolProfileNameInput.Text.Trim();
         _selectedToolProfile.IsDefault = ToolProfileIsDefaultCheck.IsChecked == true;
 
-        // Coletar valores dos campos dinâmicos recursivamente
+        // Coletar valores dos campos dinamicos recursivamente
         CollectProfileOptions(ToolProfileFieldsContainer, _selectedToolProfile.Options);
 
         _profileUIService.SaveProfile(_currentToolForProfiles, _selectedToolProfile);
         ToolProfilesList.Items.Refresh();
         UiMessageService.ShowInfo("Perfil salvo com sucesso!", "Sucesso");
+        ShowMainStatusInfo("Perfil salvo com sucesso.");
     }
 
     private void CollectProfileOptions(DependencyObject container, Dictionary<string, string> options)
@@ -444,6 +544,74 @@ public partial class MainWindow : Window
     {
         try
         {
+            var missingFields = new List<string>();
+            if (string.IsNullOrWhiteSpace(HarvestExtensions.Text))
+                missingFields.Add("Extensoes permitidas");
+            if (string.IsNullOrWhiteSpace(HarvestExcludeDirs.Text))
+                missingFields.Add("Pastas excluidas");
+            if (string.IsNullOrWhiteSpace(HarvestMaxFileSizeInput.Text))
+                missingFields.Add("Tamanho maximo por arquivo (KB)");
+            if (string.IsNullOrWhiteSpace(HarvestMinScore.Text))
+                missingFields.Add("Score minimo");
+            if (string.IsNullOrWhiteSpace(HarvestTopDefault.Text))
+                missingFields.Add("Top N default");
+            if (string.IsNullOrWhiteSpace(HarvestWeightFanIn.Text))
+                missingFields.Add("Peso FanIn");
+            if (string.IsNullOrWhiteSpace(HarvestWeightFanOut.Text))
+                missingFields.Add("Peso FanOut");
+            if (string.IsNullOrWhiteSpace(HarvestWeightDensity.Text))
+                missingFields.Add("Peso Keyword Density");
+            if (string.IsNullOrWhiteSpace(HarvestWeightDeadCode.Text))
+                missingFields.Add("Peso DeadCode");
+
+            if (!TryBuildRequiredFieldsMessage(missingFields, out var requiredMessage))
+            {
+                ShowRequiredFieldsWarning(requiredMessage);
+                return;
+            }
+
+            if (!int.TryParse(HarvestMaxFileSizeInput.Text, out int maxFileSizeKb))
+            {
+                ShowRequiredFieldsWarning("O campo 'Tamanho maximo por arquivo (KB)' deve ser numerico.");
+                return;
+            }
+
+            if (!int.TryParse(HarvestMinScore.Text, out int minScore))
+            {
+                ShowRequiredFieldsWarning("O campo 'Score minimo' deve ser numerico.");
+                return;
+            }
+
+            if (!int.TryParse(HarvestTopDefault.Text, out int topDefault))
+            {
+                ShowRequiredFieldsWarning("O campo 'Top N default' deve ser numerico.");
+                return;
+            }
+
+            if (!double.TryParse(HarvestWeightFanIn.Text, out double fanIn))
+            {
+                ShowRequiredFieldsWarning("O campo 'Peso FanIn' deve ser numerico.");
+                return;
+            }
+
+            if (!double.TryParse(HarvestWeightFanOut.Text, out double fanOut))
+            {
+                ShowRequiredFieldsWarning("O campo 'Peso FanOut' deve ser numerico.");
+                return;
+            }
+
+            if (!double.TryParse(HarvestWeightDensity.Text, out double density))
+            {
+                ShowRequiredFieldsWarning("O campo 'Peso Keyword Density' deve ser numerico.");
+                return;
+            }
+
+            if (!double.TryParse(HarvestWeightDeadCode.Text, out double deadCode))
+            {
+                ShowRequiredFieldsWarning("O campo 'Peso DeadCode' deve ser numerico.");
+                return;
+            }
+
             // Parse Lists
             _currentHarvestConfig.Rules.Extensions = HarvestExtensions.Text
                 .Split(',')
@@ -457,27 +625,37 @@ public partial class MainWindow : Window
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .ToList();
 
-            if (int.TryParse(HarvestMaxFileSizeInput.Text, out int size))
-                _currentHarvestConfig.Rules.MaxFileSizeKb = size;
-            else
-                _currentHarvestConfig.Rules.MaxFileSizeKb = null;
+            if (_currentHarvestConfig.Rules.Extensions.Count == 0)
+            {
+                ShowRequiredFieldsWarning("Informe ao menos uma extensao valida em 'Extensoes permitidas'.");
+                return;
+            }
+
+            if (_currentHarvestConfig.Rules.ExcludeDirectories.Count == 0)
+            {
+                ShowRequiredFieldsWarning("Informe ao menos uma pasta valida em 'Pastas excluidas'.");
+                return;
+            }
+
+            _currentHarvestConfig.Rules.MaxFileSizeKb = maxFileSizeKb;
 
             // Parse Limits
-            int.TryParse(HarvestMinScore.Text, out int minScore); _currentHarvestConfig.MinScoreDefault = minScore;
-            int.TryParse(HarvestTopDefault.Text, out int topDefault); _currentHarvestConfig.TopDefault = topDefault;
+            _currentHarvestConfig.MinScoreDefault = minScore;
+            _currentHarvestConfig.TopDefault = topDefault;
 
             // Parse Weights
-            double.TryParse(HarvestWeightFanIn.Text, out double fanIn); _currentHarvestConfig.Weights.FanInWeight = fanIn;
-            double.TryParse(HarvestWeightFanOut.Text, out double fanOut); _currentHarvestConfig.Weights.FanOutWeight = fanOut;
-            double.TryParse(HarvestWeightDensity.Text, out double density); _currentHarvestConfig.Weights.KeywordDensityWeight = density;
-            double.TryParse(HarvestWeightDeadCode.Text, out double deadCode); _currentHarvestConfig.Weights.DeadCodePenalty = deadCode;
+            _currentHarvestConfig.Weights.FanInWeight = fanIn;
+            _currentHarvestConfig.Weights.FanOutWeight = fanOut;
+            _currentHarvestConfig.Weights.KeywordDensityWeight = density;
+            _currentHarvestConfig.Weights.DeadCodePenalty = deadCode;
 
             _configService.SaveSection("Harvest", _currentHarvestConfig);
-            UiMessageService.ShowInfo("Configuração do Harvest salva com sucesso!", "Sucesso");
+            UiMessageService.ShowInfo("Configuracao do Harvest salva com sucesso!", "Sucesso");
+            ShowMainStatusInfo("Configuracao do Harvest salva com sucesso.");
         }
         catch (Exception ex)
         {
-            UiMessageService.ShowError("Erro ao salvar configuração do Harvest.", "Erro ao salvar", ex);
+            UiMessageService.ShowError("Erro ao salvar configuracao do Harvest.", "Erro ao salvar", ex);
         }
     }
 
@@ -531,17 +709,40 @@ public partial class MainWindow : Window
     {
         if (_selectedCategory == null) return;
 
-        _selectedCategory.Name = OrgCatName.Text;
-        _selectedCategory.Folder = OrgCatFolder.Text;
-        _selectedCategory.Keywords = OrgCatKeywords.Text
+        var missingFields = new List<string>();
+        if (string.IsNullOrWhiteSpace(OrgCatName.Text))
+            missingFields.Add("Nome da Categoria");
+        if (string.IsNullOrWhiteSpace(OrgCatFolder.Text))
+            missingFields.Add("Nome da Pasta Destino");
+        if (string.IsNullOrWhiteSpace(OrgCatKeywords.Text))
+            missingFields.Add("Palavras-Chave");
+
+        if (!TryBuildRequiredFieldsMessage(missingFields, out var requiredMessage))
+        {
+            ShowRequiredFieldsWarning(requiredMessage);
+            return;
+        }
+
+        var keywords = OrgCatKeywords.Text
             .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
             .Select(s => s.Trim())
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .ToArray();
 
+        if (keywords.Length == 0)
+        {
+            ShowRequiredFieldsWarning("Informe ao menos uma palavra-chave valida.");
+            return;
+        }
+
+        _selectedCategory.Name = OrgCatName.Text;
+        _selectedCategory.Folder = OrgCatFolder.Text;
+        _selectedCategory.Keywords = keywords;
+
         _configService.SaveSection("Organizer", _currentOrganizerConfig);
         OrganizerCategoriesList.Items.Refresh();
         UiMessageService.ShowInfo("Categoria salva!", "Sucesso");
+        ShowMainStatusInfo("Categoria salva com sucesso.");
     }
 
     private void DeleteOrganizerCategory_Click(object sender, RoutedEventArgs e)
@@ -579,13 +780,30 @@ public partial class MainWindow : Window
 
     private void SaveMigrationsSettings_Click(object sender, RoutedEventArgs e)
     {
+        var missingFields = new List<string>();
+        if (string.IsNullOrWhiteSpace(MigRootPathSelector.SelectedPath))
+            missingFields.Add("Caminho Raiz do Projeto (Root Path)");
+        if (string.IsNullOrWhiteSpace(MigStartupPathSelector.SelectedPath))
+            missingFields.Add("Caminho do Projeto de Startup");
+        if (string.IsNullOrWhiteSpace(MigContextInput.Text))
+            missingFields.Add("Nome Completo do DbContext");
+        if (string.IsNullOrWhiteSpace(MigArgsInput.Text))
+            missingFields.Add("Argumentos Adicionais");
+
+        if (!TryBuildRequiredFieldsMessage(missingFields, out var requiredMessage))
+        {
+            ShowRequiredFieldsWarning(requiredMessage);
+            return;
+        }
+
         _currentMigrationsConfig.RootPath = MigRootPathSelector.SelectedPath;
         _currentMigrationsConfig.StartupProjectPath = MigStartupPathSelector.SelectedPath;
-        _currentMigrationsConfig.DbContextFullName = MigContextInput.Text;
-        _currentMigrationsConfig.AdditionalArgs = MigArgsInput.Text;
+        _currentMigrationsConfig.DbContextFullName = MigContextInput.Text.Trim();
+        _currentMigrationsConfig.AdditionalArgs = MigArgsInput.Text.Trim();
 
         _configService.SaveSection("Migrations", _currentMigrationsConfig);
-        UiMessageService.ShowInfo("Configurações do Migrations salvas!", "Sucesso");
+        UiMessageService.ShowInfo("Configuracoes do Migrations salvas!", "Sucesso");
+        ShowMainStatusInfo("Configuracoes do Migrations salvas.");
     }
 
     // --- Ngrok Settings ---
@@ -609,12 +827,27 @@ public partial class MainWindow : Window
 
     private void SaveNgrokSettings_Click(object sender, RoutedEventArgs e)
     {
+        var missingFields = new List<string>();
+        if (string.IsNullOrWhiteSpace(NgrokExeSelector.SelectedPath))
+            missingFields.Add("Caminho do Executavel do Ngrok");
+        if (string.IsNullOrWhiteSpace(NgrokAuthTokenInput.Text))
+            missingFields.Add("Auth Token");
+        if (string.IsNullOrWhiteSpace(NgrokArgsInput.Text))
+            missingFields.Add("Argumentos Adicionais");
+
+        if (!TryBuildRequiredFieldsMessage(missingFields, out var requiredMessage))
+        {
+            ShowRequiredFieldsWarning(requiredMessage);
+            return;
+        }
+
         _currentNgrokConfig.ExecutablePath = NgrokExeSelector.SelectedPath;
-        _currentNgrokConfig.AuthToken = NgrokAuthTokenInput.Text;
-        _currentNgrokConfig.AdditionalArgs = NgrokArgsInput.Text;
+        _currentNgrokConfig.AuthToken = NgrokAuthTokenInput.Text.Trim();
+        _currentNgrokConfig.AdditionalArgs = NgrokArgsInput.Text.Trim();
 
         _configService.SaveSection("Ngrok", _currentNgrokConfig);
-        UiMessageService.ShowInfo("Configurações do Ngrok salvas!", "Sucesso");
+        UiMessageService.ShowInfo("Configuracoes do Ngrok salvas!", "Sucesso");
+        ShowMainStatusInfo("Configuracoes do Ngrok salvas.");
     }
 
     // --- Notes and Cloud Settings ---
@@ -632,6 +865,7 @@ public partial class MainWindow : Window
         _currentGoogleDriveSettings = _configService.GetSection<GoogleDriveSettings>("GoogleDrive") ?? new();
 
         // Local Storage
+        _currentNotesSettings.StoragePath = ResolveNotesStoragePath(_currentNotesSettings.StoragePath);
         NotesStoragePathSelector.SelectedPath = _currentNotesSettings.StoragePath;
         NotesAutoCloudSyncCheck.IsChecked = _currentNotesSettings.AutoCloudSync;
         
@@ -643,6 +877,11 @@ public partial class MainWindow : Window
                 NotesFormatCombo.SelectedItem = item;
                 break;
             }
+        }
+
+        if (NotesFormatCombo.SelectedItem == null && NotesFormatCombo.Items.Count > 0)
+        {
+            NotesFormatCombo.SelectedIndex = 0;
         }
 
         // Google Drive
@@ -661,9 +900,22 @@ public partial class MainWindow : Window
         try
         {
             // Local Storage
-            _currentNotesSettings.StoragePath = NotesStoragePathSelector.SelectedPath;
+            _currentNotesSettings.StoragePath = ResolveNotesStoragePath(NotesStoragePathSelector.SelectedPath);
+            NotesStoragePathSelector.SelectedPath = _currentNotesSettings.StoragePath;
             _currentNotesSettings.AutoCloudSync = NotesAutoCloudSyncCheck.IsChecked == true;
             _currentNotesSettings.DefaultFormat = (NotesFormatCombo.SelectedItem as ComboBoxItem)?.Content.ToString() ?? ".txt";
+
+            var missingFields = new List<string>();
+            if (string.IsNullOrWhiteSpace(_currentNotesSettings.StoragePath))
+                missingFields.Add("Pasta de Armazenamento");
+            if (NotesFormatCombo.SelectedItem == null)
+                missingFields.Add("Formato Padrao");
+
+            if (!TryBuildRequiredFieldsMessage(missingFields, out var notesRequiredMessage))
+            {
+                ShowRequiredFieldsWarning(notesRequiredMessage);
+                return;
+            }
 
             // Google Drive
             _currentGoogleDriveSettings = ReadGoogleDriveSettingsFromUi();
@@ -676,11 +928,12 @@ public partial class MainWindow : Window
             _configService.SaveSection("Notes", _currentNotesSettings);
             _configService.SaveSection("GoogleDrive", _currentGoogleDriveSettings);
 
-            UiMessageService.ShowInfo("Configurações de Notas e Nuvem salvas com sucesso!", "Sucesso");
+            UiMessageService.ShowInfo("Configuracoes de Notas e Nuvem salvas com sucesso!", "Sucesso");
+            ShowMainStatusInfo("Configuracoes de Notas e Nuvem salvas.");
         }
         catch (Exception ex)
         {
-            UiMessageService.ShowError("Erro ao salvar configurações de Notas.", "Erro ao salvar", ex);
+            UiMessageService.ShowError("Erro ao salvar configuracoes de Notas.", "Erro ao salvar", ex);
         }
     }
 
@@ -714,19 +967,20 @@ public partial class MainWindow : Window
         }
 
         _isTestingGoogleDriveConnection = true;
-        SetGDriveTestUiState(isTesting: true, statusText: "Testando conexão com Google Drive...");
+        SetGDriveTestUiState(isTesting: true, statusText: "Testando conexao com Google Drive...");
         try
         {
-            // Mantemos o fluxo assíncrono sem bloquear a UI.
+            // Mantemos o fluxo assincrono sem bloquear a UI.
             await _googleDriveService.TestConnectionAsync(tempSettings);
 
-            SetGDriveTestUiState(isTesting: false, statusText: "Conexão validada com sucesso.");
-            UiMessageService.ShowInfo("Conexão com Google Drive estabelecida com sucesso!", "Sucesso");
+            SetGDriveTestUiState(isTesting: false, statusText: "Conexao validada com sucesso.");
+            UiMessageService.ShowInfo("Conexao com Google Drive estabelecida com sucesso!", "Sucesso");
+            ShowMainStatusInfo("Conexao com Google Drive validada com sucesso.");
         }
         catch (Exception ex)
         {
-            SetGDriveTestUiState(isTesting: false, statusText: "Falha ao validar conexão.", isError: true);
-            UiMessageService.ShowError("Falha ao conectar com Google Drive. Verifique as credenciais.", "Erro de Conexão", ex);
+            SetGDriveTestUiState(isTesting: false, statusText: "Falha ao validar conexao.", isError: true);
+            UiMessageService.ShowError("Falha ao conectar com Google Drive. Verifique as credenciais.", "Erro de Conexao", ex);
         }
         finally
         {
@@ -735,9 +989,49 @@ public partial class MainWindow : Window
         }
     }
 
-    private static void ShowRequiredFieldsWarning(string message)
+    private void ShowRequiredFieldsWarning(string message)
     {
-        UiMessageService.ShowWarning(message, "Campos Obrigatórios");
+        if (MainStatusText == null)
+        {
+            return;
+        }
+
+        MainStatusText.Text = message;
+        MainStatusText.Foreground = (System.Windows.Media.Brush)FindResource("ErrorBrush");
+    }
+
+    private void ShowMainStatusInfo(string message)
+    {
+        if (MainStatusText == null)
+        {
+            return;
+        }
+
+        MainStatusText.Text = message;
+        MainStatusText.Foreground = (System.Windows.Media.Brush)FindResource("DevToolsTextSecondary");
+    }
+
+    private static bool TryBuildRequiredFieldsMessage(List<string> missing, out string message)
+    {
+        if (missing.Count == 0)
+        {
+            message = string.Empty;
+            return true;
+        }
+
+        message = "Os campos abaixo nao podem ficar em branco:\n- " + string.Join("\n- ", missing);
+        return false;
+    }
+
+    private static string ResolveNotesStoragePath(string? candidatePath)
+    {
+        var resolved = string.IsNullOrWhiteSpace(candidatePath)
+            ? NotesStorageDefaults.GetDefaultPath()
+            : candidatePath.Trim();
+
+        var fullPath = System.IO.Path.GetFullPath(resolved);
+        System.IO.Directory.CreateDirectory(fullPath);
+        return fullPath;
     }
 
     private GoogleDriveSettings ReadGoogleDriveSettingsFromUi()
@@ -771,7 +1065,7 @@ public partial class MainWindow : Window
             return true;
         }
 
-        message = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
+        message = "Os campos abaixo nao podem ficar em branco:\n- " + string.Join("\n- ", missing);
         return false;
     }
 
@@ -780,7 +1074,7 @@ public partial class MainWindow : Window
         if (GDriveTestConnectionButton != null)
         {
             GDriveTestConnectionButton.IsEnabled = !isTesting;
-            GDriveTestConnectionButton.Content = isTesting ? "Testando..." : "Testar Conexão";
+            GDriveTestConnectionButton.Content = isTesting ? "Testando..." : "Testar Conexao";
         }
 
         if (GDriveTestConnectionStatus != null && !preserveStatus)
@@ -790,6 +1084,9 @@ public partial class MainWindow : Window
                 ? (System.Windows.Media.Brush)FindResource("ErrorBrush")
                 : (System.Windows.Media.Brush)FindResource("SecondaryTextBrush");
         }
+    }
 }
-}
+
+
+
 

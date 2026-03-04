@@ -8,7 +8,7 @@ Esta matriz resume o que esta automatizado sem depender de servicos externos (Go
 |---|---|---|
 | Router de ferramentas | `src/Tools/DevTools.Tests/ToolRouterIntegrationTests.cs` | Resolucao por ID, tool desabilitada, singleton/non-singleton, launch background |
 | Registry de ferramentas | `src/Tools/DevTools.Tests/ToolRegistryBehaviorTests.cs` | Filtro de tools desabilitadas, ordenacao por categoria/ordem/titulo, override por mesmo ID |
-| Simulacao de uso WPF | `src/Tools/DevTools.Tests/ToolUsageSimulationTests.cs` | Abertura de ferramentas, fluxos principais (Organizer, Harvest, Search, Rename, Snapshot, Utf8, Image, Migrations, Notes, janelas auxiliares) |
+| Simulacao de uso WPF | `src/Tools/DevTools.Tests/ToolUsageSimulationTests.cs` | Abertura de ferramentas e fluxos principais (Organizer, Harvest, Search, Rename, Snapshot, Utf8, Image, Migrations, Notes, Logs, Help) |
 | Validacao de Google Drive na UI | `src/Tools/DevTools.Tests/MainWindowGoogleDriveValidationTests.cs` | Campos obrigatorios no painel de configuracao (sem teste de API externa) |
 | Persistencia SQLite (settings) | `src/Tools/DevTools.Tests/SqliteStoresIntegrationTests.cs` | Save/Get de seções, defaults e idempotencia |
 | Persistencia SQLite (profiles) | `src/Tools/DevTools.Tests/SqliteStoresIntegrationTests.cs` | Save/Load com ordenacao e substituicao completa |

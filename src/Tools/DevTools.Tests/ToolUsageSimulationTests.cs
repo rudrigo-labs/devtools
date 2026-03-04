@@ -368,15 +368,23 @@ public class ToolUsageSimulationTests
             return;
         }
 
-        var app = new Application
+        try
         {
-            ShutdownMode = ShutdownMode.OnExplicitShutdown
-        };
+            var app = new Application
+            {
+                ShutdownMode = ShutdownMode.OnExplicitShutdown
+            };
 
-        app.Resources.MergedDictionaries.Add(new ResourceDictionary
+            app.Resources.MergedDictionaries.Add(new ResourceDictionary
+            {
+                Source = new Uri("pack://application:,,,/DevTools.Presentation.Wpf;component/Theme/DarkTheme.xaml")
+            });
+        }
+        catch (InvalidOperationException)
         {
-            Source = new Uri("pack://application:,,,/DevTools.Presentation.Wpf;component/Theme/DarkTheme.xaml")
-        });
+            // Some test hosts can keep the WPF app-domain flag as initialized.
+            // In this case, skip creating a second Application instance.
+        }
     }
 
     private static void WaitForJobs(JobManager manager, int timeoutMs = 15000)

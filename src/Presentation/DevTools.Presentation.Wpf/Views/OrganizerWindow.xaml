@@ -12,7 +12,8 @@
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
 
-    <c:DevToolsToolFrame Title="Organizador de Arquivos"
+    <c:DevToolsToolFrame x:Name="MainFrame"
+                         Title="Organizador de Arquivos"
                          HelpText="Move e organiza arquivos por regras de categoria."
                          PrimaryButtonContent="Organizar"
                          SecondaryButtonContent="Cancelar"

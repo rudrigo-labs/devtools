@@ -10,7 +10,8 @@
         ShowInTaskbar="False"
         Topmost="True">
 
-    <c:DevToolsToolFrame Title="Snapshot de Projeto"
+    <c:DevToolsToolFrame x:Name="MainFrame"
+                         Title="Snapshot de Projeto"
                          HelpText="Gera saidas de snapshot em multiplos formatos."
                          PrimaryButtonContent="Gerar Snapshot"
                          SecondaryButtonContent="Cancelar"

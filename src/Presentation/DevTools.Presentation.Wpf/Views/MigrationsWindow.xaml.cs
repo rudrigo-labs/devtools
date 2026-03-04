@@ -1,14 +1,13 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Collections.Generic;
+using DevTools.Core.Configuration;
 using DevTools.Core.Models;
 using DevTools.Migrations.Engine;
 using DevTools.Migrations.Models;
 using DevTools.Presentation.Wpf.Services;
-
-using DevTools.Core.Configuration;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -40,26 +39,23 @@ public partial class MigrationsWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // Tentar carregar perfil padrão
         _currentProfile = _profileManager?.GetDefaultProfile("Migrations");
         if (_currentProfile != null)
         {
             if (_currentProfile.Options.TryGetValue("root-path", out var root)) ProjectSelector.SelectedPath = root;
             if (_currentProfile.Options.TryGetValue("startup-path", out var startup)) StartupSelector.SelectedPath = startup;
             if (_currentProfile.Options.TryGetValue("dbcontext", out var context)) DbContextInput.Text = context;
+            return;
         }
-        else
-        {
-            // Fallback para configurações salvas anteriormente (comportamento original)
-            if (!string.IsNullOrEmpty(_settings?.Settings.LastMigrationsRootPath))
-                ProjectSelector.SelectedPath = _settings.Settings.LastMigrationsRootPath;
 
-            if (!string.IsNullOrEmpty(_settings?.Settings.LastMigrationsStartupPath))
-                StartupSelector.SelectedPath = _settings.Settings.LastMigrationsStartupPath;
+        if (!string.IsNullOrEmpty(_settings?.Settings.LastMigrationsRootPath))
+            ProjectSelector.SelectedPath = _settings.Settings.LastMigrationsRootPath;
 
-            if (!string.IsNullOrEmpty(_settings?.Settings.LastMigrationsDbContext))
-                DbContextInput.Text = _settings.Settings.LastMigrationsDbContext;
-        }
+        if (!string.IsNullOrEmpty(_settings?.Settings.LastMigrationsStartupPath))
+            StartupSelector.SelectedPath = _settings.Settings.LastMigrationsStartupPath;
+
+        if (!string.IsNullOrEmpty(_settings?.Settings.LastMigrationsDbContext))
+            DbContextInput.Text = _settings.Settings.LastMigrationsDbContext;
     }
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
@@ -82,23 +78,18 @@ public partial class MigrationsWindow : Window
         if (MigrationNamePanel == null) return;
 
         var selectedTag = (ActionCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-        if (selectedTag == "Add")
-        {
-            MigrationNamePanel.Visibility = Visibility.Visible;
-        }
-        else
-        {
-            MigrationNamePanel.Visibility = Visibility.Collapsed;
-        }
+        MigrationNamePanel.Visibility = selectedTag == "Add" ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void Execute_Click(object sender, RoutedEventArgs e)
     {
         if (!ValidateInputs(out var validationError, out var action, out var provider, out var root, out var startup, out var migrationName))
         {
-            UiMessageService.ShowError(validationError, "Erro de Validação");
+            ValidationUiService.ShowInline(MainFrame, validationError);
             return;
         }
+
+        ValidationUiService.ClearInline(MainFrame);
 
         var request = new MigrationsRequest(
             Action: action,
@@ -114,12 +105,11 @@ public partial class MigrationsWindow : Window
             WorkingDirectory: root
         );
 
-        // Sincronizar com o perfil padrão se estiver em uso
         if (_currentProfile != null)
         {
-            _currentProfile.Options["root-path"] = root ?? "";
-            _currentProfile.Options["startup-path"] = startup ?? "";
-            _currentProfile.Options["dbcontext"] = DbContextInput.Text ?? "";
+            _currentProfile.Options["root-path"] = root ?? string.Empty;
+            _currentProfile.Options["startup-path"] = startup ?? string.Empty;
+            _currentProfile.Options["dbcontext"] = DbContextInput.Text ?? string.Empty;
             _profileManager.SaveProfile("Migrations", _currentProfile);
         }
 
@@ -128,25 +118,22 @@ public partial class MigrationsWindow : Window
         _jobManager.StartJob("EF Core Migration", async (progress, ct) =>
         {
             var engine = new MigrationsEngine();
-            // Engine execution
             var result = await engine.ExecuteAsync(request, progress, ct);
 
             if (result.IsSuccess)
             {
                 Dispatcher.Invoke(() =>
                 {
-                    OutputText.Text = result.Value?.StdOut ?? "Comando executado com sucesso (sem saída).";
+                    OutputText.Text = result.Value?.StdOut ?? "Comando executado com sucesso (sem saida).";
                 });
                 return "Comando EF Core finalizado com sucesso.";
             }
-            else
+
+            Dispatcher.Invoke(() =>
             {
-                Dispatcher.Invoke(() =>
-                {
-                    OutputText.Text = $"ERRO:\n{string.Join("\n", result.Errors.Select(e => e.Message))}\n\nDetalhes:\n{result.Value?.StdOut}\n{result.Value?.StdErr}";
-                });
-                return "Falha ao executar comando EF Core.";
-            }
+                OutputText.Text = $"ERRO:\n{string.Join("\n", result.Errors.Select(e => e.Message))}\n\nDetalhes:\n{result.Value?.StdOut}\n{result.Value?.StdErr}";
+            });
+            return "Falha ao executar comando EF Core.";
         });
     }
 
@@ -174,9 +161,9 @@ public partial class MigrationsWindow : Window
 
         var missing = new List<string>();
         if (string.IsNullOrWhiteSpace(root))
-            missing.Add("Diretório do Projeto");
+            missing.Add("Diretorio do Projeto");
         if (string.IsNullOrWhiteSpace(startup))
-            missing.Add("Diretório do Startup Project");
+            missing.Add("Diretorio do Startup Project");
         if (action == MigrationsAction.AddMigration && string.IsNullOrWhiteSpace(migrationName))
             missing.Add("Nome da Migration");
         if (string.IsNullOrWhiteSpace(DbContextInput.Text))
@@ -184,25 +171,7 @@ public partial class MigrationsWindow : Window
 
         if (missing.Count > 0)
         {
-            errorMessage = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(root) || string.IsNullOrWhiteSpace(startup))
-        {
-            errorMessage = "Selecione os diretórios do Projeto e do Startup Project.";
-            return false;
-        }
-
-        if (action == MigrationsAction.AddMigration && string.IsNullOrWhiteSpace(migrationName))
-        {
-            errorMessage = "Informe o nome da Migration.";
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(DbContextInput.Text))
-        {
-            errorMessage = "Informe o nome completo do DbContext.";
+            errorMessage = "Os campos abaixo nao podem ficar em branco:\n- " + string.Join("\n- ", missing);
             return false;
         }
 

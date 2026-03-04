@@ -25,6 +25,21 @@ namespace DevTools.Presentation.Wpf.Views
         private NotesSettings GetNotesSettings() => _config.GetSection<NotesSettings>("Notes") ?? new();
         private GoogleDriveSettings GetGDriveSettings() => _config.GetSection<GoogleDriveSettings>("GoogleDrive") ?? new();
 
+        private string ResolveNotesStoragePath(NotesSettings notesSettings)
+        {
+            var configuredPath = string.IsNullOrWhiteSpace(notesSettings.StoragePath)
+                ? _settings.Settings.NotesStoragePath
+                : notesSettings.StoragePath;
+
+            var resolved = string.IsNullOrWhiteSpace(configuredPath)
+                ? NotesStorageDefaults.GetDefaultPath()
+                : configuredPath;
+
+            var fullPath = Path.GetFullPath(resolved);
+            Directory.CreateDirectory(fullPath);
+            return fullPath;
+        }
+
         public NotesWindow(SettingsService settings, GoogleDriveService googleDriveService, ConfigService config)
         {
             InitializeComponent();
@@ -66,7 +81,7 @@ namespace DevTools.Presentation.Wpf.Views
                 UiMessageService.ShowInfo("Sincronizando notas com o Google Drive...", "Google Drive");
                 
                 var notesSettings = GetNotesSettings();
-                string storagePath = string.IsNullOrEmpty(notesSettings.StoragePath) ? _settings.Settings.NotesStoragePath : notesSettings.StoragePath;
+                string storagePath = ResolveNotesStoragePath(notesSettings);
 
                 // Buscar todas as notas
                 var request = new NotesRequest(
@@ -77,7 +92,7 @@ namespace DevTools.Presentation.Wpf.Views
                 var listResult = await _engine.ExecuteAsync(request);
                 if (!listResult.IsSuccess || listResult.Value?.ListResult == null)
                 {
-                    UiMessageService.ShowError("Não foi possível carregar a lista de notas para sincronização.", "Erro");
+                    UiMessageService.ShowError("Nao foi possivel carregar a lista de notas para sincronizacao.", "Erro");
                     return;
                 }
 
@@ -109,7 +124,7 @@ namespace DevTools.Presentation.Wpf.Views
                     }
                 }
                 
-                UiMessageService.ShowInfo($"Sincronização concluída. Sucesso: {synced} | Falhas: {failed}", "Google Drive");
+                UiMessageService.ShowInfo($"Sincronizacao concluida. Sucesso: {synced} | Falhas: {failed}", "Google Drive");
             }
             catch (Exception ex)
             {
@@ -130,7 +145,7 @@ namespace DevTools.Presentation.Wpf.Views
         private async Task LoadList()
         {
             var notesSettings = GetNotesSettings();
-            string storagePath = string.IsNullOrEmpty(notesSettings.StoragePath) ? _settings.Settings.NotesStoragePath : notesSettings.StoragePath;
+            string storagePath = ResolveNotesStoragePath(notesSettings);
 
             var request = new NotesRequest(
                 Action: NotesAction.ListItems, 
@@ -153,6 +168,7 @@ namespace DevTools.Presentation.Wpf.Views
             _currentNoteKey = null;
             NoteTitle.Text = "";
             NotesContent.Text = "";
+            ClearEditValidation();
             ShowEditMode(true);
         }
 
@@ -163,7 +179,7 @@ namespace DevTools.Presentation.Wpf.Views
                 _currentNoteKey = item.FileName; 
                 
                 var notesSettings = GetNotesSettings();
-                string storagePath = string.IsNullOrEmpty(notesSettings.StoragePath) ? _settings.Settings.NotesStoragePath : notesSettings.StoragePath;
+                string storagePath = ResolveNotesStoragePath(notesSettings);
 
                 var request = new NotesRequest(
                     Action: NotesAction.LoadNote, 
@@ -176,6 +192,7 @@ namespace DevTools.Presentation.Wpf.Views
                 {
                     NoteTitle.Text = item.Title; 
                     NotesContent.Text = result.Value.ReadResult.Content;
+                    ClearEditValidation();
                     ShowEditMode(true);
                 }
             }
@@ -183,6 +200,7 @@ namespace DevTools.Presentation.Wpf.Views
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
+            ClearEditValidation();
             ShowEditMode(false);
         }
 
@@ -190,12 +208,19 @@ namespace DevTools.Presentation.Wpf.Views
         {
             if (string.IsNullOrWhiteSpace(NoteTitle.Text))
             {
-                UiMessageService.ShowError("O título é obrigatório.", "Erro");
+                SetEditValidation("O titulo da nota e obrigatorio.");
                 return;
             }
 
+            if (string.IsNullOrWhiteSpace(NotesContent.Text))
+            {
+                SetEditValidation("O conteudo da nota e obrigatorio.");
+                return;
+            }
+
+            ClearEditValidation();
             var notesSettings = GetNotesSettings();
-            string storagePath = string.IsNullOrEmpty(notesSettings.StoragePath) ? _settings.Settings.NotesStoragePath : notesSettings.StoragePath;
+            string storagePath = ResolveNotesStoragePath(notesSettings);
             bool useMarkdown = string.Equals(NormalizeExtension(notesSettings.DefaultFormat), ".md", StringComparison.OrdinalIgnoreCase);
 
             var action = _currentNoteKey == null ? NotesAction.CreateItem : NotesAction.SaveNote; 
@@ -215,7 +240,7 @@ namespace DevTools.Presentation.Wpf.Views
                 // Atualiza key local para uploads individuais consistentes
                 _currentNoteKey = result.Value?.CreateResult?.FileName ?? result.Value?.WriteResult?.Key ?? _currentNoteKey;
 
-                // Backup automático na nuvem se habilitado
+                // Backup automatico na nuvem se habilitado
                 if (notesSettings.AutoCloudSync)
                 {
                     _ = UploadCurrentNoteAsync(showSuccessMessage: false);
@@ -242,7 +267,7 @@ namespace DevTools.Presentation.Wpf.Views
             if (dialog.ShowDialog() == true)
             {
                 var notesSettings = GetNotesSettings();
-                string storagePath = string.IsNullOrEmpty(notesSettings.StoragePath) ? _settings.Settings.NotesStoragePath : notesSettings.StoragePath;
+                string storagePath = ResolveNotesStoragePath(notesSettings);
 
                 var request = new NotesRequest(
                     Action: NotesAction.ExportZip, 
@@ -273,7 +298,7 @@ namespace DevTools.Presentation.Wpf.Views
             if (dialog.ShowDialog() == true)
             {
                 var notesSettings = GetNotesSettings();
-                string storagePath = string.IsNullOrEmpty(notesSettings.StoragePath) ? _settings.Settings.NotesStoragePath : notesSettings.StoragePath;
+                string storagePath = ResolveNotesStoragePath(notesSettings);
 
                 var request = new NotesRequest(
                     Action: NotesAction.ImportZip, 
@@ -302,8 +327,31 @@ namespace DevTools.Presentation.Wpf.Views
 
         private void ShowEditMode(bool edit)
         {
+            if (!edit)
+            {
+                ClearEditValidation();
+            }
+
             ListGrid.Visibility = edit ? Visibility.Collapsed : Visibility.Visible;
             EditGrid.Visibility = edit ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void SetEditValidation(string message)
+        {
+            if (EditValidationText == null)
+                return;
+
+            EditValidationText.Text = message;
+            EditValidationText.Visibility = Visibility.Visible;
+        }
+
+        private void ClearEditValidation()
+        {
+            if (EditValidationText == null)
+                return;
+
+            EditValidationText.Text = string.Empty;
+            EditValidationText.Visibility = Visibility.Collapsed;
         }
 
         private async Task UploadCurrentNoteAsync(bool showSuccessMessage)

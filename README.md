@@ -6,7 +6,7 @@ Suite de produtividade para desenvolvedores, focada em Windows, com shell WPF em
 
 - Interface oficial: WPF (`src/Presentation/DevTools.Presentation.Wpf`)
 - Projeto CLI: obsoleto (mantido no repositorio apenas para referencia historica)
-- Persistencia: JSON (padrao) ou SQLite (modo opcional)
+- Persistencia: JSON (padrao) ou SQLite (modo opcional, selecionavel na UI)
 
 ## Ferramentas disponiveis
 
@@ -71,6 +71,14 @@ O instalador inclui o manual oficial em:
 - Manual de uso completo: [MANUAL.md](MANUAL.md)
 - Cobertura de testes: [docs/INTEGRATION_TEST_COVERAGE.md](docs/INTEGRATION_TEST_COVERAGE.md)
 - Relatorio de varredura: [docs/RELATORIO_TESTES_E_VARREDURA_GERAL_2026-03-04.md](docs/RELATORIO_TESTES_E_VARREDURA_GERAL_2026-03-04.md)
+
+## Melhorias sugeridas (proxima versao)
+
+1. Tornar SQLite o backend padrao com assistente de migracao JSON -> SQLite.
+2. Adicionar exportacao/importacao de configuracoes e perfis em pacote unico.
+3. Evoluir observabilidade: painel de saude (jobs, tunel SSH, ngrok, storage) no shell.
+4. Aumentar cobertura de testes de UI com cenarios de fechamento/minimizacao e stress de jobs.
+5. Versionar release com changelog automatizado e notas de versao por tag.
 
 ## Licenca
 

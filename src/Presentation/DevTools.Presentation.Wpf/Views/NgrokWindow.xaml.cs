@@ -75,9 +75,11 @@ public partial class NgrokWindow : Window
 
         if (string.IsNullOrWhiteSpace(PortInput.Text))
         {
-            UiMessageService.ShowError("Os campos abaixo não podem ficar em branco:\n- Porta Local", "Erro de Validação");
+            ValidationUiService.ShowInline(MainFrame, "Campos obrigatorios: Porta Local.");
             return;
         }
+
+        ValidationUiService.ClearInline(MainFrame);
 
         if (int.TryParse(PortInput.Text, out int port))
         {
@@ -113,7 +115,7 @@ public partial class NgrokWindow : Window
         }
         else
         {
-            UiMessageService.ShowError("Porta inválida.", "Erro de Validacao");
+            ValidationUiService.ShowInline(MainFrame, "Porta invalida.");
         }
     }
 

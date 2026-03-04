@@ -1,58 +1,97 @@
-# DevTools - Documentação Técnica
+# DevTools - Documentacao Tecnica
 
-## Visão Geral
-O **DevTools** é uma aplicação WPF modular construída sobre .NET 8/9, projetada para aumentar a produtividade do desenvolvedor. A arquitetura segue princípios de **Clean Architecture** simplificada e **Pure Dependency Injection** (sem contêineres complexos), priorizando performance e baixo acoplamento.
+## Visao geral
 
-## Arquitetura
+DevTools e uma aplicacao WPF modular para produtividade tecnica no Windows.
+O foco atual e shell unico em estilo IDE, com roteamento de ferramentas e execucao via bandeja.
 
-### Estrutura da Solução
-- **DevTools.Core:** Abstrações (`IDevToolEngine`), Modelos e Interfaces comuns.
-- **DevTools.Presentation.Wpf:** Camada de apresentação (UI), ponto de entrada.
-- **Tools Projects:** Cada ferramenta possui seu próprio projeto/biblioteca (ex: `DevTools.Rename`, `DevTools.Organizer`) contendo a lógica de negócio (Engine).
+Stack atual:
 
-### Componentes Chave
+- .NET 10 (`net10.0-windows`)
+- WPF + MaterialDesignThemes
+- Persistencia em JSON (padrao) ou SQLite (opcional)
 
-#### 1. TrayService (Central Controller)
-Gerencia o ciclo de vida da aplicação na bandeja do sistema.
-- Responsável por instanciar e abrir janelas de ferramentas.
-- Controla o ícone da bandeja e o menu de contexto.
-- Atua como "Launcher" para o Dashboard e janelas individuais.
+## Estrutura do repositorio
 
-#### 2. JobManager (Async Task Orchestrator)
-Gerencia a execução de tarefas em background para não bloquear a UI.
-- Mantém uma coleção observável de `UiJob`.
-- Suporta cancelamento via `CancellationToken`.
-- Fornece eventos de progresso e logs em tempo real.
+- `src/Core/DevTools.Core`: contratos e modelos base
+- `src/Tools/*`: engines por ferramenta
+- `src/Presentation/DevTools.Presentation.Wpf`: shell, views, tema, tray, storage
+- `src/Tools/DevTools.Tests`: testes de integracao/smoke
 
-#### 3. IDevToolEngine
-Interface padrão para todas as ferramentas "executáveis" (que rodam jobs).
-```csharp
-public interface IDevToolEngine
-{
-    Task<IResult> ExecuteAsync(IRequest request, IProgressReporter progress, CancellationToken ct);
-}
+## Arquitetura de execucao
+
+### Shell e navegacao
+
+- `MainWindow` funciona como shell principal com abas:
+1. Ferramentas
+2. Jobs
+3. Configuracoes
+
+### Tool routing
+
+O roteamento e centralizado via:
+
+- `ToolDescriptor`
+- `ToolRegistry`
+- `ToolRouter`
+- strategies por modo de abertura:
+1. `EmbeddedTabLaunchStrategy`
+2. `DetachedWindowLaunchStrategy`
+3. `BackgroundOnlyLaunchStrategy`
+
+O `TrayService` registra as tools e aciona o router.
+
+### Jobs e execucao assincrona
+
+`JobManager` controla tarefas em background:
+
+- cria e acompanha jobs
+- publica progresso/log/status
+- suporta cancelamento individual ou em lote
+- integra com UI (aba Jobs) e tray
+
+## Persistencia
+
+Backends suportados:
+
+1. JSON (default)
+2. SQLite (habilitado por `DEVTOOLS_STORAGE_BACKEND=sqlite`)
+
+Notas `.txt/.md` continuam em arquivos fisicos no disco.
+
+## Google Drive (Notes)
+
+Fluxo atual:
+
+1. salvar nota localmente (sempre)
+2. se configurado e ativo, sincronizar para Google Drive
+
+Configuracao de credenciais via UI (sem `credentials.json` manual na pasta do app).
+
+## Empacotamento e distribuicao
+
+Fluxo oficial:
+
+```powershell
+build\build_installer.bat 1.0.0
 ```
 
-#### 4. SettingsService
-Gerencia a persistência de configurações do usuário (posições de janela, últimos caminhos) via JSON local.
+Script publica WPF e gera instalador Inno Setup (`DEVTOOLS_SETUP_BUILD.iss`), incluindo manual.
 
-## Como Adicionar uma Nova Ferramenta
+## Testes
 
-1. **Core/Logic:**
-   - Crie um novo projeto ou pasta em `src/Tools`.
-   - Implemente a lógica de negócio (se complexa, implemente `IDevToolEngine`).
+Principal suite:
 
-2. **UI (WPF):**
-   - Crie uma nova `Window` em `Views/`.
-   - Injete `JobManager` e `SettingsService` no construtor se necessário.
+```powershell
+dotnet test src/Tools/DevTools.Tests/DevTools.Tests.csproj -c Debug
+```
 
-3. **Integração:**
-   - Adicione a entrada no `TrayResources.xaml` (Menu).
-   - Adicione o botão no `DashboardWindow.xaml` (Card).
-   - Registre a abertura no `TrayService.cs` (método `OpenTool`).
+Cobertura de referencia:
 
-## Detalhes de Implementação
+- `docs/INTEGRATION_TEST_COVERAGE.md`
 
-- **Dashboard:** Utiliza `Grid` layout e `TabControl` para organizar ferramentas e jobs. O DataGrid de jobs utiliza DataBinding direto com a coleção do `JobManager`.
-- **UI Threading:** O `JobManager` utiliza `SynchronizationContext` (ou Dispatcher) para garantir que atualizações de progresso vindas de threads secundárias sejam marshalled corretamente para a UI.
-- **Recursos:** Ícones utilizam `Segoe MDL2 Assets` font ou `System.Drawing.Icon` para a bandeja.
+## Observacoes de manutencao
+
+- CLI e considerado obsoleto para entrega oficial.
+- Documentacao de uso deve permanecer em `MANUAL.md` (raiz).
+- Documentos legados devem ser movidos para `docs/_obsolete`.
