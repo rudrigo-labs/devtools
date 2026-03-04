@@ -1,7 +1,7 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using DevTools.Core.Configuration;
 using DevTools.Core.Models;
 using DevTools.Presentation.Wpf.Services;
@@ -20,7 +20,7 @@ public partial class SshTunnelWindow : Window
     private readonly TunnelService _tunnelService;
     private readonly bool _ownsTunnelService;
     private ToolProfile? _currentProfile;
-    
+
     public SshTunnelWindow(
         JobManager jobManager,
         SettingsService settingsService,
@@ -33,14 +33,12 @@ public partial class SshTunnelWindow : Window
         _settingsService = settingsService;
         _configService = configService;
         _profileManager = profileManager;
-        
-        // Inicializa serviços do SSH Tunnel
+
         _tunnelService = sharedTunnelService ?? new TunnelService(new SystemProcessRunner());
         _ownsTunnelService = sharedTunnelService == null;
 
         Loaded += OnLoaded;
 
-        // Monitora fechamento para salvar posição
         Closing += (s, e) => SavePosition();
         Closed += (s, e) =>
         {
@@ -49,25 +47,21 @@ public partial class SshTunnelWindow : Window
                 _tunnelService.Dispose();
             }
         };
-        
-        // Timer para atualizar status UI (polling simples)
-        var timer = new System.Windows.Threading.DispatcherTimer();
+
+        var timer = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(1)
+        };
         timer.Tick += (s, e) => UpdateStatusUI();
-        timer.Interval = TimeSpan.FromSeconds(1);
         timer.Start();
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // Tentar carregar perfil padrão
         _currentProfile = _profileManager?.GetDefaultProfile("SSHTunnel");
         if (_currentProfile != null)
         {
             LoadProfile(_currentProfile);
-        }
-        else
-        {
-            // Fallback para configurações salvas anteriormente se houver (opcional)
         }
     }
 
@@ -102,60 +96,53 @@ public partial class SshTunnelWindow : Window
 
         if (_tunnelService.IsOn)
         {
-            // Stop
             primaryButton.IsEnabled = false;
             primaryButton.Content = "Parando...";
             await _tunnelService.StopAsync(TimeSpan.FromSeconds(5));
             UpdateStatusUI();
             primaryButton.IsEnabled = true;
+            return;
         }
-        else
+
+        if (!ValidateInputs(out var validationError))
         {
-            // Start
-            if (!ValidateInputs(out var validationError))
-            {
-                UiMessageService.ShowError(validationError, "Erro de Validação");
-                return;
-            }
+            ValidationUiService.ShowInline(MainFrame, validationError);
+            return;
+        }
 
-            var profile = BuildProfileFromUi();
-            if (string.IsNullOrWhiteSpace(profile.SshHost))
-            {
-                UiMessageService.ShowError("Host SSH é obrigatório.", "Erro");
-                return;
-            }
+        ValidationUiService.ClearInline(MainFrame);
 
-            // Sincronizar com o perfil padrão se estiver em uso
-            if (_currentProfile != null)
-            {
-                UpdateProfileFromUi(_currentProfile);
-                _profileManager.SaveProfile("SSHTunnel", _currentProfile);
-            }
+        var profile = BuildProfileFromUi();
 
-            primaryButton.IsEnabled = false;
-            primaryButton.Content = "Conectando...";
-            
-            try
-            {
-                await _tunnelService.StartAsync(profile);
-            }
+        if (_currentProfile != null)
+        {
+            UpdateProfileFromUi(_currentProfile);
+            _profileManager.SaveProfile("SSHTunnel", _currentProfile);
+        }
+
+        primaryButton.IsEnabled = false;
+        primaryButton.Content = "Conectando...";
+
+        try
+        {
+            await _tunnelService.StartAsync(profile);
+        }
         catch (Exception ex)
         {
-            UiMessageService.ShowError("Erro ao iniciar túnel SSH.", "Erro ao iniciar túnel", ex);
+            UiMessageService.ShowError("Erro ao iniciar tunel SSH.", "Erro ao iniciar tunel", ex);
         }
-            finally
-            {
-                primaryButton.IsEnabled = true;
-                UpdateStatusUI();
-            }
+        finally
+        {
+            primaryButton.IsEnabled = true;
+            UpdateStatusUI();
         }
     }
 
     private TunnelProfile BuildProfileFromUi()
     {
-        int.TryParse(SshPortInput.Text, out int sshPort);
-        int.TryParse(LocalPortInput.Text, out int localPort);
-        int.TryParse(RemotePortInput.Text, out int remotePort);
+        _ = int.TryParse(SshPortInput.Text, out var sshPort);
+        _ = int.TryParse(LocalPortInput.Text, out var localPort);
+        _ = int.TryParse(RemotePortInput.Text, out var remotePort);
 
         return new TunnelProfile
         {
@@ -174,12 +161,27 @@ public partial class SshTunnelWindow : Window
     private bool ValidateInputs(out string errorMessage)
     {
         var missing = new List<string>();
-        if (string.IsNullOrWhiteSpace(SshHostInput.Text))
-            missing.Add("Host SSH");
+
+        if (string.IsNullOrWhiteSpace(SshHostInput.Text)) missing.Add("Host SSH");
+        if (string.IsNullOrWhiteSpace(SshPortInput.Text)) missing.Add("Porta SSH");
+        if (string.IsNullOrWhiteSpace(SshUserInput.Text)) missing.Add("Usuario SSH");
+        if (string.IsNullOrWhiteSpace(IdentityFileInput.Text)) missing.Add("Arquivo de Chave");
+        if (string.IsNullOrWhiteSpace(LocalBindInput.Text)) missing.Add("Bind Local");
+        if (string.IsNullOrWhiteSpace(LocalPortInput.Text)) missing.Add("Porta Local");
+        if (string.IsNullOrWhiteSpace(RemoteHostInput.Text)) missing.Add("Host Remoto");
+        if (string.IsNullOrWhiteSpace(RemotePortInput.Text)) missing.Add("Porta Remota");
 
         if (missing.Count > 0)
         {
-            errorMessage = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
+            errorMessage = "Os campos abaixo nao podem ficar em branco:\n- " + string.Join("\n- ", missing);
+            return false;
+        }
+
+        if (!int.TryParse(SshPortInput.Text, out _)
+            || !int.TryParse(LocalPortInput.Text, out _)
+            || !int.TryParse(RemotePortInput.Text, out _))
+        {
+            errorMessage = "Portas SSH, Local e Remota devem ser numericas.";
             return false;
         }
 
@@ -194,16 +196,15 @@ public partial class SshTunnelWindow : Window
 
         if (_tunnelService.IsOn)
         {
-            MainFrame.StatusText = "🟢 Conectado";
+            MainFrame.StatusText = "Status: Conectado";
             primaryButton.Content = "Desconectar";
-            primaryButton.Style = (Style)FindResource("SecondaryButtonStyle"); // Use secondary style for disconnect
+            primaryButton.Style = (Style)FindResource("SecondaryButtonStyle");
+            return;
         }
-        else
-        {
-            MainFrame.StatusText = "⚫ Parado";
-            primaryButton.Content = "Conectar";
-            primaryButton.Style = (Style)FindResource("PrimaryButtonStyle");
-        }
+
+        MainFrame.StatusText = "Status: Parado";
+        primaryButton.Content = "Conectar";
+        primaryButton.Style = (Style)FindResource("PrimaryButtonStyle");
     }
 
     private void BrowseKey_Click(object sender, RoutedEventArgs e)
@@ -221,7 +222,7 @@ public partial class SshTunnelWindow : Window
 
     private void SavePosition()
     {
-        // Implementar persistência de posição da janela se necessário
+        // Sem persistencia de posicao no momento.
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)

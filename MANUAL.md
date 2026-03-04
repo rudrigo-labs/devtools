@@ -21,8 +21,9 @@ dotnet run --project src/Presentation/DevTools.Presentation.Wpf/DevTools.Present
 
 ### 2.2 Comportamento na bandeja (tray)
 
-- Duplo clique no icone: abre o shell principal
-- Menu de contexto: abre ferramentas diretamente
+- O icone da bandeja e inicializado quando voce usa "Minimizar para Bandeja" ou ao abrir o SSH Tunnel
+- Duplo clique no icone (quando ativo): abre o shell principal
+- Menu de contexto (quando ativo): abre ferramentas diretamente
 - Fechar o shell: oferece minimizar para bandeja ou encerrar
 
 ## 3. Shell principal (IDE-style)
@@ -208,10 +209,18 @@ Permite salvar configuracoes recorrentes por ferramenta.
 
 ## 5.3 Outras configuracoes
 
+- Armazenamento (backend de configuracoes): JSON ou SQLite
 - Harvest
 - Organizer
 - Migrations
 - Ngrok
+
+## 5.4 Regras de validacao
+
+- Campos obrigatorios nao podem ser salvos em branco.
+- Validacoes de formulario exibem aviso inline no proprio painel.
+- Mensagens dialogadas do sistema usam o padrao visual do `UiMessageService`.
+- No painel de Google Drive, o botao "Testar conexao" valida campos antes de executar.
 
 ## 6. Persistencia
 
@@ -221,7 +230,11 @@ Modo padrao:
 
 Modo opcional:
 
-- SQLite, habilitado por variavel de ambiente:
+- SQLite, selecionavel na UI em Configuracoes > Configuracoes Gerais > Armazenamento
+
+Opcao avancada (manual):
+
+- SQLite via variavel de ambiente:
 
 ```powershell
 $env:DEVTOOLS_STORAGE_BACKEND="sqlite"
@@ -272,5 +285,13 @@ Saida esperada:
 
 - Interface oficial: WPF
 - Projeto CLI: obsoleto e fora da solution/instalador
+- Notas: sempre em arquivo fisico local (`.txt` ou `.md`), com envio opcional ao Google Drive apos salvar localmente.
+
+## 10. Melhorias futuras planejadas
+
+1. Finalizar a estabilizacao da infraestrutura de testes WPF para remover 2 testes atualmente ignorados.
+2. Disponibilizar assistente de migracao de persistencia JSON -> SQLite na UI.
+3. Adicionar exportacao/importacao consolidada de perfis e configuracoes.
+4. Evoluir o painel de monitoramento operacional no shell (jobs, tuneis e storage).
 
 Fim do manual.

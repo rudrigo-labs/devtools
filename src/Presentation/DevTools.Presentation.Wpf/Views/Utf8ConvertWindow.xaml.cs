@@ -1,12 +1,12 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using System.Collections.Generic;
+using DevTools.Core.Models;
 using DevTools.Presentation.Wpf.Services;
 using DevTools.Utf8Convert.Engine;
 using DevTools.Utf8Convert.Models;
-using DevTools.Core.Models;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -23,33 +23,6 @@ public partial class Utf8ConvertWindow : Window
 
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastUtf8RootPath))
             RootPathSelector.SelectedPath = _settingsService.Settings.LastUtf8RootPath;
-
-        /* Position handled by TrayService
-        if (_settingsService.Settings.Utf8WindowTop.HasValue)
-        {
-            Top = _settingsService.Settings.Utf8WindowTop.Value;
-            Left = _settingsService.Settings.Utf8WindowLeft.Value;
-        }
-        else
-        {
-            var screen = SystemParameters.WorkArea;
-            Left = screen.Right - Width - 20;
-            Top = screen.Bottom - Height - 20;
-        }
-
-        var workArea = SystemParameters.WorkArea;
-        if (Top < 0 || Top > workArea.Height) Top = workArea.Height - Height - 20;
-        if (Left < 0 || Left > workArea.Width) Left = workArea.Width - Width - 20;
-        */
-
-        /*
-        Closed += (s, e) =>
-        {
-            _settingsService.Settings.Utf8WindowTop = Top;
-            _settingsService.Settings.Utf8WindowLeft = Left;
-            _settingsService.Save();
-        };
-        */
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -65,9 +38,11 @@ public partial class Utf8ConvertWindow : Window
     {
         if (!ValidateInputs(out var errorMessage))
         {
-            UiMessageService.ShowError(errorMessage, "Erro de Validação");
+            ValidationUiService.ShowInline(MainFrame, errorMessage);
             return;
         }
+
+        ValidationUiService.ClearInline(MainFrame);
 
         var root = RootPathSelector.SelectedPath;
         var recursive = RecursiveCheck.IsChecked ?? true;
@@ -92,26 +67,16 @@ public partial class Utf8ConvertWindow : Window
             var result = await engine.ExecuteAsync(request, reporter, ct);
 
             return result.IsSuccess
-                ? $"Conversão concluída! {result.Value?.Summary.Converted ?? 0} arquivos convertidos."
-                : $"Falha na conversão: {string.Join(", ", result.Errors.Select(x => x.Message))}";
+                ? $"Conversao concluida! {result.Value?.Summary.Converted ?? 0} arquivos convertidos."
+                : $"Falha na conversao: {string.Join(", ", result.Errors.Select(x => x.Message))}";
         });
     }
 
     private bool ValidateInputs(out string errorMessage)
     {
-        var missing = new List<string>();
-        if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
-            missing.Add("Pasta Raiz");
-
-        if (missing.Count > 0)
-        {
-            errorMessage = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
-            return false;
-        }
-
         if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
         {
-            errorMessage = "Pasta Raiz é obrigatória.";
+            errorMessage = "Os campos abaixo nao podem ficar em branco:\n- Pasta Raiz";
             return false;
         }
 

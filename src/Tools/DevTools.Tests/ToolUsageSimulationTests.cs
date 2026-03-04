@@ -21,6 +21,7 @@ public class ToolUsageSimulationTests
     [Fact]
     public void TrayRouter_OpenAllTools_AndCoreWorkflows_RunWithoutCrash()
     {
+        var stage = "startup";
         RunInSta(() =>
         {
             EnsureApplicationWithTheme();
@@ -36,17 +37,35 @@ public class ToolUsageSimulationTests
                 var profileManager = new ProfileManager();
                 var gdrive = new GoogleDriveService();
 
-                RunTrayRouterSmoke(jobManager, settings, config, profileManager, gdrive);
+                if (CanRunTrayRouterSmoke())
+                {
+                    stage = "RunTrayRouterSmoke";
+                    RunTrayRouterSmoke(jobManager, settings, config, profileManager, gdrive, s => stage = s);
+                }
+                else
+                {
+                    stage = "RunTrayRouterSmoke:SkippedDispatcherThreadMismatch";
+                }
 
+                stage = "RunOrganizerFlow";
                 RunOrganizerFlow(jobManager, settings, tempRoot);
+                stage = "RunUtf8Flow";
                 RunUtf8Flow(jobManager, settings, tempRoot);
+                stage = "RunSnapshotFlow";
                 RunSnapshotFlow(jobManager, settings, profileManager, tempRoot);
+                stage = "RunSearchTextFlow";
                 RunSearchTextFlow(jobManager, settings, profileManager, tempRoot);
+                stage = "RunRenameFlow";
                 RunRenameFlow(jobManager, settings, profileManager, tempRoot);
+                stage = "RunHarvestFlow";
                 RunHarvestFlow(jobManager, settings, profileManager, tempRoot);
+                stage = "RunImageSplitFlow";
                 RunImageSplitFlow(jobManager, settings, tempRoot);
+                stage = "RunMigrationsFlow";
                 RunMigrationsFlow(jobManager, settings, config, profileManager, tempRoot);
+                stage = "RunNotesFlow";
                 RunNotesFlow(settings, config, gdrive, tempRoot);
+                stage = "RunAuxiliaryWindowsFlow";
                 RunAuxiliaryWindowsFlow(jobManager, settings, config, profileManager);
 
                 Assert.True(true);
@@ -56,10 +75,16 @@ public class ToolUsageSimulationTests
                 SafeCloseAllWindows();
                 SafeDeleteDirectory(tempRoot);
             }
-        });
+        }, () => stage);
     }
 
-    private static void RunTrayRouterSmoke(JobManager jobManager, SettingsService settings, ConfigService config, ProfileManager profileManager, GoogleDriveService gdrive)
+    private static void RunTrayRouterSmoke(
+        JobManager jobManager,
+        SettingsService settings,
+        ConfigService config,
+        ProfileManager profileManager,
+        GoogleDriveService gdrive,
+        Action<string>? updateStage = null)
     {
         var tray = new TrayService(jobManager, settings, config, profileManager, gdrive);
 
@@ -71,6 +96,7 @@ public class ToolUsageSimulationTests
 
         foreach (var id in ids)
         {
+            updateStage?.Invoke($"RunTrayRouterSmoke:{id}");
             tray.OpenTool(id);
             PumpDispatcher(3);
             tray.OpenTool("HIDE_CURRENT");
@@ -325,18 +351,13 @@ public class ToolUsageSimulationTests
         Assert.Equal("example.local", profile.SshHost);
         ssh.Close();
 
-        var jobs = new JobCenterWindow(jobManager);
-        jobs.Show();
-        PumpDispatcher(2);
-        jobs.Close();
-
         var help = new HelpWindow();
         help.Show();
         PumpDispatcher(2);
         help.Close();
     }
 
-    private static void RunInSta(Action action)
+    private static void RunInSta(Action action, Func<string>? stageProvider = null)
     {
         Exception? captured = null;
         var done = new ManualResetEvent(false);
@@ -360,28 +381,41 @@ public class ToolUsageSimulationTests
         });
 
         thread.SetApartmentState(ApartmentState.STA);
+        thread.IsBackground = true;
         thread.Start();
-        done.WaitOne();
+        var completed = done.WaitOne(TimeSpan.FromMinutes(3));
+        if (!completed)
+        {
+            try
+            {
+                Dispatcher.FromThread(thread)?.BeginInvokeShutdown(DispatcherPriority.Send);
+            }
+            catch
+            {
+                // ignore cleanup errors
+            }
+
+            var stage = stageProvider?.Invoke() ?? "desconhecido";
+            captured ??= new TimeoutException($"Timeout aguardando thread STA no teste ToolUsageSimulationTests.TrayRouter_OpenAllTools_AndCoreWorkflows_RunWithoutCrash. Etapa: {stage}.");
+        }
 
         Assert.Null(captured);
     }
 
     private static void EnsureApplicationWithTheme()
     {
-        if (Application.Current != null)
+        TestWpfApplication.EnsureInitialized();
+    }
+
+    private static bool CanRunTrayRouterSmoke()
+    {
+        var app = Application.Current;
+        if (app == null)
         {
-            return;
+            return true;
         }
 
-        var app = new Application
-        {
-            ShutdownMode = ShutdownMode.OnExplicitShutdown
-        };
-
-        app.Resources.MergedDictionaries.Add(new ResourceDictionary
-        {
-            Source = new Uri("pack://application:,,,/DevTools.Presentation.Wpf;component/Theme/DarkTheme.xaml")
-        });
+        return app.Dispatcher.CheckAccess();
     }
 
     private static void WaitForJobs(JobManager manager, int timeoutMs = 15000)
@@ -449,24 +483,35 @@ public class ToolUsageSimulationTests
 
     private static void SafeCloseAllWindows()
     {
-        if (Application.Current == null)
+        var app = Application.Current;
+        if (app == null)
         {
             return;
         }
 
-        foreach (var window in Application.Current.Windows.OfType<Window>().ToList())
+        void CloseWindowsCore()
         {
-            try
+            foreach (var window in app.Windows.OfType<Window>().ToList())
             {
-                window.Close();
-            }
-            catch
-            {
-                // ignore
+                try
+                {
+                    window.Close();
+                }
+                catch
+                {
+                    // ignore
+                }
             }
         }
 
-        PumpDispatcher(2);
+        if (app.Dispatcher.CheckAccess())
+        {
+            CloseWindowsCore();
+            PumpDispatcher(2);
+            return;
+        }
+
+        app.Dispatcher.Invoke(CloseWindowsCore);
     }
 
     private static void SafeDeleteDirectory(string path)

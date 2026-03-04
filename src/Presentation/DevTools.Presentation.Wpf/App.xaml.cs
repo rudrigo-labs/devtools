@@ -47,8 +47,6 @@ public partial class App : System.Windows.Application
         var mainWindow = new DevTools.Presentation.Wpf.Views.MainWindow(_trayService, _jobManager, _configService, profileUIService, _googleDriveService);
         _trayService.SetMainWindow(mainWindow);
 
-        _trayService.Initialize();
-        
         // Iniciar com a Dashboard aberta
         _trayService.ShowDashboard();
     }
