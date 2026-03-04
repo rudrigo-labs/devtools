@@ -1,22 +1,21 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Collections.Generic;
+using DevTools.Core.Configuration;
+using DevTools.Core.Models;
 using DevTools.Presentation.Wpf.Services;
 using DevTools.SearchText.Engine;
 using DevTools.SearchText.Models;
-using DevTools.Core.Models;
-
-using DevTools.Core.Configuration;
 
 namespace DevTools.Presentation.Wpf.Views;
 
 public partial class SearchTextWindow : Window
 {
-    private readonly JobManager _jobManager;
-    private readonly SettingsService _settings;
-    private readonly ProfileManager _profileManager;
+    private readonly JobManager _jobManager = null!;
+    private readonly SettingsService _settings = null!;
+    private readonly ProfileManager _profileManager = null!;
     private ToolProfile? _currentProfile;
 
     public SearchTextWindow(JobManager jobManager, SettingsService settings, ProfileManager profileManager)
@@ -38,7 +37,6 @@ public partial class SearchTextWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // Tentar carregar perfil padrão
         _currentProfile = _profileManager?.GetDefaultProfile("SearchText");
         if (_currentProfile != null)
         {
@@ -46,19 +44,17 @@ public partial class SearchTextWindow : Window
             if (_currentProfile.Options.TryGetValue("search-pattern", out var pattern)) SearchTextInput.Text = pattern;
             if (_currentProfile.Options.TryGetValue("include", out var inc)) IncludePatternInput.Text = inc;
             if (_currentProfile.Options.TryGetValue("exclude", out var exc)) ExcludePatternInput.Text = exc;
+            return;
         }
-        else
-        {
-            // Fallback para configurações salvas anteriormente (comportamento original)
-            if (!string.IsNullOrEmpty(_settings?.Settings.LastSearchTextRootPath))
-                PathSelector.SelectedPath = _settings.Settings.LastSearchTextRootPath;
 
-            if (!string.IsNullOrEmpty(_settings?.Settings.LastSearchTextInclude))
-                IncludePatternInput.Text = _settings.Settings.LastSearchTextInclude;
+        if (!string.IsNullOrEmpty(_settings?.Settings.LastSearchTextRootPath))
+            PathSelector.SelectedPath = _settings.Settings.LastSearchTextRootPath;
 
-            if (!string.IsNullOrEmpty(_settings?.Settings.LastSearchTextExclude))
-                ExcludePatternInput.Text = _settings.Settings.LastSearchTextExclude;
-        }
+        if (!string.IsNullOrEmpty(_settings?.Settings.LastSearchTextInclude))
+            IncludePatternInput.Text = _settings.Settings.LastSearchTextInclude;
+
+        if (!string.IsNullOrEmpty(_settings?.Settings.LastSearchTextExclude))
+            ExcludePatternInput.Text = _settings.Settings.LastSearchTextExclude;
     }
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
@@ -80,20 +76,21 @@ public partial class SearchTextWindow : Window
     {
         if (!ValidateInputs(out var errorMessage))
         {
-            UiMessageService.ShowError(errorMessage, "Erro de Validação");
+            ValidationUiService.ShowInline(MainFrame, errorMessage);
             return;
         }
 
-        var root = PathSelector.SelectedPath;
-        var text = SearchTextInput.Text;
+        ValidationUiService.ClearInline(MainFrame);
 
-        // Sincronizar com o perfil padrão se estiver em uso
+        string root = PathSelector.SelectedPath ?? string.Empty;
+        string text = SearchTextInput.Text ?? string.Empty;
+
         if (_currentProfile != null)
         {
-            _currentProfile.Options["root-path"] = root ?? "";
-            _currentProfile.Options["search-pattern"] = text ?? "";
-            _currentProfile.Options["include"] = IncludePatternInput.Text ?? "";
-            _currentProfile.Options["exclude"] = ExcludePatternInput.Text ?? "";
+            _currentProfile.Options["root-path"] = root;
+            _currentProfile.Options["search-pattern"] = text;
+            _currentProfile.Options["include"] = IncludePatternInput.Text ?? string.Empty;
+            _currentProfile.Options["exclude"] = ExcludePatternInput.Text ?? string.Empty;
             _profileManager.SaveProfile("SearchText", _currentProfile);
         }
 
@@ -120,23 +117,21 @@ public partial class SearchTextWindow : Window
 
                 Dispatcher.Invoke(() =>
                 {
-                    OutputText.Text = $"Encontrados {count} resultados em {fileCount} arquivos.\n\n" + 
-                                      string.Join("\n", result.Value.Files.SelectMany(f => f.Lines.Select(m => $"{f.FullPath}:{m.LineNumber} -> {m.LineText.Trim()}")));
+                    OutputText.Text = $"Encontrados {count} resultados em {fileCount} arquivos.\n\n"
+                        + string.Join("\n", result.Value.Files.SelectMany(f => f.Lines.Select(m => $"{f.FullPath}:{m.LineNumber} -> {m.LineText.Trim()}")));
                 });
-                return $"Busca concluída: {count} ocorrências.";
+                return $"Busca concluida: {count} ocorrencias.";
             }
-            else
+
+            Dispatcher.Invoke(() =>
             {
-                Dispatcher.Invoke(() =>
-                {
-                    OutputText.Text = $"ERRO:\n{string.Join("\n", result.Errors.Select(e => e.Message))}";
-                });
-                return "Falha na busca.";
-            }
+                OutputText.Text = $"ERRO:\n{string.Join("\n", result.Errors.Select(e => e.Message))}";
+            });
+            return "Falha na busca.";
         });
     }
 
-    private string[] ParsePatterns(string input)
+    private static string[] ParsePatterns(string? input)
     {
         if (string.IsNullOrWhiteSpace(input)) return Array.Empty<string>();
         return input.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -146,25 +141,13 @@ public partial class SearchTextWindow : Window
     {
         var missing = new List<string>();
         if (string.IsNullOrWhiteSpace(PathSelector.SelectedPath))
-            missing.Add("Diretório de Busca");
+            missing.Add("Diretorio de Busca");
         if (string.IsNullOrWhiteSpace(SearchTextInput.Text))
             missing.Add("Texto de Pesquisa");
 
         if (missing.Count > 0)
         {
-            errorMessage = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(PathSelector.SelectedPath))
-        {
-            errorMessage = "Selecione o diretório de busca.";
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(SearchTextInput.Text))
-        {
-            errorMessage = "Informe o texto a ser pesquisado.";
+            errorMessage = "Os campos abaixo nao podem ficar em branco:\n- " + string.Join("\n- ", missing);
             return false;
         }
 

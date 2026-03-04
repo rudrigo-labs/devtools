@@ -8,15 +8,30 @@ Esta matriz resume o que esta automatizado sem depender de servicos externos (Go
 |---|---|---|
 | Router de ferramentas | `src/Tools/DevTools.Tests/ToolRouterIntegrationTests.cs` | Resolucao por ID, tool desabilitada, singleton/non-singleton, launch background |
 | Registry de ferramentas | `src/Tools/DevTools.Tests/ToolRegistryBehaviorTests.cs` | Filtro de tools desabilitadas, ordenacao por categoria/ordem/titulo, override por mesmo ID |
-| Simulacao de uso WPF | `src/Tools/DevTools.Tests/ToolUsageSimulationTests.cs` | Abertura de ferramentas, fluxos principais (Organizer, Harvest, Search, Rename, Snapshot, Utf8, Image, Migrations, Notes, janelas auxiliares) |
+| Simulacao de uso WPF | `src/Tools/DevTools.Tests/ToolUsageSimulationTests.cs` | Abertura de ferramentas e fluxos principais (Organizer, Harvest, Search, Rename, Snapshot, Utf8, Image, Migrations, Notes, Logs, Help) |
 | Validacao de Google Drive na UI | `src/Tools/DevTools.Tests/MainWindowGoogleDriveValidationTests.cs` | Campos obrigatorios no painel de configuracao (sem teste de API externa) |
-| Persistencia SQLite (settings) | `src/Tools/DevTools.Tests/SqliteStoresIntegrationTests.cs` | Save/Get de seções, defaults e idempotencia |
+| Persistencia SQLite (settings) | `src/Tools/DevTools.Tests/SqliteStoresIntegrationTests.cs` | Save/Get de secoes, defaults e idempotencia |
 | Persistencia SQLite (profiles) | `src/Tools/DevTools.Tests/SqliteStoresIntegrationTests.cs` | Save/Load com ordenacao e substituicao completa |
 | Persistencia SQLite (note metadata) | `src/Tools/DevTools.Tests/SqliteStoresIntegrationTests.cs` | Upsert/Get/Delete de metadados |
 | Engine de notas (filesystem) | `src/Tools/DevTools.Tests/NotesEngineIntegrationTests.cs` | Criacao/listagem/leitura com `.md` e `.txt` |
 | Engine de notas (edicao) | `src/Tools/DevTools.Tests/NotesEngineIntegrationTests.cs` | Edicao de nota existente (SaveNote/LoadNote) com sincronizacao de indice |
 | Backup de notas em volume | `src/Tools/DevTools.Tests/NotesBackupVolumeIntegrationTests.cs` | Export/Import ZIP com lote grande e validacao de conflitos |
 | Startup SQLite | `src/Tools/DevTools.Tests/StorageBackendAndBootstrapperTests.cs` | Resolucao de backend por env var e bootstrap idempotente do banco |
+
+## Resultado de execucao (2026-03-04)
+
+- `dotnet test src/Tools/DevTools.Tests/DevTools.Tests.csproj -c Debug --no-build`
+- Total: 37
+- Aprovados: 35
+- Ignorados: 2
+- Falhas: 0
+
+Testes ignorados no momento:
+
+1. `PathSelectorTests.SelectedPath_Updates_TextBox_Display`
+2. `SnapshotWindowTests.ProcessButton_Persists_SelectedPath_To_Settings`
+
+Motivo: instabilidade de infraestrutura de teste WPF com afinidade de thread em `Application.Current` e recursos globais.
 
 ## Cobertura Nao Incluida
 

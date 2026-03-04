@@ -1,14 +1,13 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
-using System.Collections.Generic;
+using DevTools.Core.Models;
 using DevTools.Image.Engine;
 using DevTools.Image.Models;
 using DevTools.Presentation.Wpf.Services;
-using DevTools.Core.Models;
-using Microsoft.Win32;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -23,43 +22,11 @@ public partial class ImageSplitWindow : Window
         _jobManager = jobManager;
         _settingsService = settingsService;
 
-        // Restore Settings
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastImageSplitInputPath))
             InputPathSelector.SelectedPath = _settingsService.Settings.LastImageSplitInputPath;
-        
+
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastImageSplitOutputDir))
             OutputPathSelector.SelectedPath = _settingsService.Settings.LastImageSplitOutputDir;
-
-        // Restore Position
-        /* Position handled by TrayService
-        if (_settingsService.Settings.ImageSplitWindowTop.HasValue)
-        {
-            Top = _settingsService.Settings.ImageSplitWindowTop.Value;
-            Left = _settingsService.Settings.ImageSplitWindowLeft.Value;
-        }
-        else
-        {
-            // Default: Bottom-Right
-            var screen = SystemParameters.WorkArea;
-            Left = screen.Right - Width - 20;
-            Top = screen.Bottom - Height - 20;
-        }
-
-        // Safety check
-        var workArea = SystemParameters.WorkArea;
-        if (Top < 0 || Top > workArea.Height) Top = workArea.Height - Height - 20;
-        if (Left < 0 || Left > workArea.Width) Left = workArea.Width - Width - 20;
-        */
-
-        // Auto-Save Position on Close
-        /*
-        Closed += (s, e) =>
-        {
-            _settingsService.Settings.ImageSplitWindowTop = Top;
-            _settingsService.Settings.ImageSplitWindowLeft = Left;
-            _settingsService.Save();
-        };
-        */
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -91,18 +58,19 @@ public partial class ImageSplitWindow : Window
     {
         if (!ValidateInputs(out var errorMessage))
         {
-            UiMessageService.ShowError(errorMessage, "Erro de Validação");
+            ValidationUiService.ShowInline(MainFrame, errorMessage);
             return;
         }
 
+        ValidationUiService.ClearInline(MainFrame);
+
         var inputPath = InputPathSelector.SelectedPath;
         var outputPath = OutputPathSelector.SelectedPath;
-        
-        if (!byte.TryParse(AlphaBox.Text, out var alpha)) alpha = 10;
-        if (!int.TryParse(MinSizeBox.Text, out var minSize)) minSize = 3;
+
+        _ = byte.TryParse(AlphaBox.Text, out var alpha);
+        _ = int.TryParse(MinSizeBox.Text, out var minSize);
         var overwrite = OverwriteCheck.IsChecked ?? false;
 
-        // Close window to start job
         Close();
 
         _settingsService.Settings.LastImageSplitInputPath = inputPath;
@@ -128,13 +96,13 @@ public partial class ImageSplitWindow : Window
                 var total = result.Value.TotalComponents;
                 var saved = result.Value.Outputs.Count;
                 var dir = result.Value.OutputDirectory;
-                
+
                 if (saved > 0)
-                    return $"Recorte concluído! {saved} parte(s) salva(s) em: {dir}";
-                
+                    return $"Recorte concluido! {saved} parte(s) salva(s) em: {dir}";
+
                 return $"Nenhuma parte salva. Detectadas {total}. Dica: habilite 'Sobrescrever' ou ajuste Alpha/Tamanho/StartIndex. Pasta: {dir}";
             }
-            
+
             return $"Falha no recorte: {string.Join(", ", result.Errors.Select(e => e.Message))}";
         });
     }
@@ -142,30 +110,34 @@ public partial class ImageSplitWindow : Window
     private bool ValidateInputs(out string errorMessage)
     {
         var missing = new List<string>();
+
         if (string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath))
             missing.Add("Imagem de Entrada");
 
+        if (string.IsNullOrWhiteSpace(OutputPathSelector.SelectedPath))
+            missing.Add("Pasta de Saida");
+
+        if (string.IsNullOrWhiteSpace(MinSizeBox.Text))
+            missing.Add("Tamanho Minimo");
+
+        if (string.IsNullOrWhiteSpace(AlphaBox.Text))
+            missing.Add("Alpha");
+
         if (missing.Count > 0)
         {
-            errorMessage = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
+            errorMessage = "Os campos abaixo nao podem ficar em branco:\n- " + string.Join("\n- ", missing);
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath))
+        if (!int.TryParse(MinSizeBox.Text, out _))
         {
-            errorMessage = "Por favor, selecione uma imagem de entrada.";
+            errorMessage = "Tamanho minimo deve ser um numero inteiro valido.";
             return false;
         }
 
-        if (!string.IsNullOrWhiteSpace(MinSizeBox.Text) && !int.TryParse(MinSizeBox.Text, out _))
+        if (!byte.TryParse(AlphaBox.Text, out _))
         {
-            errorMessage = "Tamanho mínimo deve ser um número inteiro válido.";
-            return false;
-        }
-
-        if (!string.IsNullOrWhiteSpace(AlphaBox.Text) && !byte.TryParse(AlphaBox.Text, out _))
-        {
-            errorMessage = "Alpha deve ser um número entre 0 e 255.";
+            errorMessage = "Alpha deve ser um numero entre 0 e 255.";
             return false;
         }
 

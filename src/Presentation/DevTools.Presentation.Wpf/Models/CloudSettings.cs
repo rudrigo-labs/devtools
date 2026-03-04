@@ -1,8 +1,20 @@
+using System;
+using System.IO;
+
 namespace DevTools.Presentation.Wpf.Models;
+
+public static class NotesStorageDefaults
+{
+    public static string GetDefaultPath()
+    {
+        var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        return Path.Combine(documents, "DevTools", "Notes");
+    }
+}
 
 public class NotesSettings
 {
-    public string StoragePath { get; set; } = string.Empty;
+    public string StoragePath { get; set; } = NotesStorageDefaults.GetDefaultPath();
     public string DefaultFormat { get; set; } = ".txt"; // .txt ou .md
     public bool AutoCloudSync { get; set; } = false;
 }

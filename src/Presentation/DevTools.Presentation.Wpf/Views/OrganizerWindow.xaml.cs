@@ -1,12 +1,11 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Collections.Generic;
+using DevTools.Core.Models;
 using DevTools.Organizer.Engine;
 using DevTools.Organizer.Models;
 using DevTools.Presentation.Wpf.Services;
-using DevTools.Core.Models;
 
 namespace DevTools.Presentation.Wpf.Views;
 
@@ -21,24 +20,20 @@ public partial class OrganizerWindow : Window
         _jobManager = jobManager;
         _settingsService = settingsService;
 
-        // Carregar configurações
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastOrganizerInputPath))
             InputPathSelector.SelectedPath = _settingsService.Settings.LastOrganizerInputPath;
 
-        // Posicionar no canto inferior direito
-        Loaded += (s, e) => 
+        Loaded += (s, e) =>
         {
             var desktopWorkingArea = SystemParameters.WorkArea;
-            this.Left = desktopWorkingArea.Right - this.ActualWidth - 20;
-            this.Top = desktopWorkingArea.Bottom - this.ActualHeight - 20;
-            this.Activate();
+            Left = desktopWorkingArea.Right - ActualWidth - 20;
+            Top = desktopWorkingArea.Bottom - ActualHeight - 20;
+            Activate();
         };
 
-        // Comportamento estilo Tray: Fechar ao clicar fora
-        this.Deactivated += (s, e) => 
+        Deactivated += (s, e) =>
         {
-             // this.Close(); 
-             // Comentado para evitar fechamento acidental ao usar dialogs
+            // Mantido aberto para evitar fechamento acidental.
         };
     }
 
@@ -55,42 +50,34 @@ public partial class OrganizerWindow : Window
 
         if (!ValidateInputs(out var validationError))
         {
-            UiMessageService.ShowError(validationError, "Erro de Validação");
+            ValidationUiService.ShowInline(MainFrame, validationError);
             return;
         }
 
-        // Salvar configurações
+        ValidationUiService.ClearInline(MainFrame);
+
         _settingsService.Settings.LastOrganizerInputPath = inputPath;
         _settingsService.Save();
 
-        // Se output vazio, usa input (comportamento padrão do Organizer)
-        if (string.IsNullOrWhiteSpace(outputPath))
-        {
-            outputPath = inputPath;
-        }
-
-        // Fecha janela para iniciar background job
         Close();
 
-        // Inicia Job
         _jobManager.StartJob("Organizer", async (reporter, ct) =>
         {
             var engine = new OrganizerEngine();
-            // Apply = !simulate
             var request = new OrganizerRequest(inputPath, outputPath, null, null, !simulate);
-            
+
             var result = await engine.ExecuteAsync(request, reporter, ct);
-            return result.IsSuccess 
-                ? $"Organização concluída! Arquivos processados: {result.Value?.Stats.TotalFiles ?? 0}" 
-                : $"Falha na organização: {string.Join(", ", result.Errors.Select(e => e.Message))}";
+            return result.IsSuccess
+                ? $"Organizacao concluida! Arquivos processados: {result.Value?.Stats.TotalFiles ?? 0}"
+                : $"Falha na organizacao: {string.Join(", ", result.Errors.Select(e => e.Message))}";
         });
     }
 
     private bool ValidateInputs(out string errorMessage)
     {
-        if (string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath))
+        if (string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath) || string.IsNullOrWhiteSpace(OutputPathSelector.SelectedPath))
         {
-            errorMessage = "Os campos abaixo não podem ficar em branco:\n- Pasta de Entrada";
+            errorMessage = "Os campos abaixo nao podem ficar em branco:\n- Pasta de Entrada\n- Pasta de Saida";
             return false;
         }
 
