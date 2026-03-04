@@ -13,9 +13,9 @@ namespace DevTools.Presentation.Wpf.Views;
 
 public partial class HarvestWindow : Window
 {
-    private readonly JobManager _jobManager;
-    private readonly SettingsService _settingsService;
-    private readonly ProfileManager _profileManager;
+    private readonly JobManager _jobManager = null!;
+    private readonly SettingsService _settingsService = null!;
+    private readonly ProfileManager _profileManager = null!;
     private ToolProfile? _currentProfile;
     public HarvestRequest? Result { get; private set; }
 

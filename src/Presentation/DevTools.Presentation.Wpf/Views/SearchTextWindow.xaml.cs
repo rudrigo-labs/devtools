@@ -14,9 +14,9 @@ namespace DevTools.Presentation.Wpf.Views;
 
 public partial class SearchTextWindow : Window
 {
-    private readonly JobManager _jobManager;
-    private readonly SettingsService _settings;
-    private readonly ProfileManager _profileManager;
+    private readonly JobManager _jobManager = null!;
+    private readonly SettingsService _settings = null!;
+    private readonly ProfileManager _profileManager = null!;
     private ToolProfile? _currentProfile;
 
     public SearchTextWindow(JobManager jobManager, SettingsService settings, ProfileManager profileManager)

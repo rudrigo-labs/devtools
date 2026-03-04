@@ -217,12 +217,14 @@ public partial class MainWindow : Window
 
     private void MinimizeToTray_Click(object sender, RoutedEventArgs e)
     {
+        _trayService.EnsureInitialized();
         Hide();
     }
 
     private void MinimizeToTrayFromDialog_Click(object sender, RoutedEventArgs e)
     {
         MaterialDesignThemes.Wpf.DialogHost.Close("RootDialog");
+        _trayService.EnsureInitialized();
         Hide();
     }
 

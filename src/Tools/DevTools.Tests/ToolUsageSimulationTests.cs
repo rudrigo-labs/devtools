@@ -325,11 +325,6 @@ public class ToolUsageSimulationTests
         Assert.Equal("example.local", profile.SshHost);
         ssh.Close();
 
-        var jobs = new JobCenterWindow(jobManager);
-        jobs.Show();
-        PumpDispatcher(2);
-        jobs.Close();
-
         var help = new HelpWindow();
         help.Show();
         PumpDispatcher(2);

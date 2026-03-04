@@ -29,13 +29,14 @@ public class TrayService : IDisposable
     private readonly DetachedWindowLaunchStrategy _detachedWindowStrategy = new();
     private readonly ToolRouter _toolRouter;
 
-    private TaskbarIcon _taskbarIcon = null!;
+    private TaskbarIcon? _taskbarIcon;
     private MainWindow? _mainWindow;
 
     public event Action<EmbeddedToolRequest>? EmbeddedToolRequested;
 
     public bool HasOpenToolWindow => _detachedWindowStrategy.HasOpenWindow;
     public bool HasActiveTunnel => _sharedTunnelService.IsOn;
+    public bool IsInitialized => _taskbarIcon != null;
 
     public TrayService(JobManager jobManager, SettingsService settingsService, ConfigService configService, ProfileManager profileManager, GoogleDriveService googleDriveService)
     {
@@ -78,6 +79,11 @@ public class TrayService : IDisposable
         if (string.IsNullOrWhiteSpace(tag))
         {
             return;
+        }
+
+        if (string.Equals(tag, "SSHTunnel", StringComparison.OrdinalIgnoreCase))
+        {
+            EnsureInitialized();
         }
 
         if (string.Equals(tag, "HIDE_CURRENT", StringComparison.OrdinalIgnoreCase))
@@ -160,8 +166,23 @@ public class TrayService : IDisposable
         WpfApplication.Current.Shutdown();
     }
 
+    public void EnsureInitialized()
+    {
+        if (_taskbarIcon != null)
+        {
+            return;
+        }
+
+        Initialize();
+    }
+
     public void Initialize()
     {
+        if (_taskbarIcon != null)
+        {
+            return;
+        }
+
         _taskbarIcon = new TaskbarIcon
         {
             ToolTipText = "DevTools Tray",
@@ -169,7 +190,7 @@ public class TrayService : IDisposable
             DoubleClickCommand = new DelegateCommand(ShowDashboard)
         };
 
-        if (!TrySetIconSource())
+        if (!TrySetIconSource(_taskbarIcon))
         {
             _taskbarIcon.Icon = SystemIcons.Application;
         }
@@ -180,6 +201,7 @@ public class TrayService : IDisposable
     public void Dispose()
     {
         _taskbarIcon?.Dispose();
+        _taskbarIcon = null;
         _sharedTunnelService?.Dispose();
     }
 
@@ -409,7 +431,7 @@ public class TrayService : IDisposable
         });
     }
 
-    private bool TrySetIconSource()
+    private bool TrySetIconSource(TaskbarIcon taskbarIcon)
     {
         try
         {
@@ -417,7 +439,7 @@ public class TrayService : IDisposable
             var streamInfo = WpfApplication.GetResourceStream(uriSimple);
             if (streamInfo != null)
             {
-                _taskbarIcon.Icon = new Icon(streamInfo.Stream);
+                taskbarIcon.Icon = new Icon(streamInfo.Stream);
                 return true;
             }
 
@@ -425,14 +447,14 @@ public class TrayService : IDisposable
             var streamInfo2 = WpfApplication.GetResourceStream(uriQualified);
             if (streamInfo2 != null)
             {
-                _taskbarIcon.Icon = new Icon(streamInfo2.Stream);
+                taskbarIcon.Icon = new Icon(streamInfo2.Stream);
                 return true;
             }
 
             var candidatePath = Path.Combine(AppContext.BaseDirectory, "Assets", "app.ico");
             if (File.Exists(candidatePath))
             {
-                _taskbarIcon.Icon = new Icon(candidatePath);
+                taskbarIcon.Icon = new Icon(candidatePath);
                 return true;
             }
 
@@ -486,7 +508,11 @@ public class TrayService : IDisposable
         {
             try
             {
-                _taskbarIcon.ToolTipText = $"DevTools: {message}";
+                if (_taskbarIcon != null)
+                {
+                    _taskbarIcon.ToolTipText = $"DevTools: {message}";
+                }
+
                 if (!success)
                 {
                     UiMessageService.ShowError(message, "Erro DevTools");

@@ -14,10 +14,10 @@ namespace DevTools.Presentation.Wpf.Views;
 
 public partial class MigrationsWindow : Window
 {
-    private readonly JobManager _jobManager;
-    private readonly SettingsService _settings;
-    private readonly ConfigService _config;
-    private readonly ProfileManager _profileManager;
+    private readonly JobManager _jobManager = null!;
+    private readonly SettingsService _settings = null!;
+    private readonly ConfigService _config = null!;
+    private readonly ProfileManager _profileManager = null!;
     private ToolProfile? _currentProfile;
 
     public MigrationsWindow(JobManager jobManager, SettingsService settings, ConfigService config, ProfileManager profileManager)
