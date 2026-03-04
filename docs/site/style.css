@@ -1,0 +1,147 @@
+:root {
+  --bg: #11161c;
+  --bg-soft: #171e27;
+  --card: #1d2631;
+  --border: #2d3b4b;
+  --text: #eaf0f7;
+  --muted: #9db0c6;
+  --accent: #2f81f7;
+  --accent-2: #1f6feb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", "Inter", sans-serif;
+  background: linear-gradient(180deg, var(--bg) 0%, #0d1218 100%);
+  color: var(--text);
+}
+
+a {
+  color: #86b6ff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.container {
+  width: min(1040px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+.hero {
+  padding: 4rem 0 3rem;
+  border-bottom: 1px solid var(--border);
+  background: radial-gradient(1200px 450px at 15% -10%, #284063 0%, transparent 65%);
+}
+
+.eyebrow {
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  margin: 0 0 0.4rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 6vw, 3.2rem);
+}
+
+.subtitle {
+  color: var(--muted);
+  max-width: 720px;
+  line-height: 1.45;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.btn {
+  display: inline-block;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+}
+
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent-2);
+  color: #fff;
+}
+
+.btn.primary:hover {
+  background: var(--accent-2);
+  text-decoration: none;
+}
+
+.btn.secondary:hover {
+  background: var(--bg-soft);
+  text-decoration: none;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 1.5rem 0 2.2rem;
+}
+
+.card {
+  background: color-mix(in oklab, var(--card) 92%, #000 8%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1rem 1.1rem;
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.card p,
+.card li {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.card ul {
+  margin: 0.55rem 0 0;
+  padding-left: 1rem;
+}
+
+.card.full {
+  grid-column: 1 / -1;
+}
+
+.cols {
+  columns: 2;
+  column-gap: 2rem;
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  padding: 1rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cols {
+    columns: 1;
+  }
+}

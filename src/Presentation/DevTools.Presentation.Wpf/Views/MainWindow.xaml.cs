@@ -67,12 +67,7 @@ public partial class MainWindow : Window
 
     private void MainWindow_StateChanged(object? sender, EventArgs e)
     {
-        // Se a principal minimizar, a ferramenta aberta deve acompanhar (se houver)
-        if (_trayService.HasOpenToolWindow)
-        {
-            // O WPF ja lida com Owner minimizando junto se WindowState mudar
-            // mas garantimos que a logica de Hide/Show funcione
-        }
+        UpdateMaximizeRestoreButton();
     }
 
     private void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -98,10 +93,7 @@ public partial class MainWindow : Window
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        // Posiciona no canto inferior direito (WorkArea)
-        var workArea = SystemParameters.WorkArea;
-        this.Left = workArea.Right - this.Width - 20;
-        this.Top = workArea.Bottom - this.Height - 20;
+        UpdateMaximizeRestoreButton();
     }
 
     public void ResetToHome()
@@ -210,6 +202,7 @@ public partial class MainWindow : Window
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
         CloseDialogMessageText.Text = BuildCloseDialogMessage();
+        UpdateCloseDialogActions();
         var dialogContent = RootDialog.DialogContent ?? RootDialog;
         MaterialDesignThemes.Wpf.DialogHost.Show(dialogContent, "RootDialog");
     }
@@ -221,19 +214,43 @@ public partial class MainWindow : Window
 
     private void MinimizeToTray_Click(object sender, RoutedEventArgs e)
     {
+        if (!_trayService.HasActiveTunnel)
+        {
+            ShowMainStatusInfo("Minimizar para bandeja disponivel somente com tunel SSH ativo.");
+            return;
+        }
+
         _trayService.EnsureInitialized();
         Hide();
     }
 
     private void MinimizeToTrayFromDialog_Click(object sender, RoutedEventArgs e)
     {
+        if (!_trayService.HasActiveTunnel)
+        {
+            MaterialDesignThemes.Wpf.DialogHost.Close("RootDialog");
+            ShowMainStatusInfo("Minimizar para bandeja disponivel somente com tunel SSH ativo.");
+            return;
+        }
+
         MaterialDesignThemes.Wpf.DialogHost.Close("RootDialog");
         _trayService.EnsureInitialized();
         Hide();
     }
 
+    private void MaximizeRestoreButton_Click(object sender, RoutedEventArgs e)
+    {
+        ToggleMaximizeRestore();
+    }
+
     private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (e.ClickCount == 2 && e.ChangedButton == MouseButton.Left)
+        {
+            ToggleMaximizeRestore();
+            return;
+        }
+
         if (e.ChangedButton == MouseButton.Left)
             this.DragMove();
     }
@@ -281,6 +298,37 @@ public partial class MainWindow : Window
         return "Operacoes ativas detectadas:\n"
             + string.Join("\n", details)
             + "\n\nEscolha como deseja continuar.";
+    }
+
+    private void ToggleMaximizeRestore()
+    {
+        WindowState = WindowState == WindowState.Maximized
+            ? WindowState.Normal
+            : WindowState.Maximized;
+    }
+
+    private void UpdateMaximizeRestoreButton()
+    {
+        if (MaximizeRestoreButton == null)
+        {
+            return;
+        }
+
+        MaximizeRestoreButton.Content = WindowState == WindowState.Maximized
+            ? "\uE923"
+            : "\uE922";
+    }
+
+    private void UpdateCloseDialogActions()
+    {
+        if (CloseDialogMinimizeToTrayButton == null)
+        {
+            return;
+        }
+
+        CloseDialogMinimizeToTrayButton.Visibility = _trayService.HasActiveTunnel
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     // --- Settings Navigation Logic ---
