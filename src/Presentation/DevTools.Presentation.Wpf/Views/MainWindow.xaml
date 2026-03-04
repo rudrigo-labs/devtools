@@ -1,4 +1,4 @@
-<Window x:Class="DevTools.Presentation.Wpf.Views.MainWindow"
+﻿<Window x:Class="DevTools.Presentation.Wpf.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
@@ -40,30 +40,64 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
+            <Style x:Key="SettingsBackButtonStyle" TargetType="Button" BasedOn="{StaticResource IconButtonStyle}">
+                <Setter Property="Content" Value="&#xE72B;"/>
+                <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Width" Value="36"/>
+                <Setter Property="Height" Value="36"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Margin" Value="0,0,10,0"/>
+            </Style>
+
+            <Style x:Key="SettingsCardStyle" TargetType="materialDesign:Card">
+                <Setter Property="Padding" Value="20"/>
+                <Setter Property="Margin" Value="0,0,0,24"/>
+                <Setter Property="Background" Value="{DynamicResource DevToolsSurface}"/>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
     <materialDesign:DialogHost x:Name="RootDialog" Identifier="RootDialog" DialogTheme="Dark">
         <materialDesign:DialogHost.DialogContent>
             <Border Padding="20" Background="{DynamicResource DevToolsSurface}" CornerRadius="8" BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="1">
-                <StackPanel Width="320">
-                    <TextBlock Text="Encerrar Aplicação" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource DevToolsTextPrimary}" Margin="0,0,0,8"/>
-                    <TextBlock Text="Deseja realmente sair do DevTools?" Foreground="{DynamicResource DevToolsTextSecondary}" Margin="0,0,0,18"/>
+                <StackPanel MinWidth="500" MaxWidth="640">
+                    <TextBlock Text="Fechar DevTools"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource DevToolsTextPrimary}"
+                               Margin="0,0,0,8"/>
+                    <TextBlock x:Name="CloseDialogMessageText"
+                               Text="Escolha como deseja fechar o DevTools."
+                               Foreground="{DynamicResource DevToolsTextSecondary}"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,18"/>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <!-- BOTÃO NÃO (fecha o diálogo) -->
-                        <Button Content="NÃO"
-                            Click="DialogNoButton_Click"
-                            Margin="0,0,10,0"
-                            Padding="14,6"/>
+                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Minimizar para Bandeja"
+                                Click="MinimizeToTrayFromDialog_Click"
+                                Margin="0,0,10,10"
+                                MinWidth="0"
+                                Style="{DynamicResource DevToolsSecondaryButton}"/>
 
-                        <!-- BOTÃO SIM (encerra de verdade) -->
-                        <Button Content="SIM"
-                            Click="Shutdown_Click"
-                            Background="{DynamicResource ErrorBrush}"
-                            Foreground="{DynamicResource DevToolsTextPrimary}"
-                            Padding="14,6"/>
-                    </StackPanel>
+                        <Button Content="Cancelar"
+                                Click="DialogNoButton_Click"
+                                Margin="0,0,10,10"
+                                MinWidth="0"
+                                Style="{DynamicResource DevToolsSecondaryButton}"/>
+
+                        <Button Content="Encerrar e Sair"
+                                Click="Shutdown_Click"
+                                MinWidth="0"
+                                Margin="0,0,0,10"
+                                Style="{DynamicResource DevToolsPrimaryButton}"
+                                Background="{DynamicResource ErrorBrush}"
+                                Foreground="{DynamicResource DevToolsTextPrimary}"/>
+                    </WrapPanel>
                 </StackPanel>
             </Border>
         </materialDesign:DialogHost.DialogContent>
@@ -87,8 +121,8 @@
                         </StackPanel>
 
                         <Button Content="Ferramentas" Style="{DynamicResource SidebarButtonStyle}" Tag="Tools" Click="NavButton_Click" Margin="0,0,0,5"/>
-                        <Button Content="Execuções (Jobs)" Style="{DynamicResource SidebarButtonStyle}" Tag="Jobs" Click="NavButton_Click" Margin="0,0,0,5"/>
-                        <Button Content="Configurações" Style="{DynamicResource SidebarButtonStyle}" Tag="Settings" Click="NavButton_Click" Margin="0,0,0,20"/>
+                        <Button Content="ExecuÃ§Ãµes (Jobs)" Style="{DynamicResource SidebarButtonStyle}" Tag="Jobs" Click="NavButton_Click" Margin="0,0,0,5"/>
+                        <Button Content="ConfiguraÃ§Ãµes" Style="{DynamicResource SidebarButtonStyle}" Tag="Settings" Click="NavButton_Click" Margin="0,0,0,20"/>
 
                         <Button Content="Minimizar para Bandeja" Style="{DynamicResource SidebarButtonStyle}" Click="MinimizeToTray_Click" Margin="0,0,0,5"/>
                         <Button Content="Encerrar"
@@ -167,7 +201,7 @@
                     <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="24,16,24,16" x:Name="MainTabControl">
                         <TabControl.Resources>
                             <Style TargetType="TabItem">
-                                <!-- Removemos a visibilidade Collapsed aqui para garantir que os cards apareçam se selecionado -->
+                                <!-- Removemos a visibilidade Collapsed aqui para garantir que os cards apareÃ§am se selecionado -->
                             </Style>
                         </TabControl.Resources>
 
@@ -175,15 +209,15 @@
                         <TabItem x:Name="TabTools">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,15,0">
                                 <StackPanel>
-                                    <TextBlock Text="Ferramentas Disponíveis" FontSize="24" FontWeight="Light" Foreground="{DynamicResource DevToolsTextPrimary}" Margin="0,0,0,20"/>
+                                    <TextBlock Text="Ferramentas DisponÃ­veis" FontSize="24" FontWeight="Light" Foreground="{DynamicResource DevToolsTextPrimary}" Margin="0,0,0,20"/>
 
                                     <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
                                         <!-- Cards de Ferramentas -->
-                                        <Button Style="{DynamicResource ToolCardStyle}" Content="Notas Rápidas" 
-                                            Tag="{DynamicResource Icon.Notes}" ToolTip="Anotações flutuantes always-on-top" Click="OpenTool_Click" CommandParameter="Notes"/>
+                                        <Button Style="{DynamicResource ToolCardStyle}" Content="Notas RÃ¡pidas" 
+                                            Tag="{DynamicResource Icon.Notes}" ToolTip="AnotaÃ§Ãµes flutuantes always-on-top" Click="OpenTool_Click" CommandParameter="Notes"/>
 
                                         <Button Style="{DynamicResource ToolCardStyle}" Content="Organizador de Arquivos" 
-                                            Tag="{DynamicResource Icon.Organizer}" ToolTip="Move/organiza por extensão/data conforme categorias" Click="OpenTool_Click" CommandParameter="Organizer"/>
+                                            Tag="{DynamicResource Icon.Organizer}" ToolTip="Move/organiza por extensÃ£o/data conforme categorias" Click="OpenTool_Click" CommandParameter="Organizer"/>
 
                                         <Button Style="{DynamicResource ToolCardStyle}" Content="Renomear Projeto .NET" 
                                             Tag="{DynamicResource Icon.Rename}" ToolTip="Renomeia projeto/solution e namespaces C# com backup" Click="OpenTool_Click" CommandParameter="Rename"/>
@@ -192,22 +226,22 @@
                                             Tag="{DynamicResource Icon.Snapshot}" ToolTip="Gera ZIP do projeto com filtros" Click="OpenTool_Click" CommandParameter="Snapshot"/>
 
                                         <Button Style="{DynamicResource ToolCardStyle}" Content="Dividir Imagens" 
-                                            Tag="{DynamicResource Icon.ImageSplitter}" ToolTip="Divide imagens em grade configurável" Click="OpenTool_Click" CommandParameter="ImageSplitter"/>
+                                            Tag="{DynamicResource Icon.ImageSplitter}" ToolTip="Divide imagens em grade configurÃ¡vel" Click="OpenTool_Click" CommandParameter="ImageSplitter"/>
 
-                                        <Button Style="{DynamicResource ToolCardStyle}" Content="Converter para UTF‑8" 
-                                            Tag="{DynamicResource Icon.Utf8Convert}" ToolTip="Converte arquivos para UTF‑8 preservando conteúdo" Click="OpenTool_Click" CommandParameter="Utf8Convert"/>
+                                        <Button Style="{DynamicResource ToolCardStyle}" Content="Converter para UTFâ€‘8" 
+                                            Tag="{DynamicResource Icon.Utf8Convert}" ToolTip="Converte arquivos para UTFâ€‘8 preservando conteÃºdo" Click="OpenTool_Click" CommandParameter="Utf8Convert"/>
 
                                         <Button Style="{DynamicResource ToolCardStyle}" Content="Buscar Texto em Arquivos" 
-                                            Tag="{DynamicResource Icon.SearchText}" ToolTip="Busca rápida com regex e filtros" Click="OpenTool_Click" CommandParameter="SearchText"/>
+                                            Tag="{DynamicResource Icon.SearchText}" ToolTip="Busca rÃ¡pida com regex e filtros" Click="OpenTool_Click" CommandParameter="SearchText"/>
 
                                         <Button Style="{DynamicResource ToolCardStyle}" Content="EF Core Migrations" 
                                             Tag="{DynamicResource Icon.Migrations}" ToolTip="Cria/aplica migrations em contextos EF Core" Click="OpenTool_Click" CommandParameter="Migrations"/>
 
                                         <Button Style="{DynamicResource ToolCardStyle}" Content="Coletor de Arquivos" 
-                                            Tag="{DynamicResource Icon.Harvest}" ToolTip="Copia arquivos filtrados para pasta de saída" Click="OpenTool_Click" CommandParameter="Harvest"/>
+                                            Tag="{DynamicResource Icon.Harvest}" ToolTip="Copia arquivos filtrados para pasta de saÃ­da" Click="OpenTool_Click" CommandParameter="Harvest"/>
 
-                                        <Button Style="{DynamicResource ToolCardStyle}" Content="Túnel SSH" 
-                                            Tag="{DynamicResource Icon.SSHTunnel}" ToolTip="Gerenciador de túneis SSH" Click="OpenTool_Click" CommandParameter="SSHTunnel"/>
+                                        <Button Style="{DynamicResource ToolCardStyle}" Content="TÃºnel SSH" 
+                                            Tag="{DynamicResource Icon.SSHTunnel}" ToolTip="Gerenciador de tÃºneis SSH" Click="OpenTool_Click" CommandParameter="SSHTunnel"/>
 
                                     </WrapPanel>
                                 </StackPanel>
@@ -217,7 +251,7 @@
                         <!-- Tab: Jobs -->
                         <TabItem x:Name="TabJobs">
                             <DockPanel LastChildFill="True">
-                                <TextBlock DockPanel.Dock="Top" Text="Centro de Execuções" FontSize="24" FontWeight="Light" Foreground="{DynamicResource DevToolsTextPrimary}" Margin="0,0,0,20"/>
+                                <TextBlock DockPanel.Dock="Top" Text="Centro de ExecuÃ§Ãµes" FontSize="24" FontWeight="Light" Foreground="{DynamicResource DevToolsTextPrimary}" Margin="0,0,0,20"/>
 
                                 <!-- Detalhes / Logs (Bottom) -->
                                 <Expander DockPanel.Dock="Bottom" Header="Detalhes / Logs" Margin="0,10,0,0" IsExpanded="True" BorderBrush="{DynamicResource DevToolsBrushBorder}">
@@ -285,49 +319,108 @@
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
                                         <DataGridTextColumn Header="Mensagem" Binding="{Binding Message}" Width="3*"/>
-                                        <DataGridTextColumn Header="Início" Binding="{Binding StartedAt, StringFormat=HH:mm:ss}" Width="80"/>
+                                        <DataGridTextColumn Header="InÃ­cio" Binding="{Binding StartedAt, StringFormat=HH:mm:ss}" Width="80"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </DockPanel>
                         </TabItem>
 
+                        <!-- Tab: Embedded Tool Host -->
+                        <TabItem x:Name="TabEmbeddedTool">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <Border Grid.Row="0"
+                                        Background="{DynamicResource DevToolsSurface}"
+                                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Padding="16"
+                                        Margin="0,0,0,12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Button Grid.Column="0"
+                                                Content="&#xE72B;"
+                                                FontFamily="Segoe MDL2 Assets"
+                                                Style="{DynamicResource DevToolsSecondaryButton}"
+                                                Width="40"
+                                                Height="40"
+                                                Click="BackToToolsFromEmbedded_Click"/>
+
+                                        <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock x:Name="EmbeddedToolTitleText"
+                                                       Text="Ferramenta Embutida"
+                                                       FontSize="18"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource DevToolsTextPrimary}"/>
+                                            <TextBlock x:Name="EmbeddedToolSubtitleText"
+                                                       Text="Visualizacao integrada no Shell."
+                                                       FontSize="13"
+                                                       Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                                        </StackPanel>
+
+                                        <Button Grid.Column="2"
+                                                Content="Voltar para Ferramentas"
+                                                Click="BackToToolsFromEmbedded_Click"
+                                                Style="{DynamicResource DevToolsSecondaryButton}"/>
+                                    </Grid>
+                                </Border>
+
+                                <Border Grid.Row="1"
+                                        Background="{DynamicResource DevToolsWindowBackground}"
+                                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                    <ContentControl x:Name="EmbeddedToolContentHost"/>
+                                </Border>
+                            </Grid>
+                        </TabItem>
+
                         <!-- Tab: Settings -->
                         <TabItem x:Name="TabSettings">
                             <Grid>
-                                <!-- Lista de Configurações (Cards) -->
+                                <!-- Lista de ConfiguraÃ§Ãµes (Cards) -->
                                 <ScrollViewer x:Name="SettingsListPanel" VerticalScrollBarVisibility="Auto">
                                     <StackPanel Margin="0,10">
-                                        <TextBlock Text="Configurações do Projeto" FontSize="24" FontWeight="Light" Foreground="{DynamicResource DevToolsTextPrimary}" Margin="0,0,0,20"/>
+                                        <TextBlock Text="Configurações do Projeto" Style="{DynamicResource DevToolsPageTitle}"/>
 
-                                        <!-- Seção: Configurações Gerais -->
-                                        <TextBlock Text="Configurações Gerais" FontSize="18" Foreground="{DynamicResource DevToolsAccent}" Margin="0,0,0,10"/>
+                                        <!-- SeÃ§Ã£o: ConfiguraÃ§Ãµes Gerais -->
+                                        <TextBlock Text="Configurações Gerais" Style="{DynamicResource DevToolsSectionTitle}"/>
                                         <WrapPanel Orientation="Horizontal" Margin="0,0,-15,20">
     
 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Harvest}" Content="Harvest" 
-                                                ToolTip="Configurar regras de extração e IA" Width="200" Click="OpenHarvestSettings_Click"/>
+                                                ToolTip="Configurar regras de extraÃ§Ã£o e IA" Width="200" Click="OpenHarvestSettings_Click"/>
 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Organizer}" Content="Organizer" 
-                                                ToolTip="Categorias e regras de organização" Width="200" Click="OpenOrganizerSettings_Click"/>
+                                                ToolTip="Categorias e regras de organizaÃ§Ã£o" Width="200" Click="OpenOrganizerSettings_Click"/>
 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="Migrations" 
                                                 ToolTip="Caminhos e contextos do EF Core" Width="200" Click="OpenMigrationsSettings_Click"/>
 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Ngrok}" Content="Ngrok" 
-                                                ToolTip="Caminho do executável e token" Width="200" Click="OpenNgrokSettings_Click"/>
+                                                ToolTip="Caminho do executÃ¡vel e token" Width="200" Click="OpenNgrokSettings_Click"/>
 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Notes}" Content="Notas e Nuvem" 
                                                 ToolTip="Local de armazenamento e backup no Google Drive" Width="200" Click="OpenNotesCloudSettings_Click"/>
                                         </WrapPanel>
 
-                                        <!-- Seção: Perfis de Ferramentas -->
-                                        <TextBlock Text="Perfis de Ferramentas" FontSize="18" Foreground="{DynamicResource DevToolsAccent}" Margin="0,20,0,10"/>
+                                        <!-- SeÃ§Ã£o: Perfis de Ferramentas -->
+                                        <TextBlock Text="Perfis de Ferramentas" Style="{DynamicResource DevToolsSectionTitle}" Margin="0,20,0,10"/>
                                         <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
-                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Rename}" Content="Renomeação" 
-                                                ToolTip="Perfis de renomeação de projeto" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Rename"/>
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Rename}" Content="RenomeaÃ§Ã£o" 
+                                                ToolTip="Perfis de renomeaÃ§Ã£o de projeto" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Rename"/>
 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="EF Migrations" 
-                                                ToolTip="Perfis de execução de migrations" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Migrations"/>
+                                                ToolTip="Perfis de execuÃ§Ã£o de migrations" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Migrations"/>
 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Harvest}" Content="Harvest" 
                                                 ToolTip="Perfis de coleta de arquivos" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Harvest"/>
@@ -338,13 +431,13 @@
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Snapshot}" Content="Snapshot" 
                                                 ToolTip="Perfis de snapshot de projeto" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Snapshot"/>
 
-                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.SSHTunnel}" Content="Túnel SSH" 
-                                                ToolTip="Perfis de conexão e túnel SSH" Width="200" Click="OpenToolProfiles_Click" CommandParameter="SSHTunnel"/>
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.SSHTunnel}" Content="TÃºnel SSH" 
+                                                ToolTip="Perfis de conexÃ£o e tÃºnel SSH" Width="200" Click="OpenToolProfiles_Click" CommandParameter="SSHTunnel"/>
                                         </WrapPanel>
                                     </StackPanel>
                                 </ScrollViewer>
 
-                                <!-- Painel: Gestão de Perfis de Ferramenta -->
+                                <!-- Painel: GestÃ£o de Perfis de Ferramenta -->
                                 <Grid x:Name="ToolProfilesSettingsPanel" Visibility="Collapsed">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -353,13 +446,11 @@
 
                                     <!-- Header com Voltar -->
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                        <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
-                                            Foreground="{DynamicResource DevToolsTextPrimary}" Background="Transparent" BorderThickness="0"
-                                            Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
-                                        <TextBlock x:Name="ToolProfilesTitle" Text="Perfis: [Ferramenta]" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource DevToolsTextPrimary}" VerticalAlignment="Center"/>
+                                        <Button Style="{DynamicResource SettingsBackButtonStyle}" Click="BackToSettingsList_Click" />
+                                        <TextBlock x:Name="ToolProfilesTitle" Text="Perfis: [Ferramenta]" Style="{DynamicResource DevToolsPanelTitle}"/>
                                     </StackPanel>
 
-                                    <!-- Conteúdo Gestão de Perfis -->
+                                    <!-- ConteÃºdo GestÃ£o de Perfis -->
                                     <Grid Grid.Row="1">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="250"/>
@@ -370,7 +461,7 @@
                                         <Border BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="0" Padding="0,0,10,0">
                                             <DockPanel>
                                                 <Button DockPanel.Dock="Bottom" Content="+ Novo Perfil" Style="{DynamicResource DevToolsSecondaryButton}" 
-                                                    Height="35" Margin="0,10,0,0" Click="AddToolProfile_Click"/>
+                                                    Margin="0,10,0,0" Click="AddToolProfile_Click"/>
                                                 <ListBox x:Name="ToolProfilesList" Background="Transparent" BorderThickness="0" 
                                                      Foreground="{DynamicResource DevToolsTextPrimary}" SelectionChanged="ToolProfile_SelectionChanged">
                                                     <ListBox.ItemTemplate>
@@ -381,9 +472,9 @@
                                                                     <ColumnDefinition Width="Auto"/>
                                                                 </Grid.ColumnDefinitions>
                                                                 <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                                                                <TextBlock Grid.Column="1" Text="⭐" Foreground="{DynamicResource DevToolsAccent}" 
+                                                                <TextBlock Grid.Column="1" Text="â­" Foreground="{DynamicResource DevToolsAccent}" 
                                                                            Visibility="{Binding IsDefault, Converter={StaticResource BooleanToVisibilityConverter}}" 
-                                                                           ToolTip="Perfil Padrão" Margin="5,0,0,0"/>
+                                                                           ToolTip="Perfil PadrÃ£o" Margin="5,0,0,0"/>
                                                             </Grid>
                                                         </DataTemplate>
                                                     </ListBox.ItemTemplate>
@@ -420,11 +511,11 @@
                                         <ScrollViewer Grid.Column="1" Margin="20,0,0,0" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
                                             <StackPanel x:Name="ToolProfileEditForm" Visibility="Collapsed">
                                                 
-                                                <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
+                                                <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
                                                     <StackPanel>
                                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                             <materialDesign:PackIcon Kind="Settings" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                            <TextBlock Text="Configurações do Perfil" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="ConfiguraÃ§Ãµes do Perfil" Style="{DynamicResource DevToolsCardTitle}"/>
                                                         </StackPanel>
 
                                                         <StackPanel>
@@ -432,11 +523,11 @@
                                                             <TextBox x:Name="ToolProfileNameInput" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
 
-                                                        <!-- Container para campos específicos injetados -->
+                                                        <!-- Container para campos especÃ­ficos injetados -->
                                                         <StackPanel x:Name="ToolProfileFieldsContainer" Margin="0,20,0,0"/>
 
                                                         <CheckBox x:Name="ToolProfileIsDefaultCheck" 
-                                                              Content="Usar como perfil padrão" 
+                                                              Content="Usar como perfil padrÃ£o" 
                                                               Margin="0,24,0,0"
                                                               Style="{DynamicResource DevToolsCheckBox}"/>
                                                     </StackPanel>
@@ -457,7 +548,7 @@
 
 
 
-                                <!-- Painel: Configuração Notas e Nuvem -->
+                                <!-- Painel: ConfiguraÃ§Ã£o Notas e Nuvem -->
                                 <Grid x:Name="NotesCloudSettingsPanel" Visibility="Collapsed">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -465,21 +556,19 @@
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                        <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
-                                            Foreground="{DynamicResource DevToolsTextPrimary}" Background="Transparent" BorderThickness="0"
-                                            Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Configuração: Notas e Nuvem" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource DevToolsTextPrimary}" VerticalAlignment="Center"/>
+                                        <Button Style="{DynamicResource SettingsBackButtonStyle}" Click="BackToSettingsList_Click" />
+                                        <TextBlock Text="Configuração: Notas e Nuvem" Style="{DynamicResource DevToolsPanelTitle}"/>
                                     </StackPanel>
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
                                             
                                             <!-- Grupo: Armazenamento Local -->
-                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
+                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                         <materialDesign:PackIcon Kind="Folder" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Armazenamento Local" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="Armazenamento Local" Style="{DynamicResource DevToolsCardTitle}"/>
                                                     </StackPanel>
 
                                                     <c:PathSelector x:Name="NotesStoragePathSelector" Title="Pasta de Armazenamento" IsFolderPicker="True" Margin="0,0,0,20"/>
@@ -492,7 +581,7 @@
                                                         </Grid.ColumnDefinitions>
 
                                                         <StackPanel>
-                                                            <TextBlock Text="Formato Padrão" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Formato PadrÃ£o" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <ComboBox x:Name="NotesFormatCombo" Style="{DynamicResource DevToolsSelectInput}">
                                                                 <ComboBoxItem Content=".txt"/>
                                                                 <ComboBoxItem Content=".md"/>
@@ -500,22 +589,22 @@
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
-                                                            <CheckBox x:Name="NotesAutoCloudSyncCheck" Content="Backup Automático na Nuvem ao Salvar" Style="{DynamicResource DevToolsCheckBox}"/>
+                                                            <CheckBox x:Name="NotesAutoCloudSyncCheck" Content="Backup AutomÃ¡tico na Nuvem ao Salvar" Style="{DynamicResource DevToolsCheckBox}"/>
                                                         </StackPanel>
                                                     </Grid>
                                                 </StackPanel>
                                             </materialDesign:Card>
 
                                             <!-- Grupo: Google Drive (Backup) -->
-                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
+                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
                                                 <StackPanel>
                                                     <DockPanel LastChildFill="False" Margin="0,0,0,20">
                                                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                                                             <materialDesign:PackIcon Kind="GoogleDrive" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                            <TextBlock Text="Backup Google Drive" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="Backup Google Drive" Style="{DynamicResource DevToolsCardTitle}"/>
                                                         </StackPanel>
                                                         <Button DockPanel.Dock="Right" Content="Como configurar?" Style="{DynamicResource DevToolsSecondaryButton}" 
-                                                            Padding="10,2" Height="25" FontSize="11" Click="OpenHelp_Click"/>
+                                                            Padding="12,8" MinWidth="140" Click="OpenHelp_Click"/>
                                                     </DockPanel>
 
                                                     <CheckBox x:Name="GDriveEnabledCheck" Content="Habilitar Backup no Google Drive" 
@@ -554,7 +643,7 @@
                                                             <TextBox x:Name="GDriveFolderName" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                         </StackPanel>
 
-                                                        <Button x:Name="GDriveTestConnectionButton" Grid.Row="2" Grid.Column="0" Content="Testar Conexão" Click="TestConnection_Click" 
+                                                        <Button x:Name="GDriveTestConnectionButton" Grid.Row="2" Grid.Column="0" Content="Testar ConexÃ£o" Click="TestConnection_Click" 
                                                             Style="{DynamicResource DevToolsSecondaryButton}" Width="150" HorizontalAlignment="Left" Margin="0,20,0,0"/>
                                                         <TextBlock x:Name="GDriveTestConnectionStatus" Grid.Row="2" Grid.Column="2" Margin="0,24,0,0"
                                                                    Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11"
@@ -571,7 +660,7 @@
                                     </ScrollViewer>
                                 </Grid>
 
-                                <!-- Painel: Configuração Harvest -->
+                                <!-- Painel: ConfiguraÃ§Ã£o Harvest -->
                                 <Grid x:Name="HarvestSettingsPanel" Visibility="Collapsed">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -579,21 +668,19 @@
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                        <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
-                                            Foreground="{DynamicResource DevToolsTextPrimary}" Background="Transparent" BorderThickness="0"
-                                            Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Configuração: Harvest" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource DevToolsTextPrimary}" VerticalAlignment="Center"/>
+                                        <Button Style="{DynamicResource SettingsBackButtonStyle}" Click="BackToSettingsList_Click" />
+                                        <TextBlock Text="Configuração: Harvest" Style="{DynamicResource DevToolsPanelTitle}"/>
                                     </StackPanel>
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
                                             
                                             <!-- Grupo: Regras de Filtragem -->
-                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
+                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                         <materialDesign:PackIcon Kind="FilterVariant" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Regras de Filtragem" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="Regras de Filtragem" Style="{DynamicResource DevToolsCardTitle}"/>
                                                     </StackPanel>
 
                                                     <Grid>
@@ -604,31 +691,31 @@
                                                         </Grid.ColumnDefinitions>
 
                                                         <StackPanel>
-                                                            <TextBlock Text="Extensões Permitidas (ex: .cs, .ts)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="ExtensÃµes Permitidas (ex: .cs, .ts)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="HarvestExtensions" 
-                                                                 Style="{DynamicResource DevToolsTextInput}" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
+                                                                 Style="{DynamicResource DevToolsTextInput}" MinHeight="80" AcceptsReturn="True" TextWrapping="Wrap"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="2">
                                                             <TextBlock Text="Pastas Ignoradas (ex: bin, obj)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="HarvestExcludeDirs" 
-                                                                 Style="{DynamicResource DevToolsTextInput}" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
+                                                                 Style="{DynamicResource DevToolsTextInput}" MinHeight="80" AcceptsReturn="True" TextWrapping="Wrap"/>
                                                         </StackPanel>
                                                     </Grid>
 
                                                     <StackPanel Margin="0,20,0,0" Width="200" HorizontalAlignment="Left">
-                                                        <TextBlock Text="Tamanho Máximo de Arquivo (KB)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBlock Text="Tamanho MÃ¡ximo de Arquivo (KB)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                         <TextBox x:Name="HarvestMaxFileSizeInput" Style="{DynamicResource DevToolsTextInput}"/>
                                                     </StackPanel>
                                                 </StackPanel>
                                             </materialDesign:Card>
 
                                             <!-- Grupo: Limites e Top -->
-                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
+                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                         <materialDesign:PackIcon Kind="ChartLine" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Limites Padrão" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="Limites PadrÃ£o" Style="{DynamicResource DevToolsCardTitle}"/>
                                                     </StackPanel>
 
                                                     <Grid>
@@ -639,7 +726,7 @@
                                                         </Grid.ColumnDefinitions>
                                                         
                                                         <StackPanel>
-                                                            <TextBlock Text="Score Mínimo (0-100)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Score MÃ­nimo (0-100)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="HarvestMinScore" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
                                                         
@@ -652,11 +739,11 @@
                                             </materialDesign:Card>
 
                                             <!-- Grupo: Pesos de IA -->
-                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
+                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                         <materialDesign:PackIcon Kind="Robot" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Pesos de Relevância (IA)" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="Pesos de RelevÃ¢ncia (IA)" Style="{DynamicResource DevToolsCardTitle}"/>
                                                     </StackPanel>
 
                                                     <Grid>
@@ -675,7 +762,7 @@
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="2">
-                                                            <TextBlock Text="Fan-Out (Saídas)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Fan-Out (SaÃ­das)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="HarvestWeightFanOut" Style="{DynamicResource DevToolsTextInput}"/>
 
                                                             <TextBlock Text="Penalidade Dead Code" Style="{DynamicResource DevToolsInputLabel}" Margin="0,20,0,6"/>
@@ -695,7 +782,7 @@
                                     </ScrollViewer>
                                 </Grid>
 
-                                <!-- Painel: Configuração Organizer -->
+                                <!-- Painel: ConfiguraÃ§Ã£o Organizer -->
                                 <Grid x:Name="OrganizerSettingsPanel" Visibility="Collapsed">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -703,10 +790,8 @@
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                        <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
-                                            Foreground="{DynamicResource DevToolsTextPrimary}" Background="Transparent" BorderThickness="0"
-                                            Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Configuração: Organizer" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource DevToolsTextPrimary}" VerticalAlignment="Center"/>
+                                        <Button Style="{DynamicResource SettingsBackButtonStyle}" Click="BackToSettingsList_Click" />
+                                        <TextBlock Text="Configuração: Organizer" Style="{DynamicResource DevToolsPanelTitle}"/>
                                     </StackPanel>
 
                                     <Grid Grid.Row="1">
@@ -719,7 +804,7 @@
                                         <Border BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="0" Padding="0,0,10,0">
                                             <DockPanel>
                                                 <Button DockPanel.Dock="Bottom" Content="+ Nova Categoria" Style="{DynamicResource DevToolsSecondaryButton}" 
-                                                    Height="35" Margin="0,10,0,0" Click="AddOrganizerCategory_Click"/>
+                                                    Margin="0,10,0,0" Click="AddOrganizerCategory_Click"/>
                                                 <ListBox x:Name="OrganizerCategoriesList" Background="Transparent" BorderThickness="0" 
                                                      Foreground="{DynamicResource DevToolsTextPrimary}" DisplayMemberPath="Name" SelectionChanged="OrganizerCategory_SelectionChanged">
                                                     <ListBox.ItemContainerStyle>
@@ -756,11 +841,11 @@
                                             <StackPanel x:Name="OrganizerEditForm" Visibility="Collapsed">
                                                 
                                                 <!-- Grupo: Detalhes da Categoria -->
-                                                <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="{DynamicResource DevToolsSurface}">
+                                                <materialDesign:Card Style="{DynamicResource SettingsCardStyle}" Margin="0,0,0,16">
                                                     <StackPanel>
                                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                                                             <materialDesign:PackIcon Kind="Category" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                                            <TextBlock Text="Detalhes da Categoria" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="Detalhes da Categoria" Style="{DynamicResource DevToolsCardTitle}"/>
                                                         </StackPanel>
 
                                                         <StackPanel>
@@ -774,8 +859,8 @@
                                                         </StackPanel>
 
                                                         <StackPanel Margin="0,16,0,0">
-                                                            <TextBlock Text="Palavras-Chave (separadas por vírgula)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,2"/>
-                                                            <TextBox x:Name="OrgCatKeywords" Style="{DynamicResource DevToolsTextInput}" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
+                                                            <TextBlock Text="Palavras-Chave (separadas por vÃ­rgula)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,2"/>
+                                                            <TextBox x:Name="OrgCatKeywords" Style="{DynamicResource DevToolsTextInput}" MinHeight="80" AcceptsReturn="True" TextWrapping="Wrap"/>
                                                         </StackPanel>
                                                     </StackPanel>
                                                 </materialDesign:Card>
@@ -793,7 +878,7 @@
                                     </Grid>
                                 </Grid>
 
-                                <!-- Painel: Configuração Migrations -->
+                                <!-- Painel: ConfiguraÃ§Ã£o Migrations -->
                                 <Grid x:Name="MigrationsSettingsPanel" Visibility="Collapsed">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -801,21 +886,19 @@
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                        <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
-                                            Foreground="{DynamicResource DevToolsTextPrimary}" Background="Transparent" BorderThickness="0"
-                                            Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Configuração: EF Core Migrations" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource DevToolsTextPrimary}" VerticalAlignment="Center"/>
+                                        <Button Style="{DynamicResource SettingsBackButtonStyle}" Click="BackToSettingsList_Click" />
+                                        <TextBlock Text="Configuração: EF Core Migrations" Style="{DynamicResource DevToolsPanelTitle}"/>
                                     </StackPanel>
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
                                             
                                             <!-- Grupo: Caminhos do Projeto -->
-                                            <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="{DynamicResource DevToolsSurface}">
+                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}" Margin="0,0,0,16">
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                     <materialDesign:PackIcon Kind="Folder" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                    <TextBlock Text="Caminhos do Projeto" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="Caminhos do Projeto" Style="{DynamicResource DevToolsCardTitle}"/>
                                                 </StackPanel>
 
                                                 <StackPanel Margin="0,0,0,20">
@@ -828,12 +911,12 @@
                                             </StackPanel>
                                         </materialDesign:Card>
 
-                                        <!-- Grupo: Configuração do Contexto -->
-                                        <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
+                                        <!-- Grupo: ConfiguraÃ§Ã£o do Contexto -->
+                                        <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
                                             <StackPanel>
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                     <materialDesign:PackIcon Kind="DatabaseSettings" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                    <TextBlock Text="Configuração do Contexto" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="ConfiguraÃ§Ã£o do Contexto" Style="{DynamicResource DevToolsCardTitle}"/>
                                                 </StackPanel>
 
                                                 <StackPanel>
@@ -857,7 +940,7 @@
                                     </ScrollViewer>
                                 </Grid>
 
-                                <!-- Painel: Configuração Ngrok -->
+                                <!-- Painel: ConfiguraÃ§Ã£o Ngrok -->
                                 <Grid x:Name="NgrokSettingsPanel" Visibility="Collapsed">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -865,33 +948,31 @@
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                        <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
-                                            Foreground="{DynamicResource DevToolsTextPrimary}" Background="Transparent" BorderThickness="0"
-                                            Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Configuração: Ngrok" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource DevToolsTextPrimary}" VerticalAlignment="Center"/>
+                                        <Button Style="{DynamicResource SettingsBackButtonStyle}" Click="BackToSettingsList_Click" />
+                                        <TextBlock Text="Configuração: Ngrok" Style="{DynamicResource DevToolsPanelTitle}"/>
                                     </StackPanel>
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
                                             
-                                            <!-- Grupo: Execução Local -->
-                                        <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
+                                            <!-- Grupo: ExecuÃ§Ã£o Local -->
+                                        <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
                                             <StackPanel>
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                     <materialDesign:PackIcon Kind="PlayCircle" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                    <TextBlock Text="Execução Local" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="ExecuÃ§Ã£o Local" Style="{DynamicResource DevToolsCardTitle}"/>
                                                 </StackPanel>
 
-                                                <c:PathSelector x:Name="NgrokExeSelector" Title="Caminho do Executável do Ngrok (ngrok.exe)" IsFolderPicker="False"/>
+                                                <c:PathSelector x:Name="NgrokExeSelector" Title="Caminho do ExecutÃ¡vel do Ngrok (ngrok.exe)" IsFolderPicker="False"/>
                                             </StackPanel>
                                         </materialDesign:Card>
 
-                                        <!-- Grupo: Autenticação e Argumentos -->
-                                        <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
+                                        <!-- Grupo: AutenticaÃ§Ã£o e Argumentos -->
+                                        <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
                                             <StackPanel>
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                     <materialDesign:PackIcon Kind="KeyVariant" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                    <TextBlock Text="Autenticação e Argumentos" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="AutenticaÃ§Ã£o e Argumentos" Style="{DynamicResource DevToolsCardTitle}"/>
                                                 </StackPanel>
 
                                                 <StackPanel>
@@ -955,4 +1036,9 @@
         </Border>
     </materialDesign:DialogHost>
 </Window>
+
+
+
+
+
 

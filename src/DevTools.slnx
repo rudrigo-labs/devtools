@@ -1,7 +1,4 @@
 <Solution>
-  <Folder Name="/Cli/">
-    <Project Path="Cli/DevTools.Cli/DevTools.Cli.csproj" Id="5aaa14e8-5816-4889-9e08-f375374c778a" />
-  </Folder>
   <Folder Name="/Core/">
     <Project Path="Core/DevTools.Core/DevTools.Core.csproj" />
   </Folder>

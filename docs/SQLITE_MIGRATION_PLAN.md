@@ -4,6 +4,29 @@
 
 Substituir persistencia baseada em JSON para configuracoes/metadados por SQLite, mantendo as notas `.txt/.md` como arquivos fisicos.
 
+## Status atual (2026-03-04)
+
+- [x] Fase 1 implementada no codigo:
+  - Pacotes EF Core SQLite adicionados no projeto WPF.
+  - `DevToolsDbContext` + entidades iniciais criados.
+  - `SqlitePathProvider` definido para `%AppData%/DevTools/devtools.db`.
+  - Bootstrap no `App.xaml.cs` para criar schema automaticamente na inicializacao.
+- [x] Fase 2 implementada no codigo (abstracao + feature flag):
+  - `ISettingsStore` com `JsonSettingsStore` e `SqliteSettingsStore`.
+  - `IProfileStore` no Core com `JsonFileProfileStore` e `SqliteProfileStore` no WPF.
+  - `INoteMetadataStore` com implementacoes JSON/SQLite.
+  - Selecao de backend por feature flag: `DEVTOOLS_STORAGE_BACKEND=json|sqlite`.
+- [ ] Fases 3-5 pendentes (migracao de dados JSON -> SQLite, troca oficial de runtime em todas as rotas e endurecimento).
+
+### Como ativar SQLite agora
+
+- PowerShell (sessao atual):
+  - `$env:DEVTOOLS_STORAGE_BACKEND='sqlite'`
+- Voltar para JSON:
+  - `$env:DEVTOOLS_STORAGE_BACKEND='json'`
+- Sem variavel definida:
+  - backend padrao = `json`.
+
 ## Escopo
 
 ### Entra na migracao

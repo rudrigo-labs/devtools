@@ -20,6 +20,10 @@ public sealed class JobManager
 
     public event Action<string, bool>? OnJobCompleted;
 
+    public int RunningJobsCount => Jobs.Count(j => j.Status == UiJobStatus.Running);
+
+    public bool HasRunningJobs => RunningJobsCount > 0;
+
     public JobManager()
     {
         // Captura o contexto de UI (ideal: instanciar JobManager no startup do WPF).
@@ -87,6 +91,25 @@ public sealed class JobManager
         }
 
         return false;
+    }
+
+    public int CancelAllRunningJobs()
+    {
+        var canceled = 0;
+        foreach (var pair in _ctsByJobId)
+        {
+            try
+            {
+                pair.Value.Cancel();
+                canceled++;
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        return canceled;
     }
 
     public UiJob? GetJob(Guid jobId)

@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="Guia de Ajuda"
@@ -13,41 +14,42 @@
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
-
-    <Border Background="{DynamicResource DevToolsWindowBackground}"
-            BorderBrush="{DynamicResource DevToolsBrushBorder}"
-            BorderThickness="1"
-            CornerRadius="8">
-
+    <c:DevToolsToolFrame Title="Guia de Ajuda: Configuracao de Backup"
+                         HelpText="Deseja levar este guia com voce?"
+                         PrimaryButtonContent="Fechar"
+                         SecondaryButtonContent="Baixar PDF"
+                         PrimaryButtonClick="CloseButton_Click"
+                         SecondaryButtonClick="DownloadPdfButton_Click"
+                         CloseButtonClick="CloseButton_Click">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="48"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="72"/>
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0"
                     Background="{DynamicResource DevToolsSurface}"
                     BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                    BorderThickness="0,0,0,1">
-                <StackPanel Orientation="Horizontal" Margin="16,0">
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="12"
+                    Margin="0,0,0,16">
+                <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="HelpCircle"
                                              Foreground="{DynamicResource DevToolsAccent}"
-                                             Width="20"
-                                             Height="20"
+                                             Width="18"
+                                             Height="18"
                                              VerticalAlignment="Center"
-                                             Margin="0,0,10,0"/>
-                    <TextBlock Text="Guia de Ajuda: Configuracao de Backup"
-                               Foreground="{DynamicResource DevToolsTextPrimary}"
-                               FontSize="{DynamicResource DevToolsFontSize.WindowTitle}"
-                               FontWeight="SemiBold"
+                                             Margin="0,0,8,0"/>
+                    <TextBlock Text="Siga o guia abaixo para configurar o Google Drive."
+                               Foreground="{DynamicResource DevToolsTextSecondary}"
+                               FontSize="{DynamicResource DevToolsFontSize.Status}"
                                VerticalAlignment="Center"/>
                 </StackPanel>
             </Border>
 
             <RichTextBox x:Name="HelpContentViewer"
                          Grid.Row="1"
-                         Margin="16"
                          Padding="8,2"
                          Background="Transparent"
                          Foreground="{DynamicResource DevToolsTextPrimary}"
@@ -56,41 +58,6 @@
                          IsDocumentEnabled="True"
                          VerticalScrollBarVisibility="Auto"
                          HorizontalScrollBarVisibility="Disabled"/>
-
-            <Border Grid.Row="2"
-                    Background="{DynamicResource DevToolsSurface}"
-                    BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                    BorderThickness="0,1,0,0"
-                    Padding="16,0">
-                <DockPanel LastChildFill="False">
-                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                        <materialDesign:PackIcon Kind="FilePdfBox"
-                                                 Foreground="{DynamicResource ErrorBrush}"
-                                                 Width="18"
-                                                 Height="18"
-                                                 VerticalAlignment="Center"
-                                                 Margin="0,0,8,0"/>
-                        <TextBlock Text="Deseja levar este guia com voce?"
-                                   Foreground="{DynamicResource DevToolsTextSecondary}"
-                                   VerticalAlignment="Center"
-                                   FontSize="{DynamicResource DevToolsFontSize.Status}"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                        <Button x:Name="DownloadPdfButton"
-                                Content="Baixar PDF"
-                                Click="DownloadPdfButton_Click"
-                                Style="{DynamicResource DevToolsSecondaryButton}"
-                                Width="140"
-                                Margin="0,0,10,0"/>
-                        <Button x:Name="CloseButton"
-                                Content="Fechar"
-                                Click="CloseButton_Click"
-                                Style="{DynamicResource DevToolsPrimaryButton}"
-                                Width="120"/>
-                    </StackPanel>
-                </DockPanel>
-            </Border>
         </Grid>
-    </Border>
+    </c:DevToolsToolFrame>
 </Window>
