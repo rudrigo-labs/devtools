@@ -5,12 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Logs do Sistema" Height="640" Width="900" WindowStartupLocation="CenterOwner"
+        Title="Logs do Sistema"
+        Height="640"
+        Width="900"
+        WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
 
     <c:DevToolsToolFrame x:Name="MainFrame"
                          Title="Logs do Sistema"
+                         HelpText="Consulta e manutencao de logs locais."
                          PrimaryButtonContent="Atualizar"
                          SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="Refresh_Click"
@@ -22,17 +26,27 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Toolbar -->
-            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,10">
-                <Button Content="Abrir Pasta" Click="OpenFolder_Click" Margin="0,0,10,0" Style="{StaticResource SecondaryButtonStyle}" Padding="10,5" FontSize="12"/>
-                <Button Content="Limpar" Click="Clear_Click" Style="{StaticResource SecondaryButtonStyle}" Padding="10,5" FontSize="12"/>
+            <StackPanel Grid.Row="0"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,0,12">
+                <Button Content="Abrir Pasta"
+                        Click="OpenFolder_Click"
+                        Margin="0,0,12,0"
+                        Style="{StaticResource DevToolsSecondaryButton}"/>
+                <Button Content="Limpar"
+                        Click="Clear_Click"
+                        Style="{StaticResource DevToolsSecondaryButton}"/>
             </StackPanel>
 
-            <!-- Log Content -->
-            <TextBox x:Name="LogTextBox" Grid.Row="1"
-                     Style="{StaticResource ModernTextBoxStyle}"
-                     FontFamily="Consolas" FontSize="12"
-                     IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+            <TextBox x:Name="LogTextBox"
+                     Grid.Row="1"
+                     Style="{StaticResource DevToolsTextInput}"
+                     FontFamily="Consolas"
+                     FontSize="12"
+                     IsReadOnly="True"
+                     VerticalScrollBarVisibility="Auto"
+                     HorizontalScrollBarVisibility="Auto"
                      TextWrapping="NoWrap"/>
         </Grid>
     </c:DevToolsToolFrame>

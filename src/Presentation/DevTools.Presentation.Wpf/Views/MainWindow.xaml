@@ -13,20 +13,17 @@
     <Window.Resources>
         <ResourceDictionary>
             <!-- Recursos locais para esta janela -->
-            <SolidColorBrush x:Key="SidebarBackground" Color="#252526"/>
-            <SolidColorBrush x:Key="ContentBackground" Color="#1E1E1E"/>
-            <SolidColorBrush x:Key="AccentColor" Color="#007ACC"/>
-            
+                                                
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             
             <Style TargetType="Button" x:Key="SidebarButtonStyle">
                 <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="#CCCCCC"/>
+                <Setter Property="Foreground" Value="{DynamicResource DevToolsTextSecondary}"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Height" Value="40"/>
                 <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                <Setter Property="Padding" Value="15,0,0,0"/>
-                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Padding" Value="14,0,0,0"/>
+                <Setter Property="FontSize" Value="{DynamicResource DevToolsFontSize.Input}"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
@@ -35,8 +32,8 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#3E3E42"/>
-                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="Background" Value="{DynamicResource DevToolsWindowBackground}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -48,10 +45,10 @@
 
     <materialDesign:DialogHost x:Name="RootDialog" Identifier="RootDialog" DialogTheme="Dark">
         <materialDesign:DialogHost.DialogContent>
-            <Border Padding="20" Background="#2D2D30" CornerRadius="8" BorderBrush="#3F3F46" BorderThickness="1">
+            <Border Padding="20" Background="{DynamicResource DevToolsSurface}" CornerRadius="8" BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="1">
                 <StackPanel Width="320">
-                    <TextBlock Text="Encerrar Aplicação" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,8"/>
-                    <TextBlock Text="Deseja realmente sair do DevTools?" Foreground="#CCCCCC" Margin="0,0,0,18"/>
+                    <TextBlock Text="Encerrar Aplicação" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource DevToolsTextPrimary}" Margin="0,0,0,8"/>
+                    <TextBlock Text="Deseja realmente sair do DevTools?" Foreground="{DynamicResource DevToolsTextSecondary}" Margin="0,0,0,18"/>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <!-- BOTÃO NÃO (fecha o diálogo) -->
@@ -63,15 +60,15 @@
                         <!-- BOTÃO SIM (encerra de verdade) -->
                         <Button Content="SIM"
                             Click="Shutdown_Click"
-                            Background="#E81123"
-                            Foreground="White"
+                            Background="{DynamicResource ErrorBrush}"
+                            Foreground="{DynamicResource DevToolsTextPrimary}"
                             Padding="14,6"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
         </materialDesign:DialogHost.DialogContent>
 
-        <Border Background="{DynamicResource ContentBackground}" 
+        <Border Background="{DynamicResource DevToolsWindowBackground}" 
             BorderBrush="{DynamicResource DevToolsBrushBorder}" 
             BorderThickness="1" 
             CornerRadius="8">
@@ -82,11 +79,11 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Sidebar -->
-                <Border Grid.Column="0" Background="{DynamicResource SidebarBackground}" CornerRadius="8,0,0,8">
+                <Border Grid.Column="0" Background="{DynamicResource DevToolsSurface}" CornerRadius="8,0,0,8">
                     <StackPanel Margin="0,20,0,0">
                         <StackPanel Orientation="Horizontal" Margin="20,0,0,30">
-                            <TextBlock Text="&#xE80F;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="{DynamicResource AccentColor}" Margin="0,2,10,0"/>
-                            <TextBlock Text="DevTools" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="&#xE80F;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="{DynamicResource DevToolsAccent}" Margin="0,2,10,0"/>
+                            <TextBlock Text="DevTools" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource DevToolsTextPrimary}"/>
                         </StackPanel>
 
                         <Button Content="Ferramentas" Style="{DynamicResource SidebarButtonStyle}" Tag="Tools" Click="NavButton_Click" Margin="0,0,0,5"/>
@@ -96,7 +93,7 @@
                         <Button Content="Minimizar para Bandeja" Style="{DynamicResource SidebarButtonStyle}" Click="MinimizeToTray_Click" Margin="0,0,0,5"/>
                         <Button Content="Encerrar"
                             Style="{DynamicResource SidebarButtonStyle}"
-                            Foreground="#E81123"
+                            Foreground="{DynamicResource ErrorBrush}"
                             Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
                             CommandTarget="{Binding ElementName=RootDialog}"/>
                     </StackPanel>
@@ -105,17 +102,18 @@
                 <!-- Main Content -->
                 <Grid Grid.Column="1">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="50"/>
-                        <!-- Increased Header Height -->
+                        <RowDefinition Height="48"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="72"/>
                     </Grid.RowDefinitions>
 
                     <!-- Window Drag/Close -->
-                    <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+                    <Grid Grid.Row="0" Background="{DynamicResource DevToolsSurface}" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+                        <Border BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="0,0,0,1"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Click="MinimizeButton_Click"
                                 Content="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="12"
-                                Width="40" Height="40" Background="Transparent" Foreground="#999999"
+                                Width="40" Height="40" Background="Transparent" Foreground="{DynamicResource DevToolsTextSecondary}"
                                 BorderThickness="0">
                                 <Button.Style>
                                     <Style TargetType="Button">
@@ -127,8 +125,8 @@
                                                     </Border>
                                                     <ControlTemplate.Triggers>
                                                         <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#3E3E42"/>
-                                                            <Setter Property="Foreground" Value="White"/>
+                                                            <Setter Property="Background" Value="{DynamicResource DevToolsWindowBackground}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
                                                         </Trigger>
                                                     </ControlTemplate.Triggers>
                                                 </ControlTemplate>
@@ -140,7 +138,7 @@
 
                             <Button Click="CloseButton_Click"
                                 Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="12"
-                                Width="40" Height="40" Background="Transparent" Foreground="#999999"
+                                Width="40" Height="40" Background="Transparent" Foreground="{DynamicResource DevToolsTextSecondary}"
                                 BorderThickness="0">
                                 <Button.Style>
                                     <Style TargetType="Button">
@@ -152,8 +150,8 @@
                                                     </Border>
                                                     <ControlTemplate.Triggers>
                                                         <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#C42B1C"/>
-                                                            <Setter Property="Foreground" Value="White"/>
+                                                            <Setter Property="Background" Value="{DynamicResource DevToolsStatusError}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
                                                         </Trigger>
                                                     </ControlTemplate.Triggers>
                                                 </ControlTemplate>
@@ -166,7 +164,7 @@
                     </Grid>
 
                     <!-- Dynamic Content Area -->
-                    <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="30,0,30,30" x:Name="MainTabControl">
+                    <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="24,16,24,16" x:Name="MainTabControl">
                         <TabControl.Resources>
                             <Style TargetType="TabItem">
                                 <!-- Removemos a visibilidade Collapsed aqui para garantir que os cards apareçam se selecionado -->
@@ -177,7 +175,7 @@
                         <TabItem x:Name="TabTools">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,15,0">
                                 <StackPanel>
-                                    <TextBlock Text="Ferramentas Disponíveis" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
+                                    <TextBlock Text="Ferramentas Disponíveis" FontSize="24" FontWeight="Light" Foreground="{DynamicResource DevToolsTextPrimary}" Margin="0,0,0,20"/>
 
                                     <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
                                         <!-- Cards de Ferramentas -->
@@ -219,14 +217,14 @@
                         <!-- Tab: Jobs -->
                         <TabItem x:Name="TabJobs">
                             <DockPanel LastChildFill="True">
-                                <TextBlock DockPanel.Dock="Top" Text="Centro de Execuções" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
+                                <TextBlock DockPanel.Dock="Top" Text="Centro de Execuções" FontSize="24" FontWeight="Light" Foreground="{DynamicResource DevToolsTextPrimary}" Margin="0,0,0,20"/>
 
                                 <!-- Detalhes / Logs (Bottom) -->
                                 <Expander DockPanel.Dock="Bottom" Header="Detalhes / Logs" Margin="0,10,0,0" IsExpanded="True" BorderBrush="{DynamicResource DevToolsBrushBorder}">
                                     <TextBox Text="{Binding SelectedItem.Logs, ElementName=JobsDataGrid, Mode=OneWay}" 
                                          Height="150" 
-                                         Background="#1E1E1E" 
-                                         Foreground="#D4D4D4"
+                                         Background="{DynamicResource DevToolsWindowBackground}" 
+                                         Foreground="{DynamicResource DevToolsTextPrimary}"
                                          FontFamily="Consolas"
                                          IsReadOnly="True"
                                          VerticalScrollBarVisibility="Auto"
@@ -243,14 +241,14 @@
                                       HeadersVisibility="Column"
                                       GridLinesVisibility="Horizontal"
                                       RowBackground="Transparent"
-                                      Foreground="#CCCCCC">
+                                      Foreground="{DynamicResource DevToolsTextSecondary}">
                                     <DataGrid.Resources>
                                         <Style TargetType="DataGridColumnHeader">
-                                            <Setter Property="Background" Value="#2D2D30"/>
-                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="Background" Value="{DynamicResource DevToolsSurface}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
                                             <Setter Property="Padding" Value="10,5"/>
                                             <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                                            <Setter Property="BorderBrush" Value="#3F3F46"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource DevToolsBorder}"/>
                                         </Style>
                                         <Style TargetType="DataGridCell">
                                             <Setter Property="Padding" Value="10"/>
@@ -266,8 +264,8 @@
                                             </Setter>
                                             <Style.Triggers>
                                                 <Trigger Property="IsSelected" Value="True">
-                                                    <Setter Property="Background" Value="#3E3E42"/>
-                                                    <Setter Property="Foreground" Value="White"/>
+                                                    <Setter Property="Background" Value="{DynamicResource DevToolsWindowBackground}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
                                                 </Trigger>
                                             </Style.Triggers>
                                         </Style>
@@ -280,8 +278,8 @@
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <Grid>
-                                                        <ProgressBar Value="{Binding ProgressPercent}" Maximum="100" Height="4" VerticalAlignment="Center" Background="#333333" BorderThickness="0" Foreground="{DynamicResource AccentColor}"/>
-                                                        <TextBlock Text="{Binding ProgressPercent, StringFormat={}{0}%}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="White" Margin="0,-15,0,0"/>
+                                                        <ProgressBar Value="{Binding ProgressPercent}" Maximum="100" Height="4" VerticalAlignment="Center" Background="{DynamicResource DevToolsBrushBorder}" BorderThickness="0" Foreground="{DynamicResource DevToolsAccent}"/>
+                                                        <TextBlock Text="{Binding ProgressPercent, StringFormat={}{0}%}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" Foreground="{DynamicResource DevToolsTextPrimary}" Margin="0,-15,0,0"/>
                                                     </Grid>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
@@ -299,10 +297,10 @@
                                 <!-- Lista de Configurações (Cards) -->
                                 <ScrollViewer x:Name="SettingsListPanel" VerticalScrollBarVisibility="Auto">
                                     <StackPanel Margin="0,10">
-                                        <TextBlock Text="Configurações do Projeto" FontSize="24" FontWeight="Light" Foreground="White" Margin="0,0,0,20"/>
+                                        <TextBlock Text="Configurações do Projeto" FontSize="24" FontWeight="Light" Foreground="{DynamicResource DevToolsTextPrimary}" Margin="0,0,0,20"/>
 
                                         <!-- Seção: Configurações Gerais -->
-                                        <TextBlock Text="Configurações Gerais" FontSize="18" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
+                                        <TextBlock Text="Configurações Gerais" FontSize="18" Foreground="{DynamicResource DevToolsAccent}" Margin="0,0,0,10"/>
                                         <WrapPanel Orientation="Horizontal" Margin="0,0,-15,20">
     
 
@@ -323,7 +321,7 @@
                                         </WrapPanel>
 
                                         <!-- Seção: Perfis de Ferramentas -->
-                                        <TextBlock Text="Perfis de Ferramentas" FontSize="18" Foreground="{DynamicResource AccentColor}" Margin="0,20,0,10"/>
+                                        <TextBlock Text="Perfis de Ferramentas" FontSize="18" Foreground="{DynamicResource DevToolsAccent}" Margin="0,20,0,10"/>
                                         <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Rename}" Content="Renomeação" 
                                                 ToolTip="Perfis de renomeação de projeto" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Rename"/>
@@ -356,9 +354,9 @@
                                     <!-- Header com Voltar -->
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                         <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
-                                            Foreground="White" Background="Transparent" BorderThickness="0"
+                                            Foreground="{DynamicResource DevToolsTextPrimary}" Background="Transparent" BorderThickness="0"
                                             Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
-                                        <TextBlock x:Name="ToolProfilesTitle" Text="Perfis: [Ferramenta]" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock x:Name="ToolProfilesTitle" Text="Perfis: [Ferramenta]" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource DevToolsTextPrimary}" VerticalAlignment="Center"/>
                                     </StackPanel>
 
                                     <!-- Conteúdo Gestão de Perfis -->
@@ -371,10 +369,10 @@
                                         <!-- Lista de Perfis -->
                                         <Border BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="0" Padding="0,0,10,0">
                                             <DockPanel>
-                                                <Button DockPanel.Dock="Bottom" Content="+ Novo Perfil" Style="{DynamicResource SecondaryButtonStyle}" 
+                                                <Button DockPanel.Dock="Bottom" Content="+ Novo Perfil" Style="{DynamicResource DevToolsSecondaryButton}" 
                                                     Height="35" Margin="0,10,0,0" Click="AddToolProfile_Click"/>
                                                 <ListBox x:Name="ToolProfilesList" Background="Transparent" BorderThickness="0" 
-                                                     Foreground="White" SelectionChanged="ToolProfile_SelectionChanged">
+                                                     Foreground="{DynamicResource DevToolsTextPrimary}" SelectionChanged="ToolProfile_SelectionChanged">
                                                     <ListBox.ItemTemplate>
                                                         <DataTemplate>
                                                             <Grid Margin="0,2">
@@ -383,7 +381,7 @@
                                                                     <ColumnDefinition Width="Auto"/>
                                                                 </Grid.ColumnDefinitions>
                                                                 <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                                                                <TextBlock Grid.Column="1" Text="⭐" Foreground="Gold" 
+                                                                <TextBlock Grid.Column="1" Text="⭐" Foreground="{DynamicResource DevToolsAccent}" 
                                                                            Visibility="{Binding IsDefault, Converter={StaticResource BooleanToVisibilityConverter}}" 
                                                                            ToolTip="Perfil Padrão" Margin="5,0,0,0"/>
                                                             </Grid>
@@ -393,7 +391,7 @@
                                                         <Style TargetType="ListBoxItem">
                                                             <Setter Property="Padding" Value="10,8"/>
                                                             <Setter Property="Margin" Value="0,0,0,2"/>
-                                                            <Setter Property="Background" Value="#2D2D30"/>
+                                                            <Setter Property="Background" Value="{DynamicResource DevToolsSurface}"/>
                                                             <Setter Property="Template">
                                                                 <Setter.Value>
                                                                     <ControlTemplate TargetType="ListBoxItem">
@@ -402,11 +400,11 @@
                                                                         </Border>
                                                                         <ControlTemplate.Triggers>
                                                                             <Trigger Property="IsSelected" Value="True">
-                                                                                <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
+                                                                                <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
                                                                             </Trigger>
                                                                             <Trigger Property="IsMouseOver" Value="True">
                                                                                 <Setter Property="Cursor" Value="Hand"/>
-                                                                                <Setter Property="Background" Value="#3E3E42"/>
+                                                                                <Setter Property="Background" Value="{DynamicResource DevToolsWindowBackground}"/>
                                                                             </Trigger>
                                                                         </ControlTemplate.Triggers>
                                                                     </ControlTemplate>
@@ -422,15 +420,15 @@
                                         <ScrollViewer Grid.Column="1" Margin="20,0,0,0" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
                                             <StackPanel x:Name="ToolProfileEditForm" Visibility="Collapsed">
                                                 
-                                                <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="#2D2D30">
+                                                <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
                                                     <StackPanel>
                                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                            <materialDesign:PackIcon Kind="Settings" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                            <TextBlock Text="Configurações do Perfil" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                            <materialDesign:PackIcon Kind="Settings" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                            <TextBlock Text="Configurações do Perfil" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
                                                         </StackPanel>
 
                                                         <StackPanel>
-                                                            <Label Content="Nome do Perfil" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Nome do Perfil" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="ToolProfileNameInput" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
 
@@ -446,11 +444,11 @@
 
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
                                                     <Button Content="Remover" Click="DeleteToolProfile_Click" 
-                                                            Style="{DynamicResource SecondaryButtonStyle}" Width="120" Foreground="#E81123" Margin="0,0,10,0"/>
+                                                            Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Foreground="{DynamicResource ErrorBrush}" Margin="0,0,10,0"/>
                                                     <Button Content="Cancelar" Click="BackToSettingsList_Click" 
-                                                            Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
+                                                            Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
                                                     <Button Content="Salvar" Click="SaveToolProfile_Click" 
-                                                            Style="{DynamicResource PrimaryButtonStyle}" Width="120"/>
+                                                            Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </ScrollViewer>
@@ -468,20 +466,20 @@
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                         <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
-                                            Foreground="White" Background="Transparent" BorderThickness="0"
+                                            Foreground="{DynamicResource DevToolsTextPrimary}" Background="Transparent" BorderThickness="0"
                                             Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Configuração: Notas e Nuvem" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Configuração: Notas e Nuvem" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource DevToolsTextPrimary}" VerticalAlignment="Center"/>
                                     </StackPanel>
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
                                             
                                             <!-- Grupo: Armazenamento Local -->
-                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="#2D2D30">
+                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                        <materialDesign:PackIcon Kind="Folder" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Armazenamento Local" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                        <materialDesign:PackIcon Kind="Folder" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                        <TextBlock Text="Armazenamento Local" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
                                                     </StackPanel>
 
                                                     <c:PathSelector x:Name="NotesStoragePathSelector" Title="Pasta de Armazenamento" IsFolderPicker="True" Margin="0,0,0,20"/>
@@ -494,7 +492,7 @@
                                                         </Grid.ColumnDefinitions>
 
                                                         <StackPanel>
-                                                            <Label Content="Formato Padrão" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Formato Padrão" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <ComboBox x:Name="NotesFormatCombo" Style="{DynamicResource DevToolsSelectInput}">
                                                                 <ComboBoxItem Content=".txt"/>
                                                                 <ComboBoxItem Content=".md"/>
@@ -509,14 +507,14 @@
                                             </materialDesign:Card>
 
                                             <!-- Grupo: Google Drive (Backup) -->
-                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="#2D2D30">
+                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
                                                 <StackPanel>
                                                     <DockPanel LastChildFill="False" Margin="0,0,0,20">
                                                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                                                            <materialDesign:PackIcon Kind="GoogleDrive" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                            <TextBlock Text="Backup Google Drive" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                            <materialDesign:PackIcon Kind="GoogleDrive" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                            <TextBlock Text="Backup Google Drive" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
                                                         </StackPanel>
-                                                        <Button DockPanel.Dock="Right" Content="Como configurar?" Style="{DynamicResource SecondaryButtonStyle}" 
+                                                        <Button DockPanel.Dock="Right" Content="Como configurar?" Style="{DynamicResource DevToolsSecondaryButton}" 
                                                             Padding="10,2" Height="25" FontSize="11" Click="OpenHelp_Click"/>
                                                     </DockPanel>
 
@@ -537,27 +535,27 @@
                                                         </Grid.ColumnDefinitions>
 
                                                         <StackPanel Grid.Row="0" Grid.Column="0">
-                                                            <Label Content="Client ID" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Client ID" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="GDriveClientId" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Row="0" Grid.Column="2">
-                                                            <Label Content="Client Secret" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Client Secret" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="GDriveClientSecret" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,20,0,0">
-                                                            <Label Content="Project ID" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Project ID" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="GDriveProjectId" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,20,0,0">
-                                                            <Label Content="Nome da Pasta no Drive" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Nome da Pasta no Drive" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="GDriveFolderName" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                         </StackPanel>
 
                                                         <Button x:Name="GDriveTestConnectionButton" Grid.Row="2" Grid.Column="0" Content="Testar Conexão" Click="TestConnection_Click" 
-                                                            Style="{DynamicResource SecondaryButtonStyle}" Width="150" HorizontalAlignment="Left" Margin="0,20,0,0"/>
+                                                            Style="{DynamicResource DevToolsSecondaryButton}" Width="150" HorizontalAlignment="Left" Margin="0,20,0,0"/>
                                                         <TextBlock x:Name="GDriveTestConnectionStatus" Grid.Row="2" Grid.Column="2" Margin="0,24,0,0"
                                                                    Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11"
                                                                    TextWrapping="Wrap" VerticalAlignment="Center"/>
@@ -566,8 +564,8 @@
                                             </materialDesign:Card>
 
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
-                                                <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
-                                                <Button Content="Salvar" Click="SaveNotesCloudSettings_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="120"/>
+                                                <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
+                                                <Button Content="Salvar" Click="SaveNotesCloudSettings_Click" Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </ScrollViewer>
@@ -582,20 +580,20 @@
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                         <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
-                                            Foreground="White" Background="Transparent" BorderThickness="0"
+                                            Foreground="{DynamicResource DevToolsTextPrimary}" Background="Transparent" BorderThickness="0"
                                             Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Configuração: Harvest" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Configuração: Harvest" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource DevToolsTextPrimary}" VerticalAlignment="Center"/>
                                     </StackPanel>
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
                                             
                                             <!-- Grupo: Regras de Filtragem -->
-                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="#2D2D30">
+                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                        <materialDesign:PackIcon Kind="FilterVariant" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Regras de Filtragem" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                        <materialDesign:PackIcon Kind="FilterVariant" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                        <TextBlock Text="Regras de Filtragem" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
                                                     </StackPanel>
 
                                                     <Grid>
@@ -606,31 +604,31 @@
                                                         </Grid.ColumnDefinitions>
 
                                                         <StackPanel>
-                                                            <Label Content="Extensões Permitidas (ex: .cs, .ts)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Extensões Permitidas (ex: .cs, .ts)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="HarvestExtensions" 
                                                                  Style="{DynamicResource DevToolsTextInput}" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="2">
-                                                            <Label Content="Pastas Ignoradas (ex: bin, obj)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Pastas Ignoradas (ex: bin, obj)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="HarvestExcludeDirs" 
                                                                  Style="{DynamicResource DevToolsTextInput}" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
                                                         </StackPanel>
                                                     </Grid>
 
                                                     <StackPanel Margin="0,20,0,0" Width="200" HorizontalAlignment="Left">
-                                                        <Label Content="Tamanho Máximo de Arquivo (KB)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                        <TextBlock Text="Tamanho Máximo de Arquivo (KB)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                         <TextBox x:Name="HarvestMaxFileSizeInput" Style="{DynamicResource DevToolsTextInput}"/>
                                                     </StackPanel>
                                                 </StackPanel>
                                             </materialDesign:Card>
 
                                             <!-- Grupo: Limites e Top -->
-                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="#2D2D30">
+                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                        <materialDesign:PackIcon Kind="ChartLine" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Limites Padrão" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                        <materialDesign:PackIcon Kind="ChartLine" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                        <TextBlock Text="Limites Padrão" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
                                                     </StackPanel>
 
                                                     <Grid>
@@ -641,12 +639,12 @@
                                                         </Grid.ColumnDefinitions>
                                                         
                                                         <StackPanel>
-                                                            <Label Content="Score Mínimo (0-100)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Score Mínimo (0-100)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="HarvestMinScore" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
                                                         
                                                         <StackPanel Grid.Column="2">
-                                                            <Label Content="Top Arquivos (Quantidade)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Top Arquivos (Quantidade)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="HarvestTopDefault" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
                                                     </Grid>
@@ -654,11 +652,11 @@
                                             </materialDesign:Card>
 
                                             <!-- Grupo: Pesos de IA -->
-                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="#2D2D30">
+                                            <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                        <materialDesign:PackIcon Kind="Robot" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Pesos de Relevância (IA)" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                        <materialDesign:PackIcon Kind="Robot" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                        <TextBlock Text="Pesos de Relevância (IA)" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
                                                     </StackPanel>
 
                                                     <Grid>
@@ -669,18 +667,18 @@
                                                         </Grid.ColumnDefinitions>
 
                                                         <StackPanel>
-                                                            <Label Content="Fan-In (Entradas)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Fan-In (Entradas)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="HarvestWeightFanIn" Style="{DynamicResource DevToolsTextInput}"/>
 
-                                                            <Label Content="Densidade de Keywords" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,20,0,6"/>
+                                                            <TextBlock Text="Densidade de Keywords" Style="{DynamicResource DevToolsInputLabel}" Margin="0,20,0,6"/>
                                                             <TextBox x:Name="HarvestWeightDensity" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
 
                                                         <StackPanel Grid.Column="2">
-                                                            <Label Content="Fan-Out (Saídas)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                            <TextBlock Text="Fan-Out (Saídas)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                             <TextBox x:Name="HarvestWeightFanOut" Style="{DynamicResource DevToolsTextInput}"/>
 
-                                                            <Label Content="Penalidade Dead Code" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,20,0,6"/>
+                                                            <TextBlock Text="Penalidade Dead Code" Style="{DynamicResource DevToolsInputLabel}" Margin="0,20,0,6"/>
                                                             <TextBox x:Name="HarvestWeightDeadCode" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
                                                     </Grid>
@@ -689,9 +687,9 @@
 
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
                                                 <Button Content="Cancelar" Click="BackToSettingsList_Click" 
-                                                        Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
+                                                        Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
                                                 <Button Content="Salvar" Click="SaveHarvestSettings_Click" 
-                                                        Style="{DynamicResource PrimaryButtonStyle}" Width="120"/>
+                                                        Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </ScrollViewer>
@@ -706,9 +704,9 @@
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                         <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
-                                            Foreground="White" Background="Transparent" BorderThickness="0"
+                                            Foreground="{DynamicResource DevToolsTextPrimary}" Background="Transparent" BorderThickness="0"
                                             Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Configuração: Organizer" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Configuração: Organizer" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource DevToolsTextPrimary}" VerticalAlignment="Center"/>
                                     </StackPanel>
 
                                     <Grid Grid.Row="1">
@@ -720,15 +718,15 @@
                                         <!-- Lista de Categorias -->
                                         <Border BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="0" Padding="0,0,10,0">
                                             <DockPanel>
-                                                <Button DockPanel.Dock="Bottom" Content="+ Nova Categoria" Style="{DynamicResource SecondaryButtonStyle}" 
+                                                <Button DockPanel.Dock="Bottom" Content="+ Nova Categoria" Style="{DynamicResource DevToolsSecondaryButton}" 
                                                     Height="35" Margin="0,10,0,0" Click="AddOrganizerCategory_Click"/>
                                                 <ListBox x:Name="OrganizerCategoriesList" Background="Transparent" BorderThickness="0" 
-                                                     Foreground="White" DisplayMemberPath="Name" SelectionChanged="OrganizerCategory_SelectionChanged">
+                                                     Foreground="{DynamicResource DevToolsTextPrimary}" DisplayMemberPath="Name" SelectionChanged="OrganizerCategory_SelectionChanged">
                                                     <ListBox.ItemContainerStyle>
                                                         <Style TargetType="ListBoxItem">
                                                             <Setter Property="Padding" Value="10,8"/>
                                                             <Setter Property="Margin" Value="0,0,0,2"/>
-                                                            <Setter Property="Background" Value="#2D2D30"/>
+                                                            <Setter Property="Background" Value="{DynamicResource DevToolsSurface}"/>
                                                             <Setter Property="Template">
                                                                 <Setter.Value>
                                                                     <ControlTemplate TargetType="ListBoxItem">
@@ -737,11 +735,11 @@
                                                                         </Border>
                                                                         <ControlTemplate.Triggers>
                                                                             <Trigger Property="IsSelected" Value="True">
-                                                                                <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
+                                                                                <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
                                                                             </Trigger>
                                                                             <Trigger Property="IsMouseOver" Value="True">
                                                                                 <Setter Property="Cursor" Value="Hand"/>
-                                                                                <Setter Property="Background" Value="#3E3E42"/>
+                                                                                <Setter Property="Background" Value="{DynamicResource DevToolsWindowBackground}"/>
                                                                             </Trigger>
                                                                         </ControlTemplate.Triggers>
                                                                     </ControlTemplate>
@@ -758,25 +756,25 @@
                                             <StackPanel x:Name="OrganizerEditForm" Visibility="Collapsed">
                                                 
                                                 <!-- Grupo: Detalhes da Categoria -->
-                                                <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="#2D2D30">
+                                                <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="{DynamicResource DevToolsSurface}">
                                                     <StackPanel>
                                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                                            <materialDesign:PackIcon Kind="Category" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                                            <TextBlock Text="Detalhes da Categoria" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                            <materialDesign:PackIcon Kind="Category" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                            <TextBlock Text="Detalhes da Categoria" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
                                                         </StackPanel>
 
                                                         <StackPanel>
-                                                            <Label Content="Nome da Categoria" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                            <TextBlock Text="Nome da Categoria" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,2"/>
                                                             <TextBox x:Name="OrgCatName" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
 
                                                         <StackPanel Margin="0,16,0,0">
-                                                            <Label Content="Nome da Pasta Destino" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                            <TextBlock Text="Nome da Pasta Destino" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,2"/>
                                                             <TextBox x:Name="OrgCatFolder" Style="{DynamicResource DevToolsTextInput}"/>
                                                         </StackPanel>
 
                                                         <StackPanel Margin="0,16,0,0">
-                                                            <Label Content="Palavras-Chave (separadas por vírgula)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,2"/>
+                                                            <TextBlock Text="Palavras-Chave (separadas por vírgula)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,2"/>
                                                             <TextBox x:Name="OrgCatKeywords" Style="{DynamicResource DevToolsTextInput}" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
                                                         </StackPanel>
                                                     </StackPanel>
@@ -784,11 +782,11 @@
 
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
                                                     <Button Content="Remover" Click="DeleteOrganizerCategory_Click" 
-                                                            Style="{DynamicResource SecondaryButtonStyle}" Width="120" Foreground="#E81123" Margin="0,0,10,0"/>
+                                                            Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Foreground="{DynamicResource ErrorBrush}" Margin="0,0,10,0"/>
                                                     <Button Content="Cancelar" Click="BackToSettingsList_Click" 
-                                                            Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
+                                                            Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
                                                     <Button Content="Salvar" Click="SaveOrganizerCategory_Click" 
-                                                            Style="{DynamicResource PrimaryButtonStyle}" Width="120"/>
+                                                            Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </ScrollViewer>
@@ -804,20 +802,20 @@
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                         <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
-                                            Foreground="White" Background="Transparent" BorderThickness="0"
+                                            Foreground="{DynamicResource DevToolsTextPrimary}" Background="Transparent" BorderThickness="0"
                                             Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Configuração: EF Core Migrations" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Configuração: EF Core Migrations" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource DevToolsTextPrimary}" VerticalAlignment="Center"/>
                                     </StackPanel>
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
                                             
                                             <!-- Grupo: Caminhos do Projeto -->
-                                            <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="#2D2D30">
+                                            <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="{DynamicResource DevToolsSurface}">
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                    <materialDesign:PackIcon Kind="Folder" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                    <TextBlock Text="Caminhos do Projeto" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                    <materialDesign:PackIcon Kind="Folder" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                    <TextBlock Text="Caminhos do Projeto" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
                                                 </StackPanel>
 
                                                 <StackPanel Margin="0,0,0,20">
@@ -831,29 +829,29 @@
                                         </materialDesign:Card>
 
                                         <!-- Grupo: Configuração do Contexto -->
-                                        <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="#2D2D30">
+                                        <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
                                             <StackPanel>
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                    <materialDesign:PackIcon Kind="DatabaseSettings" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                    <TextBlock Text="Configuração do Contexto" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                    <materialDesign:PackIcon Kind="DatabaseSettings" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                    <TextBlock Text="Configuração do Contexto" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
                                                 </StackPanel>
 
                                                 <StackPanel>
-                                                    <Label Content="Nome Completo do DbContext (ex: MyApp.Data.AppDbContext)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                    <TextBlock Text="Nome Completo do DbContext (ex: MyApp.Data.AppDbContext)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                     <TextBox x:Name="MigContextInput" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                 </StackPanel>
 
                                                 <StackPanel Margin="0,20,0,0">
-                                                    <Label Content="Argumentos Adicionais (dotnet ef ...)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                    <TextBlock Text="Argumentos Adicionais (dotnet ef ...)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                     <TextBox x:Name="MigArgsInput" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </materialDesign:Card>
 
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
-                                            <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
+                                            <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
                                             <Button Content="Salvar" Click="SaveMigrationsSettings_Click" 
-                                                Style="{DynamicResource PrimaryButtonStyle}" Width="120"/>
+                                                Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                         </StackPanel>
                                         </StackPanel>
                                     </ScrollViewer>
@@ -868,20 +866,20 @@
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                         <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16" 
-                                            Foreground="White" Background="Transparent" BorderThickness="0"
+                                            Foreground="{DynamicResource DevToolsTextPrimary}" Background="Transparent" BorderThickness="0"
                                             Click="BackToSettingsList_Click" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Configuração: Ngrok" FontSize="20" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Configuração: Ngrok" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource DevToolsTextPrimary}" VerticalAlignment="Center"/>
                                     </StackPanel>
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
                                             
                                             <!-- Grupo: Execução Local -->
-                                        <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="#2D2D30">
+                                        <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
                                             <StackPanel>
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                    <materialDesign:PackIcon Kind="PlayCircle" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                    <TextBlock Text="Execução Local" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                    <materialDesign:PackIcon Kind="PlayCircle" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                    <TextBlock Text="Execução Local" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
                                                 </StackPanel>
 
                                                 <c:PathSelector x:Name="NgrokExeSelector" Title="Caminho do Executável do Ngrok (ngrok.exe)" IsFolderPicker="False"/>
@@ -889,29 +887,29 @@
                                         </materialDesign:Card>
 
                                         <!-- Grupo: Autenticação e Argumentos -->
-                                        <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="#2D2D30">
+                                        <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource DevToolsSurface}">
                                             <StackPanel>
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                    <materialDesign:PackIcon Kind="KeyVariant" Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                    <TextBlock Text="Autenticação e Argumentos" FontSize="16" Foreground="White" FontWeight="SemiBold"/>
+                                                    <materialDesign:PackIcon Kind="KeyVariant" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                    <TextBlock Text="Autenticação e Argumentos" FontSize="16" Foreground="{DynamicResource DevToolsTextPrimary}" FontWeight="SemiBold"/>
                                                 </StackPanel>
 
                                                 <StackPanel>
-                                                    <Label Content="Auth Token (Opcional - via --authtoken)" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                    <TextBlock Text="Auth Token (Opcional - via --authtoken)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                     <TextBox x:Name="NgrokAuthTokenInput" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                 </StackPanel>
 
                                                 <StackPanel Margin="0,20,0,0">
-                                                    <Label Content="Argumentos Adicionais" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11" Margin="0,0,0,6"/>
+                                                    <TextBlock Text="Argumentos Adicionais" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                     <TextBox x:Name="NgrokArgsInput" Style="{DynamicResource DevToolsTextInput}" FontFamily="Consolas"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </materialDesign:Card>
 
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
-                                            <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
+                                            <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
                                             <Button Content="Salvar" Click="SaveNgrokSettings_Click" 
-                                                Style="{DynamicResource PrimaryButtonStyle}" Width="120"/>
+                                                Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                         </StackPanel>
                                         </StackPanel>
                                     </ScrollViewer>
@@ -920,8 +918,41 @@
                         </TabItem>
 
                     </TabControl>
+
+                    <Border Grid.Row="2"
+                            Background="{DynamicResource DevToolsSurface}"
+                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                            BorderThickness="0,1,0,0"
+                            Padding="20,0">
+                        <Grid IsSharedSizeScope="True">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="MainFooterButton"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="MainFooterButton"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="DevTools Hub pronto."
+                                       Foreground="{DynamicResource DevToolsTextSecondary}"
+                                       FontSize="{DynamicResource DevToolsFontSize.Status}"
+                                       VerticalAlignment="Center"/>
+
+                            <Button Grid.Column="1"
+                                    Content="Minimizar para Bandeja"
+                                    Click="MinimizeToTray_Click"
+                                    Style="{DynamicResource DevToolsSecondaryButton}"/>
+
+                            <Button Grid.Column="3"
+                                    Content="Abrir Jobs"
+                                    Tag="Jobs"
+                                    Click="NavButton_Click"
+                                    Style="{DynamicResource DevToolsPrimaryButton}"/>
+                        </Grid>
+                    </Border>
                 </Grid>
             </Grid>
         </Border>
     </materialDesign:DialogHost>
 </Window>
+

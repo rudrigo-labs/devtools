@@ -6,40 +6,39 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="Guia de Ajuda"
-        Height="700" Width="800"
-        MinHeight="560" MinWidth="680"
+        Height="700"
+        Width="840"
+        MinHeight="560"
+        MinWidth="680"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
 
-    <Border Background="{DynamicResource WindowBackgroundBrush}"
-            BorderBrush="{DynamicResource BorderBrush}"
+    <Border Background="{DynamicResource DevToolsWindowBackground}"
+            BorderBrush="{DynamicResource DevToolsBrushBorder}"
             BorderThickness="1"
-            CornerRadius="12">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="25" ShadowDepth="10" Opacity="0.6" Color="Black"/>
-        </Border.Effect>
+            CornerRadius="8">
 
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="64"/>
+                <RowDefinition Height="48"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="72"/>
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0"
-                    Background="{DynamicResource ControlBackgroundBrush}"
-                    BorderBrush="{DynamicResource BorderBrush}"
+                    Background="{DynamicResource DevToolsSurface}"
+                    BorderBrush="{DynamicResource DevToolsBrushBorder}"
                     BorderThickness="0,0,0,1">
-                <StackPanel Orientation="Horizontal" Margin="20,0">
+                <StackPanel Orientation="Horizontal" Margin="16,0">
                     <materialDesign:PackIcon Kind="HelpCircle"
-                                             Foreground="{DynamicResource AccentBrush}"
-                                             Width="24"
-                                             Height="24"
+                                             Foreground="{DynamicResource DevToolsAccent}"
+                                             Width="20"
+                                             Height="20"
                                              VerticalAlignment="Center"
-                                             Margin="0,0,12,0"/>
-                    <TextBlock Text="Guia de Ajuda: Configuração de Backup"
-                               Foreground="{DynamicResource PrimaryTextBrush}"
+                                             Margin="0,0,10,0"/>
+                    <TextBlock Text="Guia de Ajuda: Configuracao de Backup"
+                               Foreground="{DynamicResource DevToolsTextPrimary}"
                                FontSize="{DynamicResource DevToolsFontSize.WindowTitle}"
                                FontWeight="SemiBold"
                                VerticalAlignment="Center"/>
@@ -48,10 +47,10 @@
 
             <RichTextBox x:Name="HelpContentViewer"
                          Grid.Row="1"
-                         Margin="22,16,22,16"
+                         Margin="16"
                          Padding="8,2"
                          Background="Transparent"
-                         Foreground="{DynamicResource PrimaryTextBrush}"
+                         Foreground="{DynamicResource DevToolsTextPrimary}"
                          BorderThickness="0"
                          IsReadOnly="True"
                          IsDocumentEnabled="True"
@@ -59,20 +58,20 @@
                          HorizontalScrollBarVisibility="Disabled"/>
 
             <Border Grid.Row="2"
-                    Background="{DynamicResource ControlBackgroundBrush}"
-                    Padding="20,15"
-                    BorderBrush="{DynamicResource BorderBrush}"
-                    BorderThickness="0,1,0,0">
+                    Background="{DynamicResource DevToolsSurface}"
+                    BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                    BorderThickness="0,1,0,0"
+                    Padding="16,0">
                 <DockPanel LastChildFill="False">
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                         <materialDesign:PackIcon Kind="FilePdfBox"
                                                  Foreground="{DynamicResource ErrorBrush}"
-                                                 Width="20"
-                                                 Height="20"
+                                                 Width="18"
+                                                 Height="18"
                                                  VerticalAlignment="Center"
                                                  Margin="0,0,8,0"/>
-                        <TextBlock Text="Deseja levar este guia com você?"
-                                   Foreground="{DynamicResource SecondaryTextBrush}"
+                        <TextBlock Text="Deseja levar este guia com voce?"
+                                   Foreground="{DynamicResource DevToolsTextSecondary}"
                                    VerticalAlignment="Center"
                                    FontSize="{DynamicResource DevToolsFontSize.Status}"/>
                     </StackPanel>
@@ -81,14 +80,14 @@
                         <Button x:Name="DownloadPdfButton"
                                 Content="Baixar PDF"
                                 Click="DownloadPdfButton_Click"
-                                Style="{DynamicResource SecondaryButtonStyle}"
-                                Width="120"
+                                Style="{DynamicResource DevToolsSecondaryButton}"
+                                Width="140"
                                 Margin="0,0,10,0"/>
                         <Button x:Name="CloseButton"
                                 Content="Fechar"
                                 Click="CloseButton_Click"
-                                Style="{DynamicResource PrimaryButtonStyle}"
-                                Width="100"/>
+                                Style="{DynamicResource DevToolsPrimaryButton}"
+                                Width="120"/>
                     </StackPanel>
                 </DockPanel>
             </Border>

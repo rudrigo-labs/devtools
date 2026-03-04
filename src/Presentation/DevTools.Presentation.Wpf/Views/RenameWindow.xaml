@@ -2,68 +2,107 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
-        Title="Renomear Projeto .NET" Height="640" Width="900" WindowStartupLocation="CenterOwner"
+        Title="Renomear Projeto .NET"
+        Height="640"
+        Width="900"
+        WindowStartupLocation="CenterOwner"
         Style="{StaticResource ModernWindowStyle}"
         ShowInTaskbar="False"
         Topmost="True">
 
-    <Window.Resources>
-        <!-- Styles removed to use global theme -->
-    </Window.Resources>
-
     <c:DevToolsToolFrame Title="Renomear Projeto .NET"
-                         HelpText="Renomeia projeto/solution e namespaces C# com opções de backup."
+                         HelpText="Renomeia projeto e namespaces com opcoes de seguranca."
                          PrimaryButtonContent="Renomear"
                          SecondaryButtonContent="Cancelar"
                          PrimaryButtonClick="ProcessButton_Click"
                          SecondaryButtonClick="CloseButton_Click">
-        
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,5,0">
-        <StackPanel Margin="0,10,0,0">
-            
-                <c:PathSelector x:Name="RootPathSelector" Title="Pasta Raiz" IsFolderPicker="True" />
 
-                <Grid Margin="0,15,0,0">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                        <Label Content="Texto Antigo:" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <TextBox x:Name="OldTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Text="Configuracao"
+                           FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource AccentBrush}"
+                           Margin="0,0,0,16"/>
+
+                <c:PathSelector x:Name="RootPathSelector"
+                                Title="Pasta Raiz"
+                                IsFolderPicker="True"
+                                Margin="0,0,0,16"/>
+
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Texto Antigo" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="OldTextBox" Style="{StaticResource DevToolsTextInput}"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                        <Label Content="Texto Novo:" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <TextBox x:Name="NewTextBox" Style="{StaticResource ModernTextBoxStyle}"/>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Texto Novo" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="NewTextBox" Style="{StaticResource DevToolsTextInput}"/>
                     </StackPanel>
                 </Grid>
 
-                <StackPanel Margin="0,15,0,0">
-                    <Label Content="Modo de Renomeação:" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                    <ComboBox x:Name="ModeCombo" SelectedIndex="0" Style="{StaticResource ModernComboBoxStyle}">
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock Text="Modo de Renomeacao" Style="{StaticResource DevToolsInputLabel}"/>
+                    <ComboBox x:Name="ModeCombo" SelectedIndex="0" Style="{StaticResource DevToolsSelectInput}">
                         <ComboBoxItem Content="Geral (Texto Simples)"/>
                         <ComboBoxItem Content="Namespace C# (Inteligente)"/>
                     </ComboBox>
                 </StackPanel>
-                
-                <Grid Margin="0,15,0,0">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                        <Label Content="Include (Glob):" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <TextBox x:Name="IncludeBox" Style="{StaticResource ModernTextBoxStyle}" ToolTip="Ex: *.cs, **/*.txt"/>
+
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Include (Glob)" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="IncludeBox"
+                                 Style="{StaticResource DevToolsTextInput}"
+                                 ToolTip="Ex: *.cs, **/*.txt"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                        <Label Content="Exclude (Glob):" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <TextBox x:Name="ExcludeBox" Style="{StaticResource ModernTextBoxStyle}" ToolTip="Ex: obj/*, bin/*"/>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Exclude (Glob)" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="ExcludeBox"
+                                 Style="{StaticResource DevToolsTextInput}"
+                                 ToolTip="Ex: obj/*, bin/*"/>
                     </StackPanel>
                 </Grid>
-                
-                <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
-                    <CheckBox x:Name="BackupCheck" Content="Criar Backup" IsChecked="True" Margin="0,0,15,0" Foreground="White"/>
-                    <CheckBox x:Name="UndoLogCheck" Content="Log de Reversão" IsChecked="True" Foreground="White"/>
-                    <CheckBox x:Name="DryRunCheck" Content="Dry Run (Teste)" IsChecked="False" Margin="15,0,0,0" Foreground="White"/>
-                    <CheckBox x:Name="RememberSettingsCheck" Content="Lembrar" IsChecked="False" Margin="15,0,0,0" Foreground="White"/>
-                </StackPanel>
-                
-                <c:RunSummaryControl x:Name="RunSummary" Margin="0,15,0,0"/>
-        </StackPanel>
+
+                <WrapPanel Margin="0,0,0,16">
+                    <CheckBox x:Name="BackupCheck"
+                              Content="Criar Backup"
+                              IsChecked="True"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              Margin="0,0,16,8"/>
+                    <CheckBox x:Name="UndoLogCheck"
+                              Content="Log de Reversao"
+                              IsChecked="True"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              Margin="0,0,16,8"/>
+                    <CheckBox x:Name="DryRunCheck"
+                              Content="Dry Run (Teste)"
+                              IsChecked="False"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              Margin="0,0,16,8"/>
+                    <CheckBox x:Name="RememberSettingsCheck"
+                              Content="Lembrar"
+                              IsChecked="False"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              Margin="0,0,16,8"/>
+                </WrapPanel>
+
+                <c:RunSummaryControl x:Name="RunSummary"/>
+            </StackPanel>
         </ScrollViewer>
     </c:DevToolsToolFrame>
 </Window>

@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Notes" Height="720" Width="420"
+        Title="Notas" Height="720" Width="420"
         Style="{StaticResource ModernWindowStyle}"
         Topmost="True"
         ShowInTaskbar="False">
@@ -36,23 +36,32 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="{StaticResource WindowBackgroundBrush}"
-            BorderBrush="{StaticResource BorderBrush}"
+    <Border Background="{DynamicResource DevToolsWindowBackground}"
+            BorderBrush="{DynamicResource DevToolsBrushBorder}"
             BorderThickness="1"
-            CornerRadius="12"
+            CornerRadius="8"
             Padding="0">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="25" ShadowDepth="10" Opacity="0.6" Color="Black"/>
-        </Border.Effect>
-        <Grid Margin="15">
+        <Grid Margin="16">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/> <!-- Header -->
+                <RowDefinition Height="48"/> <!-- Header -->
                 <RowDefinition Height="*"/>    <!-- Content -->
             </Grid.RowDefinitions>
 
             <!-- Header (Draggable) -->
-            <Border Grid.Row="0" Background="Transparent" Padding="15,10" MouseLeftButtonDown="Header_MouseLeftButtonDown">
-                <TextBlock x:Name="HeaderTitle" Text="NOTAS" FontFamily="Segoe UI Light" FontSize="24" Foreground="{StaticResource PrimaryTextBrush}" IsHitTestVisible="False"/>
+            <Border Grid.Row="0"
+                    Background="{DynamicResource DevToolsSurface}"
+                    BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                    BorderThickness="0,0,0,1"
+                    CornerRadius="6"
+                    Padding="12,0"
+                    MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                <TextBlock x:Name="HeaderTitle"
+                           Text="NOTAS"
+                           FontSize="{DynamicResource DevToolsFontSize.WindowTitle}"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource DevToolsTextPrimary}"
+                           VerticalAlignment="Center"
+                           IsHitTestVisible="False"/>
             </Border>
 
             <!-- List View -->
@@ -62,13 +71,13 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <ListBox x:Name="NotesList" Grid.Row="0" 
+                <ListBox x:Name="NotesList" Grid.Row="0"
                          Background="Transparent" BorderThickness="0" 
-                         Foreground="{StaticResource PrimaryTextBrush}"
+                         Foreground="{DynamicResource DevToolsTextPrimary}"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                          MouseDoubleClick="NotesList_MouseDoubleClick"
-                         Margin="10,0">
+                         Margin="0,12,0,0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border BorderThickness="0,0,0,1" BorderBrush="#333333" Padding="5,10">
@@ -104,7 +113,11 @@
                 </ListBox>
 
                 <!-- AppBar List -->
-                <Border Grid.Row="1" Background="#FF1F1F1F" Padding="0,5">
+                <Border Grid.Row="1"
+                        Background="{DynamicResource DevToolsSurface}"
+                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                        BorderThickness="0,1,0,0"
+                        Padding="0,6">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button x:Name="AddButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Nova Nota" Click="AddButton_Click">
                             <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
@@ -135,25 +148,30 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBox x:Name="NoteTitle" Grid.Row="0" Margin="15,0,15,10"
-                         Style="{StaticResource ModernTextBoxStyle}"
+                <TextBox x:Name="NoteTitle" Grid.Row="0" Margin="0,12,0,10"
+                         Style="{StaticResource DevToolsTextInput}"
                          Height="Auto"
                          FontSize="18" FontFamily="Segoe UI" FontWeight="SemiBold"
-                         Padding="0,5"/>
+                         Padding="12,10"/>
 
                 <TextBox x:Name="NotesContent" Grid.Row="1"
-                         Style="{StaticResource ModernTextBoxStyle}"
+                         Style="{StaticResource DevToolsTextInput}"
                          Height="Auto"
                          FontFamily="Consolas"
                          FontSize="14"
-                         Padding="15,5"
+                         Padding="12,10"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
+                         VerticalContentAlignment="Top"
                          VerticalScrollBarVisibility="Auto"
                          TextChanged="NotesContent_TextChanged"/>
 
                 <!-- AppBar Edit -->
-                <Border Grid.Row="2" Background="#FF1F1F1F" Padding="0,5">
+                <Border Grid.Row="2"
+                        Background="{DynamicResource DevToolsSurface}"
+                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                        BorderThickness="0,1,0,0"
+                        Padding="0,6">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button x:Name="BackButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Voltar" Click="BackButton_Click" Margin="0,0,10,0">
                             <TextBlock Text="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>

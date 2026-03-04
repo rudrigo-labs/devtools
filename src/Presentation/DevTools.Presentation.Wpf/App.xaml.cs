@@ -36,7 +36,7 @@ public partial class App : System.Windows.Application
         _trayService = new TrayService(_jobManager, _settingsService, _configService, _profileManager, _googleDriveService);
 
         // Instancia MainWindow (Hub)
-        var mainWindow = new DevTools.Presentation.Wpf.Views.MainWindow(_trayService, _jobManager, _configService, profileUIService);
+        var mainWindow = new DevTools.Presentation.Wpf.Views.MainWindow(_trayService, _jobManager, _configService, profileUIService, _googleDriveService);
         _trayService.SetMainWindow(mainWindow);
 
         _trayService.Initialize();
