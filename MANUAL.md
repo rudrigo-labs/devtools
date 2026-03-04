@@ -215,6 +215,13 @@ Permite salvar configuracoes recorrentes por ferramenta.
 - Migrations
 - Ngrok
 
+## 5.4 Regras de validacao
+
+- Campos obrigatorios nao podem ser salvos em branco.
+- Validacoes de formulario exibem aviso inline no proprio painel.
+- Mensagens dialogadas do sistema usam o padrao visual do `UiMessageService`.
+- No painel de Google Drive, o botao "Testar conexao" valida campos antes de executar.
+
 ## 6. Persistencia
 
 Modo padrao:
@@ -278,5 +285,13 @@ Saida esperada:
 
 - Interface oficial: WPF
 - Projeto CLI: obsoleto e fora da solution/instalador
+- Notas: sempre em arquivo fisico local (`.txt` ou `.md`), com envio opcional ao Google Drive apos salvar localmente.
+
+## 10. Melhorias futuras planejadas
+
+1. Finalizar a estabilizacao da infraestrutura de testes WPF para remover 2 testes atualmente ignorados.
+2. Disponibilizar assistente de migracao de persistencia JSON -> SQLite na UI.
+3. Adicionar exportacao/importacao consolidada de perfis e configuracoes.
+4. Evoluir o painel de monitoramento operacional no shell (jobs, tuneis e storage).
 
 Fim do manual.
