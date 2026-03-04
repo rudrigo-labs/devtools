@@ -5,24 +5,21 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="400">
     <StackPanel>
-        <Label x:Name="TitleBlock"
-               Content="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
-               Padding="0"
-               Margin="0,0,0,5"
-               FontSize="12">
-            <Label.Style>
-                <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+        <TextBlock x:Name="TitleBlock"
+                   Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource DevToolsInputLabel}">
                     <Style.Triggers>
-                        <Trigger Property="Content" Value="{x:Null}">
+                        <Trigger Property="Text" Value="{x:Null}">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </Trigger>
-                        <Trigger Property="Content" Value="">
+                        <Trigger Property="Text" Value="">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </Trigger>
                     </Style.Triggers>
                 </Style>
-            </Label.Style>
-        </Label>
+            </TextBlock.Style>
+        </TextBlock>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -30,7 +27,7 @@
             </Grid.ColumnDefinitions>
             <TextBox x:Name="PathInput"
                      Text="{Binding SelectedPath, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{StaticResource ModernTextBoxStyle}"
+                     Style="{StaticResource DevToolsTextInput}"
                      IsReadOnly="True"
                      ToolTip="{Binding SelectedPath, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"/>
             <Button Grid.Column="1" Content="Procurar" Style="{StaticResource SecondaryButtonStyle}" Click="Browse_Click" ToolTip="Selecionar pasta/arquivo" Margin="10,0,0,0"/>

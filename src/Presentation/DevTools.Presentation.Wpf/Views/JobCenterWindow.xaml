@@ -5,13 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Centro de Execuções (Jobs)" Height="640" Width="900" WindowStartupLocation="CenterOwner"
+        Title="Centro de Execucoes (Jobs)"
+        Height="640"
+        Width="900"
+        WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
 
     <c:DevToolsToolFrame x:Name="MainFrame"
                          Title="Job Center"
-                         HelpText="Execuções em background"
+                         HelpText="Execucoes em background"
                          PrimaryButtonContent="Cancelar Job Selecionado"
                          SecondaryButtonContent="Fechar Janela"
                          PrimaryButtonClick="CancelSelected_Click"
@@ -19,19 +22,28 @@
                          CloseButtonClick="CloseButton_Click">
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <DataGrid x:Name="JobsGrid" Grid.Row="0"
+            <TextBlock Grid.Row="0"
+                       Text="Execucoes Ativas"
+                       FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource AccentBrush}"
+                       Margin="0,0,0,12"/>
+
+            <DataGrid x:Name="JobsGrid"
+                      Grid.Row="1"
                       ItemsSource="{Binding Jobs}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
                       HeadersVisibility="Column"
                       GridLinesVisibility="None"
-                      Background="#1E1E1E"
-                      Foreground="{StaticResource PrimaryTextBrush}"
-                      BorderBrush="#333333"
+                      Background="{DynamicResource DevToolsWindowBackground}"
+                      Foreground="{DynamicResource DevToolsTextPrimary}"
+                      BorderBrush="{DynamicResource DevToolsBrushBorder}"
                       BorderThickness="1"
                       RowHeight="40"
                       ColumnHeaderHeight="34"
@@ -42,19 +54,24 @@
                     <DataGridTemplateColumn Header="Progresso" Width="160">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressPercent}" Height="12" Margin="0,0,10,0"/>
+                                <ProgressBar Minimum="0"
+                                             Maximum="100"
+                                             Value="{Binding ProgressPercent}"
+                                             Height="12"
+                                             Margin="0,0,10,0"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTextColumn Header="Mensagem" Binding="{Binding Message}" Width="*"/>
-                    <DataGridTextColumn Header="Início" Binding="{Binding StartedAt}" Width="160"/>
+                    <DataGridTextColumn Header="Inicio" Binding="{Binding StartedAt}" Width="160"/>
                 </DataGrid.Columns>
             </DataGrid>
 
-            <TextBlock Grid.Row="1"
-                       Margin="4,10,0,0"
-                       Text="Dica: você pode fechar esta tela. Os jobs continuam rodando no tray."
-                       Foreground="{StaticResource SecondaryTextBrush}" FontSize="12"/>
+            <TextBlock Grid.Row="2"
+                       Margin="0,10,0,0"
+                       Text="Dica: voce pode fechar esta tela. Os jobs continuam rodando no tray."
+                       Foreground="{StaticResource SecondaryTextBrush}"
+                       FontSize="{DynamicResource DevToolsFontSize.Status}"/>
         </Grid>
     </c:DevToolsToolFrame>
 </Window>

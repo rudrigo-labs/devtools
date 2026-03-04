@@ -2,6 +2,12 @@
 
 Status: Em uso
 
+## Onde esta a documentacao oficial
+
+- Visao geral: `docs/README.md`
+- Ferramentas (fonte canonica): `docs/tools/`
+- Legado/obsoleto: `docs/_obsolete/`
+
 ## Como executar
 
 1. Execute o CLI:
@@ -32,7 +38,7 @@ Status: Em uso
 - SSHTunnel
 - Notes
 
-Cada ferramenta possui um documento proprio em `docs/`.
+Cada ferramenta possui um documento proprio em `docs/tools/<Tool>/README.md`.
 
 ## Nota sobre configuracoes
 

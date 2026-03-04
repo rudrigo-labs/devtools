@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private readonly TrayService _trayService;
     private readonly JobManager _jobManager;
     private readonly ConfigService _configService;
+    private readonly GoogleDriveService _googleDriveService;
 
     // Config Objects
     private HarvestConfig _currentHarvestConfig = new();
@@ -35,14 +36,16 @@ public partial class MainWindow : Window
     private string? _currentToolForProfiles;
     private ToolProfile? _selectedToolProfile;
     private readonly ProfileUIService _profileUIService;
+    private bool _isTestingGoogleDriveConnection;
 
-    public MainWindow(TrayService trayService, JobManager jobManager, ConfigService configService, ProfileUIService profileUIService)
+    public MainWindow(TrayService trayService, JobManager jobManager, ConfigService configService, ProfileUIService profileUIService, GoogleDriveService googleDriveService)
     {
         InitializeComponent();
         _trayService = trayService;
         _jobManager = jobManager;
         _configService = configService;
         _profileUIService = profileUIService;
+        _googleDriveService = googleDriveService;
 
         _trayService.SetMainWindow(this);
 
@@ -79,6 +82,11 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        _trayService = null!;
+        _jobManager = null!;
+        _configService = null!;
+        _profileUIService = null!;
+        _googleDriveService = null!;
     }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -555,7 +563,7 @@ public partial class MainWindow : Window
             _currentGoogleDriveSettings = ReadGoogleDriveSettingsFromUi();
             if (_currentGoogleDriveSettings.IsEnabled && !ValidateGoogleDriveSettings(_currentGoogleDriveSettings, out var validationMessage))
             {
-                UiMessageService.ShowWarning(validationMessage, "Campos Obrigatórios");
+                ShowRequiredFieldsWarning(validationMessage);
                 return;
             }
 
@@ -587,22 +595,25 @@ public partial class MainWindow : Window
 
     private async void TestConnection_Click(object sender, RoutedEventArgs e)
     {
+        if (_isTestingGoogleDriveConnection)
+            return;
+
         var tempSettings = ReadGoogleDriveSettingsFromUi();
         tempSettings.IsEnabled = true; // Teste deve funcionar mesmo com o toggle desligado.
 
         if (!ValidateGoogleDriveSettings(tempSettings, out var validationMessage))
         {
-            UiMessageService.ShowError(validationMessage, "Erro de Validação");
+            ShowRequiredFieldsWarning(validationMessage);
             return;
         }
 
+        _isTestingGoogleDriveConnection = true;
         SetGDriveTestUiState(isTesting: true, statusText: "Testando conexão com Google Drive...");
         try
         {
-            var gDriveService = new GoogleDriveService();
-            // Executa fora do thread de UI para evitar travamento durante o fluxo OAuth/browser.
-            await Task.Run(() => gDriveService.TestConnectionAsync(tempSettings));
-            
+            // Mantemos o fluxo assíncrono sem bloquear a UI.
+            await _googleDriveService.TestConnectionAsync(tempSettings);
+
             SetGDriveTestUiState(isTesting: false, statusText: "Conexão validada com sucesso.");
             UiMessageService.ShowInfo("Conexão com Google Drive estabelecida com sucesso!", "Sucesso");
         }
@@ -613,8 +624,14 @@ public partial class MainWindow : Window
         }
         finally
         {
+            _isTestingGoogleDriveConnection = false;
             SetGDriveTestUiState(isTesting: false, statusText: GDriveTestConnectionStatus?.Text, isError: false, preserveStatus: true);
         }
+    }
+
+    private static void ShowRequiredFieldsWarning(string message)
+    {
+        UiMessageService.ShowWarning(message, "Campos Obrigatórios");
     }
 
     private GoogleDriveSettings ReadGoogleDriveSettingsFromUi()
@@ -667,7 +684,6 @@ public partial class MainWindow : Window
                 ? (System.Windows.Media.Brush)FindResource("ErrorBrush")
                 : (System.Windows.Media.Brush)FindResource("SecondaryTextBrush");
         }
-
-        Mouse.OverrideCursor = isTesting ? System.Windows.Input.Cursors.Wait : null;
-    }
 }
+}
+

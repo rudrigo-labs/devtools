@@ -5,45 +5,79 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Coletor de Arquivos (Harvest)" Height="720" Width="900" WindowStartupLocation="CenterOwner"
+        Title="Coletor de Arquivos (Harvest)"
+        Height="720"
+        Width="900"
+        WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
-        WindowStyle="None" AllowsTransparency="True" Background="Transparent">
+        Style="{StaticResource ModernWindowStyle}">
 
     <c:DevToolsToolFrame Title="Coletor de Arquivos"
-                         HelpText="Copia arquivos filtrados por regras para pasta de saída"
+                         HelpText="Copia arquivos filtrados por regras para pasta de saida."
                          PrimaryButtonContent="Executar"
                          SecondaryButtonContent="Cancelar"
                          PrimaryButtonClick="Run_Click"
                          SecondaryButtonClick="Cancel_Click"
                          CloseButtonClick="Cancel_Click">
 
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,5,0">
-        <StackPanel Margin="0,10,0,0">
-            <TextBlock Text="Configuração" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,15"/>
-                
-                <c:PathSelector x:Name="SourcePathSelector" Title="Diretório de Origem (Projeto para Análise)" 
-                                IsFolderPicker="True" Margin="0,0,0,20"/>
-                
-                <c:PathSelector x:Name="OutputPathSelector" Title="Diretório de Destino (Local de Backup)" 
-                                IsFolderPicker="True"/>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Text="Configuracao"
+                           FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource AccentBrush}"
+                           Margin="0,0,0,16"/>
 
-                <c:PathSelector x:Name="ConfigPathSelector" Title="Arquivo de Configuração (Opcional)" 
-                                IsFolderPicker="False" Margin="0,20,0,0"/>
+                <c:PathSelector x:Name="SourcePathSelector"
+                                Title="Diretorio de Origem (Projeto)"
+                                IsFolderPicker="True"
+                                Margin="0,0,0,16"/>
 
-                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                     <StackPanel Margin="0,0,20,0">
-                        <Label Content="Pontuação Mínima"/>
-                        <TextBox x:Name="MinScoreBox" Text="0" Width="100" Style="{StaticResource ModernTextBoxStyle}"/>
-                     </StackPanel>
-                     
-                     <CheckBox x:Name="CopyFilesCheck" Content="Copiar Arquivos" IsChecked="True" VerticalAlignment="Bottom" Margin="0,0,20,5"/>
-                     <CheckBox x:Name="RememberSettingsCheck" Content="Lembrar configurações" IsChecked="False" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
-                </StackPanel>
-                                
-                <TextBlock Text="Esta ferramenta analisará o diretório de origem em busca de classes auxiliares e utilitários (Helpers, Utils), pontuando-os com base em regras predefinidas, e copiará os arquivos úteis para o diretório de destino." 
-                           TextWrapping="Wrap" Foreground="{StaticResource SecondaryTextBrush}" FontSize="12" Margin="0,20,0,0" LineHeight="18"/>
-                
-                <c:RunSummaryControl x:Name="RunSummary" Margin="0,20,0,0"/>
+                <c:PathSelector x:Name="OutputPathSelector"
+                                Title="Diretorio de Destino (Backup)"
+                                IsFolderPicker="True"
+                                Margin="0,0,0,16"/>
+
+                <c:PathSelector x:Name="ConfigPathSelector"
+                                Title="Arquivo de Configuracao (Opcional)"
+                                IsFolderPicker="False"
+                                Margin="0,0,0,16"/>
+
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                        <TextBlock Text="Pontuacao Minima"
+                                   Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="MinScoreBox"
+                                 Text="0"
+                                 Width="120"
+                                 Style="{StaticResource DevToolsTextInput}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Bottom">
+                        <CheckBox x:Name="CopyFilesCheck"
+                                  Content="Copiar arquivos"
+                                  IsChecked="True"
+                                  Style="{StaticResource DevToolsCheckBox}"
+                                  Margin="0,0,0,8"/>
+                        <CheckBox x:Name="RememberSettingsCheck"
+                                  Content="Lembrar configuracoes"
+                                  IsChecked="False"
+                                  Style="{StaticResource DevToolsCheckBox}"/>
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="Analisa o diretorio de origem, pontua arquivos por regras configuradas e copia os itens relevantes para o diretorio de destino."
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource SecondaryTextBrush}"
+                           FontSize="{DynamicResource DevToolsFontSize.Status}"
+                           Margin="0,0,0,16"/>
+
+                <c:RunSummaryControl x:Name="RunSummary"/>
             </StackPanel>
         </ScrollViewer>
     </c:DevToolsToolFrame>

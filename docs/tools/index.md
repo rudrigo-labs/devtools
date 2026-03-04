@@ -1,6 +1,8 @@
-# DevTools - Tools Documentation
+# DevTools - Documentacao por Ferramenta
 
-Use the folders below for each tool:
+Esta pasta contem a fonte canonica da documentacao tecnica/operacional por ferramenta.
+
+## Ferramentas
 
 - Harvest: `docs/tools/Harvest/README.md`
 - Snapshot: `docs/tools/Snapshot/README.md`
@@ -13,3 +15,7 @@ Use the folders below for each tool:
 - Rename: `docs/tools/Rename/README.md`
 - Notes: `docs/tools/Notes/README.md`
 - SSHTunnel: `docs/tools/SSHTunnel/README.md`
+
+## Observacao
+
+Guias antigos `docs/tool-*.md` foram movidos para `docs/_obsolete/legacy_tool_docs/`.

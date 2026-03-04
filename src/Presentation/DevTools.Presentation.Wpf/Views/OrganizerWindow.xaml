@@ -5,32 +5,47 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="Organizador de Arquivos" Height="640" Width="900" WindowStartupLocation="CenterOwner"
+        Title="Organizador de Arquivos"
+        Height="640"
+        Width="900"
+        WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
-    
+
     <c:DevToolsToolFrame Title="Organizador de Arquivos"
-                         HelpText="Move/organiza por extensão/data conforme categorias"
+                         HelpText="Move e organiza arquivos por regras de categoria."
                          PrimaryButtonContent="Organizar"
                          SecondaryButtonContent="Cancelar"
                          PrimaryButtonClick="RunButton_Click"
                          SecondaryButtonClick="CloseButton_Click"
                          CloseButtonClick="CloseButton_Click">
-        <StackPanel Margin="0,20,0,0">
-            <TextBlock Text="Configuração" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,15"/>
-            
-            <c:PathSelector x:Name="InputPathSelector" Title="Pasta de Entrada (Arquivos Bagunçados)" 
-                            IsFolderPicker="True" Margin="0,0,0,20"/>
-            
-            <c:PathSelector x:Name="OutputPathSelector" Title="Pasta de Saída (Opcional - Padrão: Mesma da Entrada)" 
-            IsFolderPicker="True" Margin="0,0,0,20"/>
+        <StackPanel>
+            <TextBlock Text="Configuracao"
+                       FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource AccentBrush}"
+                       Margin="0,0,0,16"/>
 
-            <CheckBox x:Name="SimulateCheck" Content="Simular (Apenas Teste - Não move arquivos)" 
-                      Foreground="{StaticResource PrimaryTextBrush}"
-                      FontSize="14"
+            <c:PathSelector x:Name="InputPathSelector"
+                            Title="Pasta de Entrada"
+                            IsFolderPicker="True"
+                            Margin="0,0,0,16"/>
+
+            <c:PathSelector x:Name="OutputPathSelector"
+                            Title="Pasta de Saida (Opcional)"
+                            IsFolderPicker="True"
+                            Margin="0,0,0,16"/>
+
+            <CheckBox x:Name="SimulateCheck"
+                      Content="Simular (nao move arquivos)"
                       IsChecked="False"
-                      VerticalContentAlignment="Center"
-                      Margin="0,5,0,0"/>
+                      Style="{StaticResource DevToolsCheckBox}"
+                      Margin="0,0,0,16"/>
+
+            <TextBlock Text="Se a pasta de saida estiver vazia, a ferramenta organiza na mesma pasta de entrada."
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource SecondaryTextBrush}"
+                       FontSize="{DynamicResource DevToolsFontSize.Status}"/>
         </StackPanel>
     </c:DevToolsToolFrame>
 </Window>

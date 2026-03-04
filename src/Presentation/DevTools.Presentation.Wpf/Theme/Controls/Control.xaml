@@ -6,9 +6,15 @@
 
     <Style TargetType="Label">
         <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
-        <Setter Property="Margin" Value="0,0,0,5"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Margin" Value="{DynamicResource DevToolsSpacing.LabelMargin}"/>
+        <Setter Property="FontSize" Value="13"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="Padding" Value="0"/>
+    </Style>
+
+    <Style x:Key="DevToolsInputLabel" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Margin" Value="{DynamicResource DevToolsSpacing.LabelMargin}"/>
     </Style>
 </ResourceDictionary>

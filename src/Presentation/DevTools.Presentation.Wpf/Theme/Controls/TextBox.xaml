@@ -9,9 +9,9 @@
         <Setter Property="BorderThickness" Value="1"/>
 
         <!-- conforto + padrão -->
-        <Setter Property="FontSize" Value="13"/>
-        <Setter Property="MinHeight" Value="32"/>
-        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="FontSize" Value="{DynamicResource DevToolsFontSize.Input}"/>
+        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="Padding" Value="12,10"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="CaretBrush" Value="White"/>
 
@@ -55,8 +55,8 @@
         <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource DevToolsBrushBorder}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="Padding" Value="12,10"/>
         <Setter Property="FontSize" Value="{DynamicResource DevToolsFontSize.Input}"/>
-        <Setter Property="MinHeight" Value="32"/>
+        <Setter Property="MinHeight" Value="40"/>
     </Style>
 </ResourceDictionary>

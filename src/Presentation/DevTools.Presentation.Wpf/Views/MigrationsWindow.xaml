@@ -3,57 +3,66 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:components="clr-namespace:DevTools.Presentation.Wpf.Components"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
-        Title="EF Core Migrations" Height="720" Width="900" WindowStartupLocation="CenterOwner"
+        Title="EF Core Migrations"
+        Height="720"
+        Width="900"
+        WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
-        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
-        ResizeMode="NoResize">
+        Style="{StaticResource ModernWindowStyle}">
 
     <c:DevToolsToolFrame x:Name="MainFrame"
                          Title="EF Core Migrations"
-                         HelpText="Cria/aplica migrations para contextos EF Core."
+                         HelpText="Cria ou aplica migrations para contextos EF Core."
                          PrimaryButtonContent="Executar"
                          SecondaryButtonContent="Cancelar"
                          PrimaryButtonClick="Execute_Click"
                          SecondaryButtonClick="Close_Click"
                          CloseButtonClick="Close_Click">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
             <StackPanel>
-                
-                <!-- Caminhos -->
-                <components:PathSelector x:Name="ProjectSelector" 
-                                     Title="Pasta Raiz do Projeto (Onde está o .csproj)"
-                                     IsFolderPicker="True"
-                                     Margin="0,0,0,15"/>
+                <TextBlock Text="Configuracao"
+                           FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource AccentBrush}"
+                           Margin="0,0,0,16"/>
 
-                <components:PathSelector x:Name="StartupSelector" 
-                                     Title="Startup Project (API/Web)"
-                                     IsFolderPicker="True"
-                                     Margin="0,0,0,15"/>
+                <c:PathSelector x:Name="ProjectSelector"
+                                Title="Pasta Raiz do Projeto (onde esta o .csproj)"
+                                IsFolderPicker="True"
+                                Margin="0,0,0,16"/>
 
-                <!-- Configuração -->
-                <Grid Margin="0,0,0,15">
+                <c:PathSelector x:Name="StartupSelector"
+                                Title="Startup Project (API/Web)"
+                                IsFolderPicker="True"
+                                Margin="0,0,0,16"/>
+
+                <Grid Margin="0,0,0,16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    
-                    <!-- Ação -->
-                    <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                        <Label Content="Ação" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <ComboBox x:Name="ActionCombo" SelectionChanged="ActionCombo_SelectionChanged" SelectedIndex="0" Style="{StaticResource ModernComboBoxStyle}" Background="{StaticResource ControlBackgroundBrush}">
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Acao" Style="{StaticResource DevToolsInputLabel}"/>
+                        <ComboBox x:Name="ActionCombo"
+                                  SelectionChanged="ActionCombo_SelectionChanged"
+                                  SelectedIndex="0"
+                                  Style="{StaticResource DevToolsSelectInput}">
                             <ComboBoxItem Content="Add Migration" Tag="Add"/>
                             <ComboBoxItem Content="Remove Migration" Tag="Remove"/>
                             <ComboBoxItem Content="Update Database" Tag="Update"/>
                         </ComboBox>
                     </StackPanel>
-                    
-                    <!-- Provider -->
-                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                        <Label Content="Provider" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <ComboBox x:Name="ProviderCombo" SelectedIndex="0" Style="{StaticResource ModernComboBoxStyle}" Background="{StaticResource ControlBackgroundBrush}">
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Provider" Style="{StaticResource DevToolsInputLabel}"/>
+                        <ComboBox x:Name="ProviderCombo"
+                                  SelectedIndex="0"
+                                  Style="{StaticResource DevToolsSelectInput}">
                             <ComboBoxItem Content="SQL Server" Tag="SqlServer"/>
                             <ComboBoxItem Content="SQLite" Tag="Sqlite"/>
                             <ComboBoxItem Content="PostgreSQL" Tag="PostgreSql"/>
@@ -61,34 +70,36 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- Campos Específicos -->
-                <StackPanel x:Name="MigrationNamePanel" Margin="0,0,0,15">
-                    <Label Content="Nome da Migration" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                    <TextBox x:Name="MigrationNameInput" Style="{StaticResource ModernTextBoxStyle}"/>
+                <StackPanel x:Name="MigrationNamePanel" Margin="0,0,0,16">
+                    <TextBlock Text="Nome da Migration" Style="{StaticResource DevToolsInputLabel}"/>
+                    <TextBox x:Name="MigrationNameInput" Style="{StaticResource DevToolsTextInput}"/>
                 </StackPanel>
 
-                <StackPanel Margin="0,0,0,15">
-                    <Label Content="DbContext Full Name (Opcional)" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                    <TextBox x:Name="DbContextInput" ToolTip="Ex: MyProject.Data.AppDbContext" Style="{StaticResource ModernTextBoxStyle}"/>
+                <StackPanel Margin="0,0,0,16">
+                    <TextBlock Text="DbContext Full Name" Style="{StaticResource DevToolsInputLabel}"/>
+                    <TextBox x:Name="DbContextInput"
+                             ToolTip="Ex: MyProject.Data.AppDbContext"
+                             Style="{StaticResource DevToolsTextInput}"/>
                 </StackPanel>
 
-                <CheckBox x:Name="DryRunCheck" Content="Dry Run (Gerar comando sem executar)" Margin="0,5,0,15" Foreground="White"/>
+                <CheckBox x:Name="DryRunCheck"
+                          Content="Dry Run (gerar comando sem executar)"
+                          Style="{StaticResource DevToolsCheckBox}"
+                          Margin="0,0,0,16"/>
 
-                <!-- Output Area -->
-                <Expander IsExpanded="True" BorderBrush="{StaticResource BorderBrush}">
+                <Expander IsExpanded="True">
                     <Expander.Header>
-                        <TextBlock Text="Log de Saída" Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <TextBlock Text="Log de Saida" Foreground="{StaticResource SecondaryTextBrush}"/>
                     </Expander.Header>
-                    <TextBox x:Name="OutputText" 
-                             Height="100" 
-                             TextWrapping="Wrap" 
-                             IsReadOnly="True" 
+                    <TextBox x:Name="OutputText"
+                             Height="120"
+                             TextWrapping="Wrap"
+                             IsReadOnly="True"
                              FontFamily="Consolas"
                              FontSize="12"
                              VerticalScrollBarVisibility="Auto"
-                             Style="{StaticResource ModernTextBoxStyle}"/>
+                             Style="{StaticResource DevToolsTextInput}"/>
                 </Expander>
-
             </StackPanel>
         </ScrollViewer>
     </c:DevToolsToolFrame>

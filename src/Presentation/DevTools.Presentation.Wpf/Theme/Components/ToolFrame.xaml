@@ -11,15 +11,11 @@
                             CornerRadius="8" 
                             Background="{TemplateBinding Background}"
                             ClipToBounds="True">
-                        <Border.Effect>
-                            <DropShadowEffect Color="Black" BlurRadius="15" ShadowDepth="2" Opacity="0.5"/>
-                        </Border.Effect>
                         <Grid>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="{DynamicResource DevToolsHeaderHeight}"/>
                                 <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="{DynamicResource DevToolsFooterHeight}"/>
                             </Grid.RowDefinitions>
 
                             <!-- Header -->
@@ -28,16 +24,16 @@
                                     Background="{DynamicResource DevToolsSurface}"
                                     BorderBrush="{DynamicResource DevToolsBrushBorder}"
                                     BorderThickness="0,0,0,1"
-                                    Padding="20,10">
+                                    Padding="20,0">
                                 <DockPanel>
                                     <Button x:Name="PART_CloseButton"
-                                            Content="✕"
+                                            Content="X"
                                             DockPanel.Dock="Right"
                                             Style="{DynamicResource IconButtonStyle}"
                                             FontSize="14"
                                             HorizontalAlignment="Right"
                                             VerticalAlignment="Center"
-                                            Margin="10,-5,-5,-5"
+                                            Margin="10,0,0,0"
                                             Width="30" Height="30"/>
 
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -63,14 +59,18 @@
                             </Border>
 
                             <!-- Content (no forced scroll - content handles scrolling) -->
-                            <ContentPresenter Grid.Row="1" Margin="30,20"/>
+                            <Grid Grid.Row="1"
+                                  Margin="{DynamicResource DevToolsContentMargin}">
+                                <ContentPresenter MaxWidth="{DynamicResource DevToolsContentMaxWidth}"
+                                                  HorizontalAlignment="Center"/>
+                            </Grid>
 
                             <!-- Action Bar -->
                             <Border Grid.Row="2"
                                     Background="{DynamicResource DevToolsSurface}"
                                     BorderBrush="{DynamicResource DevToolsBrushBorder}"
                                     BorderThickness="0,1,0,0"
-                                    Padding="20,10">
+                                    Padding="20,0">
                                 <Grid IsSharedSizeScope="True">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -98,10 +98,6 @@
                                             Style="{DynamicResource DevToolsPrimaryButton}"/>
                                 </Grid>
                             </Border>
-
-                            <!-- Footer (Rodapé mantido, mas sem o status que foi para o header) -->
-                            <Border Grid.Row="3"
-                                    Background="{DynamicResource DevToolsStatusIdle}"/>
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -120,3 +116,4 @@
         </Setter>
     </Style>
 </ResourceDictionary>
+
