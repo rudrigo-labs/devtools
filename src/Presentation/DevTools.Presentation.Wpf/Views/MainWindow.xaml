@@ -6,9 +6,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="DevTools Hub" Height="840" Width="1280"
+        Title="DevTools Hub" Height="900" Width="1440" MinHeight="760" MinWidth="1180"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
-        ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+        ResizeMode="CanResize" WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -78,11 +78,13 @@
                                Margin="0,0,0,18"/>
 
                     <WrapPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Minimizar para Bandeja"
+                        <Button x:Name="CloseDialogMinimizeToTrayButton"
+                                Content="Minimizar para Bandeja"
                                 Click="MinimizeToTrayFromDialog_Click"
                                 Margin="0,0,10,10"
                                 MinWidth="0"
-                                Style="{DynamicResource DevToolsSecondaryButton}"/>
+                                Style="{DynamicResource DevToolsSecondaryButton}"
+                                Visibility="Collapsed"/>
 
                         <Button Content="Cancelar"
                                 Click="DialogNoButton_Click"
@@ -124,7 +126,6 @@
                         <Button Content="Execuções (Jobs)" Style="{DynamicResource SidebarButtonStyle}" Tag="Jobs" Click="NavButton_Click" Margin="0,0,0,5"/>
                         <Button Content="Configurações" Style="{DynamicResource SidebarButtonStyle}" Tag="Settings" Click="NavButton_Click" Margin="0,0,0,20"/>
 
-                        <Button Content="Minimizar para Bandeja" Style="{DynamicResource SidebarButtonStyle}" Click="MinimizeToTray_Click" Margin="0,0,0,5"/>
                         <Button Content="Encerrar"
                             Style="{DynamicResource SidebarButtonStyle}"
                             Foreground="{DynamicResource ErrorBrush}"
@@ -147,6 +148,32 @@
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Click="MinimizeButton_Click"
                                 Content="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                Width="40" Height="40" Background="Transparent" Foreground="{DynamicResource DevToolsTextSecondary}"
+                                BorderThickness="0">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource DevToolsWindowBackground}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
+                            <Button x:Name="MaximizeRestoreButton"
+                                Click="MaximizeRestoreButton_Click"
+                                Content="&#xE922;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                                 Width="40" Height="40" Background="Transparent" Foreground="{DynamicResource DevToolsTextSecondary}"
                                 BorderThickness="0">
                                 <Button.Style>
@@ -1074,8 +1101,6 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="MainFooterButton"/>
-                                <ColumnDefinition Width="10"/>
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="MainFooterButton"/>
                             </Grid.ColumnDefinitions>
 
                             <TextBlock x:Name="MainStatusText"
@@ -1086,11 +1111,6 @@
                                        VerticalAlignment="Center"/>
 
                             <Button Grid.Column="1"
-                                    Content="Minimizar para Bandeja"
-                                    Click="MinimizeToTray_Click"
-                                    Style="{DynamicResource DevToolsSecondaryButton}"/>
-
-                            <Button Grid.Column="3"
                                     Content="Abrir Jobs"
                                     Tag="Jobs"
                                     Click="NavButton_Click"
