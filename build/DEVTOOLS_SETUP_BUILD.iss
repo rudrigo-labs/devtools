@@ -9,7 +9,7 @@ OutputBaseFilename=DevTools_Setup
 SetupIconFile={#ICO_APP}
 Compression=lzma2
 SolidCompression=yes
-ArchitecturesInstallIn64BitMode=x64
+ArchitecturesInstallIn64BitMode=x64compatible
 AlwaysShowComponentsList=yes
 PrivilegesRequired=admin
 
@@ -17,36 +17,25 @@ PrivilegesRequired=admin
 Name: "ptbr"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
 
 [Types]
-Name: "full"; Description: "Completa (WPF + CLI)"
+Name: "full"; Description: "Completa (WPF)"
 Name: "custom"; Description: "Personalizada"; Flags: iscustom
 
 [Components]
-Name: "wpf"; Description: "Aplicação de Bandeja (WPF)"; Types: full custom
-Name: "cli"; Description: "Interface de Terminal (CLI)"; Types: full custom
+Name: "wpf"; Description: "Aplicacao de Bandeja (WPF)"; Types: full custom
 
 [Files]
-; Instalamos o WPF em {app}\bin e o CLI em {app}\cli
 Source: "{#WPF_DIR}\*"; DestDir: "{app}\bin"; Flags: recursesubdirs ignoreversion; Components: wpf
-Source: "{#CLI_DIR}\*"; DestDir: "{app}\cli"; Flags: recursesubdirs ignoreversion; Components: cli
+Source: "{#MANUAL_FILE}"; DestDir: "{app}\docs"; DestName: "MANUAL_DEVTOOLS.md"; Flags: ignoreversion; Components: wpf
 
 [Icons]
-; --- ATALHOS WPF ---
-; Menu Iniciar: Apontando para o EXE dentro da pasta bin
 Name: "{group}\DevTools"; Filename: "{app}\bin\DevTools.Presentation.Wpf.exe"; WorkingDir: "{app}\bin"; Components: wpf
-; Área de Trabalho
 Name: "{commondesktop}\DevTools"; Filename: "{app}\bin\DevTools.Presentation.Wpf.exe"; WorkingDir: "{app}\bin"; Components: wpf
-
-; --- ATALHOS CLI ---
-; Menu Iniciar para o CLI
-Name: "{group}\DevTools CLI"; Filename: "{app}\cli\DevTools.Cli.exe"; WorkingDir: "{app}\cli"; Components: cli
-; Área de Trabalho para o CLI (Opcional, adicionei para garantir que você veja algo)
-Name: "{commondesktop}\DevTools CLI"; Filename: "{app}\cli\DevTools.Cli.exe"; WorkingDir: "{app}\cli"; Components: cli
+Name: "{group}\Manual do DevTools"; Filename: "{app}\docs\MANUAL_DEVTOOLS.md"; WorkingDir: "{app}\docs"; Components: wpf
 
 [Run]
 Filename: "{app}\bin\DevTools.Presentation.Wpf.exe"; Description: "Iniciar DevTools agora"; Flags: nowait postinstall skipifsilent; Components: wpf
 
 [Code]
-// Lógica de desinstalação automática (Mantida para garantir limpeza)
 function GetUninstallString(): String;
 var
   sUninstPath: String;
@@ -69,9 +58,10 @@ begin
   if sUnInstallString <> '' then
   begin
     sUnInstallString := RemoveQuotes(sUnInstallString);
-    if (MsgBox('Uma versão anterior do DevTools foi detectada. Deseja removê-la antes de continuar?', mbConfirmation, MB_YESNO) = IDYES) then
+    if (MsgBox('Uma versao anterior do DevTools foi detectada. Deseja remove-la antes de continuar?', mbConfirmation, MB_YESNO) = IDYES) then
     begin
       Exec(sUnInstallString, '/SILENT /NORESTART /SUPPRESSMSGBOXES', '', SW_SHOW, ewWaitUntilTerminated, iResultCode);
     end;
   end;
 end;
+
