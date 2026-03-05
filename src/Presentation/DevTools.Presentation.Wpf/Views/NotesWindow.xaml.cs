@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,11 +19,14 @@ namespace DevTools.Presentation.Wpf.Views
 {
     public partial class NotesWindow : Window
     {
+        private const int MinVisibleNotes = 8;
         private readonly SettingsService _settings;
         private readonly ConfigService _config;
         private readonly GoogleDriveService _googleDriveService;
         private readonly NotesEngine _engine;
         private string? _currentNoteKey; 
+        private List<NoteListItem> _allNotes = new();
+        private int _currentVisibleNotes = MinVisibleNotes;
 
         private NotesSettings GetNotesSettings() => _config.GetSection<NotesSettings>("Notes") ?? new();
         private GoogleDriveSettings GetGDriveSettings() => _config.GetSection<GoogleDriveSettings>("GoogleDrive") ?? new();
@@ -66,6 +70,7 @@ namespace DevTools.Presentation.Wpf.Views
             var notesSettings = GetNotesSettings();
             var resolvedPath = ResolveNotesStoragePath(notesSettings);
             var normalizedFormat = NormalizeExtension(notesSettings.DefaultFormat);
+            var normalizedDisplay = NormalizeInitialListDisplay(notesSettings.InitialListDisplay);
 
             var changed = false;
             if (!string.Equals(notesSettings.StoragePath, resolvedPath, StringComparison.OrdinalIgnoreCase))
@@ -77,6 +82,12 @@ namespace DevTools.Presentation.Wpf.Views
             if (!string.Equals(notesSettings.DefaultFormat, normalizedFormat, StringComparison.OrdinalIgnoreCase))
             {
                 notesSettings.DefaultFormat = normalizedFormat;
+                changed = true;
+            }
+
+            if (!string.Equals(notesSettings.InitialListDisplay, normalizedDisplay, StringComparison.OrdinalIgnoreCase))
+            {
+                notesSettings.InitialListDisplay = normalizedDisplay;
                 changed = true;
             }
 
@@ -201,12 +212,108 @@ namespace DevTools.Presentation.Wpf.Views
             var result = await _engine.ExecuteAsync(request);
             if (result.IsSuccess && result.Value?.ListResult != null)
             {
-                NotesList.ItemsSource = result.Value.ListResult.Items;
+                _allNotes = result.Value.ListResult.Items
+                    .OrderByDescending(x => x.UpdatedUtc)
+                    .ToList();
+                ApplyVisibleNotes(resetToBase: true);
             }
             else
             {
+                _allNotes = new List<NoteListItem>();
                 NotesList.ItemsSource = new List<NoteListItem>();
+                if (LoadMoreNotesButton != null)
+                {
+                    LoadMoreNotesButton.Visibility = Visibility.Collapsed;
+                }
             }
+        }
+
+        private void ApplyVisibleNotes(bool resetToBase)
+        {
+            if (_allNotes.Count == 0)
+            {
+                NotesList.ItemsSource = new List<NoteListItem>();
+                if (LoadMoreNotesButton != null)
+                    LoadMoreNotesButton.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            int baseCount = CalculateBaseVisibleNotes();
+            if (resetToBase)
+            {
+                _currentVisibleNotes = baseCount;
+            }
+            else if (_currentVisibleNotes < baseCount)
+            {
+                _currentVisibleNotes = baseCount;
+            }
+
+            NotesList.ItemsSource = _allNotes.Take(_currentVisibleNotes).ToList();
+            UpdateLoadMoreState(baseCount);
+        }
+
+        private int CalculateBaseVisibleNotes()
+        {
+            var configuredFixedCount = GetConfiguredFixedVisibleCount(GetNotesSettings().InitialListDisplay);
+            if (configuredFixedCount.HasValue)
+            {
+                return Math.Max(MinVisibleNotes, configuredFixedCount.Value);
+            }
+
+            if (NotesList == null || NotesList.ActualHeight <= 0)
+                return MinVisibleNotes;
+
+            const double estimatedItemHeight = 72d;
+            int fit = (int)Math.Floor(NotesList.ActualHeight / estimatedItemHeight);
+            return Math.Max(MinVisibleNotes, fit);
+        }
+
+        private void UpdateLoadMoreState(int baseCount)
+        {
+            if (LoadMoreNotesButton == null)
+                return;
+
+            bool hasMore = _allNotes.Count > _currentVisibleNotes;
+            LoadMoreNotesButton.Visibility = hasMore ? Visibility.Visible : Visibility.Collapsed;
+
+            if (!hasMore)
+            {
+                LoadMoreNotesButton.ToolTip = "Todas as notas já estão visíveis";
+                return;
+            }
+
+            int nextCount = GetNextVisibleStep(_currentVisibleNotes);
+            int delta = Math.Max(1, nextCount - _currentVisibleNotes);
+            LoadMoreNotesButton.ToolTip = $"Mostrar mais notas (+{delta})";
+        }
+
+        private static int GetNextVisibleStep(int current)
+        {
+            if (current < 15)
+                return 15;
+
+            return current + 5;
+        }
+
+        private static int? GetConfiguredFixedVisibleCount(string? displayMode)
+        {
+            if (int.TryParse(displayMode, out var count) && count > 0)
+            {
+                return count;
+            }
+
+            return null;
+        }
+
+        private static string NormalizeInitialListDisplay(string? value)
+        {
+            return value switch
+            {
+                "8" => "8",
+                "15" => "15",
+                "20" => "20",
+                _ => "Auto"
+            };
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
@@ -504,15 +611,51 @@ namespace DevTools.Presentation.Wpf.Views
             }
         }
 
-        private async void DeleteListButton_Click(object sender, RoutedEventArgs e)
+        private void LoadMoreNotesButton_Click(object sender, RoutedEventArgs e)
         {
-            if (NotesList.SelectedItem is not NoteListItem selected)
-            {
-                UiMessageService.ShowWarning("Selecione uma nota para excluir.", "Notas");
+            if (_allNotes.Count == 0)
                 return;
-            }
 
-            await DeleteNoteByKeyAsync(selected.FileName, selected.Title);
+            int nextCount = GetNextVisibleStep(_currentVisibleNotes);
+            _currentVisibleNotes = Math.Min(nextCount, _allNotes.Count);
+            ApplyVisibleNotes(resetToBase: false);
+        }
+
+        private async void DeleteItemButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not System.Windows.Controls.Button button)
+                return;
+
+            if (button.Tag is not string noteKey || string.IsNullOrWhiteSpace(noteKey))
+                return;
+
+            var title = button.CommandParameter as string;
+            await DeleteNoteByKeyAsync(noteKey, title);
+        }
+
+        private void OpenFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string storagePath = ResolveNotesStoragePath(GetNotesSettings());
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = storagePath,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                UiMessageService.ShowError($"Erro ao abrir pasta de notas: {ex.Message}", "Notas");
+            }
+        }
+
+        private void NotesList_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (_allNotes.Count == 0)
+                return;
+
+            ApplyVisibleNotes(resetToBase: false);
         }
 
         private async void DeleteEditButton_Click(object sender, RoutedEventArgs e)

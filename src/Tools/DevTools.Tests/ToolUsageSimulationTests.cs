@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using DevTools.Core.Configuration;
+using DevTools.Notes.Models;
 using DevTools.Presentation.Wpf.Components;
 using DevTools.Presentation.Wpf.Models;
 using DevTools.Presentation.Wpf.Services;
@@ -318,6 +319,27 @@ public class ToolUsageSimulationTests
                   && (Directory.GetFiles(Path.Combine(notesRoot, "items"), "*.txt", SearchOption.AllDirectories).Any()
                       || Directory.GetFiles(Path.Combine(notesRoot, "items"), "*.md", SearchOption.AllDirectories).Any()),
             timeoutMs: 12000);
+
+        var list = GetField<ListBox>(window, "NotesList");
+        WaitUntil(() => list.Items.Count > 0, timeoutMs: 12000);
+        var first = Assert.IsType<NoteListItem>(list.Items[0]);
+
+        UiMessageService.ConfirmOverrideForTests = (_, _) => true;
+        try
+        {
+            if (Invoke(window, "DeleteNoteByKeyAsync", first.FileName, first.Title) is Task deleteTask)
+            {
+                deleteTask.GetAwaiter().GetResult();
+            }
+        }
+        finally
+        {
+            UiMessageService.ConfirmOverrideForTests = null;
+        }
+
+        var deletedPath = Path.Combine(notesRoot, "items", first.FileName.Replace('/', Path.DirectorySeparatorChar));
+        WaitUntil(() => !File.Exists(deletedPath), timeoutMs: 12000);
+        WaitUntil(() => list.Items.Cast<object>().All(i => !string.Equals(((NoteListItem)i).FileName, first.FileName, StringComparison.OrdinalIgnoreCase)), timeoutMs: 12000);
         window.Close();
     }
 

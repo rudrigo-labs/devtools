@@ -1055,6 +1055,7 @@ public partial class MainWindow : Window
 
         // Local Storage
         _currentNotesSettings.StoragePath = ResolveNotesStoragePath(_currentNotesSettings.StoragePath);
+        _currentNotesSettings.InitialListDisplay = NormalizeNotesInitialListDisplay(_currentNotesSettings.InitialListDisplay);
         NotesStoragePathSelector.SelectedPath = _currentNotesSettings.StoragePath;
         NotesAutoCloudSyncCheck.IsChecked = _currentNotesSettings.AutoCloudSync;
         
@@ -1071,6 +1072,20 @@ public partial class MainWindow : Window
         if (NotesFormatCombo.SelectedItem == null && NotesFormatCombo.Items.Count > 0)
         {
             NotesFormatCombo.SelectedIndex = 0;
+        }
+
+        foreach (ComboBoxItem item in NotesInitialListDisplayCombo.Items)
+        {
+            if (item.Content?.ToString() == _currentNotesSettings.InitialListDisplay)
+            {
+                NotesInitialListDisplayCombo.SelectedItem = item;
+                break;
+            }
+        }
+
+        if (NotesInitialListDisplayCombo.SelectedItem == null && NotesInitialListDisplayCombo.Items.Count > 0)
+        {
+            NotesInitialListDisplayCombo.SelectedIndex = 0;
         }
 
         // Google Drive
@@ -1093,12 +1108,15 @@ public partial class MainWindow : Window
             NotesStoragePathSelector.SelectedPath = _currentNotesSettings.StoragePath;
             _currentNotesSettings.AutoCloudSync = NotesAutoCloudSyncCheck.IsChecked == true;
             _currentNotesSettings.DefaultFormat = (NotesFormatCombo.SelectedItem as ComboBoxItem)?.Content.ToString() ?? ".txt";
+            _currentNotesSettings.InitialListDisplay = NormalizeNotesInitialListDisplay((NotesInitialListDisplayCombo.SelectedItem as ComboBoxItem)?.Content?.ToString());
 
             var missingFields = new List<string>();
             if (string.IsNullOrWhiteSpace(_currentNotesSettings.StoragePath))
                 missingFields.Add("Pasta de Armazenamento");
             if (NotesFormatCombo.SelectedItem == null)
                 missingFields.Add("Formato Padrao");
+            if (NotesInitialListDisplayCombo.SelectedItem == null)
+                missingFields.Add("Exibicao Inicial da Lista");
 
             if (!TryBuildRequiredFieldsMessage(missingFields, out var notesRequiredMessage))
             {
@@ -1221,6 +1239,17 @@ public partial class MainWindow : Window
         var fullPath = System.IO.Path.GetFullPath(resolved);
         System.IO.Directory.CreateDirectory(fullPath);
         return fullPath;
+    }
+
+    private static string NormalizeNotesInitialListDisplay(string? value)
+    {
+        return value switch
+        {
+            "8" => "8",
+            "15" => "15",
+            "20" => "20",
+            _ => "Auto"
+        };
     }
 
     private GoogleDriveSettings ReadGoogleDriveSettingsFromUi()

@@ -87,15 +87,33 @@
                          Foreground="{DynamicResource DevToolsTextPrimary}"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         SizeChanged="NotesList_SizeChanged"
                          MouseDoubleClick="NotesList_MouseDoubleClick"
                          Margin="0,12,0,0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border BorderThickness="0,0,0,1" BorderBrush="#333333" Padding="5,10">
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Text="{Binding UpdatedUtc}" FontSize="12" Opacity="0.6"/>
-                                </StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding UpdatedUtc}" FontSize="12" Opacity="0.6"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="1"
+                                            Style="{StaticResource AppBarButtonStyle}"
+                                            Width="36"
+                                            Height="36"
+                                            ToolTip="Excluir nota"
+                                            Click="DeleteItemButton_Click"
+                                            Tag="{Binding FileName}"
+                                            CommandParameter="{Binding Title}"
+                                            Margin="8,0,0,0">
+                                        <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+                                    </Button>
+                                </Grid>
                             </Border>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -130,17 +148,20 @@
                         BorderThickness="0,1,0,0"
                         Padding="0,6">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button x:Name="LoadMoreNotesButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Mostrar mais notas" Click="LoadMoreNotesButton_Click" Margin="0,0,10,0" Visibility="Collapsed">
+                            <TextBlock Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
+                        </Button>
                         <Button x:Name="AddButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Nova Nota" Click="AddButton_Click">
                             <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
-                        </Button>
-                        <Button x:Name="DeleteListButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Excluir Nota Selecionada" Click="DeleteListButton_Click" Margin="10,0,0,0">
-                            <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                         </Button>
                         <Button x:Name="ExportButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Exportar Backup (ZIP)" Click="ExportButton_Click" Margin="10,0">
                             <TextBlock Text="&#xE78C;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                         </Button>
                         <Button x:Name="ImportButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Importar Backup (ZIP)" Click="ImportButton_Click" Margin="0,0,10,0">
                             <TextBlock Text="&#xE8B5;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
+                        </Button>
+                        <Button x:Name="OpenFolderButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Abrir pasta das notas" Click="OpenFolderButton_Click" Margin="0,0,10,0">
+                            <TextBlock Text="&#xE838;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                         </Button>
 
                         <Button x:Name="CloudSyncButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Sincronizar com Google Drive" Click="CloudSyncButton_Click" Margin="0,0,10,0" Visibility="Collapsed">

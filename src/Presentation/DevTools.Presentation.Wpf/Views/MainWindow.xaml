@@ -681,95 +681,102 @@
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
-                                            
                                             <!-- Grupo: Armazenamento Local -->
-                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                                <StackPanel>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                        <materialDesign:PackIcon Kind="Folder" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Armazenamento Local" Style="{DynamicResource DevToolsCardTitle}"/>
+                                            <StackPanel Margin="0,0,0,16">
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                                    <materialDesign:PackIcon Kind="Folder" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                    <TextBlock Text="Armazenamento Local" Style="{DynamicResource DevToolsCardTitle}"/>
+                                                </StackPanel>
+
+                                                <c:PathSelector x:Name="NotesStoragePathSelector" Title="Pasta de Armazenamento" IsFolderPicker="True" Margin="0,0,0,20"/>
+
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="20"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel>
+                                                        <TextBlock Text="Formato Padrão" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <ComboBox x:Name="NotesFormatCombo" Style="{DynamicResource DevToolsSelectInput}">
+                                                            <ComboBoxItem Content=".txt"/>
+                                                            <ComboBoxItem Content=".md"/>
+                                                        </ComboBox>
                                                     </StackPanel>
 
-                                                    <c:PathSelector x:Name="NotesStoragePathSelector" Title="Pasta de Armazenamento" IsFolderPicker="True" Margin="0,0,0,20"/>
+                                                    <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                                                        <CheckBox x:Name="NotesAutoCloudSyncCheck" Content="Backup Automático na Nuvem ao Salvar" Style="{DynamicResource DevToolsCheckBox}"/>
+                                                    </StackPanel>
+                                                </Grid>
 
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="20"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-
-                                                        <StackPanel>
-                                                            <TextBlock Text="Formato Padrão" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <ComboBox x:Name="NotesFormatCombo" Style="{DynamicResource DevToolsSelectInput}">
-                                                                <ComboBoxItem Content=".txt"/>
-                                                                <ComboBoxItem Content=".md"/>
-                                                            </ComboBox>
-                                                        </StackPanel>
-
-                                                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
-                                                            <CheckBox x:Name="NotesAutoCloudSyncCheck" Content="Backup Automático na Nuvem ao Salvar" Style="{DynamicResource DevToolsCheckBox}"/>
-                                                        </StackPanel>
-                                                    </Grid>
+                                                <StackPanel Margin="0,20,0,0" Width="320">
+                                                    <TextBlock Text="Exibição Inicial da Lista" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                    <ComboBox x:Name="NotesInitialListDisplayCombo" Style="{DynamicResource DevToolsSelectInput}">
+                                                        <ComboBoxItem Content="Auto"/>
+                                                        <ComboBoxItem Content="8"/>
+                                                        <ComboBoxItem Content="15"/>
+                                                        <ComboBoxItem Content="20"/>
+                                                    </ComboBox>
                                                 </StackPanel>
-                                            </materialDesign:Card>
+                                            </StackPanel>
+
+                                            <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,0,0,16"/>
 
                                             <!-- Grupo: Google Drive (Backup) -->
-                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                                <StackPanel>
-                                                    <DockPanel LastChildFill="False" Margin="0,0,0,20">
-                                                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                                                            <materialDesign:PackIcon Kind="GoogleDrive" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                            <TextBlock Text="Backup Google Drive" Style="{DynamicResource DevToolsCardTitle}"/>
-                                                        </StackPanel>
-                                                        <Button DockPanel.Dock="Right" Content="Como configurar?" Style="{DynamicResource DevToolsSecondaryButton}" 
-                                                            Padding="12,8" MinWidth="140" Click="OpenHelp_Click"/>
-                                                    </DockPanel>
+                                            <StackPanel Margin="0,0,0,8">
+                                                <DockPanel LastChildFill="False" Margin="0,0,0,20">
+                                                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                                                        <materialDesign:PackIcon Kind="GoogleDrive" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                        <TextBlock Text="Backup Google Drive" Style="{DynamicResource DevToolsCardTitle}"/>
+                                                    </StackPanel>
+                                                    <Button DockPanel.Dock="Right" Content="Como configurar?" Style="{DynamicResource DevToolsSecondaryButton}" 
+                                                        Padding="12,8" MinWidth="140" Click="OpenHelp_Click"/>
+                                                </DockPanel>
 
-                                                    <CheckBox x:Name="GDriveEnabledCheck" Content="Habilitar Backup no Google Drive" 
-                                                              Margin="0,0,0,20" Style="{DynamicResource DevToolsCheckBox}"
-                                                              Checked="GDriveEnabledCheck_Changed" Unchecked="GDriveEnabledCheck_Changed"/>
+                                                <CheckBox x:Name="GDriveEnabledCheck" Content="Habilitar Backup no Google Drive" 
+                                                          Margin="0,0,0,20" Style="{DynamicResource DevToolsCheckBox}"
+                                                          Checked="GDriveEnabledCheck_Changed" Unchecked="GDriveEnabledCheck_Changed"/>
 
-                                                    <Grid x:Name="GDriveConfigGrid" IsEnabled="{Binding IsChecked, ElementName=GDriveEnabledCheck}">
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                        </Grid.RowDefinitions>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="20"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
+                                                <Grid x:Name="GDriveConfigGrid" IsEnabled="{Binding IsChecked, ElementName=GDriveEnabledCheck}">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="20"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
 
-                                                        <StackPanel Grid.Row="0" Grid.Column="0">
-                                                            <TextBlock Text="Client ID" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="GDriveClientId" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
+                                                    <StackPanel Grid.Row="0" Grid.Column="0">
+                                                        <TextBlock Text="Client ID" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="GDriveClientId" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
 
-                                                        <StackPanel Grid.Row="0" Grid.Column="2">
-                                                            <TextBlock Text="Client Secret" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="GDriveClientSecret" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
+                                                    <StackPanel Grid.Row="0" Grid.Column="2">
+                                                        <TextBlock Text="Client Secret" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="GDriveClientSecret" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
 
-                                                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,20,0,0">
-                                                            <TextBlock Text="Project ID" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="GDriveProjectId" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
+                                                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,20,0,0">
+                                                        <TextBlock Text="Project ID" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="GDriveProjectId" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
 
-                                                        <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,20,0,0">
-                                                            <TextBlock Text="Nome da Pasta no Drive" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="GDriveFolderName" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
+                                                    <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,20,0,0">
+                                                        <TextBlock Text="Nome da Pasta no Drive" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="GDriveFolderName" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
 
-                                                        <Button x:Name="GDriveTestConnectionButton" Grid.Row="2" Grid.Column="0" Content="Testar Conexão" Click="TestConnection_Click" 
-                                                            Style="{DynamicResource DevToolsSecondaryButton}" Width="150" HorizontalAlignment="Left" Margin="0,20,0,0"/>
-                                                        <TextBlock x:Name="GDriveTestConnectionStatus" Grid.Row="2" Grid.Column="2" Margin="0,24,0,0"
-                                                                   Foreground="{DynamicResource DevToolsTextSecondary}" FontSize="13"
-                                                                   TextWrapping="Wrap" VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </StackPanel>
-                                            </materialDesign:Card>
+                                                    <Button x:Name="GDriveTestConnectionButton" Grid.Row="2" Grid.Column="0" Content="Testar Conexão" Click="TestConnection_Click" 
+                                                        Style="{DynamicResource DevToolsSecondaryButton}" Width="150" HorizontalAlignment="Left" Margin="0,20,0,0"/>
+                                                    <TextBlock x:Name="GDriveTestConnectionStatus" Grid.Row="2" Grid.Column="2" Margin="0,24,0,0"
+                                                               Foreground="{DynamicResource DevToolsTextSecondary}" FontSize="13"
+                                                               TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </StackPanel>
 
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
                                                 <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
@@ -888,9 +895,9 @@
 
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
                                                 <Button Content="Cancelar" Click="BackToSettingsList_Click" 
-                                                        Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
+                                                        Style="{StaticResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
                                                 <Button Content="Salvar" Click="SaveHarvestSettings_Click" 
-                                                        Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
+                                                        Style="{StaticResource DevToolsPrimaryButton}" Width="120"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </ScrollViewer>
@@ -1045,10 +1052,8 @@
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
-                                            
                                             <!-- Grupo: Execução Local -->
-                                        <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                            <StackPanel>
+                                            <StackPanel Margin="0,0,0,16">
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                     <materialDesign:PackIcon Kind="PlayCircle" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
                                                     <TextBlock Text="Execução Local" Style="{DynamicResource DevToolsCardTitle}"/>
@@ -1056,11 +1061,11 @@
 
                                                 <c:PathSelector x:Name="NgrokExeSelector" Title="Caminho do Executável do Ngrok (ngrok.exe)" IsFolderPicker="False"/>
                                             </StackPanel>
-                                        </materialDesign:Card>
 
-                                        <!-- Grupo: Autenticação e Argumentos -->
-                                        <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                            <StackPanel>
+                                            <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,0,0,16"/>
+
+                                            <!-- Grupo: Autenticação e Argumentos -->
+                                            <StackPanel Margin="0,0,0,8">
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                     <materialDesign:PackIcon Kind="KeyVariant" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
                                                     <TextBlock Text="Autenticação e Argumentos" Style="{DynamicResource DevToolsCardTitle}"/>
@@ -1076,7 +1081,6 @@
                                                     <TextBox x:Name="NgrokArgsInput" Style="{DynamicResource DevToolsTextInput}"/>
                                                 </StackPanel>
                                             </StackPanel>
-                                        </materialDesign:Card>
 
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
                                             <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>

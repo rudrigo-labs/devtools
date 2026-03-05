@@ -8,6 +8,8 @@ namespace DevTools.Presentation.Wpf.Services;
 
 public static class UiMessageService
 {
+    public static Func<string, string, bool>? ConfirmOverrideForTests { get; set; }
+
     private enum DialogType
     {
         Info,
@@ -43,6 +45,11 @@ public static class UiMessageService
 
     public static bool Confirm(string message, string title = "Confirmar")
     {
+        if (ConfirmOverrideForTests != null)
+        {
+            return ConfirmOverrideForTests(message, title);
+        }
+
         if (TryShowDialogHost(DialogType.Confirm, title, message, out var hostResult))
         {
             return hostResult;
@@ -67,6 +74,13 @@ public static class UiMessageService
 
         try
         {
+            var activeWindow = GetActiveWindow();
+            // Evita travamento em janelas auxiliares (ex.: NotesWindow) sem host de dialogo.
+            if (activeWindow == null || !string.Equals(activeWindow.GetType().Name, "MainWindow", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
             var content = BuildDialogContent(type, title, message, closeByHost: true);
             var result = MaterialDesignThemes.Wpf.DialogHost.Show(content, "RootDialog").GetAwaiter().GetResult();
             confirmResult = result is bool b && b;
