@@ -8,6 +8,7 @@ using DevTools.SSHTunnel.Models;
 using DevTools.Harvest.Configuration;
 using DevTools.Organizer.Models;
 using DevTools.Migrations.Models;
+using DevTools.Ngrok.Engine;
 using DevTools.Ngrok.Models;
 using DevTools.Presentation.Wpf.Models;
 using DevTools.Presentation.Wpf.Persistence;
@@ -26,6 +27,7 @@ public partial class MainWindow : Window
     private readonly JobManager _jobManager;
     private readonly ConfigService _configService;
     private readonly GoogleDriveService _googleDriveService;
+    private readonly NgrokSetupService _ngrokSetupService;
 
     // Config Objects
     private HarvestConfig _currentHarvestConfig = new();
@@ -52,6 +54,7 @@ public partial class MainWindow : Window
         _configService = configService;
         _profileUIService = profileUIService;
         _googleDriveService = googleDriveService;
+        _ngrokSetupService = new NgrokSetupService();
 
         _trayService.SetMainWindow(this);
         _trayService.EmbeddedToolRequested += TrayService_EmbeddedToolRequested;
@@ -89,6 +92,7 @@ public partial class MainWindow : Window
         _configService = null!;
         _profileUIService = null!;
         _googleDriveService = null!;
+        _ngrokSetupService = new NgrokSetupService();
     }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -865,7 +869,7 @@ public partial class MainWindow : Window
 
     private void LoadNgrokConfig()
     {
-        _currentNgrokConfig = _configService.GetSection<NgrokSettings>("Ngrok");
+        _currentNgrokConfig = _ngrokSetupService.GetSettings();
         _currentNgrokConfig.Normalize();
 
         NgrokExeSelector.SelectedPath = _currentNgrokConfig.ExecutablePath;
@@ -876,12 +880,8 @@ public partial class MainWindow : Window
     private void SaveNgrokSettings_Click(object sender, RoutedEventArgs e)
     {
         var missingFields = new List<string>();
-        if (string.IsNullOrWhiteSpace(NgrokExeSelector.SelectedPath))
-            missingFields.Add("Caminho do Executavel do Ngrok");
         if (string.IsNullOrWhiteSpace(NgrokAuthTokenInput.Text))
             missingFields.Add("Auth Token");
-        if (string.IsNullOrWhiteSpace(NgrokArgsInput.Text))
-            missingFields.Add("Argumentos Adicionais");
 
         if (!TryBuildRequiredFieldsMessage(missingFields, out var requiredMessage))
         {
@@ -893,7 +893,7 @@ public partial class MainWindow : Window
         _currentNgrokConfig.AuthToken = NgrokAuthTokenInput.Text.Trim();
         _currentNgrokConfig.AdditionalArgs = NgrokArgsInput.Text.Trim();
 
-        _configService.SaveSection("Ngrok", _currentNgrokConfig);
+        _ngrokSetupService.SaveSettings(_currentNgrokConfig);
         UiMessageService.ShowInfo("Configuracoes do Ngrok salvas!", "Sucesso");
         ShowMainStatusInfo("Configuracoes do Ngrok salvas.");
     }

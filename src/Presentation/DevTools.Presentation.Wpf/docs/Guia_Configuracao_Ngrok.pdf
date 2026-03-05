@@ -1,0 +1,58 @@
+%PDF-1.4
+%DEVTOOLS
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 593 >>
+stream
+BT
+/F1 12 Tf
+50 760 Td
+(Guia de Configuracao do Ngrok no DevTools) Tj
+0 -18 Td
+() Tj
+0 -18 Td
+(1. Crie uma conta gratuita no ngrok.) Tj
+0 -18 Td
+(2. Acesse o painel da sua conta.) Tj
+0 -18 Td
+(3. Copie seu Authtoken.) Tj
+0 -18 Td
+(4. Cole o token na tela de configuracao do DevTools.) Tj
+0 -18 Td
+(5. Clique em Salvar configuracao.) Tj
+0 -18 Td
+(6. Informe a porta local e clique em Iniciar Tunel.) Tj
+0 -18 Td
+() Tj
+0 -18 Td
+(Criar conta: https://dashboard.ngrok.com/signup) Tj
+0 -18 Td
+(Pagina do token: https://dashboard.ngrok.com/get-started/your-authtoken) Tj
+ET
+
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000019 00000 n 
+0000000068 00000 n 
+0000000125 00000 n 
+0000000251 00000 n 
+0000000321 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+965
+%%EOF
