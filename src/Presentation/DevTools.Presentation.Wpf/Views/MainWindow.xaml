@@ -657,7 +657,7 @@
                                                 Orientation="Horizontal"
                                                 HorizontalAlignment="Right"
                                                 Margin="0,10,0,8">
-                                        <Button x:Name="AddToolProfileButton" Content="Adicionar" Click="AddToolProfile_Click" 
+                                        <Button x:Name="AddToolProfileButton" Content="Novo" Click="AddToolProfile_Click" 
                                                 Style="{DynamicResource DevToolsSuccessButton}" Width="120" Margin="0,0,10,0"/>
                                         <Button x:Name="DeleteToolProfileButton" Content="Remover" Click="DeleteToolProfile_Click" 
                                                 Style="{DynamicResource DevToolsDangerButton}" Width="120" Margin="0,0,10,0"/>
@@ -975,7 +975,7 @@
                                                 Orientation="Horizontal"
                                                 HorizontalAlignment="Right"
                                                 Margin="0,10,0,8">
-                                        <Button x:Name="OrganizerAddCategoryButton" Content="Adicionar" Click="AddOrganizerCategory_Click" 
+                                        <Button x:Name="OrganizerAddCategoryButton" Content="Novo" Click="AddOrganizerCategory_Click" 
                                                 Style="{DynamicResource DevToolsSuccessButton}" Width="120" Margin="0,0,10,0"/>
                                         <Button x:Name="DeleteOrganizerCategoryButton" Content="Remover" Click="DeleteOrganizerCategory_Click" 
                                                 Style="{DynamicResource DevToolsDangerButton}" Width="120" Margin="0,0,10,0" Visibility="Collapsed"/>
