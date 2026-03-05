@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using DevTools.Notes.Engine;
 using DevTools.Notes.Models;
+using DevTools.Notes.Providers;
 using DevTools.Presentation.Wpf.Models;
 using DevTools.Presentation.Wpf.Services;
 using Microsoft.Win32;
@@ -53,8 +55,52 @@ namespace DevTools.Presentation.Wpf.Views
 
         private async void OnLoaded(object sender, RoutedEventArgs e)
         {
+            var resolvedPath = EnsureNotesDefaultsPersisted();
+            UpdateStoragePathHint(resolvedPath);
             CheckGoogleDriveStatus();
             await LoadList();
+        }
+
+        private string EnsureNotesDefaultsPersisted()
+        {
+            var notesSettings = GetNotesSettings();
+            var resolvedPath = ResolveNotesStoragePath(notesSettings);
+            var normalizedFormat = NormalizeExtension(notesSettings.DefaultFormat);
+
+            var changed = false;
+            if (!string.Equals(notesSettings.StoragePath, resolvedPath, StringComparison.OrdinalIgnoreCase))
+            {
+                notesSettings.StoragePath = resolvedPath;
+                changed = true;
+            }
+
+            if (!string.Equals(notesSettings.DefaultFormat, normalizedFormat, StringComparison.OrdinalIgnoreCase))
+            {
+                notesSettings.DefaultFormat = normalizedFormat;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                _config.SaveSection("Notes", notesSettings);
+            }
+
+            if (!string.Equals(_settings.Settings.NotesStoragePath, resolvedPath, StringComparison.OrdinalIgnoreCase))
+            {
+                _settings.Settings.NotesStoragePath = resolvedPath;
+                _settings.Save();
+            }
+
+            return resolvedPath;
+        }
+
+        private void UpdateStoragePathHint(string fullPath)
+        {
+            if (NotesStoragePathHint == null)
+                return;
+
+            NotesStoragePathHint.Text = $"Salvando em: {fullPath}";
+            NotesStoragePathHint.ToolTip = fullPath;
         }
 
         private void CheckGoogleDriveStatus()
@@ -168,8 +214,12 @@ namespace DevTools.Presentation.Wpf.Views
             _currentNoteKey = null;
             NoteTitle.Text = "";
             NotesContent.Text = "";
+            SetFormatFromSettingsDefault();
+            NoteFormatCombo.IsEnabled = true;
             ClearEditValidation();
             ShowEditMode(true);
+            UpdateDeleteButtonsState();
+            FocusContentAtTop();
         }
 
         private async void NotesList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -192,8 +242,11 @@ namespace DevTools.Presentation.Wpf.Views
                 {
                     NoteTitle.Text = item.Title; 
                     NotesContent.Text = result.Value.ReadResult.Content;
+                    SetFormatFromFileName(item.FileName);
+                    NoteFormatCombo.IsEnabled = false;
                     ClearEditValidation();
                     ShowEditMode(true);
+                    UpdateDeleteButtonsState();
                 }
             }
         }
@@ -221,7 +274,7 @@ namespace DevTools.Presentation.Wpf.Views
             ClearEditValidation();
             var notesSettings = GetNotesSettings();
             string storagePath = ResolveNotesStoragePath(notesSettings);
-            bool useMarkdown = string.Equals(NormalizeExtension(notesSettings.DefaultFormat), ".md", StringComparison.OrdinalIgnoreCase);
+            bool useMarkdown = string.Equals(GetSelectedFormatExtension(), ".md", StringComparison.OrdinalIgnoreCase);
 
             var action = _currentNoteKey == null ? NotesAction.CreateItem : NotesAction.SaveNote; 
             
@@ -248,6 +301,7 @@ namespace DevTools.Presentation.Wpf.Views
 
                 ShowEditMode(false);
                 await LoadList();
+                UpdateDeleteButtonsState();
             }
             else
             {
@@ -334,6 +388,7 @@ namespace DevTools.Presentation.Wpf.Views
 
             ListGrid.Visibility = edit ? Visibility.Collapsed : Visibility.Visible;
             EditGrid.Visibility = edit ? Visibility.Visible : Visibility.Collapsed;
+            UpdateDeleteButtonsState();
         }
 
         private void SetEditValidation(string message)
@@ -405,6 +460,115 @@ namespace DevTools.Presentation.Wpf.Views
                 return ".md";
 
             return ".txt";
+        }
+
+        private void SetFormatFromSettingsDefault()
+        {
+            var notesSettings = GetNotesSettings();
+            var ext = NormalizeExtension(notesSettings.DefaultFormat);
+            NoteFormatCombo.SelectedIndex = string.Equals(ext, ".md", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+        }
+
+        private void SetFormatFromFileName(string? fileName)
+        {
+            var ext = NormalizeExtension(Path.GetExtension(fileName));
+            NoteFormatCombo.SelectedIndex = string.Equals(ext, ".md", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+        }
+
+        private string GetSelectedFormatExtension()
+        {
+            if (NoteFormatCombo.SelectedItem is ComboBoxItem item && item.Content is string content)
+            {
+                return NormalizeExtension(content);
+            }
+
+            return ".txt";
+        }
+
+        private void FocusContentAtTop()
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                NotesContent.Focus();
+                NotesContent.CaretIndex = 0;
+                NotesContent.ScrollToHome();
+                NotesContent.ScrollToLine(0);
+            }), DispatcherPriority.Input);
+        }
+
+        private void UpdateDeleteButtonsState()
+        {
+            if (DeleteEditButton != null)
+            {
+                DeleteEditButton.Visibility = !string.IsNullOrWhiteSpace(_currentNoteKey) ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        private async void DeleteListButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (NotesList.SelectedItem is not NoteListItem selected)
+            {
+                UiMessageService.ShowWarning("Selecione uma nota para excluir.", "Notas");
+                return;
+            }
+
+            await DeleteNoteByKeyAsync(selected.FileName, selected.Title);
+        }
+
+        private async void DeleteEditButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(_currentNoteKey))
+                return;
+
+            await DeleteNoteByKeyAsync(_currentNoteKey, NoteTitle.Text);
+        }
+
+        private async Task DeleteNoteByKeyAsync(string noteKey, string? title)
+        {
+            var noteTitle = string.IsNullOrWhiteSpace(title) ? noteKey : title;
+            if (!UiMessageService.Confirm($"Deseja excluir a nota '{noteTitle}'?", "Excluir nota"))
+                return;
+
+            try
+            {
+                var notesSettings = GetNotesSettings();
+                string storagePath = ResolveNotesStoragePath(notesSettings);
+                string root = NotesPaths.ResolveRoot(storagePath);
+                string itemsRoot = NotesPaths.ItemsDir(root);
+
+                string normalized = noteKey
+                    .Replace('/', Path.DirectorySeparatorChar)
+                    .Replace('\\', Path.DirectorySeparatorChar)
+                    .TrimStart(Path.DirectorySeparatorChar);
+
+                string fullPath = Path.GetFullPath(Path.Combine(itemsRoot, normalized));
+                string rootWithSeparator = itemsRoot.EndsWith(Path.DirectorySeparatorChar)
+                    ? itemsRoot
+                    : itemsRoot + Path.DirectorySeparatorChar;
+
+                if (fullPath.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase) && File.Exists(fullPath))
+                {
+                    File.Delete(fullPath);
+                }
+
+                var indexStore = new NotesIndexStore();
+                var load = await indexStore.LoadAsync(root);
+                if (load.IsSuccess && load.Value != null)
+                {
+                    load.Value.Items.RemoveAll(x =>
+                        string.Equals(x.FileName, noteKey, StringComparison.OrdinalIgnoreCase));
+                    await indexStore.SaveAsync(root, load.Value);
+                }
+
+                _currentNoteKey = null;
+                ShowEditMode(false);
+                await LoadList();
+                UiMessageService.ShowInfo("Nota excluida com sucesso.", "Notas");
+            }
+            catch (Exception ex)
+            {
+                UiMessageService.ShowError($"Erro ao excluir nota: {ex.Message}", "Erro ao excluir");
+            }
         }
     }
 }
