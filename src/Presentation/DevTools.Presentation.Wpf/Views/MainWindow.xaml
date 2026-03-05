@@ -574,8 +574,8 @@
                                     </ScrollViewer>
 
                                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
-                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
-                                        <Button Content="Salvar" Click="SaveStorageSettings_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="120"/>
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button Content="Salvar" Click="SaveStorageSettings_Click" Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                     </StackPanel>
                                 </Grid>
 
@@ -657,14 +657,14 @@
                                                 Orientation="Horizontal"
                                                 HorizontalAlignment="Right"
                                                 Margin="0,10,0,8">
-                                        <Button Content="Novo Perfil" Click="AddToolProfile_Click" 
-                                                Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
-                                        <Button Content="Remover" Click="DeleteToolProfile_Click" 
-                                                Style="{DynamicResource DangerButtonStyle}" Width="120" Margin="0,0,10,0"/>
+                                        <Button x:Name="AddToolProfileButton" Content="Adicionar" Click="AddToolProfile_Click" 
+                                                Style="{DynamicResource DevToolsSuccessButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button x:Name="DeleteToolProfileButton" Content="Remover" Click="DeleteToolProfile_Click" 
+                                                Style="{DynamicResource DevToolsDangerButton}" Width="120" Margin="0,0,10,0"/>
                                         <Button Content="Cancelar" Click="BackToSettingsList_Click" 
-                                                Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
-                                        <Button Content="Salvar" Click="SaveToolProfile_Click" 
-                                                Style="{DynamicResource PrimaryButtonStyle}" Width="120"/>
+                                                Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button x:Name="SaveToolProfileButton" Content="Salvar" Click="SaveToolProfile_Click" 
+                                                Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                     </StackPanel>
                                 </Grid>
 
@@ -734,7 +734,7 @@
                                                         <materialDesign:PackIcon Kind="GoogleDrive" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
                                                         <TextBlock Text="Backup Google Drive" Style="{DynamicResource DevToolsCardTitle}"/>
                                                     </StackPanel>
-                                                    <Button DockPanel.Dock="Right" Content="Como configurar?" Style="{DynamicResource SecondaryButtonStyle}" 
+                                                    <Button DockPanel.Dock="Right" Content="Como configurar?" Style="{DynamicResource DevToolsSecondaryButton}" 
                                                         Padding="12,8" MinWidth="140" Click="OpenHelp_Click"/>
                                                 </DockPanel>
 
@@ -775,7 +775,7 @@
                                                     </StackPanel>
 
                                                     <Button x:Name="GDriveTestConnectionButton" Grid.Row="2" Grid.Column="0" Content="Testar Conexão" Click="TestConnection_Click" 
-                                                        Style="{DynamicResource SecondaryButtonStyle}" Width="150" HorizontalAlignment="Left" Margin="0,20,0,0"/>
+                                                        Style="{DynamicResource DevToolsSecondaryButton}" Width="150" HorizontalAlignment="Left" Margin="0,20,0,0"/>
                                                     <TextBlock x:Name="GDriveTestConnectionStatus" Grid.Row="2" Grid.Column="2" Margin="0,24,0,0"
                                                                Foreground="{DynamicResource DevToolsTextSecondary}" FontSize="13"
                                                                TextWrapping="Wrap" VerticalAlignment="Center"/>
@@ -786,8 +786,8 @@
                                     </ScrollViewer>
 
                                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
-                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
-                                        <Button Content="Salvar" Click="SaveNotesCloudSettings_Click" Style="{DynamicResource PrimaryButtonStyle}" Width="120"/>
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button Content="Salvar" Click="SaveNotesCloudSettings_Click" Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                     </StackPanel>
                                 </Grid>
 
@@ -904,9 +904,9 @@
 
                                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
                                         <Button Content="Cancelar" Click="BackToSettingsList_Click" 
-                                                Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
+                                                Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
                                         <Button Content="Salvar" Click="SaveHarvestSettings_Click" 
-                                                Style="{DynamicResource PrimaryButtonStyle}" Width="120"/>
+                                                Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                     </StackPanel>
                                 </Grid>
 
@@ -975,14 +975,14 @@
                                                 Orientation="Horizontal"
                                                 HorizontalAlignment="Right"
                                                 Margin="0,10,0,8">
-                                        <Button Content="Nova Categoria" Click="AddOrganizerCategory_Click" 
-                                                Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
-                                        <Button Content="Remover" Click="DeleteOrganizerCategory_Click" 
-                                                Style="{DynamicResource DangerButtonStyle}" Width="120" Margin="0,0,10,0"/>
+                                        <Button x:Name="OrganizerAddCategoryButton" Content="Adicionar" Click="AddOrganizerCategory_Click" 
+                                                Style="{DynamicResource DevToolsSuccessButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button x:Name="DeleteOrganizerCategoryButton" Content="Remover" Click="DeleteOrganizerCategory_Click" 
+                                                Style="{DynamicResource DevToolsDangerButton}" Width="120" Margin="0,0,10,0" Visibility="Collapsed"/>
                                         <Button Content="Cancelar" Click="BackToSettingsList_Click" 
-                                                Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
-                                        <Button Content="Salvar" Click="SaveOrganizerCategory_Click" 
-                                                Style="{DynamicResource PrimaryButtonStyle}" Width="120"/>
+                                                Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button x:Name="SaveOrganizerCategoryButton" Content="Salvar" Click="SaveOrganizerCategory_Click" 
+                                                Style="{DynamicResource DevToolsPrimaryButton}" Width="120" Visibility="Collapsed"/>
                                     </StackPanel>
                                 </Grid>
 
@@ -1042,9 +1042,9 @@
                                     </ScrollViewer>
 
                                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
-                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
                                         <Button Content="Salvar" Click="SaveMigrationsSettings_Click" 
-                                            Style="{DynamicResource PrimaryButtonStyle}" Width="120"/>
+                                            Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                     </StackPanel>
                                 </Grid>
 
@@ -1097,9 +1097,9 @@
                                     </ScrollViewer>
 
                                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
-                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource SecondaryButtonStyle}" Width="120" Margin="0,0,10,0"/>
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
                                         <Button Content="Salvar" Click="SaveNgrokSettings_Click" 
-                                            Style="{DynamicResource PrimaryButtonStyle}" Width="120"/>
+                                            Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                     </StackPanel>
                                 </Grid>
                             </Grid>

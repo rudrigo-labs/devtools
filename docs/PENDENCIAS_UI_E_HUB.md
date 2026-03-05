@@ -43,3 +43,25 @@ Status: Aberto
 - Criterio de aceite:
   - Primeira abertura da tela: checkbox desmarcado.
   - Apos salvar configuracao: checkbox reflete exatamente o valor salvo.
+
+## 5) SSH Tunnel: definir posicao final das abas
+
+- Pendencia: Definir o posicionamento/layout das abas da janela de SSH Tunnel.
+- Problema atual: A aparencia/posicao atual das abas nao ficou boa visualmente.
+- Objetivo:
+  - Escolher uma posicao final consistente com o padrao visual da aplicacao.
+  - Ajustar espacos e hierarquia visual para evitar aspecto "solto" ou desalinhado.
+- Criterio de aceite:
+  - Posicao das abas aprovada visualmente.
+  - Sem regressao de usabilidade no fluxo de conexao e mapeamento.
+
+## 6) SSH Tunnel: definir posicao final do status
+
+- Pendencia: Definir onde o status da janela de SSH Tunnel deve ficar.
+- Problema atual: O status atual esta visualmente ruim no ponto em que foi colocado.
+- Objetivo:
+  - Escolher uma posicao final mais limpa e previsivel para leitura do status.
+  - Garantir que o status nao concorra com titulo/acoes da janela.
+- Criterio de aceite:
+  - Posicao do status aprovada visualmente.
+  - Leitura clara de estados (parado/conectando/conectado/erro) sem poluicao.

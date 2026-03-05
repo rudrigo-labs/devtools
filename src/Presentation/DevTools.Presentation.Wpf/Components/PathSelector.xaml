@@ -32,7 +32,7 @@
                      ToolTip="{Binding SelectedPath, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"/>
             <Button Grid.Column="1"
                     Content="Procurar"
-                    Style="{StaticResource DevToolsSecondaryButton}"
+                    Style="{StaticResource DevToolsBrowseButton}"
                     Click="Browse_Click"
                     ToolTip="Selecionar pasta/arquivo"
                     MinWidth="112"

@@ -616,18 +616,20 @@ public partial class MainWindow : Window
         {
             var newProfile = new ToolProfile
             {
-                Name = "Novo Perfil 1"
+                Name = GenerateNextProfileName(profiles)
             };
 
             profiles.Add(newProfile);
             ToolProfilesList.ItemsSource = null;
             ToolProfilesList.ItemsSource = profiles;
             ToolProfilesList.SelectedItem = newProfile;
+            UpdateToolProfileActionButtonsState();
             return;
         }
 
         ToolProfileEditForm.Visibility = Visibility.Collapsed;
         ToolProfilesList.SelectedItem = null;
+        UpdateToolProfileActionButtonsState();
     }
 
     private void AddToolProfile_Click(object sender, RoutedEventArgs e)
@@ -636,7 +638,7 @@ public partial class MainWindow : Window
 
         var newProfile = new ToolProfile 
         { 
-            Name = "Novo Perfil " + (ToolProfilesList.Items.Count + 1)
+            Name = GenerateNextProfileName((ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>())
         };
         
         var list = (ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>();
@@ -645,6 +647,7 @@ public partial class MainWindow : Window
         ToolProfilesList.ItemsSource = null;
         ToolProfilesList.ItemsSource = list;
         ToolProfilesList.SelectedItem = newProfile;
+        UpdateToolProfileActionButtonsState();
     }
 
     private void ToolProfile_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -663,6 +666,8 @@ public partial class MainWindow : Window
             _selectedToolProfile = null;
             ToolProfileEditForm.Visibility = Visibility.Collapsed;
         }
+
+        UpdateToolProfileActionButtonsState();
     }
 
     private void SaveToolProfile_Click(object sender, RoutedEventArgs e)
@@ -677,6 +682,12 @@ public partial class MainWindow : Window
 
         _selectedToolProfile.Name = ToolProfileNameInput.Text.Trim();
         _selectedToolProfile.IsDefault = ToolProfileIsDefaultCheck.IsChecked == true;
+
+        if (!_selectedToolProfile.IsDefault && !HasOtherDefaultProfile())
+        {
+            ShowRequiredFieldsWarning("Para salvar, marque 'Usar como perfil padrão'. Deve existir pelo menos um perfil padrão.");
+            return;
+        }
 
         // Coletar valores dos campos dinamicos recursivamente
         CollectProfileOptions(ToolProfileFieldsContainer, _selectedToolProfile.Options);
@@ -718,6 +729,8 @@ public partial class MainWindow : Window
             _profileUIService.DeleteProfile(_currentToolForProfiles, _selectedToolProfile.Name);
             LoadToolProfiles();
         }
+
+        UpdateToolProfileActionButtonsState();
     }
 
 
@@ -894,15 +907,17 @@ public partial class MainWindow : Window
         OrganizerCategoriesList.ItemsSource = _currentOrganizerConfig.Categories;
         OrganizerCategoriesList.SelectedItem = null;
         OrganizerEditForm.Visibility = Visibility.Collapsed;
+        UpdateOrganizerActionButtonsState();
     }
 
     private void AddOrganizerCategory_Click(object sender, RoutedEventArgs e)
     {
-        var newCat = new OrganizerCategory("Nova Categoria", "NovaPasta", Array.Empty<string>());
+        var newCat = new OrganizerCategory($"Categoria {_currentOrganizerConfig.Categories.Count + 1}", "NovaPasta", Array.Empty<string>());
         _currentOrganizerConfig.Categories.Add(newCat);
         OrganizerCategoriesList.ItemsSource = null;
         OrganizerCategoriesList.ItemsSource = _currentOrganizerConfig.Categories;
         OrganizerCategoriesList.SelectedItem = newCat;
+        UpdateOrganizerActionButtonsState();
     }
 
     private void OrganizerCategory_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -920,6 +935,8 @@ public partial class MainWindow : Window
             _selectedCategory = null;
             OrganizerEditForm.Visibility = Visibility.Collapsed;
         }
+
+        UpdateOrganizerActionButtonsState();
     }
 
     private void SaveOrganizerCategory_Click(object sender, RoutedEventArgs e)
@@ -972,6 +989,71 @@ public partial class MainWindow : Window
             _configService.SaveSection("Organizer", _currentOrganizerConfig);
             LoadOrganizerConfig();
         }
+
+        UpdateOrganizerActionButtonsState();
+    }
+
+    private void UpdateToolProfileActionButtonsState()
+    {
+        var hasSelection = _selectedToolProfile != null && ToolProfileEditForm.Visibility == Visibility.Visible;
+
+        if (DeleteToolProfileButton != null)
+        {
+            DeleteToolProfileButton.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        if (SaveToolProfileButton != null)
+        {
+            SaveToolProfileButton.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
+    private void UpdateOrganizerActionButtonsState()
+    {
+        var hasSelection = _selectedCategory != null && OrganizerEditForm.Visibility == Visibility.Visible;
+
+        if (DeleteOrganizerCategoryButton != null)
+        {
+            DeleteOrganizerCategoryButton.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        if (SaveOrganizerCategoryButton != null)
+        {
+            SaveOrganizerCategoryButton.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
+    private bool HasOtherDefaultProfile()
+    {
+        var list = (ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>();
+        return list.Any(p => !ReferenceEquals(p, _selectedToolProfile) && p.IsDefault);
+    }
+
+    private static string GenerateNextProfileName(IReadOnlyCollection<ToolProfile> profiles)
+    {
+        var maxNumber = 0;
+
+        foreach (var profile in profiles)
+        {
+            if (profile?.Name is null)
+            {
+                continue;
+            }
+
+            var trimmed = profile.Name.Trim();
+            if (!trimmed.StartsWith("Perfil ", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var suffix = trimmed.Substring("Perfil ".Length);
+            if (int.TryParse(suffix, out var number) && number > maxNumber)
+            {
+                maxNumber = number;
+            }
+        }
+
+        return $"Perfil {maxNumber + 1}";
     }
 
 
