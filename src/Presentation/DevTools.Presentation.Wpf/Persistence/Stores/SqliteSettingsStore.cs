@@ -143,7 +143,11 @@ public sealed class SqliteSettingsStore : ISettingsStore
                 Rules = new HarvestRules
                 {
                     Extensions = new List<string> { ".cs", ".xml", ".json", ".xaml" },
-                    ExcludeDirectories = new List<string> { "bin", "obj", ".git", "node_modules" }
+                    ExcludeDirectories = new List<string>
+                    {
+                        "bin", "obj", ".git", ".vs", "node_modules",
+                        "dist", "build", ".idea", ".vscode", ".next", ".nuxt", ".turbo", "Snapshot"
+                    }
                 }
             });
         }

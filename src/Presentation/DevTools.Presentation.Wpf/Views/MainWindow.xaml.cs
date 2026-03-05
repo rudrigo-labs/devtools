@@ -22,6 +22,11 @@ namespace DevTools.Presentation.Wpf.Views;
 public partial class MainWindow : Window
 {
     private const string StorageBackendEnvVar = "DEVTOOLS_STORAGE_BACKEND";
+    private static readonly List<string> DefaultHarvestExcludeDirectories = new()
+    {
+        "bin", "obj", ".git", ".vs", "node_modules",
+        "dist", "build", ".idea", ".vscode", ".next", ".nuxt", ".turbo", "Snapshot"
+    };
 
     private readonly TrayService _trayService;
     private readonly JobManager _jobManager;
@@ -716,6 +721,11 @@ public partial class MainWindow : Window
     {
         _currentHarvestConfig = _configService.GetSection<HarvestConfig>("Harvest");
         _currentHarvestConfig.Normalize();
+
+        if (_currentHarvestConfig.Rules.ExcludeDirectories.Count == 0)
+        {
+            _currentHarvestConfig.Rules.ExcludeDirectories = new List<string>(DefaultHarvestExcludeDirectories);
+        }
 
         // Rules
         HarvestExtensions.Text = string.Join(", ", _currentHarvestConfig.Rules.Extensions);
