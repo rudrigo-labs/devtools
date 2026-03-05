@@ -1,0 +1,106 @@
+<Window x:Class="DevTools.Presentation.Wpf.Views.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Sobre o DevTools"
+        Height="720"
+        Width="980"
+        MinHeight="640"
+        MinWidth="860"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Style="{StaticResource ModernWindowStyle}">
+
+    <c:DevToolsToolFrame x:Name="MainFrame"
+                         Title="Sobre o DevTools"
+                         HelpText="Informações do produto e autoria."
+                         PrimaryButtonContent="Fechar"
+                         SecondaryButtonContent="Abrir GitHub"
+                         PrimaryButtonClick="CloseButton_Click"
+                         SecondaryButtonClick="OpenGitHubButton_Click"
+                         CloseButtonClick="CloseButton_Click">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <Border Background="{DynamicResource DevToolsSurface}"
+                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <materialDesign:PackIcon Kind="ToolboxOutline"
+                                                     Foreground="{DynamicResource DevToolsAccent}"
+                                                     Width="20"
+                                                     Height="20"
+                                                     Margin="0,0,10,0"/>
+                            <TextBlock Text="DevTools"
+                                       Style="{DynamicResource DevToolsCardTitle}"/>
+                        </StackPanel>
+                        <TextBlock Text="Suíte de produtividade para engenharia de software."
+                                   Foreground="{DynamicResource DevToolsTextSecondary}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="{DynamicResource DevToolsSurface}"
+                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <materialDesign:PackIcon Kind="AccountCircleOutline"
+                                                     Foreground="{DynamicResource DevToolsAccent}"
+                                                     Width="20"
+                                                     Height="20"
+                                                     Margin="0,0,10,0"/>
+                            <TextBlock Text="Desenvolvedor"
+                                       Style="{DynamicResource DevToolsCardTitle}"/>
+                        </StackPanel>
+                        <TextBlock Text="Rodrigo — Rudrigo Labs"
+                                   Foreground="{DynamicResource DevToolsTextPrimary}"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,6"/>
+                        <TextBlock Text="Projeto desenvolvido para centralizar ferramentas técnicas em uma experiência única, consistente e escalável."
+                                   Foreground="{DynamicResource DevToolsTextSecondary}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="{DynamicResource DevToolsSurface}"
+                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <materialDesign:PackIcon Kind="InformationOutline"
+                                                     Foreground="{DynamicResource DevToolsAccent}"
+                                                     Width="20"
+                                                     Height="20"
+                                                     Margin="0,0,10,0"/>
+                            <TextBlock Text="Versão e Tecnologias"
+                                       Style="{DynamicResource DevToolsCardTitle}"/>
+                        </StackPanel>
+                        <TextBlock Text="Interface: WPF (.NET)"
+                                   Foreground="{DynamicResource DevToolsTextSecondary}"
+                                   Margin="0,0,0,4"/>
+                        <TextBlock Text="Arquitetura: Shell + Tool Router + Engines"
+                                   Foreground="{DynamicResource DevToolsTextSecondary}"
+                                   Margin="0,0,0,4"/>
+                        <TextBlock x:Name="VersionText"
+                                   Text="Versão: 1.0.0"
+                                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </c:DevToolsToolFrame>
+</Window>

@@ -254,6 +254,10 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <Style x:Key="DevToolsDangerButton" TargetType="Button" BasedOn="{StaticResource DevToolsPrimaryButton}">
+        <Setter Property="Background" Value="{DynamicResource ErrorBrush}"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
     <Style x:Key="DevToolsCardButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>

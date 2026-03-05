@@ -1,12 +1,12 @@
-using DevTools.Core.Configuration;
+﻿using DevTools.Core.Configuration;
 using DevTools.Core.Models;
 using DevTools.Presentation.Wpf.Components;
+using MaterialDesignThemes.Wpf;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Application = System.Windows.Application;
-using MaterialDesignThemes.Wpf; // Adicionado para usar componentes do Material Design
 
 namespace DevTools.Presentation.Wpf.Services;
 
@@ -66,92 +66,93 @@ public class ProfileUIService
         switch (toolName)
         {
             case "Rename":
-                // Grupo: Substituição
-                var renameReplaceCard = CreateMaterialCard();
-                var renameReplaceStack = new StackPanel();
-                renameReplaceStack.Children.Add(CreateCardHeader("FormTextbox", "Substituição de Texto"));
-                renameReplaceStack.Children.Add(CreateGridWithTwoLabeledTextBoxes("Texto Antigo", "old-text", options, "Texto Novo", "new-text", options));
-                renameReplaceCard.Child = renameReplaceStack;
-                container.Children.Add(renameReplaceCard);
+            {
+                var replaceCard = CreateMaterialCard();
+                var replaceStack = new StackPanel();
+                replaceStack.Children.Add(CreateCardHeader("FormTextbox", "Substituição de Texto"));
+                replaceStack.Children.Add(CreateGridWithTwoLabeledTextBoxes("Texto Antigo", "old-text", options, "Texto Novo", "new-text", options));
+                replaceCard.Child = replaceStack;
+                container.Children.Add(replaceCard);
 
-                // Grupo: Filtros
-                var renameFilterCard = CreateMaterialCard();
-                var renameFilterStack = new StackPanel();
-                renameFilterStack.Children.Add(CreateCardHeader("FilterVariant", "Filtros (Glob)"));
-                renameFilterStack.Children.Add(CreateGridWithTwoLabeledTextBoxes("Include", "include", options, "Exclude", "exclude", options));
-                renameFilterCard.Child = renameFilterStack;
-                container.Children.Add(renameFilterCard);
+                var filterCard = CreateMaterialCard();
+                var filterStack = new StackPanel();
+                filterStack.Children.Add(CreateCardHeader("FilterVariant", "Filtros (Glob)"));
+                filterStack.Children.Add(CreateGridWithTwoLabeledTextBoxes("Include", "include", options, "Exclude", "exclude", options));
+                filterCard.Child = filterStack;
+                container.Children.Add(filterCard);
                 break;
+            }
 
             case "Migrations":
-                // Grupo: Caminhos
-                var migPathCard = CreateMaterialCard();
-                var migPathStack = new StackPanel();
-                migPathStack.Children.Add(CreateCardHeader("Folder", "Caminhos do Projeto"));
-                migPathStack.Children.Add(CreatePathSelector("Pasta Raiz", "root-path", options, isFolderPicker: true));
-                migPathStack.Children.Add(CreatePathSelector("Startup Project", "startup-path", options, isFolderPicker: true, new Thickness(0, 16, 0, 0)));
-                migPathCard.Child = migPathStack;
-                container.Children.Add(migPathCard);
+            {
+                var pathCard = CreateMaterialCard();
+                var pathStack = new StackPanel();
+                pathStack.Children.Add(CreateCardHeader("Folder", "Caminhos do Projeto"));
+                pathStack.Children.Add(CreatePathSelector("Pasta Raiz", "root-path", options, isFolderPicker: true));
+                pathStack.Children.Add(CreatePathSelector("Startup Project", "startup-path", options, isFolderPicker: true, new Thickness(0, 16, 0, 0)));
+                pathCard.Child = pathStack;
+                container.Children.Add(pathCard);
 
-                // Grupo: Contexto
-                var migContextCard = CreateMaterialCard();
-                var migContextStack = new StackPanel();
-                migContextStack.Children.Add(CreateCardHeader("DatabaseSettings", "Configuração do Contexto"));
-                migContextStack.Children.Add(CreateLabeledTextBox("DbContext Full Name", "dbcontext", options));
-                migContextCard.Child = migContextStack;
-                container.Children.Add(migContextCard);
+                var contextCard = CreateMaterialCard();
+                var contextStack = new StackPanel();
+                contextStack.Children.Add(CreateCardHeader("DatabaseSettings", "Configuração do Contexto"));
+                contextStack.Children.Add(CreateLabeledTextBox("DbContext Full Name", "dbcontext", options));
+                contextCard.Child = contextStack;
+                container.Children.Add(contextCard);
                 break;
+            }
 
             case "Harvest":
-                // Grupo: Caminhos
-                var harvPathCard = CreateMaterialCard();
-                var harvPathStack = new StackPanel();
-                harvPathStack.Children.Add(CreateCardHeader("FolderArrowRight", "Caminhos"));
-                harvPathStack.Children.Add(CreatePathSelector("Origem", "source-path", options, isFolderPicker: true));
-                harvPathStack.Children.Add(CreatePathSelector("Destino", "output-path", options, isFolderPicker: true, new Thickness(0, 16, 0, 0)));
-                harvPathCard.Child = harvPathStack;
-                container.Children.Add(harvPathCard);
+            {
+                var pathCard = CreateMaterialCard();
+                var pathStack = new StackPanel();
+                pathStack.Children.Add(CreateCardHeader("FolderArrowRight", "Caminhos"));
+                pathStack.Children.Add(CreatePathSelector("Origem", "source-path", options, isFolderPicker: true));
+                pathStack.Children.Add(CreatePathSelector("Destino", "output-path", options, isFolderPicker: true, new Thickness(0, 16, 0, 0)));
+                pathCard.Child = pathStack;
+                container.Children.Add(pathCard);
 
-                // Grupo: Limites
-                var harvLimitCard = CreateMaterialCard();
-                var harvLimitStack = new StackPanel();
-                harvLimitStack.Children.Add(CreateCardHeader("ChartLine", "Limites de Coleta"));
-                harvLimitStack.Children.Add(CreateLabeledTextBox("Score Mínimo (0-100)", "min-score", options));
-                harvLimitCard.Child = harvLimitStack;
-                container.Children.Add(harvLimitCard);
+                var limitCard = CreateMaterialCard();
+                var limitStack = new StackPanel();
+                limitStack.Children.Add(CreateCardHeader("ChartLine", "Limites de Coleta"));
+                limitStack.Children.Add(CreateLabeledTextBox("Score Mínimo (0-100)", "min-score", options));
+                limitCard.Child = limitStack;
+                container.Children.Add(limitCard);
                 break;
+            }
 
             case "SearchText":
-                // Grupo: Caminhos
-                var searchPathCard = CreateMaterialCard();
-                var searchPathStack = new StackPanel();
-                searchPathStack.Children.Add(CreateCardHeader("FolderSearch", "Diretório de Busca"));
-                searchPathStack.Children.Add(CreatePathSelector("Pasta Raiz", "root-path", options, isFolderPicker: true));
-                searchPathCard.Child = searchPathStack;
-                container.Children.Add(searchPathCard);
+            {
+                var pathCard = CreateMaterialCard();
+                var pathStack = new StackPanel();
+                pathStack.Children.Add(CreateCardHeader("FolderSearch", "Diretório de Busca"));
+                pathStack.Children.Add(CreatePathSelector("Pasta Raiz", "root-path", options, isFolderPicker: true));
+                pathCard.Child = pathStack;
+                container.Children.Add(pathCard);
 
-                // Grupo: Busca
-                var searchConfigCard = CreateMaterialCard();
-                var searchConfigStack = new StackPanel();
-                searchConfigStack.Children.Add(CreateCardHeader("Magnify", "Configuração da Busca"));
-                searchConfigStack.Children.Add(CreateLabeledTextBox("Padrão de Busca", "search-pattern", options));
-                searchConfigStack.Children.Add(CreateGridWithTwoLabeledTextBoxes("Include (Glob)", "include", options, "Exclude (Glob)", "exclude", options, new Thickness(0, 16, 0, 0)));
-                searchConfigCard.Child = searchConfigStack;
-                container.Children.Add(searchConfigCard);
+                var configCard = CreateMaterialCard();
+                var configStack = new StackPanel();
+                configStack.Children.Add(CreateCardHeader("Magnify", "Configuração da Busca"));
+                configStack.Children.Add(CreateLabeledTextBox("Padrão de Busca", "search-pattern", options));
+                configStack.Children.Add(CreateGridWithTwoLabeledTextBoxes("Include (Glob)", "include", options, "Exclude (Glob)", "exclude", options, new Thickness(0, 16, 0, 0)));
+                configCard.Child = configStack;
+                container.Children.Add(configCard);
                 break;
+            }
 
             case "Snapshot":
-                // Grupo: Projeto
-                var snapCard = CreateMaterialCard();
-                var snapStack = new StackPanel();
-                snapStack.Children.Add(CreateCardHeader("PackageVariant", "Snapshot do Projeto"));
-                snapStack.Children.Add(CreatePathSelector("Pasta do Projeto", "project-path", options, isFolderPicker: true));
-                snapCard.Child = snapStack;
-                container.Children.Add(snapCard);
+            {
+                var card = CreateMaterialCard();
+                var stack = new StackPanel();
+                stack.Children.Add(CreateCardHeader("PackageVariant", "Snapshot do Projeto"));
+                stack.Children.Add(CreatePathSelector("Pasta do Projeto", "project-path", options, isFolderPicker: true));
+                card.Child = stack;
+                container.Children.Add(card);
                 break;
+            }
 
             case "SSHTunnel":
-                // Grupo: Dados de Conexão
+            {
                 var connectionCard = CreateMaterialCard();
                 var connectionStack = new StackPanel();
                 connectionStack.Children.Add(CreateCardHeader("ServerNetwork", "Dados de Conexão (SSH)"));
@@ -162,7 +163,6 @@ public class ProfileUIService
                 connectionCard.Child = connectionStack;
                 container.Children.Add(connectionCard);
 
-                // Grupo: Mapeamento do Túnel
                 var tunnelCard = CreateMaterialCard();
                 var tunnelStack = new StackPanel();
                 tunnelStack.Children.Add(CreateCardHeader("TransitTransfer", "Mapeamento do Túnel"));
@@ -170,49 +170,55 @@ public class ProfileUIService
                 tunnelCard.Child = tunnelStack;
                 container.Children.Add(tunnelCard);
                 break;
+            }
         }
     }
 
     private void AddProfileField(StackPanel container, string labelText, string key, Dictionary<string, string> options, bool isPath = false)
     {
-        string value = options.TryGetValue(key, out var val) ? val : "";
+        var value = options.TryGetValue(key, out var val) ? val : "";
 
         if (isPath)
         {
-            var textBlock = new TextBlock { Text = labelText, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("SecondaryTextBrush"), FontSize = 12, Margin = new Thickness(0, 0, 0, 6) };
-            container.Children.Add(textBlock);
-            var selector = new PathSelector 
-            { 
-                Title = labelText, 
+            container.Children.Add(new TextBlock
+            {
+                Text = labelText,
+                Style = (Style)Application.Current.FindResource("DevToolsInputLabel")
+            });
+
+            var selector = new PathSelector
+            {
+                Title = labelText,
                 IsFolderPicker = true,
-                SelectedPath = value
+                SelectedPath = value,
+                Tag = key
             };
-            selector.Tag = key;
+
             container.Children.Add(selector);
+            return;
         }
-        else
+
+        container.Children.Add(new TextBlock
         {
-            var textBlock = new TextBlock { Text = labelText, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("SecondaryTextBrush"), FontSize = 12, Margin = new Thickness(0, 0, 0, 6) };
-            container.Children.Add(textBlock);
-            var textBox = new System.Windows.Controls.TextBox 
-            { 
-                Text = value,
-                Tag = key,
-                Style = (Style)Application.Current.FindResource("DevToolsTextInput"),
-                Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("PrimaryTextBrush")
-            };
-            container.Children.Add(textBox);
-        }
+            Text = labelText,
+            Style = (Style)Application.Current.FindResource("DevToolsInputLabel")
+        });
+
+        container.Children.Add(new System.Windows.Controls.TextBox
+        {
+            Text = value,
+            Tag = key,
+            Style = (Style)Application.Current.FindResource("DevToolsTextInput")
+        });
     }
 
-    // Métodos auxiliares para criar componentes visuais (estilo Dashboard)
     private Border CreateMaterialCard()
     {
         return new Border
         {
             Padding = new Thickness(20),
             Margin = new Thickness(0, 0, 0, 24),
-            Background = (System.Windows.Media.Brush)Application.Current.FindResource("MaterialDesignCardBackground"),
+            Background = (System.Windows.Media.Brush)Application.Current.FindResource("DevToolsSurface"),
             CornerRadius = new CornerRadius(8),
             BorderBrush = (System.Windows.Media.Brush)Application.Current.FindResource("DevToolsBrushBorder"),
             BorderThickness = new Thickness(1)
@@ -221,56 +227,83 @@ public class ProfileUIService
 
     private StackPanel CreateCardHeader(string iconKind, string title)
     {
-        var headerStack = new StackPanel { Orientation = System.Windows.Controls.Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 20) };
-        headerStack.Children.Add(new PackIcon { Kind = (PackIconKind)System.Enum.Parse(typeof(PackIconKind), iconKind), Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("AccentBrush"), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 10, 0), Width = 20, Height = 20 });
-        headerStack.Children.Add(new TextBlock { Text = title, FontSize = 16, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("PrimaryTextBrush"), FontWeight = FontWeights.SemiBold });
+        var headerStack = new StackPanel
+        {
+            Orientation = System.Windows.Controls.Orientation.Horizontal,
+            Margin = new Thickness(0, 0, 0, 20)
+        };
+
+        headerStack.Children.Add(new PackIcon
+        {
+            Kind = (PackIconKind)System.Enum.Parse(typeof(PackIconKind), iconKind),
+            Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("DevToolsAccent"),
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 10, 0),
+            Width = 20,
+            Height = 20
+        });
+
+        headerStack.Children.Add(new TextBlock
+        {
+            Text = title,
+            Style = (Style)Application.Current.FindResource("DevToolsCardTitle")
+        });
+
         return headerStack;
     }
 
     private StackPanel CreateLabeledTextBox(string labelText, string key, Dictionary<string, string> options, Thickness? margin = null)
     {
         var stack = new StackPanel();
-        if (margin.HasValue) stack.Margin = margin.Value;
+        if (margin.HasValue)
+        {
+            stack.Margin = margin.Value;
+        }
 
-        stack.Children.Add(new TextBlock { Text = labelText, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("SecondaryTextBrush"), FontSize = 11, Margin = new Thickness(0, 0, 0, 6) });
-        
-        var textBox = new System.Windows.Controls.TextBox
+        stack.Children.Add(new TextBlock
+        {
+            Text = labelText,
+            Style = (Style)Application.Current.FindResource("DevToolsInputLabel")
+        });
+
+        stack.Children.Add(new System.Windows.Controls.TextBox
         {
             Text = options.TryGetValue(key, out var val) ? val : "",
             Tag = key,
-            Style = (Style)Application.Current.FindResource("DevToolsTextInput"),
-            Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("PrimaryTextBrush")
-        };
-        stack.Children.Add(textBox);
+            Style = (Style)Application.Current.FindResource("DevToolsTextInput")
+        });
+
         return stack;
     }
 
     private UIElement CreatePathSelector(string title, string key, Dictionary<string, string> options, bool isFolderPicker, Thickness? margin = null)
     {
-        var textBlock = new TextBlock { Text = title, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("SecondaryTextBrush"), FontSize = 12, Margin = new Thickness(0, 0, 0, 6) };
         var selector = new PathSelector
         {
             Title = title,
             IsFolderPicker = isFolderPicker,
-            SelectedPath = options.TryGetValue(key, out var val) ? val : ""
+            SelectedPath = options.TryGetValue(key, out var val) ? val : "",
+            Tag = key
         };
-        selector.Tag = key;
+
         var stack = new StackPanel();
-        if (margin.HasValue) stack.Margin = margin.Value;
-        stack.Children.Add(textBlock);
+        if (margin.HasValue)
+        {
+            stack.Margin = margin.Value;
+        }
+
         stack.Children.Add(selector);
-        return stack; 
+        return stack;
     }
 
     private Grid CreateGridWithTwoLabeledTextBoxes(string label1, string key1, Dictionary<string, string> options, string label2, string key2, Dictionary<string, string> options2, Thickness? margin = null)
     {
         var grid = new Grid();
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) }); // Spacer
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(16) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
         var stack1 = CreateLabeledTextBox(label1, key1, options);
-        stack1.Margin = new Thickness(0, 0, 10, 0);
         Grid.SetColumn(stack1, 0);
         grid.Children.Add(stack1);
 
@@ -278,7 +311,11 @@ public class ProfileUIService
         Grid.SetColumn(stack2, 2);
         grid.Children.Add(stack2);
 
-        if (margin.HasValue) grid.Margin = margin.Value;
+        if (margin.HasValue)
+        {
+            grid.Margin = margin.Value;
+        }
+
         return grid;
     }
 
@@ -287,11 +324,10 @@ public class ProfileUIService
         var grid = new Grid();
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(20) }); // Spacer
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(20) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-        // Local
         var localBind = CreateLabeledTextBox("Bind Local (IP)", "local-bind", options);
         Grid.SetColumn(localBind, 0);
         grid.Children.Add(localBind);
@@ -302,12 +338,17 @@ public class ProfileUIService
         Grid.SetColumn(localPort, 1);
         grid.Children.Add(localPort);
 
-        // Arrow
-        var arrowIcon = new PackIcon { Kind = PackIconKind.ArrowRight, VerticalAlignment = VerticalAlignment.Bottom, HorizontalAlignment = System.Windows.HorizontalAlignment.Center, Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("SecondaryTextBrush"), Margin = new Thickness(0, 0, 0, 10) };
+        var arrowIcon = new PackIcon
+        {
+            Kind = PackIconKind.ArrowRight,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+            Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("DevToolsTextSecondary"),
+            Margin = new Thickness(0, 0, 0, 10)
+        };
         Grid.SetColumn(arrowIcon, 2);
         grid.Children.Add(arrowIcon);
 
-        // Remote
         var remoteHost = CreateLabeledTextBox("Host Remoto", "remote-host", options);
         Grid.SetColumn(remoteHost, 3);
         grid.Children.Add(remoteHost);

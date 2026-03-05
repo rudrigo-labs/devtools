@@ -6,8 +6,10 @@
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Coletor de Arquivos (Harvest)"
-        Height="720"
-        Width="900"
+        Height="780"
+        Width="1120"
+        MinWidth="1020"
+        MinHeight="700"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">

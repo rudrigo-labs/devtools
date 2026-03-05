@@ -76,7 +76,7 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="ActionButtonWidth"/>
-                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="0"/>
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="ActionButtonWidth"/>
                                     </Grid.ColumnDefinitions>
 

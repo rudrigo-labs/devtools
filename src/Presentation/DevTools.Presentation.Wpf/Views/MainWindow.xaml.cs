@@ -45,6 +45,10 @@ public partial class MainWindow : Window
     private bool _isTestingGoogleDriveConnection;
     private bool _allowCloseForShutdown;
     private string? _currentEmbeddedToolId;
+    private bool _isSyncingOwnedWindows;
+    private bool _hasTrackedMainLocation;
+    private double _lastMainLeft;
+    private double _lastMainTop;
 
     public MainWindow(TrayService trayService, JobManager jobManager, ConfigService configService, ProfileUIService profileUIService, GoogleDriveService googleDriveService)
     {
@@ -66,6 +70,7 @@ public partial class MainWindow : Window
         this.Closing += MainWindow_Closing;
         this.IsVisibleChanged += MainWindow_IsVisibleChanged;
         this.StateChanged += MainWindow_StateChanged;
+        this.LocationChanged += MainWindow_LocationChanged;
     }
 
     private void MainWindow_StateChanged(object? sender, EventArgs e)
@@ -75,8 +80,8 @@ public partial class MainWindow : Window
 
     private void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        // Se a MainWindow for escondida (Hide), temos que esconder a ferramenta atual tambem
-        // para que ela nao fique "orfa" na tela
+        // Se a MainWindow for escondida (Hide), temos que esconder a ferramenta atual também
+        // para que ela não fique "órfã" na tela
         if (this.Visibility != Visibility.Visible)
         {
             _trayService.OpenTool("HIDE_CURRENT"); // Comando interno para esconder se necessario
@@ -97,6 +102,7 @@ public partial class MainWindow : Window
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
+        ApplyMainWindowWorkingArea();
         UpdateMaximizeRestoreButton();
     }
 
@@ -170,6 +176,16 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OpenAbout_Click(object sender, RoutedEventArgs e)
+    {
+        var aboutWindow = new AboutWindow
+        {
+            Owner = this
+        };
+
+        aboutWindow.ShowDialog();
+    }
+
     private void BackToToolsFromEmbedded_Click(object sender, RoutedEventArgs e)
     {
         MainTabControl.SelectedItem = TabTools;
@@ -184,7 +200,7 @@ public partial class MainWindow : Window
     {
         return new TextBlock
         {
-            Text = $"A ferramenta '{title}' nao possui conteudo embutido configurado.",
+            Text = $"A ferramenta '{title}' não possui conteúdo embutido configurado.",
             Foreground = (System.Windows.Media.Brush)FindResource("DevToolsTextSecondary"),
             Margin = new Thickness(24),
             FontSize = 14,
@@ -213,14 +229,14 @@ public partial class MainWindow : Window
 
     private void MinimizeButton_Click(object sender, RoutedEventArgs e)
     {
-        this.WindowState = WindowState.Minimized;
+        // MainWindow fixa em tela cheia por regra de UX.
     }
 
     private void MinimizeToTray_Click(object sender, RoutedEventArgs e)
     {
         if (!_trayService.HasActiveTunnel)
         {
-            ShowMainStatusInfo("Minimizar para bandeja disponivel somente com tunel SSH ativo.");
+            ShowMainStatusInfo("Minimizar para bandeja disponível somente com túnel SSH ativo.");
             return;
         }
 
@@ -233,7 +249,7 @@ public partial class MainWindow : Window
         if (!_trayService.HasActiveTunnel)
         {
             MaterialDesignThemes.Wpf.DialogHost.Close("RootDialog");
-            ShowMainStatusInfo("Minimizar para bandeja disponivel somente com tunel SSH ativo.");
+            ShowMainStatusInfo("Minimizar para bandeja disponível somente com túnel SSH ativo.");
             return;
         }
 
@@ -244,19 +260,146 @@ public partial class MainWindow : Window
 
     private void MaximizeRestoreButton_Click(object sender, RoutedEventArgs e)
     {
-        ToggleMaximizeRestore();
+        // MainWindow fixa em tela cheia por regra de UX.
     }
 
     private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.ClickCount == 2 && e.ChangedButton == MouseButton.Left)
+        if (e.ChangedButton != MouseButton.Left)
         {
-            ToggleMaximizeRestore();
             return;
         }
 
-        if (e.ChangedButton == MouseButton.Left)
-            this.DragMove();
+        try
+        {
+            DragMove();
+        }
+        catch
+        {
+            // Ignora interrupcao de drag.
+        }
+        ApplyMainWindowWorkingArea();
+        CenterOwnedWindowsOnMain();
+    }
+
+    private void MainWindow_LocationChanged(object? sender, EventArgs e)
+    {
+        if (_isSyncingOwnedWindows || OwnedWindows.Count == 0)
+        {
+            _lastMainLeft = Left;
+            _lastMainTop = Top;
+            _hasTrackedMainLocation = true;
+            return;
+        }
+
+        if (!_hasTrackedMainLocation)
+        {
+            _lastMainLeft = Left;
+            _lastMainTop = Top;
+            _hasTrackedMainLocation = true;
+            return;
+        }
+
+        var deltaX = Left - _lastMainLeft;
+        var deltaY = Top - _lastMainTop;
+
+        if (Math.Abs(deltaX) < 0.01 && Math.Abs(deltaY) < 0.01)
+        {
+            return;
+        }
+
+        _isSyncingOwnedWindows = true;
+        try
+        {
+            foreach (Window owned in OwnedWindows)
+            {
+                if (!owned.IsVisible)
+                {
+                    continue;
+                }
+
+                owned.Left += deltaX;
+                owned.Top += deltaY;
+            }
+        }
+        finally
+        {
+            _isSyncingOwnedWindows = false;
+            _lastMainLeft = Left;
+            _lastMainTop = Top;
+        }
+    }
+
+    private void ApplyMainWindowWorkingArea()
+    {
+        var workingArea = GetCurrentWorkingArea();
+
+        _isSyncingOwnedWindows = true;
+        try
+        {
+            WindowState = WindowState.Normal;
+            if (MinWidth > workingArea.Width)
+            {
+                MinWidth = workingArea.Width;
+            }
+
+            if (MinHeight > workingArea.Height)
+            {
+                MinHeight = workingArea.Height;
+            }
+
+            Left = workingArea.Left;
+            Top = workingArea.Top;
+            Width = workingArea.Width;
+            Height = workingArea.Height;
+            MaxWidth = workingArea.Width;
+            MaxHeight = workingArea.Height;
+        }
+        finally
+        {
+            _isSyncingOwnedWindows = false;
+            _lastMainLeft = Left;
+            _lastMainTop = Top;
+            _hasTrackedMainLocation = true;
+        }
+    }
+
+    private Rect GetCurrentWorkingArea()
+    {
+        var centerPoint = new System.Drawing.Point(
+            (int)Math.Round(Left + (Width / 2)),
+            (int)Math.Round(Top + (Height / 2)));
+
+        var screen = System.Windows.Forms.Screen.FromPoint(centerPoint);
+        var area = screen.WorkingArea;
+        return new Rect(area.Left, area.Top, area.Width, area.Height);
+    }
+
+    private void CenterOwnedWindowsOnMain()
+    {
+        if (OwnedWindows.Count == 0)
+        {
+            return;
+        }
+
+        _isSyncingOwnedWindows = true;
+        try
+        {
+            foreach (Window owned in OwnedWindows)
+            {
+                if (!owned.IsVisible)
+                {
+                    continue;
+                }
+
+                owned.Left = Left + ((ActualWidth - owned.ActualWidth) / 2);
+                owned.Top = Top + ((ActualHeight - owned.ActualHeight) / 2);
+            }
+        }
+        finally
+        {
+            _isSyncingOwnedWindows = false;
+        }
     }
 
     private void DialogNoButton_Click(object sender, RoutedEventArgs e)
@@ -286,7 +429,7 @@ public partial class MainWindow : Window
         var details = new List<string>();
         if (_jobManager.RunningJobsCount > 0)
         {
-            details.Add($"- Jobs em execucao: {_jobManager.RunningJobsCount}");
+            details.Add($"- Jobs em execução: {_jobManager.RunningJobsCount}");
         }
 
         if (_trayService.HasActiveTunnel)
@@ -296,7 +439,7 @@ public partial class MainWindow : Window
 
         if (details.Count == 0)
         {
-            return "Nenhuma operacao ativa detectada. Escolha uma opcao.";
+            return "Nenhuma operação ativa detectada. Escolha uma opção.";
         }
 
         return "Operacoes ativas detectadas:\n"
@@ -306,9 +449,7 @@ public partial class MainWindow : Window
 
     private void ToggleMaximizeRestore()
     {
-        WindowState = WindowState == WindowState.Maximized
-            ? WindowState.Normal
-            : WindowState.Maximized;
+        ApplyMainWindowWorkingArea();
     }
 
     private void UpdateMaximizeRestoreButton()
@@ -409,7 +550,7 @@ public partial class MainWindow : Window
     {
         if (StorageBackendCombo.SelectedItem == null)
         {
-            ShowRequiredFieldsWarning("Os campos abaixo nao podem ficar em branco:\n- Backend de Armazenamento");
+            ShowRequiredFieldsWarning("Os campos abaixo não podem ficar em branco:\n- Backend de Armazenamento");
             return;
         }
 
@@ -426,16 +567,16 @@ public partial class MainWindow : Window
             if (string.Equals(selectedBackend, currentBackend, StringComparison.OrdinalIgnoreCase))
             {
                 UiMessageService.ShowInfo("Backend mantido com sucesso.", "Sucesso");
-                ShowMainStatusInfo("Configuracao salva com sucesso.");
+                ShowMainStatusInfo("Configuração salva com sucesso.");
                 return;
             }
 
-            UiMessageService.ShowInfo("Backend salvo. Reinicie o DevTools para aplicar a troca entre JSON e SQLite.", "Reinicio necessario");
+            UiMessageService.ShowInfo("Backend salvo. Reinicie o DevTools para aplicar a troca entre JSON e SQLite.", "Reinício necessário");
             ShowMainStatusInfo("Backend salvo. Reinicie o DevTools para aplicar a troca.");
         }
         catch (Exception ex)
         {
-            UiMessageService.ShowError("Nao foi possivel salvar o backend de armazenamento.", "Erro ao salvar", ex);
+            UiMessageService.ShowError("Não foi possível salvar o backend de armazenamento.", "Erro ao salvar", ex);
         }
     }
 
@@ -511,7 +652,7 @@ public partial class MainWindow : Window
 
         if (string.IsNullOrWhiteSpace(ToolProfileNameInput.Text))
         {
-            ShowRequiredFieldsWarning("Os campos abaixo nao podem ficar em branco:\n- Nome do Perfil");
+            ShowRequiredFieldsWarning("Os campos abaixo não podem ficar em branco:\n- Nome do Perfil");
             return;
         }
 
@@ -702,8 +843,8 @@ public partial class MainWindow : Window
             _currentHarvestConfig.Weights.DeadCodePenalty = deadCode;
 
             _configService.SaveSection("Harvest", _currentHarvestConfig);
-            UiMessageService.ShowInfo("Configuracao do Harvest salva com sucesso!", "Sucesso");
-            ShowMainStatusInfo("Configuracao do Harvest salva com sucesso.");
+            UiMessageService.ShowInfo("Configuração do Harvest salva com sucesso!", "Sucesso");
+            ShowMainStatusInfo("Configuração do Harvest salva com sucesso.");
         }
         catch (Exception ex)
         {
@@ -981,7 +1122,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            UiMessageService.ShowError("Erro ao salvar configuracoes de Notas.", "Erro ao salvar", ex);
+            UiMessageService.ShowError("Erro ao salvar configurações de Notas.", "Erro ao salvar", ex);
         }
     }
 
@@ -1067,7 +1208,7 @@ public partial class MainWindow : Window
             return true;
         }
 
-        message = "Os campos abaixo nao podem ficar em branco:\n- " + string.Join("\n- ", missing);
+        message = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
         return false;
     }
 
@@ -1113,7 +1254,7 @@ public partial class MainWindow : Window
             return true;
         }
 
-        message = "Os campos abaixo nao podem ficar em branco:\n- " + string.Join("\n- ", missing);
+        message = "Os campos abaixo não podem ficar em branco:\n- " + string.Join("\n- ", missing);
         return false;
     }
 
