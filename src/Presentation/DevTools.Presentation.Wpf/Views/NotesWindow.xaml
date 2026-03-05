@@ -44,6 +44,7 @@
         <Grid Margin="16">
             <Grid.RowDefinitions>
                 <RowDefinition Height="48"/> <!-- Header -->
+                <RowDefinition Height="Auto"/> <!-- Storage hint -->
                 <RowDefinition Height="*"/>    <!-- Content -->
             </Grid.RowDefinitions>
 
@@ -64,8 +65,18 @@
                            IsHitTestVisible="False"/>
             </Border>
 
+            <Border Grid.Row="1"
+                    Margin="2,8,2,0"
+                    Background="Transparent">
+                <TextBlock x:Name="NotesStoragePathHint"
+                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                           FontSize="{DynamicResource DevToolsFontSize.Status}"
+                           TextTrimming="CharacterEllipsis"
+                           ToolTipService.ShowDuration="60000"/>
+            </Border>
+
             <!-- List View -->
-            <Grid x:Name="ListGrid" Grid.Row="1" Visibility="Visible">
+            <Grid x:Name="ListGrid" Grid.Row="2" Visibility="Visible">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
@@ -122,6 +133,9 @@
                         <Button x:Name="AddButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Nova Nota" Click="AddButton_Click">
                             <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                         </Button>
+                        <Button x:Name="DeleteListButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Excluir Nota Selecionada" Click="DeleteListButton_Click" Margin="10,0,0,0">
+                            <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
+                        </Button>
                         <Button x:Name="ExportButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Exportar Backup (ZIP)" Click="ExportButton_Click" Margin="10,0">
                             <TextBlock Text="&#xE78C;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                         </Button>
@@ -141,7 +155,7 @@
             </Grid>
 
             <!-- Edit View -->
-            <Grid x:Name="EditGrid" Grid.Row="1" Visibility="Collapsed">
+            <Grid x:Name="EditGrid" Grid.Row="2" Visibility="Collapsed">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -149,13 +163,28 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0" Margin="0,12,0,10">
-                    <TextBox x:Name="NoteTitle"
-                             Style="{StaticResource DevToolsTextInput}"
-                             Height="Auto"
-                             FontSize="18"
-                             FontFamily="Segoe UI"
-                             FontWeight="SemiBold"
-                             Padding="12,10"/>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="NoteTitle"
+                                 Grid.Column="0"
+                                 Style="{StaticResource DevToolsTextInput}"
+                                 Height="Auto"
+                                 FontSize="18"
+                                 FontFamily="Segoe UI"
+                                 FontWeight="SemiBold"
+                                 Padding="12,10"/>
+                        <ComboBox x:Name="NoteFormatCombo"
+                                  Grid.Column="2"
+                                  Style="{StaticResource DevToolsSelectInput}"
+                                  ToolTip="Formato da nota (.txt ou .md)">
+                            <ComboBoxItem Content=".txt"/>
+                            <ComboBoxItem Content=".md"/>
+                        </ComboBox>
+                    </Grid>
                     <TextBlock x:Name="EditValidationText"
                                Margin="2,6,2,0"
                                Foreground="{DynamicResource ErrorBrush}"
@@ -185,6 +214,9 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button x:Name="BackButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Voltar" Click="BackButton_Click" Margin="0,0,10,0">
                             <TextBlock Text="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
+                        </Button>
+                        <Button x:Name="DeleteEditButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Excluir Esta Nota" Click="DeleteEditButton_Click" Margin="0,0,10,0">
+                            <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
                         </Button>
                         <Button x:Name="SaveButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Salvar (Ctrl+S)" Click="SaveButton_Click">
                             <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>

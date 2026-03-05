@@ -49,7 +49,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Docs\Guia_Configuracao_Backup_Google_Drive.pdf">
+    <None Update="docs\Guia_Configuracao_Backup_Google_Drive.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="docs\Guia_Configuracao_Ngrok.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

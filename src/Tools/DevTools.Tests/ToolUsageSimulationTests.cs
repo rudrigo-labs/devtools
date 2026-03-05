@@ -330,7 +330,7 @@ public class ToolUsageSimulationTests
         Invoke(logs, "Clear_Click", logs, new RoutedEventArgs());
         logs.Close();
 
-        var ngrok = new NgrokWindow(jobManager, settings);
+        var ngrok = new NgrokWindow(settings);
         ngrok.Show();
         PumpDispatcher(4);
         Invoke(ngrok, "RefreshButton_Click", ngrok, new RoutedEventArgs());

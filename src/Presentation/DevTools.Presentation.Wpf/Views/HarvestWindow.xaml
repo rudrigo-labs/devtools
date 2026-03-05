@@ -6,8 +6,10 @@
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Coletor de Arquivos (Harvest)"
-        Height="720"
-        Width="900"
+        Height="670"
+        Width="1080"
+        MinWidth="980"
+        MinHeight="600"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
@@ -16,19 +18,13 @@
                          Title="Coletor de Arquivos"
                          HelpText="Copia arquivos filtrados por regras para pasta de saida."
                          PrimaryButtonContent="Executar"
-                         SecondaryButtonContent="Cancelar"
+                         SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="Run_Click"
                          SecondaryButtonClick="Cancel_Click"
                          CloseButtonClick="Cancel_Click">
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <TextBlock Text="Configuracao"
-                           FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource AccentBrush}"
-                           Margin="0,0,0,16"/>
-
+            <StackPanel Margin="0,12,0,0">
                 <c:PathSelector x:Name="SourcePathSelector"
                                 Title="Diretorio de Origem (Projeto)"
                                 IsFolderPicker="True"
@@ -83,3 +79,4 @@
         </ScrollViewer>
     </c:DevToolsToolFrame>
 </Window>
+

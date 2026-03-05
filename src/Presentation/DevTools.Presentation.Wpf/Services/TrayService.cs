@@ -395,7 +395,6 @@ public class TrayService : IDisposable
             Title = "Ngrok",
             LaunchMode = ToolLaunchMode.DetachedWindow,
             Factory = services => new NgrokWindow(
-                services.GetRequiredService<JobManager>(),
                 services.GetRequiredService<SettingsService>()),
             Category = ToolCategory.Infrastructure,
             Order = 130,

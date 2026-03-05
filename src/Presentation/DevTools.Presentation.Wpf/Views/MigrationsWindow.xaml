@@ -6,8 +6,10 @@
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="EF Core Migrations"
-        Height="720"
-        Width="900"
+        Height="670"
+        Width="1080"
+        MinWidth="980"
+        MinHeight="600"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
@@ -16,28 +18,30 @@
                          Title="EF Core Migrations"
                          HelpText="Cria ou aplica migrations para contextos EF Core."
                          PrimaryButtonContent="Executar"
-                         SecondaryButtonContent="Cancelar"
+                         SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="Execute_Click"
                          SecondaryButtonClick="Close_Click"
                          CloseButtonClick="Close_Click">
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
-            <StackPanel>
-                <TextBlock Text="Configuracao"
-                           FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource AccentBrush}"
-                           Margin="0,0,0,16"/>
+            <StackPanel Margin="0,12,0,0">
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <c:PathSelector x:Name="ProjectSelector"
-                                Title="Pasta Raiz do Projeto (onde esta o .csproj)"
-                                IsFolderPicker="True"
-                                Margin="0,0,0,16"/>
+                    <c:PathSelector x:Name="ProjectSelector"
+                                    Grid.Column="0"
+                                    Title="Pasta Raiz do Projeto (onde esta o .csproj)"
+                                    IsFolderPicker="True"/>
 
-                <c:PathSelector x:Name="StartupSelector"
-                                Title="Startup Project (API/Web)"
-                                IsFolderPicker="True"
-                                Margin="0,0,0,16"/>
+                    <c:PathSelector x:Name="StartupSelector"
+                                    Grid.Column="2"
+                                    Title="Startup Project (API/Web)"
+                                    IsFolderPicker="True"/>
+                </Grid>
 
                 <Grid Margin="0,0,0,16">
                     <Grid.ColumnDefinitions>
@@ -70,17 +74,25 @@
                     </StackPanel>
                 </Grid>
 
-                <StackPanel x:Name="MigrationNamePanel" Margin="0,0,0,16">
-                    <TextBlock Text="Nome da Migration" Style="{StaticResource DevToolsInputLabel}"/>
-                    <TextBox x:Name="MigrationNameInput" Style="{StaticResource DevToolsTextInput}"/>
-                </StackPanel>
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <StackPanel Margin="0,0,0,16">
-                    <TextBlock Text="DbContext Full Name" Style="{StaticResource DevToolsInputLabel}"/>
-                    <TextBox x:Name="DbContextInput"
-                             ToolTip="Ex: MyProject.Data.AppDbContext"
-                             Style="{StaticResource DevToolsTextInput}"/>
-                </StackPanel>
+                    <StackPanel x:Name="MigrationNamePanel" Grid.Column="0">
+                        <TextBlock Text="Nome da Migration" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="MigrationNameInput" Style="{StaticResource DevToolsTextInput}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="DbContext Full Name" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="DbContextInput"
+                                 ToolTip="Ex: MyProject.Data.AppDbContext"
+                                 Style="{StaticResource DevToolsTextInput}"/>
+                    </StackPanel>
+                </Grid>
 
                 <CheckBox x:Name="DryRunCheck"
                           Content="Dry Run (gerar comando sem executar)"
@@ -89,7 +101,7 @@
 
                 <Expander IsExpanded="True">
                     <Expander.Header>
-                        <TextBlock Text="Log de Saida" Foreground="{StaticResource SecondaryTextBrush}"/>
+                        <TextBlock Text="Log de Saida" Style="{StaticResource DevToolsCardTitle}"/>
                     </Expander.Header>
                     <TextBox x:Name="OutputText"
                              Height="120"
@@ -104,3 +116,4 @@
         </ScrollViewer>
     </c:DevToolsToolFrame>
 </Window>
+

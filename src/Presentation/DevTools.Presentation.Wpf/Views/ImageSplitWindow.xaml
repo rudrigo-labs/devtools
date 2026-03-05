@@ -6,8 +6,10 @@
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Dividir Imagens"
-        Height="640"
-        Width="900"
+        Height="670"
+        Width="1080"
+        MinWidth="980"
+        MinHeight="600"
         WindowStartupLocation="CenterOwner"
         Style="{StaticResource ModernWindowStyle}"
         ShowInTaskbar="False"
@@ -17,18 +19,12 @@
                          Title="Dividir Imagens"
                          HelpText="Divide imagens em grade configuravel."
                          PrimaryButtonContent="Processar"
-                         SecondaryButtonContent="Cancelar"
+                         SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="ProcessButton_Click"
                          SecondaryButtonClick="CloseButton_Click"
                          CloseButtonClick="CloseButton_Click">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <TextBlock Text="Configuracao"
-                           FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource AccentBrush}"
-                           Margin="0,0,0,16"/>
-
+            <StackPanel Margin="0,12,0,0">
                 <c:PathSelector x:Name="InputPathSelector"
                                 Title="Imagem de Entrada"
                                 IsFolderPicker="False"
@@ -78,3 +74,4 @@
         </ScrollViewer>
     </c:DevToolsToolFrame>
 </Window>
+

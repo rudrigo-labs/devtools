@@ -3,8 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         Title="Converter para UTF-8"
-        Height="500"
-        Width="800"
+        Height="670"
+        Width="1080"
+        MinWidth="980"
+        MinHeight="600"
         WindowStartupLocation="CenterOwner"
         Style="{StaticResource ModernWindowStyle}"
         ShowInTaskbar="False"
@@ -14,18 +16,12 @@
                          Title="Converter para UTF-8"
                          HelpText="Converte arquivos para UTF-8 preservando conteudo."
                          PrimaryButtonContent="Converter"
-                         SecondaryButtonContent="Cancelar"
+                         SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="ProcessButton_Click"
                          SecondaryButtonClick="CloseButton_Click"
                          CloseButtonClick="CloseButton_Click">
-        <StackPanel>
-            <TextBlock Text="Configuracao"
-                       FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
-                       FontWeight="SemiBold"
-                       Foreground="{DynamicResource AccentBrush}"
-                       Margin="0,0,0,16"/>
-
-            <c:PathSelector x:Name="RootPathSelector"
+        <StackPanel Margin="0,12,0,0">
+                <c:PathSelector x:Name="RootPathSelector"
                             Title="Pasta Raiz"
                             IsFolderPicker="True"
                             Margin="0,0,0,16"/>
@@ -50,3 +46,4 @@
         </StackPanel>
     </c:DevToolsToolFrame>
 </Window>
+

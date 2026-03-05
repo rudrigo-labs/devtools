@@ -6,8 +6,10 @@
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Buscar Texto em Arquivos"
-        Height="640"
-        Width="900"
+        Height="670"
+        Width="1080"
+        MinWidth="980"
+        MinHeight="600"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
@@ -16,19 +18,13 @@
                          Title="Buscar Texto em Arquivos"
                          HelpText="Busca rapida com regex opcional e filtros."
                          PrimaryButtonContent="Executar"
-                         SecondaryButtonContent="Cancelar"
+                         SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="Execute_Click"
                          SecondaryButtonClick="Close_Click"
                          CloseButtonClick="Close_Click">
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
-            <StackPanel>
-                <TextBlock Text="Configuracao"
-                           FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource AccentBrush}"
-                           Margin="0,0,0,16"/>
-
+            <StackPanel Margin="0,12,0,0">
                 <c:PathSelector x:Name="PathSelector"
                                 Title="Diretorio de Busca"
                                 IsFolderPicker="True"
@@ -72,9 +68,12 @@
                     </StackPanel>
                 </Grid>
 
-                <Expander Header="Resultados" IsExpanded="True">
+                <Expander IsExpanded="True" Margin="0,6,0,0">
+                    <Expander.Header>
+                        <TextBlock Text="Resultados" Style="{StaticResource DevToolsCardTitle}" Margin="0,0,0,0"/>
+                    </Expander.Header>
                     <TextBox x:Name="OutputText"
-                             Height="140"
+                             Height="120"
                              TextWrapping="Wrap"
                              IsReadOnly="True"
                              FontFamily="Consolas"

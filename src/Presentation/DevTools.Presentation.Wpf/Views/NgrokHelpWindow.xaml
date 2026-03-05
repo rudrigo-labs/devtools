@@ -1,0 +1,67 @@
+<Window x:Class="DevTools.Presentation.Wpf.Views.NgrokHelpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Ajuda do Ngrok"
+        Height="680"
+        Width="860"
+        MinHeight="560"
+        MinWidth="680"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Style="{StaticResource ModernWindowStyle}">
+    <c:DevToolsToolFrame Title="Como configurar o Ngrok"
+                         HelpText="Use os atalhos abaixo para concluir o onboarding."
+                         PrimaryButtonContent="Fechar"
+                         SecondaryButtonContent="Baixar guia em PDF"
+                         PrimaryButtonClick="CloseButton_Click"
+                         SecondaryButtonClick="DownloadPdfButton_Click"
+                         CloseButtonClick="CloseButton_Click">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0"
+                    Background="{DynamicResource DevToolsSurface}"
+                    BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="12"
+                    Margin="0,0,0,16">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="CloudQuestion"
+                                             Foreground="{DynamicResource DevToolsAccent}"
+                                             Width="18"
+                                             Height="18"
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,8,0"/>
+                    <TextBlock Text="Precisa copiar o token agora?"
+                               Foreground="{DynamicResource DevToolsTextSecondary}"
+                               FontSize="{DynamicResource DevToolsFontSize.Status}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+                    <Button Content="Abrir pagina do token"
+                            Click="OpenTokenPage_Click"
+                            Style="{DynamicResource DevToolsSecondaryButton}"/>
+                </StackPanel>
+            </Border>
+
+            <RichTextBox x:Name="HelpContentViewer"
+                         Grid.Row="1"
+                         Padding="8,2"
+                         Background="Transparent"
+                         Foreground="{DynamicResource DevToolsTextPrimary}"
+                         BorderThickness="0"
+                         IsReadOnly="True"
+                         IsDocumentEnabled="True"
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Disabled"/>
+        </Grid>
+    </c:DevToolsToolFrame>
+</Window>
