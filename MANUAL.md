@@ -1,297 +1,310 @@
-# Manual Oficial do DevTools
+# Manual do Usuario - DevTools (Detalhado)
 
-Este manual descreve o uso completo do DevTools na versao atual baseada em WPF.
+Data de referencia: 2026-03-05
 
-## 1. Objetivo do sistema
+## 1. O que e o DevTools
 
-O DevTools e uma suite para acelerar tarefas tecnicas do dia a dia:
+DevTools e uma aplicacao desktop para centralizar tarefas tecnicas de rotina:
 
-- processamento de arquivos e texto
-- suporte a manutencao de codigo
-- operacoes de infra (tunel SSH, ngrok, migrations)
-- gestao de notas locais com backup
+- manipulacao de arquivos
+- automacao de busca e renomeacao
+- suporte de infraestrutura (SSH e Ngrok)
+- apoio a migrations
+- gestao de notas locais com backup/sync opcional
 
-## 2. Como iniciar
+## 2. Como abrir a aplicacao
 
-### 2.1 Execucao em desenvolvimento
+Em desenvolvimento:
 
 ```powershell
 dotnet run --project src/Presentation/DevTools.Presentation.Wpf/DevTools.Presentation.Wpf.csproj
 ```
 
-### 2.2 Comportamento na bandeja (tray)
+## 3. Estrutura da interface
 
-- O icone da bandeja e inicializado quando voce usa "Minimizar para Bandeja" ou ao abrir o SSH Tunnel
-- Duplo clique no icone (quando ativo): abre o shell principal
-- Menu de contexto (quando ativo): abre ferramentas diretamente
-- Fechar o shell: oferece minimizar para bandeja ou encerrar
-
-## 3. Shell principal (IDE-style)
-
-O shell possui tres areas principais:
+A janela principal possui tres abas:
 
 1. Ferramentas
 2. Execucoes (Jobs)
 3. Configuracoes
 
-### 3.1 Ferramentas
+## 3.1 Ferramentas
 
-Abre as janelas de cada modulo funcional.
+Mostra os cards para abrir cada ferramenta.
 
-### 3.2 Jobs
+## 3.2 Execucoes (Jobs)
 
-Mostra tarefas em execucao/concluidas, com status e logs.
+Mostra tarefas em execucao/finalizadas, status e logs resumidos.
 
-### 3.3 Configuracoes
+## 3.3 Configuracoes
 
 Centraliza configuracoes globais e perfis por ferramenta.
 
-## 4. Ferramentas e uso
+## 4. Fluxo recomendado de uso
 
-## 4.1 Notes
+1. Abra `Configuracoes` e ajuste caminhos/defaults.
+2. Configure perfis das ferramentas que voce mais usa.
+3. Execute ferramentas pela aba `Ferramentas`.
+4. Monitore execucao na aba `Jobs`.
 
-Funcao:
+## 5. Ferramentas (passo a passo)
 
-- criar, editar e listar notas
-- salvar em `.txt` ou `.md`
-- exportar/importar backup ZIP
-- sincronizacao opcional com Google Drive
+## 5.1 Notes
 
-Fluxo de salvamento:
+Objetivo:
 
-1. salva localmente
-2. se sincronizacao estiver habilitada, envia para nuvem
+- criar/editar notas locais em `.txt` ou `.md`
 
-## 4.2 Organizer
+Fluxo:
 
-Funcao:
+1. Clique em `Nova Nota`.
+2. Preencha titulo e conteudo.
+3. Clique em `Salvar`.
+4. A nota sera salva localmente.
 
-- organizar arquivos em categorias
-- aplicar regras por extensao/palavras-chave
+Google Drive (opcional):
 
-Uso basico:
+- se habilitado em configuracoes, apos salvar localmente pode sincronizar.
 
-1. definir pasta de entrada
-2. definir pasta de saida
-3. executar
+Backup:
 
-## 4.3 Harvest
+- exporta/importa ZIP de notas.
 
-Funcao:
+## 5.2 Organizer
 
-- coletar arquivos de projeto para pasta consolidada
+Objetivo:
 
-Uso basico:
+- organizar arquivos por categoria/regras.
 
-1. selecionar origem
-2. selecionar destino
-3. ajustar score/filtros
-4. executar
+Fluxo:
 
-## 4.4 SearchText
+1. Selecione pasta de entrada.
+2. Selecione pasta de saida.
+3. Ajuste simulacao/regras.
+4. Execute.
 
-Funcao:
+## 5.3 Harvest
 
-- localizar texto em massa em arquivos
+Objetivo:
 
-Uso basico:
+- coletar arquivos conforme filtros e score.
 
-1. informar raiz
-2. informar termo ou padrao
-3. executar busca
+Fluxo:
 
-## 4.5 Rename
+1. Defina origem e destino.
+2. Ajuste score minimo e filtros.
+3. Execute.
 
-Funcao:
+## 5.4 SearchText
 
-- renomeacao/refatoracao em lote
+Objetivo:
 
-Uso basico:
+- buscar texto em lote.
 
-1. definir raiz
-2. informar texto antigo/novo
-3. configurar filtros e dry-run
-4. executar
+Fluxo:
 
-## 4.6 Snapshot
+1. Defina pasta raiz.
+2. Informe padrao de busca.
+3. Ajuste include/exclude (opcional).
+4. Execute e revise resultado.
 
-Funcao:
+## 5.5 Rename
 
-- gerar snapshot estrutural de projeto
+Objetivo:
 
-Uso basico:
+- renomeacao/refatoracao em lote.
 
-1. selecionar raiz
-2. selecionar formatos
-3. executar
+Fluxo:
 
-## 4.7 Utf8Convert
+1. Defina pasta raiz.
+2. Informe texto antigo e novo.
+3. Ajuste include/exclude e dry-run.
+4. Execute.
 
-Funcao:
+## 5.6 Snapshot
 
-- converter arquivos para UTF-8 em lote
+Objetivo:
 
-Uso basico:
+- gerar snapshot estrutural de projeto.
 
-1. selecionar raiz
-2. executar conversao
+Fluxo:
 
-## 4.8 Image Splitter
+1. Selecione pasta do projeto.
+2. Escolha formatos de saida.
+3. Gere snapshot.
 
-Funcao:
+## 5.7 Utf8Convert
 
-- dividir imagem em partes menores
+Objetivo:
 
-Uso basico:
+- converter arquivos para UTF-8.
 
-1. selecionar imagem de entrada
-2. selecionar pasta de saida
-3. ajustar parametros
-4. executar
+Fluxo:
 
-## 4.9 Migrations
+1. Selecione pasta raiz.
+2. Execute conversao.
 
-Funcao:
+## 5.8 Image Splitter
 
-- executar comandos de migration com apoio visual
+Objetivo:
 
-Uso basico:
+- dividir imagem em partes menores.
 
-1. selecionar projeto
-2. selecionar startup project
-3. informar DbContext
-4. escolher acao
-5. executar
+Fluxo:
 
-## 4.10 SSH Tunnel
+1. Selecione imagem de entrada.
+2. Selecione pasta de saida.
+3. Ajuste parametros.
+4. Execute.
 
-Funcao:
+## 5.9 Migrations
 
-- abrir tunel SSH com perfil
+Objetivo:
 
-Uso basico:
+- facilitar comandos de migration EF Core.
 
-1. preencher host/usuario/chave/portas
-2. iniciar tunel
-3. encerrar quando finalizar uso
+Fluxo:
 
-## 4.11 Ngrok
+1. Defina root do projeto.
+2. Defina startup project.
+3. Informe DbContext.
+4. Escolha acao.
+5. Execute.
 
-Funcao:
+## 5.10 SSH Tunnel
 
-- iniciar e acompanhar tunel ngrok
+Objetivo:
 
-Uso basico:
+- abrir tunel SSH local/remoto.
 
-1. configurar executavel/token
-2. iniciar tunel
-3. acompanhar URL publica
+Fluxo:
 
-## 4.12 Logs
+1. Informe host, porta, usuario e chave.
+2. Informe mapeamento local/remoto.
+3. Clique em conectar.
+4. Ao terminar, clique em fechar tunel.
 
-Funcao:
+## 5.11 Ngrok
 
-- visualizar e limpar logs de aplicacao
+Objetivo:
 
-## 5. Configuracoes
+- expor porta local com tunel publico.
 
-## 5.1 Perfis por ferramenta
+Primeiro uso:
 
-Permite salvar configuracoes recorrentes por ferramenta.
+1. Se nao configurado, use onboarding.
+2. Clique para criar conta no ngrok (se necessario).
+3. Cole `Authtoken` e salve.
 
-## 5.2 Configuracoes de Notes e Nuvem
+Uso diario:
 
-- pasta local das notas
-- formato padrao (`.txt`/`.md`)
-- auto sync
-- credenciais Google Drive via UI
-- teste de conexao
+1. Informe porta local.
+2. Inicie tunel.
+3. Copie URL publica.
+4. Pare tunel quando terminar.
 
-## 5.3 Outras configuracoes
+Importante:
 
-- Armazenamento (backend de configuracoes): JSON ou SQLite
+- para teste real, `ngrok.exe` precisa estar instalado e acessivel.
+
+## 5.12 Logs
+
+- visualizar logs
+- limpar logs quando necessario
+
+## 6. Configuracoes (detalhamento pratico)
+
+Painel `Configuracoes Gerais`:
+
+- Armazenamento
 - Harvest
 - Organizer
 - Migrations
 - Ngrok
+- Notes e Nuvem
 
-## 5.4 Regras de validacao
+Painel `Perfis de Ferramentas`:
 
-- Campos obrigatorios nao podem ser salvos em branco.
-- Validacoes de formulario exibem aviso inline no proprio painel.
-- Mensagens dialogadas do sistema usam o padrao visual do `UiMessageService`.
-- No painel de Google Drive, o botao "Testar conexao" valida campos antes de executar.
+- Rename
+- Migrations
+- Harvest
+- SearchText
+- Snapshot
+- SSHTunnel
 
-## 6. Persistencia
+Regras:
 
-Modo padrao:
+- campos obrigatorios nao podem ficar vazios
+- botoes de salvar aplicam validacao antes de persistir
 
-- JSON para configuracoes
+## 7. Notas + Google Drive (regra oficial)
 
-Modo opcional:
+Regra:
 
-- SQLite, selecionavel na UI em Configuracoes > Configuracoes Gerais > Armazenamento
+1. sempre salva localmente primeiro
+2. nuvem e opcional
 
-Opcao avancada (manual):
+Ou seja:
 
-- SQLite via variavel de ambiente:
+- sem Google Drive configurado, continua funcionando normal
+- com Google Drive ativo, envia apos salvar local
 
-```powershell
-$env:DEVTOOLS_STORAGE_BACKEND="sqlite"
-```
+## 8. Persistencia
 
-## 7. Build, testes e release
+- backend de configuracao: JSON (padrao) ou SQLite (opcional)
+- notas: sempre arquivo fisico local
 
-## 7.1 Build local
+Detalhes completos:
+
+- `docs/CONFIGURACOES_E_PERFIS_DETALHADO.md`
+
+## 9. Build/Testes/Instalador
+
+Build:
 
 ```powershell
 dotnet build src/DevTools.slnx -c Debug
 ```
 
-## 7.2 Testes
+Testes:
 
 ```powershell
-dotnet test src/Tools/DevTools.Tests/DevTools.Tests.csproj -c Debug
+dotnet test src/Tools/DevTools.Tests/DevTools.Tests.csproj -v minimal
 ```
 
-## 7.3 Gerar instalador
+Instalador:
 
 ```powershell
 build\build_installer.bat 1.0.0
 ```
 
-Saida esperada:
+## 10. Solucao rapida de problemas
 
-- `build/out/installer/DevTools_Setup.exe`
+### 10.1 Campo obrigatorio bloqueando salvar
 
-## 8. Troubleshooting rapido
+- revise mensagem inline e preencha os campos listados.
 
-## 8.1 Janela travando ao testar conexao
+### 10.2 Ngrok nao inicia
 
-- validar se campos de credencial estao preenchidos
-- revisar mensagem de validacao no painel de Notes e Nuvem
+- confirme instalacao do ngrok
+- confirme token salvo
+- confirme porta valida
 
-## 8.2 Erro de inicializacao WPF por recurso de tema
+### 10.3 Google Drive nao conecta
 
-- validar dicionarios de tema carregados
-- rodar build limpo e reabrir
+- revise `ClientId`, `ClientSecret`, `ProjectId`, `FolderName`
+- use `Testar Conexao`
 
-## 8.3 Problemas de permissao de pasta
+### 10.4 Caminhos nao persistem
 
-- testar execucao com pasta de trabalho local do usuario
-- evitar caminhos protegidos sem permissao
+- valide permissao em `%AppData%\DevTools`
+- valide backend selecionado (JSON/SQLite)
 
-## 9. Escopo atual
+## 11. Estado atual de validacao
 
-- Interface oficial: WPF
-- Projeto CLI: obsoleto e fora da solution/instalador
-- Notas: sempre em arquivo fisico local (`.txt` ou `.md`), com envio opcional ao Google Drive apos salvar localmente.
+- suite automatizada: 36 aprovados, 2 ignorados, 0 falhas
+- ha 2 cenarios WPF em `Skip` por thread affinity do host de testes
 
-## 10. Melhorias futuras planejadas
+Checklist manual desses cenarios:
 
-1. Finalizar a estabilizacao da infraestrutura de testes WPF para remover 2 testes atualmente ignorados.
-2. Disponibilizar assistente de migracao de persistencia JSON -> SQLite na UI.
-3. Adicionar exportacao/importacao consolidada de perfis e configuracoes.
-4. Evoluir o painel de monitoramento operacional no shell (jobs, tuneis e storage).
-
-Fim do manual.
+- `docs/TESTES_MANUAIS_PENDENTES_2026-03-05.md`

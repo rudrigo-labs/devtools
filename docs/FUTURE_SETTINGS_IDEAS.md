@@ -1,37 +1,31 @@
-# Planejamento de Evolução das Configurações (Roadmap de UX e Funcionalidades)
+# Roadmap de Evolucao de Configuracoes (Futuro)
 
-Este documento detalha as ideias e conceitos discutidos para a modernização das telas de configuração do DevTools Hub. Caso os créditos do assistente terminem, este roadmap serve como guia para as próximas implementações.
+Este arquivo lista ideias de melhoria para proximas versoes.
 
-## 1. Visão Geral: Dashboard de Configuração Ativa
-A ideia é transformar a aba de configurações de uma lista estática de campos em um painel informativo e "vivo".
+## 1. Painel de saude por ferramenta
 
-### Ideias de Status em Tempo Real (Cards Informativos):
-- **SSH**: Exibir "X perfis configurados | Último usado: [Nome]".
-- **Ngrok**: Exibir status do serviço ("Online/Offline") e a porta ativa.
-- **Harvest**: Exibir um resumo dos filtros ativos (ex: ".cs, .ts").
+- SSH: quantidade de perfis e ultimo perfil usado
+- Ngrok: status (instalado/configurado/ativo)
+- Notes: caminho ativo + status de sync
+- Storage: backend atual (JSON/SQLite)
 
-## 2. Funcionalidades Inteligentes (Smart Settings)
-Adicionar automações que facilitem o preenchimento dos campos:
+## 2. Automacoes de preenchimento
 
-- **Detecção de DbContext (Migrations)**: Um botão de "Varinha Mágica" ao lado do campo que faz um scan no projeto selecionado e preenche automaticamente o nome completo do DbContext encontrado.
-- **Localizador de Executáveis (Ngrok/SSH)**: Botão para buscar automaticamente o `ngrok.exe` ou `ssh.exe` em pastas comuns do sistema (Program Files, AppData, etc.).
-- **Sugestão de Nomes (Snapshot)**: Gerar automaticamente o nome do arquivo ZIP baseado no nome da pasta raiz e na data atual.
+- detector de DbContext no painel de Migrations
+- detector de executaveis (`ngrok.exe`, `ssh.exe`)
+- sugestao de nomes/padroes para exportacoes e snapshots
 
-## 3. Refinamento de UX (Interface do Usuário)
-Substituir controles básicos por elementos mais modernos e intuitivos:
+## 3. Melhorias de UX de formulario
 
-- **Toggle Switches**: Usar chaves de ligar/desligar em vez de CheckBoxes para opções binárias (ex: "IA Ativada", "Dry Run").
-- **Chips/Tags (Harvest)**: Para extensões de arquivo e pastas ignoradas, usar "Chips" (etiquetas) que podem ser adicionadas ou removidas com um "x", em vez de uma string separada por vírgula.
-- **Validação Visual**: Campos com erro (ex: caminho que não existe) devem ganhar uma borda vermelha suave e um ícone de aviso em tempo real.
+- chips/tags para listas de extensoes e pastas ignoradas
+- validacao inline com icone e mensagem contextual
+- padronizacao final de microcopy dos botoes (novo/salvar/remover)
 
-## 4. Seção de "Health Check"
-Um pequeno painel no topo de cada ferramenta de configuração indicando se ela está pronta para uso:
-- ✅ Projeto configurado corretamente.
-- ⚠️ Token do Ngrok não informado (opcional).
-- ❌ Chave SSH não encontrada.
+## 4. Perfil operacional
 
-## 5. Padronização Restante
-Aplicar o modelo visual utilizado no **Túnel SSH** (Cards Claros, Layout em Colunas e Floating Hints) nos painéis que ainda utilizam o visual antigo:
-- **Painel de Configurações Gerais**.
-- **Painel do Organizador (Refinar para o novo padrão)**.
-- **Painel do Ngrok (Refinar para o novo padrão)**.
+- export/import consolidado de perfis e configuracoes
+- sincronizacao opcional de perfis entre maquinas
+
+## 5. Observabilidade
+
+- painel unico de status no shell (jobs, tuneis, storage, logs)

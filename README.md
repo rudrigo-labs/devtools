@@ -1,86 +1,57 @@
 # DevTools
 
-Suite de produtividade para desenvolvedores no Windows, com shell WPF estilo IDE, roteamento de ferramentas por abas/janelas e suporte a execucao via system tray.
+Suite desktop para produtividade tecnica no dia a dia de desenvolvimento.
 
-## Status da versao
+## Estado atual
 
-- Interface oficial: WPF (`src/Presentation/DevTools.Presentation.Wpf`)
-- CLI: obsoleto (fora da solution e fora do instalador)
-- Persistencia de configuracoes: JSON (padrao) ou SQLite (opcional via UI)
-- Validacao tecnica em `2026-03-04`:
-  - `dotnet build src/DevTools.slnx -c Debug` -> sucesso
-  - `dotnet test src/Tools/DevTools.Tests/DevTools.Tests.csproj -c Debug --no-build` -> 35 aprovados, 2 ignorados
+- Interface oficial: WPF
+- CLI: obsoleto e fora da entrega oficial
+- Persistencia: JSON (padrao) ou SQLite (opcional)
+- Testes: 36 aprovados, 2 ignorados, 0 falhas
 
-## Ferramentas disponiveis
+## Ferramentas
 
-- Notes: notas locais (`.txt`/`.md`), backup ZIP e sync opcional com Google Drive
-- Organizer: organizacao de arquivos por regras/categorias
-- Harvest: coleta de arquivos para analise
-- SearchText: busca textual em lote com filtros
-- Rename: renomeacao/refatoracao em lote
-- Snapshot: snapshot estrutural de projeto
-- Utf8Convert: conversao de encoding para UTF-8
-- Image Splitter: fatiamento de imagens
-- Migrations: apoio a comandos de migracao
-- SSH Tunnel: tunel SSH com perfil
-- Ngrok: gerenciamento de tunel ngrok
-- Jobs/Logs: monitoramento de execucoes e diagnostico
+- Notes
+- Organizer
+- Harvest
+- SearchText
+- Rename
+- Snapshot
+- Utf8Convert
+- Image Splitter
+- Migrations
+- SSH Tunnel
+- Ngrok
+- Jobs / Logs
 
-## Estrutura
-
-- `src/Core`: contratos, modelos e utilitarios base
-- `src/Tools`: engines de cada ferramenta
-- `src/Presentation/DevTools.Presentation.Wpf`: shell, UI, temas, tray, configuracoes
-- `docs`: guias operacionais, tecnicos e relatorios
-
-## Requisitos
-
-- Windows 10/11
-- .NET SDK 10.0+
-- Inno Setup 6 (somente para gerar instalador)
-
-## Executar localmente
+## Executar
 
 ```powershell
 dotnet build src/DevTools.slnx -c Debug
 dotnet run --project src/Presentation/DevTools.Presentation.Wpf/DevTools.Presentation.Wpf.csproj
 ```
 
-## Testes
+## Testar
 
 ```powershell
-dotnet test src/Tools/DevTools.Tests/DevTools.Tests.csproj -c Debug
+dotnet test src/Tools/DevTools.Tests/DevTools.Tests.csproj -v minimal
 ```
 
-## Build de instalador
+## Instalador
 
 ```powershell
 build\build_installer.bat 1.0.0
 ```
 
-Saidas:
-
-- `build/out/wpf`
-- `build/out/installer/DevTools_Setup.exe`
-
-Manual incluido no instalador:
-
-- `{app}\docs\MANUAL_DEVTOOLS.md`
-
 ## Documentacao oficial
 
-- Manual do sistema: [MANUAL.md](MANUAL.md)
-- Mapa de docs: [docs/README.md](docs/README.md)
+- Manual detalhado: [MANUAL.md](MANUAL.md)
+- Configuracoes e perfis: [docs/CONFIGURACOES_E_PERFIS_DETALHADO.md](docs/CONFIGURACOES_E_PERFIS_DETALHADO.md)
+- Documento tecnico: [docs/TechnicalDoc.md](docs/TechnicalDoc.md)
 - Cobertura de testes: [docs/INTEGRATION_TEST_COVERAGE.md](docs/INTEGRATION_TEST_COVERAGE.md)
-- Relatorio de fechamento: [docs/RELATORIO_FECHAMENTO_VERSAO_2026-03-04.md](docs/RELATORIO_FECHAMENTO_VERSAO_2026-03-04.md)
-
-## Melhorias futuras (proxima versao)
-
-1. Consolidar infraestrutura de testes WPF para remover os 2 testes atualmente ignorados por afinidade de thread em `Application.Current`.
-2. Promover SQLite a backend padrao com assistente guiado de migracao JSON -> SQLite.
-3. Exportar/importar pacote unico de configuracoes e perfis.
-4. Criar painel de saude operacional no shell (jobs, SSH, ngrok, backend, storage path).
-5. Automatizar changelog e notas de release por tag.
+- Testes manuais pendentes: [docs/TESTES_MANUAIS_PENDENTES_2026-03-05.md](docs/TESTES_MANUAIS_PENDENTES_2026-03-05.md)
+- Pendencias da proxima versao: [docs/PENDENCIAS_UI_E_HUB.md](docs/PENDENCIAS_UI_E_HUB.md)
+- Apresentacao nao tecnica (curriculo/LinkedIn): [docs/APRESENTACAO_DEVTOOLS_LINKEDIN.md](docs/APRESENTACAO_DEVTOOLS_LINKEDIN.md)
 
 ## Licenca
 

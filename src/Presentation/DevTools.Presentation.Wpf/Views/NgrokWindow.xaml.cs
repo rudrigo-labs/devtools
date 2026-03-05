@@ -17,6 +17,7 @@ public partial class NgrokWindow : Window
     // Timer para auto-refresh
     private readonly System.Windows.Threading.DispatcherTimer _timer;
     private NgrokSettings _ngrokSettings = new();
+    private NgrokEnvironmentInfo _environmentInfo = new();
 
     public NgrokWindow(SettingsService settingsService)
     {
@@ -65,20 +66,23 @@ public partial class NgrokWindow : Window
 
     private void UpdateOnboardingState()
     {
+        _environmentInfo = _setupService.DetectEnvironment();
         var configured = IsNgrokConfigured();
 
         OnboardingPanel.Visibility = configured ? Visibility.Collapsed : Visibility.Visible;
         TunnelConfigPanel.Visibility = configured ? Visibility.Visible : Visibility.Collapsed;
 
         if (MainFrame.PrimaryButton != null)
-            MainFrame.PrimaryButton.IsEnabled = configured;
+            MainFrame.PrimaryButton.IsEnabled = configured && _environmentInfo.NgrokInstalled;
 
         if (MainFrame.SecondaryButton != null)
-            MainFrame.SecondaryButton.IsEnabled = configured;
+            MainFrame.SecondaryButton.IsEnabled = configured && _environmentInfo.NgrokInstalled;
 
-        MainFrame.StatusText = configured
-            ? "Pronto para iniciar tunel."
-            : "Ngrok nao configurado.";
+        MainFrame.StatusText = !_environmentInfo.NgrokInstalled
+            ? "Ngrok nao instalado ou nao encontrado no PATH."
+            : configured
+                ? "Pronto para iniciar tunel."
+                : "Ngrok nao configurado.";
     }
 
     private async Task RefreshTunnels()
@@ -155,6 +159,13 @@ public partial class NgrokWindow : Window
         var startButton = MainFrame.PrimaryButton;
         if (startButton == null)
             return;
+
+        _environmentInfo = _setupService.DetectEnvironment();
+        if (!_environmentInfo.NgrokInstalled)
+        {
+            ValidationUiService.ShowInline(MainFrame, "Ngrok nao encontrado. Instale o ngrok e/ou configure o executavel.");
+            return;
+        }
 
         if (!IsNgrokConfigured())
         {

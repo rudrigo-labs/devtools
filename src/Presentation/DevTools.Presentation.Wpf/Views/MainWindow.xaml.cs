@@ -46,6 +46,8 @@ public partial class MainWindow : Window
     private OrganizerCategory? _selectedCategory;
     private string? _currentToolForProfiles;
     private ToolProfile? _selectedToolProfile;
+    private ToolProfile? _pendingNewToolProfile;
+    private OrganizerCategory? _pendingNewOrganizerCategory;
     private readonly ProfileUIService _profileUIService;
     private bool _isTestingGoogleDriveConnection;
     private bool _allowCloseForShutdown;
@@ -609,6 +611,7 @@ public partial class MainWindow : Window
         if (string.IsNullOrEmpty(_currentToolForProfiles)) return;
 
         var profiles = _profileUIService.LoadProfiles(_currentToolForProfiles);
+        _pendingNewToolProfile = null;
         ToolProfilesList.ItemsSource = null;
         ToolProfilesList.ItemsSource = profiles;
 
@@ -620,6 +623,7 @@ public partial class MainWindow : Window
             };
 
             profiles.Add(newProfile);
+            _pendingNewToolProfile = newProfile;
             ToolProfilesList.ItemsSource = null;
             ToolProfilesList.ItemsSource = profiles;
             ToolProfilesList.SelectedItem = newProfile;
@@ -643,6 +647,7 @@ public partial class MainWindow : Window
         
         var list = (ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>();
         list.Add(newProfile);
+        _pendingNewToolProfile = newProfile;
         
         ToolProfilesList.ItemsSource = null;
         ToolProfilesList.ItemsSource = list;
@@ -693,9 +698,14 @@ public partial class MainWindow : Window
         CollectProfileOptions(ToolProfileFieldsContainer, _selectedToolProfile.Options);
 
         _profileUIService.SaveProfile(_currentToolForProfiles, _selectedToolProfile);
+        if (ReferenceEquals(_selectedToolProfile, _pendingNewToolProfile))
+        {
+            _pendingNewToolProfile = null;
+        }
         ToolProfilesList.Items.Refresh();
         UiMessageService.ShowInfo("Perfil salvo com sucesso!", "Sucesso");
         ShowMainStatusInfo("Perfil salvo com sucesso.");
+        UpdateToolProfileActionButtonsState();
     }
 
     private void CollectProfileOptions(DependencyObject container, Dictionary<string, string> options)
@@ -726,6 +736,10 @@ public partial class MainWindow : Window
 
         if (UiMessageService.Confirm($"Excluir perfil '{_selectedToolProfile.Name}'?", "Confirmar"))
         {
+            if (ReferenceEquals(_selectedToolProfile, _pendingNewToolProfile))
+            {
+                _pendingNewToolProfile = null;
+            }
             _profileUIService.DeleteProfile(_currentToolForProfiles, _selectedToolProfile.Name);
             LoadToolProfiles();
         }
@@ -902,6 +916,7 @@ public partial class MainWindow : Window
     {
         _currentOrganizerConfig = _configService.GetSection<OrganizerConfig>("Organizer");
         if (_currentOrganizerConfig.Categories == null) _currentOrganizerConfig.Categories = new();
+        _pendingNewOrganizerCategory = null;
         
         OrganizerCategoriesList.ItemsSource = null;
         OrganizerCategoriesList.ItemsSource = _currentOrganizerConfig.Categories;
@@ -912,8 +927,9 @@ public partial class MainWindow : Window
 
     private void AddOrganizerCategory_Click(object sender, RoutedEventArgs e)
     {
-        var newCat = new OrganizerCategory($"Categoria {_currentOrganizerConfig.Categories.Count + 1}", "NovaPasta", Array.Empty<string>());
+        var newCat = new OrganizerCategory(GenerateNextCategoryName(_currentOrganizerConfig.Categories), "NovaPasta", Array.Empty<string>());
         _currentOrganizerConfig.Categories.Add(newCat);
+        _pendingNewOrganizerCategory = newCat;
         OrganizerCategoriesList.ItemsSource = null;
         OrganizerCategoriesList.ItemsSource = _currentOrganizerConfig.Categories;
         OrganizerCategoriesList.SelectedItem = newCat;
@@ -972,11 +988,16 @@ public partial class MainWindow : Window
         _selectedCategory.Name = OrgCatName.Text;
         _selectedCategory.Folder = OrgCatFolder.Text;
         _selectedCategory.Keywords = keywords;
+        if (ReferenceEquals(_selectedCategory, _pendingNewOrganizerCategory))
+        {
+            _pendingNewOrganizerCategory = null;
+        }
 
         _configService.SaveSection("Organizer", _currentOrganizerConfig);
         OrganizerCategoriesList.Items.Refresh();
         UiMessageService.ShowInfo("Categoria salva!", "Sucesso");
         ShowMainStatusInfo("Categoria salva com sucesso.");
+        UpdateOrganizerActionButtonsState();
     }
 
     private void DeleteOrganizerCategory_Click(object sender, RoutedEventArgs e)
@@ -985,6 +1006,10 @@ public partial class MainWindow : Window
         
         if (UiMessageService.Confirm($"Excluir categoria '{_selectedCategory.Name}'?", "Confirmar"))
         {
+            if (ReferenceEquals(_selectedCategory, _pendingNewOrganizerCategory))
+            {
+                _pendingNewOrganizerCategory = null;
+            }
             _currentOrganizerConfig.Categories.Remove(_selectedCategory);
             _configService.SaveSection("Organizer", _currentOrganizerConfig);
             LoadOrganizerConfig();
@@ -996,6 +1021,7 @@ public partial class MainWindow : Window
     private void UpdateToolProfileActionButtonsState()
     {
         var hasSelection = _selectedToolProfile != null && ToolProfileEditForm.Visibility == Visibility.Visible;
+        var isEditingPendingNew = hasSelection && ReferenceEquals(_selectedToolProfile, _pendingNewToolProfile);
 
         if (DeleteToolProfileButton != null)
         {
@@ -1006,11 +1032,17 @@ public partial class MainWindow : Window
         {
             SaveToolProfileButton.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
         }
+
+        if (AddToolProfileButton != null)
+        {
+            AddToolProfileButton.IsEnabled = !isEditingPendingNew;
+        }
     }
 
     private void UpdateOrganizerActionButtonsState()
     {
         var hasSelection = _selectedCategory != null && OrganizerEditForm.Visibility == Visibility.Visible;
+        var isEditingPendingNew = hasSelection && ReferenceEquals(_selectedCategory, _pendingNewOrganizerCategory);
 
         if (DeleteOrganizerCategoryButton != null)
         {
@@ -1020,6 +1052,11 @@ public partial class MainWindow : Window
         if (SaveOrganizerCategoryButton != null)
         {
             SaveOrganizerCategoryButton.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        if (OrganizerAddCategoryButton != null)
+        {
+            OrganizerAddCategoryButton.IsEnabled = !isEditingPendingNew;
         }
     }
 
@@ -1041,19 +1078,46 @@ public partial class MainWindow : Window
             }
 
             var trimmed = profile.Name.Trim();
-            if (!trimmed.StartsWith("Perfil ", StringComparison.OrdinalIgnoreCase))
+            if (!trimmed.StartsWith("Perfil", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
 
-            var suffix = trimmed.Substring("Perfil ".Length);
+            var suffix = trimmed.Substring("Perfil".Length).Trim();
             if (int.TryParse(suffix, out var number) && number > maxNumber)
             {
                 maxNumber = number;
             }
         }
 
-        return $"Perfil {maxNumber + 1}";
+        return $"Perfil{maxNumber + 1}";
+    }
+
+    private static string GenerateNextCategoryName(IReadOnlyCollection<OrganizerCategory> categories)
+    {
+        var maxNumber = 0;
+
+        foreach (var category in categories)
+        {
+            if (string.IsNullOrWhiteSpace(category?.Name))
+            {
+                continue;
+            }
+
+            var trimmed = category.Name.Trim();
+            if (!trimmed.StartsWith("Categoria", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var suffix = trimmed.Substring("Categoria".Length).Trim();
+            if (int.TryParse(suffix, out var number) && number > maxNumber)
+            {
+                maxNumber = number;
+            }
+        }
+
+        return $"Categoria{maxNumber + 1}";
     }
 
 
@@ -1195,7 +1259,28 @@ public partial class MainWindow : Window
         }
 
         // Google Drive
-        GDriveEnabledCheck.IsChecked = _currentGoogleDriveSettings.IsEnabled;
+        var hasAnyGoogleDriveValue =
+            !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ClientId)
+            || !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ClientSecret)
+            || !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ProjectId)
+            || !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.FolderName)
+            || _currentGoogleDriveSettings.IsEnabled;
+
+        var hasRequiredGoogleDriveCredentials =
+            !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ClientId)
+            && !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ClientSecret)
+            && !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ProjectId)
+            && !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.FolderName);
+
+        if (_currentGoogleDriveSettings.IsEnabled && !hasRequiredGoogleDriveCredentials)
+        {
+            // Protege primeira abertura/estado incompleto para nao aparecer marcado por engano.
+            _currentGoogleDriveSettings.IsEnabled = false;
+        }
+
+        GDriveEnabledCheck.IsChecked = hasAnyGoogleDriveValue
+            ? _currentGoogleDriveSettings.IsEnabled
+            : false;
         GDriveClientId.Text = _currentGoogleDriveSettings.ClientId;
         GDriveClientSecret.Text = _currentGoogleDriveSettings.ClientSecret;
         GDriveProjectId.Text = _currentGoogleDriveSettings.ProjectId;

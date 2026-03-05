@@ -23,9 +23,12 @@ public class ToolUsageSimulationTests
     public void TrayRouter_OpenAllTools_AndCoreWorkflows_RunWithoutCrash()
     {
         var stage = "startup";
-        RunInSta(() =>
+        UiMessageService.DialogOverrideForTests = static (_, _, _, _, _) => true;
+        try
         {
-            EnsureApplicationWithTheme();
+            RunInSta(() =>
+            {
+                EnsureApplicationWithTheme();
 
             var tempRoot = Path.Combine(Path.GetTempPath(), "devtools-integration-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(tempRoot);
@@ -76,7 +79,12 @@ public class ToolUsageSimulationTests
                 SafeCloseAllWindows();
                 SafeDeleteDirectory(tempRoot);
             }
-        }, () => stage);
+            }, () => stage);
+        }
+        finally
+        {
+            UiMessageService.DialogOverrideForTests = null;
+        }
     }
 
     private static void RunTrayRouterSmoke(
@@ -329,7 +337,11 @@ public class ToolUsageSimulationTests
         {
             if (Invoke(window, "DeleteNoteByKeyAsync", first.FileName, first.Title) is Task deleteTask)
             {
-                deleteTask.GetAwaiter().GetResult();
+                WaitUntil(() => deleteTask.IsCompleted, timeoutMs: 12000);
+                if (deleteTask.IsFaulted)
+                {
+                    throw deleteTask.Exception?.GetBaseException() ?? new InvalidOperationException("Falha ao excluir nota no fluxo de simulacao.");
+                }
             }
         }
         finally

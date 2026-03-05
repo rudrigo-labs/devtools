@@ -22,6 +22,12 @@ public sealed class NgrokSetupService
         return _configEngine.IsConfigured();
     }
 
+    public NgrokEnvironmentInfo DetectEnvironment()
+    {
+        var settings = _configEngine.GetSettings();
+        return _configEngine.DetectEnvironment(settings.ExecutablePath);
+    }
+
     public NgrokSettings GetSettings()
     {
         return _configEngine.GetSettings();

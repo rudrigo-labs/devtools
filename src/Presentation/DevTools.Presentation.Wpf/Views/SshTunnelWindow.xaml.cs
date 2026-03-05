@@ -98,6 +98,7 @@ public partial class SshTunnelWindow : Window
         {
             primaryButton.IsEnabled = false;
             primaryButton.Content = "Parando...";
+            SetSshStatus("Parando...", "DevToolsStatusError");
             await _tunnelService.StopAsync(TimeSpan.FromSeconds(5));
             UpdateStatusUI();
             primaryButton.IsEnabled = true;
@@ -122,6 +123,7 @@ public partial class SshTunnelWindow : Window
 
         primaryButton.IsEnabled = false;
         primaryButton.Content = "Conectando...";
+        SetSshStatus("Conectando...", "DevToolsAccent");
 
         try
         {
@@ -196,15 +198,28 @@ public partial class SshTunnelWindow : Window
 
         if (_tunnelService.IsOn)
         {
-            MainFrame.StatusText = "Status: Conectado";
+            SetSshStatus("Conectado", "DevToolsStatusOk");
             primaryButton.Content = "Desconectar";
             primaryButton.Style = (Style)FindResource("SecondaryButtonStyle");
             return;
         }
 
-        MainFrame.StatusText = "Status: Parado";
+        SetSshStatus("Parado", "DevToolsStatusIdle");
         primaryButton.Content = "Conectar";
         primaryButton.Style = (Style)FindResource("PrimaryButtonStyle");
+    }
+
+    private void SetSshStatus(string text, string badgeBrushKey)
+    {
+        if (SshStatusText != null)
+        {
+            SshStatusText.Text = text;
+        }
+
+        if (SshStatusBadge != null && TryFindResource(badgeBrushKey) is System.Windows.Media.Brush brush)
+        {
+            SshStatusBadge.Background = brush;
+        }
     }
 
     private void SavePosition()

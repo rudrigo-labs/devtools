@@ -17,99 +17,133 @@
     <c:DevToolsToolFrame x:Name="MainFrame"
                          Title="Gerenciador de Tuneis SSH"
                          HelpText="Faz port-forward local para um destino remoto via bastion."
-                         StatusText="Parado"
+                         StatusText=""
                          PrimaryButtonContent="Conectar"
                          SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="ToggleTunnel_Click"
                          SecondaryButtonClick="CloseButton_Click"
                          CloseButtonClick="CloseButton_Click">
-        <TabControl Margin="0,12,0,0"
-                    Background="{DynamicResource DevToolsWindowBackground}"
-                    BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                    BorderThickness="1">
-            <TabItem Header="Conexao SSH">
-                <Grid Margin="12">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+        <Grid Margin="0,12,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-                    <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Border Grid.Row="0"
+                    Background="{DynamicResource DevToolsSurface}"
+                    BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="12,8"
+                    Margin="0,0,0,10">
+                <DockPanel LastChildFill="False">
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="Status do túnel"
+                               Foreground="{DynamicResource DevToolsTextSecondary}"
+                               FontSize="12"
+                               VerticalAlignment="Center"/>
+                    <Border x:Name="SshStatusBadge"
+                            DockPanel.Dock="Right"
+                            Background="{DynamicResource DevToolsStatusIdle}"
+                            CornerRadius="10"
+                            Padding="10,3">
+                        <TextBlock x:Name="SshStatusText"
+                                   Text="Parado"
+                                   Foreground="White"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"/>
+                    </Border>
+                </DockPanel>
+            </Border>
+
+            <TabControl Grid.Row="1"
+                        Background="{DynamicResource DevToolsWindowBackground}"
+                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                        BorderThickness="1">
+                <TabItem Header="Conexao SSH">
+                    <Grid Margin="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0" Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="160"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Host SSH (Bastion)" Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="SshHostInput" Style="{StaticResource DevToolsTextInput}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Porta SSH" Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="SshPortInput" Style="{StaticResource DevToolsTextInput}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Grid.Row="1" Margin="0,0,0,16">
+                            <TextBlock Text="Usuario SSH" Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="SshUserInput" Style="{StaticResource DevToolsTextInput}"/>
+                        </StackPanel>
+
+                        <c:PathSelector x:Name="IdentityFileSelector"
+                                        Grid.Row="2"
+                                        Title="Arquivo de Identidade (Chave Privada)"
+                                        IsFolderPicker="False"/>
+                    </Grid>
+                </TabItem>
+
+                <TabItem Header="Mapeamento do Tunel">
+                    <Grid Margin="12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="160"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Host SSH (Bastion)" Style="{StaticResource DevToolsInputLabel}"/>
-                            <TextBox x:Name="SshHostInput" Style="{StaticResource DevToolsTextInput}"/>
+                            <TextBlock Text="Local (Sua Maquina)"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Margin="0,0,0,12"/>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Text="Host Local (Bind)" Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="LocalBindInput" Style="{StaticResource DevToolsTextInput}"/>
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock Text="Porta Local" Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="LocalPortInput" Style="{StaticResource DevToolsTextInput}"/>
+                            </StackPanel>
                         </StackPanel>
 
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Porta SSH" Style="{StaticResource DevToolsInputLabel}"/>
-                            <TextBox x:Name="SshPortInput" Style="{StaticResource DevToolsTextInput}"/>
+                            <TextBlock Text="Remoto (Destino)"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       Margin="0,0,0,12"/>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <TextBlock Text="Host Remoto" Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="RemoteHostInput" Style="{StaticResource DevToolsTextInput}"/>
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock Text="Porta Remota" Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="RemotePortInput" Style="{StaticResource DevToolsTextInput}"/>
+                            </StackPanel>
                         </StackPanel>
                     </Grid>
-
-                    <StackPanel Grid.Row="1" Margin="0,0,0,16">
-                        <TextBlock Text="Usuario SSH" Style="{StaticResource DevToolsInputLabel}"/>
-                        <TextBox x:Name="SshUserInput" Style="{StaticResource DevToolsTextInput}"/>
-                    </StackPanel>
-
-                    <c:PathSelector x:Name="IdentityFileSelector"
-                                    Grid.Row="2"
-                                    Title="Arquivo de Identidade (Chave Privada)"
-                                    IsFolderPicker="False"/>
-                </Grid>
-            </TabItem>
-
-            <TabItem Header="Mapeamento do Tunel">
-                <Grid Margin="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="16"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="Local (Sua Maquina)"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource PrimaryTextBrush}"
-                                   Margin="0,0,0,12"/>
-
-                        <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="Host Local (Bind)" Style="{StaticResource DevToolsInputLabel}"/>
-                            <TextBox x:Name="LocalBindInput" Style="{StaticResource DevToolsTextInput}"/>
-                        </StackPanel>
-
-                        <StackPanel>
-                            <TextBlock Text="Porta Local" Style="{StaticResource DevToolsInputLabel}"/>
-                            <TextBox x:Name="LocalPortInput" Style="{StaticResource DevToolsTextInput}"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="2">
-                        <TextBlock Text="Remoto (Destino)"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource PrimaryTextBrush}"
-                                   Margin="0,0,0,12"/>
-
-                        <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="Host Remoto" Style="{StaticResource DevToolsInputLabel}"/>
-                            <TextBox x:Name="RemoteHostInput" Style="{StaticResource DevToolsTextInput}"/>
-                        </StackPanel>
-
-                        <StackPanel>
-                            <TextBlock Text="Porta Remota" Style="{StaticResource DevToolsInputLabel}"/>
-                            <TextBox x:Name="RemotePortInput" Style="{StaticResource DevToolsTextInput}"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Grid>
-            </TabItem>
-        </TabControl>
+                </TabItem>
+            </TabControl>
+        </Grid>
     </c:DevToolsToolFrame>
 </Window>
 

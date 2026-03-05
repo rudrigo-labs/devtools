@@ -1,25 +1,23 @@
 # Documentacao DevTools
 
-Este diretorio contem guias tecnicos e operacionais do projeto.
+## Documentos principais
 
-## Documentos oficiais
-
-- Manual oficial do produto: `../MANUAL.md`
-- README oficial do repositorio: `../README.md`
+- Manual detalhado do usuario: `../MANUAL.md`
+- Configuracoes e perfis (detalhado): `CONFIGURACOES_E_PERFIS_DETALHADO.md`
+- Documento tecnico detalhado: `TechnicalDoc.md`
 - Cobertura de testes: `INTEGRATION_TEST_COVERAGE.md`
-- Relatorio oficial de fechamento da versao: `RELATORIO_FECHAMENTO_VERSAO_2026-03-04.md`
-- Relatorio de testes e varredura: `RELATORIO_TESTES_E_VARREDURA_GERAL_2026-03-04.md`
+- Testes manuais pendentes: `TESTES_MANUAIS_PENDENTES_2026-03-05.md`
+- Pendencias para proxima versao: `PENDENCIAS_UI_E_HUB.md`
 - Guia de distribuicao: `GUIA_DE_DISTRIBUICAO.md`
-- Plano de migracao SQLite: `SQLITE_MIGRATION_PLAN.md`
+- Apresentacao nao tecnica (curriculo/LinkedIn): `APRESENTACAO_DEVTOOLS_LINKEDIN.md`
 
-## Estrutura
+## Relatorios da rodada atual
 
-- `docs/_obsolete/`: documentos legados, historicos ou substituidos
-- raiz de `docs/`: documentos transversais ativos
+- Auditoria de docs: `DOCS_AUDIT_2026-03-05.md`
+- Prontidao para release: `RELATORIO_PRONTO_PARA_RELEASE_2026-03-05.md`
+- Bypass de cenarios WPF skipped: `RELATORIO_TESTES_BYPASS_WPF_2026-03-05.md`
 
-## Regras de manutencao
+## Compatibilidade
 
-1. Evitar duplicidade entre documentos oficiais.
-2. Quando um documento ficar legado, mover para `docs/_obsolete/`.
-3. Para documentacao de usuario final, priorizar `MANUAL.md` na raiz.
-4. Relatorios de fechamento de versao devem registrar build/testes e pendencias tecnicas.
+- `CONFIGURATION.md` redireciona para o guia detalhado.
+- `SETTINGS_AND_PROFILES_GUIDE.md` redireciona para o guia detalhado.

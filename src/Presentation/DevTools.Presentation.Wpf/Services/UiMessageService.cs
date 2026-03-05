@@ -7,6 +7,7 @@ namespace DevTools.Presentation.Wpf.Services;
 
 public static class UiMessageService
 {
+    public static Func<DevToolsDialogType, string, string, string?, string?, bool?>? DialogOverrideForTests { get; set; }
     public static Func<string, string, bool>? ConfirmOverrideForTests { get; set; }
 
     public static void ShowError(string message, string title = "Erro", Exception? ex = null)
@@ -56,6 +57,15 @@ public static class UiMessageService
         string? primaryButtonText = null,
         string? secondaryButtonText = null)
     {
+        if (DialogOverrideForTests != null)
+        {
+            var overridden = DialogOverrideForTests(type, title, message, primaryButtonText, secondaryButtonText);
+            if (overridden.HasValue)
+            {
+                return overridden.Value;
+            }
+        }
+
         return RunOnUiThread(() =>
         {
             var dialog = new DevToolsDialogWindow(title, message, type, primaryButtonText, secondaryButtonText);

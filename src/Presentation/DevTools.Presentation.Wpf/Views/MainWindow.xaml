@@ -7,7 +7,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="DevTools Hub" Height="900" Width="1440" MinHeight="760" MinWidth="1180"
-        Icon="/Assets/application.ico"
+        Icon="pack://application:,,,/DevTools.Presentation.Wpf;component/Assets/application.ico"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowState="Normal">
 
@@ -574,7 +574,7 @@
                                     </ScrollViewer>
 
                                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
-                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
                                         <Button Content="Salvar" Click="SaveStorageSettings_Click" Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                     </StackPanel>
                                 </Grid>
@@ -662,7 +662,7 @@
                                         <Button x:Name="DeleteToolProfileButton" Content="Remover" Click="DeleteToolProfile_Click" 
                                                 Style="{DynamicResource DevToolsDangerButton}" Width="120" Margin="0,0,10,0"/>
                                         <Button Content="Cancelar" Click="BackToSettingsList_Click" 
-                                                Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
+                                                Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
                                         <Button x:Name="SaveToolProfileButton" Content="Salvar" Click="SaveToolProfile_Click" 
                                                 Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                     </StackPanel>
@@ -786,7 +786,7 @@
                                     </ScrollViewer>
 
                                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
-                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
                                         <Button Content="Salvar" Click="SaveNotesCloudSettings_Click" Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                     </StackPanel>
                                 </Grid>
@@ -904,7 +904,7 @@
 
                                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
                                         <Button Content="Cancelar" Click="BackToSettingsList_Click" 
-                                                Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
+                                                Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
                                         <Button Content="Salvar" Click="SaveHarvestSettings_Click" 
                                                 Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                     </StackPanel>
@@ -980,7 +980,7 @@
                                         <Button x:Name="DeleteOrganizerCategoryButton" Content="Remover" Click="DeleteOrganizerCategory_Click" 
                                                 Style="{DynamicResource DevToolsDangerButton}" Width="120" Margin="0,0,10,0" Visibility="Collapsed"/>
                                         <Button Content="Cancelar" Click="BackToSettingsList_Click" 
-                                                Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
+                                                Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
                                         <Button x:Name="SaveOrganizerCategoryButton" Content="Salvar" Click="SaveOrganizerCategory_Click" 
                                                 Style="{DynamicResource DevToolsPrimaryButton}" Width="120" Visibility="Collapsed"/>
                                     </StackPanel>
@@ -1042,7 +1042,7 @@
                                     </ScrollViewer>
 
                                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
-                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
                                         <Button Content="Salvar" Click="SaveMigrationsSettings_Click" 
                                             Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                     </StackPanel>
@@ -1097,7 +1097,7 @@
                                     </ScrollViewer>
 
                                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
-                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
                                         <Button Content="Salvar" Click="SaveNgrokSettings_Click" 
                                             Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
                                     </StackPanel>
@@ -1117,7 +1117,10 @@
                                        Text="DevTools Hub pronto."
                                        Foreground="{DynamicResource DevToolsTextSecondary}"
                                        FontSize="{DynamicResource DevToolsFontSize.Status}"
-                                       VerticalAlignment="Center"/>
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       Margin="0,0,20,0"
+                                       TextAlignment="Right"/>
                         </Grid>
                     </Border>
                 </Grid>

@@ -1,39 +1,76 @@
 # DevTools - Cobertura de Testes (Integracao/Smoke)
 
-## Escopo Atual
+Data de referencia: 2026-03-05
 
-Esta matriz resume o que esta automatizado sem depender de servicos externos (Google Drive fora de escopo).
+## 1. Escopo automatizado atual
 
 | Area | Arquivo de Teste | Cobertura principal |
 |---|---|---|
-| Router de ferramentas | `src/Tools/DevTools.Tests/ToolRouterIntegrationTests.cs` | Resolucao por ID, tool desabilitada, singleton/non-singleton, launch background |
-| Registry de ferramentas | `src/Tools/DevTools.Tests/ToolRegistryBehaviorTests.cs` | Filtro de tools desabilitadas, ordenacao por categoria/ordem/titulo, override por mesmo ID |
-| Simulacao de uso WPF | `src/Tools/DevTools.Tests/ToolUsageSimulationTests.cs` | Abertura de ferramentas e fluxos principais (Organizer, Harvest, Search, Rename, Snapshot, Utf8, Image, Migrations, Notes, Logs, Help) |
-| Validacao de Google Drive na UI | `src/Tools/DevTools.Tests/MainWindowGoogleDriveValidationTests.cs` | Campos obrigatorios no painel de configuracao (sem teste de API externa) |
-| Persistencia SQLite (settings) | `src/Tools/DevTools.Tests/SqliteStoresIntegrationTests.cs` | Save/Get de secoes, defaults e idempotencia |
-| Persistencia SQLite (profiles) | `src/Tools/DevTools.Tests/SqliteStoresIntegrationTests.cs` | Save/Load com ordenacao e substituicao completa |
-| Persistencia SQLite (note metadata) | `src/Tools/DevTools.Tests/SqliteStoresIntegrationTests.cs` | Upsert/Get/Delete de metadados |
-| Engine de notas (filesystem) | `src/Tools/DevTools.Tests/NotesEngineIntegrationTests.cs` | Criacao/listagem/leitura com `.md` e `.txt` |
-| Engine de notas (edicao) | `src/Tools/DevTools.Tests/NotesEngineIntegrationTests.cs` | Edicao de nota existente (SaveNote/LoadNote) com sincronizacao de indice |
-| Backup de notas em volume | `src/Tools/DevTools.Tests/NotesBackupVolumeIntegrationTests.cs` | Export/Import ZIP com lote grande e validacao de conflitos |
-| Startup SQLite | `src/Tools/DevTools.Tests/StorageBackendAndBootstrapperTests.cs` | Resolucao de backend por env var e bootstrap idempotente do banco |
+| Router de ferramentas | `src/Tools/DevTools.Tests/ToolRouterIntegrationTests.cs` | Resolucao por ID, desabilitacao, singleton e launch modes |
+| Registry de ferramentas | `src/Tools/DevTools.Tests/ToolRegistryBehaviorTests.cs` | Filtro, ordenacao e override por ID |
+| Simulacao de uso WPF | `src/Tools/DevTools.Tests/ToolUsageSimulationTests.cs` | Fluxo ponta a ponta de abertura/uso das ferramentas |
+| Validacao de Google Drive na UI | `src/Tools/DevTools.Tests/MainWindowGoogleDriveValidationTests.cs` | Campos obrigatorios e comportamento do painel |
+| Persistencia SQLite | `src/Tools/DevTools.Tests/SqliteStoresIntegrationTests.cs` | Settings, profiles e metadados |
+| Notas (engine e backup) | `src/Tools/DevTools.Tests/NotesEngineIntegrationTests.cs`, `NotesBackupVolumeIntegrationTests.cs` | CRUD, listagem, backup/import e conflitos |
+| Backend bootstrap | `src/Tools/DevTools.Tests/StorageBackendAndBootstrapperTests.cs` | Resolucao de backend e inicializacao SQLite |
 
-## Resultado de execucao (2026-03-04)
+## 2. Resultado de execucao mais recente
 
-- `dotnet test src/Tools/DevTools.Tests/DevTools.Tests.csproj -c Debug --no-build`
-- Total: 37
-- Aprovados: 35
+Comando:
+
+```powershell
+dotnet test src/Tools/DevTools.Tests/DevTools.Tests.csproj -v minimal
+```
+
+Resultado:
+
+- Total: 38
+- Aprovados: 36
 - Ignorados: 2
 - Falhas: 0
 
-Testes ignorados no momento:
+Comando da solucao:
+
+```powershell
+dotnet test src/DevTools.slnx -v minimal
+```
+
+Resultado:
+
+- sem falhas
+
+## 3. Testes ignorados atualmente
 
 1. `PathSelectorTests.SelectedPath_Updates_TextBox_Display`
 2. `SnapshotWindowTests.ProcessButton_Persists_SelectedPath_To_Settings`
 
-Motivo: instabilidade de infraestrutura de teste WPF com afinidade de thread em `Application.Current` e recursos globais.
+Motivo do `Skip`:
 
-## Cobertura Nao Incluida
+- instabilidade de afinidade de thread WPF (`Application.Current`) no host xUnit.
 
-- Google Drive (autenticacao e upload reais) por decisao do projeto.
-- Integracao real de SSH/ngrok com processos externos em ambiente de CI.
+## 4. Como validar manualmente os 2 cenarios ignorados
+
+### 4.1 PathSelector
+
+1. Abrir qualquer janela com `PathSelector` (ex.: Organizer, Migrations, Notes configuracao).
+2. Selecionar uma pasta/arquivo.
+3. Confirmar que o texto exibido no campo corresponde ao caminho selecionado.
+
+### 4.2 Snapshot persiste caminho
+
+1. Abrir Snapshot.
+2. Selecionar pasta no `RootPathSelector`.
+3. Executar `Gerar Snapshot`.
+4. Fechar e reabrir Snapshot.
+5. Confirmar que o ultimo caminho permanece carregado.
+
+## 5. Escopo nao coberto automaticamente (ainda)
+
+- Google Drive real (OAuth + upload real) na suite CI.
+- Ngrok/SSH com processo externo real em ambiente de CI.
+
+## 6. Observacao sobre rodada 2026-03-05
+
+Foi feita validacao bypass ad-hoc dos 2 cenarios skipped em ambiente local, registrada em:
+
+- `docs/RELATORIO_TESTES_BYPASS_WPF_2026-03-05.md`

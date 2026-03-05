@@ -1,67 +1,62 @@
-# DevTools - Pendencias UI e Ferramentas
+# DevTools - Pendencias e Melhorias (Proxima Versao)
 
 Data: 2026-03-05
 Status: Aberto
 
-## 1) Tooltip com estilo do tema
+Este arquivo deve conter somente itens que ainda nao foram entregues.
 
-- Pendencia: Padronizar visual dos ToolTips para nao parecer tooltip nativo do Windows.
-- Problema atual: Os baloes de tooltip estao com aparencia fora do tema IDE Style.
-- Objetivo:
-  - Fundo, borda, fonte e espaco interno seguindo o tema atual.
-  - Melhor contraste e legibilidade.
-  - Comportamento consistente em todas as janelas.
-- Criterio de aceite:
-  - Tooltip com estilo unico do DevTools em toda a aplicacao.
-  - Sem regressao visual em hover dos componentes.
+## 1) Estabilizacao final de testes WPF
 
-## 2) Harvest: padroes de pastas ignoradas
+- Problema: 2 testes seguem com `Skip` por afinidade de thread WPF no xUnit.
+- Itens:
+  - criar fixture STA unica para testes WPF
+  - remover `Skip` de `PathSelectorTests` e `SnapshotWindowTests`
+- Aceite:
+  - suite completa sem `skip` nesses cenarios
 
-- Pendencia: Preencher por padrao a lista de pastas ignoradas do Harvest na tela de configuracao.
-- Problema atual: O usuario pode abrir a configuracao sem uma base inicial util para exclusao de pastas tecnicas comuns.
-- Objetivo:
-  - Inserir defaults editaveis na caixa "Pastas Ignoradas" (ex.: `bin`, `obj`, `.vs`, `.git`, `node_modules`).
-  - Manter liberdade total para o usuario remover/adicionar itens.
-  - Garantir consistencia entre backend JSON e SQLite.
-- Criterio de aceite:
-  - Ao abrir a configuracao do Harvest sem valores salvos, a lista vem preenchida com padroes uteis.
-  - O usuario consegue alterar e salvar normalmente.
-  - O valor salvo prevalece sobre o padrao na proxima abertura.
+## 2) Validacao E2E real do Ngrok
 
-## 3) Observacao de execucao
+- Problema: ambiente de dev sem `ngrok.exe` impede teste real do tunel.
+- Itens:
+  - instalar ngrok localmente
+  - validar onboarding + salvar token
+  - validar `StartTunnel`/`StopTunnel` com URL publica na API local
+- Aceite:
+  - evidencia de tunel real ativo e parada controlada
 
-- Regra combinada: fechar primeiro as pendencias ativas antes de abrir novas frentes grandes.
-- Proxima revisao deste arquivo: apos fechar os ajustes de configuracoes e validacoes.
+## 3) Janela Sobre (acabamento)
 
-## 4) Notes: checkbox do Google Drive inicia marcado
+- Problema: janela ainda precisa revisao final de conteudo/visual.
+- Itens:
+  - revisar texto institucional
+  - revisar layout final e hierarquia visual
+  - validar link para GitHub Pages
+- Aceite:
+  - janela aprovada visualmente
 
-- Pendencia: Ajustar estado inicial do checkbox "Habilitar Backup no Google Drive" na configuracao de Notas e Nuvem.
-- Problema atual: O checkbox esta abrindo marcado por padrao, mesmo sem acao do usuario.
-- Objetivo:
-  - Abrir sempre desmarcado por padrao quando nao houver configuracao salva.
-  - Respeitar o valor persistido quando existir configuracao previa.
-- Criterio de aceite:
-  - Primeira abertura da tela: checkbox desmarcado.
-  - Apos salvar configuracao: checkbox reflete exatamente o valor salvo.
+## 4) Modal padrao propria (substituicao gradual)
 
-## 5) SSH Tunnel: definir posicao final das abas
+- Problema: dialogos ainda podem evoluir para um componente interno unico.
+- Itens:
+  - concluir implementacao da modal padrao reutilizavel
+  - migrar chamadas remanescentes de mensagens para a modal padrao
+- Aceite:
+  - padrao unico de dialogos no sistema
 
-- Pendencia: Definir o posicionamento/layout das abas da janela de SSH Tunnel.
-- Problema atual: A aparencia/posicao atual das abas nao ficou boa visualmente.
-- Objetivo:
-  - Escolher uma posicao final consistente com o padrao visual da aplicacao.
-  - Ajustar espacos e hierarquia visual para evitar aspecto "solto" ou desalinhado.
-- Criterio de aceite:
-  - Posicao das abas aprovada visualmente.
-  - Sem regressao de usabilidade no fluxo de conexao e mapeamento.
+## 5) Trilha SQLite (fases pendentes)
 
-## 6) SSH Tunnel: definir posicao final do status
+- Problema: migracao ainda nao concluida ponta a ponta.
+- Itens:
+  - fechar fases 3-5 do plano
+  - endurecer migracao JSON -> SQLite
+  - validar rollback e backup automatico
+- Aceite:
+  - runtime estavel com SQLite para configuracoes/perfis
 
-- Pendencia: Definir onde o status da janela de SSH Tunnel deve ficar.
-- Problema atual: O status atual esta visualmente ruim no ponto em que foi colocado.
-- Objetivo:
-  - Escolher uma posicao final mais limpa e previsivel para leitura do status.
-  - Garantir que o status nao concorra com titulo/acoes da janela.
-- Criterio de aceite:
-  - Posicao do status aprovada visualmente.
-  - Leitura clara de estados (parado/conectando/conectado/erro) sem poluicao.
+## 6) Revisao de defaults de configuracao
+
+- Itens candidatos:
+  - revisar defaults uteis por ferramenta (Harvest, Organizer, Notes)
+  - padronizar valores iniciais para reduzir setup manual
+- Aceite:
+  - primeira execucao mais orientada, com menos campos vazios
