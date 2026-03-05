@@ -47,21 +47,7 @@ public partial class HarvestWindow : Window
             return;
         }
 
-        // Fallback para configuracoes salvas anteriormente.
-        if (!string.IsNullOrEmpty(_settingsService?.Settings.LastHarvestSourcePath))
-            SourcePathSelector.SelectedPath = _settingsService.Settings.LastHarvestSourcePath;
-
-        if (!string.IsNullOrEmpty(_settingsService?.Settings.LastHarvestOutputPath))
-            OutputPathSelector.SelectedPath = _settingsService.Settings.LastHarvestOutputPath;
-
-        if (!string.IsNullOrEmpty(_settingsService?.Settings.LastHarvestConfigPath))
-            ConfigPathSelector.SelectedPath = _settingsService.Settings.LastHarvestConfigPath;
-
-        if (_settingsService?.Settings.LastHarvestMinScore.HasValue == true)
-            MinScoreBox.Text = _settingsService.Settings.LastHarvestMinScore.Value.ToString();
-
-        if (_settingsService?.Settings.LastHarvestCopyFiles.HasValue == true)
-            CopyFilesCheck.IsChecked = _settingsService.Settings.LastHarvestCopyFiles.Value;
+        // Sem fallback automatico de caminho para evitar preenchimento padrao da UI.
     }
 
     private bool ValidateInputs(out string errorMessage)

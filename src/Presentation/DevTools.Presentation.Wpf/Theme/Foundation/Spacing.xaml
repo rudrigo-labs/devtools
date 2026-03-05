@@ -4,7 +4,7 @@
     <sys:Double x:Key="DevToolsSpacing.LabelToField">8</sys:Double>
     <sys:Double x:Key="DevToolsSpacing.FieldGroup">16</sys:Double>
     <sys:Double x:Key="DevToolsFormMaxWidth">700</sys:Double>
-    <sys:Double x:Key="DevToolsContentMaxWidth">900</sys:Double>
+    <sys:Double x:Key="DevToolsContentMaxWidth">1400</sys:Double>
     <sys:Double x:Key="DevToolsActionButtonWidth">180</sys:Double>
     <GridLength x:Key="DevToolsHeaderHeight">48</GridLength>
     <GridLength x:Key="DevToolsFooterHeight">72</GridLength>

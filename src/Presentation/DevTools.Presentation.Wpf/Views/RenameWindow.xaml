@@ -14,7 +14,7 @@
                          Title="Renomear Projeto .NET"
                          HelpText="Renomeia projeto e namespaces com opcoes de seguranca."
                          PrimaryButtonContent="Renomear"
-                         SecondaryButtonContent="Cancelar"
+                         SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="ProcessButton_Click"
                          SecondaryButtonClick="CloseButton_Click">
 
@@ -107,3 +107,4 @@
         </ScrollViewer>
     </c:DevToolsToolFrame>
 </Window>
+

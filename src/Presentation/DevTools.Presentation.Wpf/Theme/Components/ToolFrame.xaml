@@ -62,7 +62,8 @@
                             <Grid Grid.Row="1"
                                   Margin="{DynamicResource DevToolsContentMargin}">
                                 <ContentPresenter MaxWidth="{DynamicResource DevToolsContentMaxWidth}"
-                                                  HorizontalAlignment="Center"/>
+                                                  HorizontalAlignment="Stretch"
+                                                  VerticalAlignment="Stretch"/>
                             </Grid>
 
                             <!-- Action Bar -->
@@ -70,7 +71,7 @@
                                     Background="{DynamicResource DevToolsSurface}"
                                     BorderBrush="{DynamicResource DevToolsBrushBorder}"
                                     BorderThickness="0,1,0,0"
-                                    Padding="20,0">
+                                    Padding="20,0,0,0">
                                 <Grid IsSharedSizeScope="True">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />

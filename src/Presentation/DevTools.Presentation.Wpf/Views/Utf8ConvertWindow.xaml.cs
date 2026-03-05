@@ -20,9 +20,6 @@ public partial class Utf8ConvertWindow : Window
         InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
-
-        if (!string.IsNullOrEmpty(_settingsService.Settings.LastUtf8RootPath))
-            RootPathSelector.SelectedPath = _settingsService.Settings.LastUtf8RootPath;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

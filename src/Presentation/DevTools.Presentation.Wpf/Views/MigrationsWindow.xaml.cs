@@ -47,15 +47,6 @@ public partial class MigrationsWindow : Window
             if (_currentProfile.Options.TryGetValue("dbcontext", out var context)) DbContextInput.Text = context;
             return;
         }
-
-        if (!string.IsNullOrEmpty(_settings?.Settings.LastMigrationsRootPath))
-            ProjectSelector.SelectedPath = _settings.Settings.LastMigrationsRootPath;
-
-        if (!string.IsNullOrEmpty(_settings?.Settings.LastMigrationsStartupPath))
-            StartupSelector.SelectedPath = _settings.Settings.LastMigrationsStartupPath;
-
-        if (!string.IsNullOrEmpty(_settings?.Settings.LastMigrationsDbContext))
-            DbContextInput.Text = _settings.Settings.LastMigrationsDbContext;
     }
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)

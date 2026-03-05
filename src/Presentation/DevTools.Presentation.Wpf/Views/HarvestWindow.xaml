@@ -16,7 +16,7 @@
                          Title="Coletor de Arquivos"
                          HelpText="Copia arquivos filtrados por regras para pasta de saida."
                          PrimaryButtonContent="Executar"
-                         SecondaryButtonContent="Cancelar"
+                         SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="Run_Click"
                          SecondaryButtonClick="Cancel_Click"
                          CloseButtonClick="Cancel_Click">
@@ -83,3 +83,4 @@
         </ScrollViewer>
     </c:DevToolsToolFrame>
 </Window>
+

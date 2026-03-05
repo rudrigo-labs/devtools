@@ -46,15 +46,6 @@ public partial class SearchTextWindow : Window
             if (_currentProfile.Options.TryGetValue("exclude", out var exc)) ExcludePatternInput.Text = exc;
             return;
         }
-
-        if (!string.IsNullOrEmpty(_settings?.Settings.LastSearchTextRootPath))
-            PathSelector.SelectedPath = _settings.Settings.LastSearchTextRootPath;
-
-        if (!string.IsNullOrEmpty(_settings?.Settings.LastSearchTextInclude))
-            IncludePatternInput.Text = _settings.Settings.LastSearchTextInclude;
-
-        if (!string.IsNullOrEmpty(_settings?.Settings.LastSearchTextExclude))
-            ExcludePatternInput.Text = _settings.Settings.LastSearchTextExclude;
     }
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)

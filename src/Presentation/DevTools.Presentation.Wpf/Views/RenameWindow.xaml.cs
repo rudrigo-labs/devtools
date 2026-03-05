@@ -44,9 +44,6 @@ public partial class RenameWindow : Window
             if (_currentProfile.Options.TryGetValue("exclude", out var exc)) ExcludeBox.Text = exc;
             return;
         }
-
-        if (!string.IsNullOrEmpty(_settingsService?.Settings.LastRenameRootPath))
-            RootPathSelector.SelectedPath = _settingsService.Settings.LastRenameRootPath;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

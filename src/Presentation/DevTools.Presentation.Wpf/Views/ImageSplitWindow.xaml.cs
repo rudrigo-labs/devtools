@@ -21,12 +21,6 @@ public partial class ImageSplitWindow : Window
         InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
-
-        if (!string.IsNullOrEmpty(_settingsService.Settings.LastImageSplitInputPath))
-            InputPathSelector.SelectedPath = _settingsService.Settings.LastImageSplitInputPath;
-
-        if (!string.IsNullOrEmpty(_settingsService.Settings.LastImageSplitOutputDir))
-            OutputPathSelector.SelectedPath = _settingsService.Settings.LastImageSplitOutputDir;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

@@ -6,8 +6,10 @@
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Tunel SSH"
-        Height="640"
-        Width="900"
+        Height="780"
+        Width="1120"
+        MinWidth="1020"
+        MinHeight="700"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
@@ -17,7 +19,7 @@
                          HelpText="Faz port-forward local para um destino remoto via bastion."
                          StatusText="Parado"
                          PrimaryButtonContent="Conectar"
-                         SecondaryButtonContent="Cancelar"
+                         SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="ToggleTunnel_Click"
                          SecondaryButtonClick="CloseButton_Click"
                          CloseButtonClick="CloseButton_Click">
@@ -125,3 +127,4 @@
         </ScrollViewer>
     </c:DevToolsToolFrame>
 </Window>
+

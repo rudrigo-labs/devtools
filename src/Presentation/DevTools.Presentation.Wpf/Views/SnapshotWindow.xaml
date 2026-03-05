@@ -14,7 +14,7 @@
                          Title="Snapshot de Projeto"
                          HelpText="Gera saidas de snapshot em multiplos formatos."
                          PrimaryButtonContent="Gerar Snapshot"
-                         SecondaryButtonContent="Cancelar"
+                         SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="ProcessButton_Click"
                          SecondaryButtonClick="CloseButton_Click"
                          CloseButtonClick="CloseButton_Click">
@@ -67,3 +67,4 @@
         </StackPanel>
     </c:DevToolsToolFrame>
 </Window>
+

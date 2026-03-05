@@ -16,7 +16,7 @@
                          Title="EF Core Migrations"
                          HelpText="Cria ou aplica migrations para contextos EF Core."
                          PrimaryButtonContent="Executar"
-                         SecondaryButtonContent="Cancelar"
+                         SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="Execute_Click"
                          SecondaryButtonClick="Close_Click"
                          CloseButtonClick="Close_Click">
@@ -104,3 +104,4 @@
         </ScrollViewer>
     </c:DevToolsToolFrame>
 </Window>
+

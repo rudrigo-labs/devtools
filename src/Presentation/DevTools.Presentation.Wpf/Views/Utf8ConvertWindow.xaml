@@ -14,7 +14,7 @@
                          Title="Converter para UTF-8"
                          HelpText="Converte arquivos para UTF-8 preservando conteudo."
                          PrimaryButtonContent="Converter"
-                         SecondaryButtonContent="Cancelar"
+                         SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="ProcessButton_Click"
                          SecondaryButtonClick="CloseButton_Click"
                          CloseButtonClick="CloseButton_Click">
@@ -50,3 +50,4 @@
         </StackPanel>
     </c:DevToolsToolFrame>
 </Window>
+

@@ -19,9 +19,6 @@ public partial class OrganizerWindow : Window
         _jobManager = jobManager;
         _settingsService = settingsService;
 
-        if (!string.IsNullOrEmpty(_settingsService.Settings.LastOrganizerInputPath))
-            InputPathSelector.SelectedPath = _settingsService.Settings.LastOrganizerInputPath;
-
         Deactivated += (s, e) =>
         {
             // Mantido aberto para evitar fechamento acidental.

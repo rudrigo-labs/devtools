@@ -42,9 +42,6 @@ public partial class SnapshotWindow : Window
             if (_currentProfile.Options.TryGetValue("project-path", out var proj)) RootPathSelector.SelectedPath = proj;
             return;
         }
-
-        if (!string.IsNullOrEmpty(_settingsService?.Settings.LastSnapshotRootPath))
-            RootPathSelector.SelectedPath = _settingsService.Settings.LastSnapshotRootPath;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

@@ -6,8 +6,10 @@
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Buscar Texto em Arquivos"
-        Height="640"
-        Width="900"
+        Height="700"
+        Width="1000"
+        MinHeight="660"
+        MinWidth="900"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
@@ -16,7 +18,7 @@
                          Title="Buscar Texto em Arquivos"
                          HelpText="Busca rapida com regex opcional e filtros."
                          PrimaryButtonContent="Executar"
-                         SecondaryButtonContent="Cancelar"
+                         SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="Execute_Click"
                          SecondaryButtonClick="Close_Click"
                          CloseButtonClick="Close_Click">
@@ -72,7 +74,8 @@
                     </StackPanel>
                 </Grid>
 
-                <Expander Header="Resultados" IsExpanded="True">
+                <StackPanel>
+                    <TextBlock Text="Resultados" Style="{StaticResource DevToolsSectionTitle}" Margin="0,6,0,8"/>
                     <TextBox x:Name="OutputText"
                              Height="140"
                              TextWrapping="Wrap"
@@ -81,7 +84,7 @@
                              FontSize="12"
                              VerticalScrollBarVisibility="Auto"
                              Style="{StaticResource DevToolsTextInput}"/>
-                </Expander>
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
     </c:DevToolsToolFrame>

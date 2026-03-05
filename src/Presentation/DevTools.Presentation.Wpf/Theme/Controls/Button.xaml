@@ -4,7 +4,7 @@
         <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
         <Setter Property="Foreground" Value="White"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="MinHeight" Value="38"/>
         <Setter Property="MinWidth" Value="100"/>
         <Setter Property="Padding" Value="16,8"/>
         <Setter Property="FontSize" Value="14"/>
@@ -145,8 +145,8 @@
         <Setter Property="BorderBrush" Value="{DynamicResource DevToolsBrushBorder}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Margin" Value="0,0,15,15"/>
-        <Setter Property="Height" Value="140"/>
-        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="176"/>
+        <Setter Property="Width" Value="240"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -156,23 +156,24 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="6">
-                        <StackPanel Margin="15">
+                        <StackPanel Margin="16">
                             <Path Data="{TemplateBinding Tag}"
                                   Style="{DynamicResource IconPathStyle}"
                                   HorizontalAlignment="Left"
-                                  Margin="0,0,0,15"/>
+                                  Margin="0,0,0,12"/>
                             
                             <TextBlock Text="{TemplateBinding Content}"
                                        FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
                                        FontWeight="SemiBold"
                                        TextWrapping="Wrap"
-                                       Margin="0,0,0,5"/>
+                                       Margin="0,0,0,6"
+                                       MaxHeight="46"/>
                             
                             <TextBlock Text="{Binding ToolTip, RelativeSource={RelativeSource TemplatedParent}}" 
                                        FontSize="12"
                                        Foreground="{DynamicResource DevToolsTextSecondary}"
                                        TextWrapping="Wrap"
-                                       MaxHeight="40"
+                                       MaxHeight="58"
                                        TextTrimming="CharacterEllipsis"/>
                         </StackPanel>
                     </Border>
@@ -194,7 +195,7 @@
         <Setter Property="BorderBrush" Value="{DynamicResource DevToolsBrushBorder}"/>
         <Setter Property="Padding" Value="16,8"/>
         <Setter Property="FontSize" Value="{DynamicResource DevToolsFontSize.Button}"/>
-        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="MinHeight" Value="38"/>
         <Setter Property="MinWidth" Value="{DynamicResource DevToolsActionButtonWidth}"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
@@ -227,7 +228,7 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="14,8"/>
         <Setter Property="FontSize" Value="{DynamicResource DevToolsFontSize.Button}"/>
-        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="MinHeight" Value="38"/>
         <Setter Property="MinWidth" Value="{DynamicResource DevToolsActionButtonWidth}"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">

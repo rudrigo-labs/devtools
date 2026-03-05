@@ -7,8 +7,9 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="DevTools Hub" Height="900" Width="1440" MinHeight="760" MinWidth="1180"
+        Icon="/Assets/application.ico"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
-        ResizeMode="CanResize" WindowStartupLocation="CenterScreen">
+        ResizeMode="CanResize" WindowStartupLocation="CenterScreen" WindowState="Maximized">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -236,9 +237,9 @@
                         <TabItem x:Name="TabTools">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,15,0">
                                 <StackPanel>
-                                    <TextBlock Text="Ferramentas Disponíveis" FontSize="24" FontWeight="Light" Foreground="{DynamicResource DevToolsTextPrimary}" Margin="0,0,0,20"/>
+                                    <TextBlock Text="Ferramentas Disponíveis" Style="{DynamicResource DevToolsPageTitle}"/>
 
-                                    <WrapPanel Orientation="Horizontal" Margin="0,0,-15,0">
+                                    <WrapPanel Orientation="Horizontal" Margin="0,4,-15,0">
                                         <!-- Cards de Ferramentas -->
                                         <Button Style="{DynamicResource ToolCardStyle}" Content="Notas Rápidas" 
                                             Tag="{DynamicResource Icon.Notes}" ToolTip="Anotações flutuantes always-on-top" Click="OpenTool_Click" CommandParameter="Notes"/>
@@ -278,10 +279,15 @@
                         <!-- Tab: Jobs -->
                         <TabItem x:Name="TabJobs">
                             <DockPanel LastChildFill="True">
-                                <TextBlock DockPanel.Dock="Top" Text="Centro de Execuções" FontSize="24" FontWeight="Light" Foreground="{DynamicResource DevToolsTextPrimary}" Margin="0,0,0,20"/>
+                                <TextBlock DockPanel.Dock="Top" Text="Centro de Execuções" Style="{DynamicResource DevToolsPageTitle}"/>
 
                                 <!-- Detalhes / Logs (Bottom) -->
-                                <Expander DockPanel.Dock="Bottom" Header="Detalhes / Logs" Margin="0,10,0,0" IsExpanded="True" BorderBrush="{DynamicResource DevToolsBrushBorder}">
+                                <Expander DockPanel.Dock="Bottom"
+                                          Header="Detalhes / Logs"
+                                          Foreground="{DynamicResource DevToolsTextPrimary}"
+                                          Margin="0,10,0,0"
+                                          IsExpanded="True"
+                                          BorderBrush="{DynamicResource DevToolsBrushBorder}">
                                     <TextBox Text="{Binding SelectedItem.Logs, ElementName=JobsDataGrid, Mode=OneWay}" 
                                          Height="150" 
                                          Background="{DynamicResource DevToolsWindowBackground}" 
@@ -416,12 +422,12 @@
                             <Grid>
                                 <!-- Lista de Configurações (Cards) -->
                                 <ScrollViewer x:Name="SettingsListPanel" VerticalScrollBarVisibility="Auto">
-                                    <StackPanel Margin="0,10">
+                                    <StackPanel Margin="0,0">
                                         <TextBlock Text="Configurações do Projeto" Style="{DynamicResource DevToolsPageTitle}"/>
 
                                         <!-- Seção: Configurações Gerais -->
                                         <TextBlock Text="Configurações Gerais" Style="{DynamicResource DevToolsSectionTitle}"/>
-                                        <WrapPanel Orientation="Horizontal" Margin="0,0,-15,20">
+                                        <WrapPanel Orientation="Horizontal" Margin="0,4,-15,20">
     
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="Armazenamento" 
                                                 ToolTip="Selecionar backend de configuracoes: JSON ou SQLite" Width="200" Click="OpenStorageSettings_Click"/>
@@ -1096,7 +1102,7 @@
                             Background="{DynamicResource DevToolsSurface}"
                             BorderBrush="{DynamicResource DevToolsBrushBorder}"
                             BorderThickness="0,1,0,0"
-                            Padding="20,0">
+                            Padding="20,0,0,0">
                         <Grid IsSharedSizeScope="True">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>

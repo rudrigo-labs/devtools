@@ -17,7 +17,7 @@
                          Title="Dividir Imagens"
                          HelpText="Divide imagens em grade configuravel."
                          PrimaryButtonContent="Processar"
-                         SecondaryButtonContent="Cancelar"
+                         SecondaryButtonContent="Fechar"
                          PrimaryButtonClick="ProcessButton_Click"
                          SecondaryButtonClick="CloseButton_Click"
                          CloseButtonClick="CloseButton_Click">
@@ -78,3 +78,4 @@
         </ScrollViewer>
     </c:DevToolsToolFrame>
 </Window>
+
