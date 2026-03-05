@@ -6,10 +6,10 @@
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Buscar Texto em Arquivos"
-        Height="780"
-        Width="1120"
-        MinWidth="1020"
-        MinHeight="700"
+        Height="670"
+        Width="1080"
+        MinWidth="980"
+        MinHeight="600"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
@@ -24,13 +24,7 @@
                          CloseButtonClick="Close_Click">
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
-            <StackPanel>
-                <TextBlock Text="Configuracao"
-                           FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource AccentBrush}"
-                           Margin="0,0,0,16"/>
-
+            <StackPanel Margin="0,12,0,0">
                 <c:PathSelector x:Name="PathSelector"
                                 Title="Diretorio de Busca"
                                 IsFolderPicker="True"
@@ -74,17 +68,19 @@
                     </StackPanel>
                 </Grid>
 
-                <StackPanel>
-                    <TextBlock Text="Resultados" Style="{StaticResource DevToolsSectionTitle}" Margin="0,6,0,8"/>
+                <Expander IsExpanded="True" Margin="0,6,0,0">
+                    <Expander.Header>
+                        <TextBlock Text="Resultados" Style="{StaticResource DevToolsCardTitle}" Margin="0,0,0,0"/>
+                    </Expander.Header>
                     <TextBox x:Name="OutputText"
-                             Height="140"
+                             Height="120"
                              TextWrapping="Wrap"
                              IsReadOnly="True"
                              FontFamily="Consolas"
                              FontSize="12"
                              VerticalScrollBarVisibility="Auto"
                              Style="{StaticResource DevToolsTextInput}"/>
-                </StackPanel>
+                </Expander>
             </StackPanel>
         </ScrollViewer>
     </c:DevToolsToolFrame>

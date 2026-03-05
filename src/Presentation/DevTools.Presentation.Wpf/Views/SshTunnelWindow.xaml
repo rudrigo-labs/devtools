@@ -6,10 +6,10 @@
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Tunel SSH"
-        Height="780"
-        Width="1120"
-        MinWidth="1020"
-        MinHeight="700"
+        Height="670"
+        Width="1080"
+        MinWidth="980"
+        MinHeight="600"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
@@ -23,66 +23,51 @@
                          PrimaryButtonClick="ToggleTunnel_Click"
                          SecondaryButtonClick="CloseButton_Click"
                          CloseButtonClick="CloseButton_Click">
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <TextBlock Text="Conexao SSH"
-                           FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource AccentBrush}"
-                           Margin="0,0,0,16"/>
+        <TabControl Margin="0,12,0,0"
+                    Background="{DynamicResource DevToolsWindowBackground}"
+                    BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                    BorderThickness="1">
+            <TabItem Header="Conexao SSH">
+                <Grid Margin="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                <Grid Margin="0,0,0,16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="16"/>
-                        <ColumnDefinition Width="160"/>
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="Host SSH (Bastion)" Style="{StaticResource DevToolsInputLabel}"/>
-                        <TextBox x:Name="SshHostInput" Style="{StaticResource DevToolsTextInput}"/>
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="2">
-                        <TextBlock Text="Porta SSH" Style="{StaticResource DevToolsInputLabel}"/>
-                        <TextBox x:Name="SshPortInput" Style="{StaticResource DevToolsTextInput}"/>
-                    </StackPanel>
-                </Grid>
-
-                <StackPanel Margin="0,0,0,16">
-                    <TextBlock Text="Usuario SSH" Style="{StaticResource DevToolsInputLabel}"/>
-                    <TextBox x:Name="SshUserInput" Style="{StaticResource DevToolsTextInput}"/>
-                </StackPanel>
-
-                <StackPanel Margin="0,0,0,16">
-                    <TextBlock Text="Arquivo de Identidade (Chave Privada)" Style="{StaticResource DevToolsInputLabel}"/>
-                    <Grid>
+                    <Grid Grid.Row="0" Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="12"/>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="160"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBox Grid.Column="0"
-                                 x:Name="IdentityFileInput"
-                                 Style="{StaticResource DevToolsTextInput}"/>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Host SSH (Bastion)" Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="SshHostInput" Style="{StaticResource DevToolsTextInput}"/>
+                        </StackPanel>
 
-                        <Button Grid.Column="2"
-                                Content="Procurar"
-                                Click="BrowseKey_Click"
-                                Style="{StaticResource DevToolsSecondaryButton}"/>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Porta SSH" Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="SshPortInput" Style="{StaticResource DevToolsTextInput}"/>
+                        </StackPanel>
                     </Grid>
-                </StackPanel>
 
-                <Separator Margin="0,0,0,16"/>
+                    <StackPanel Grid.Row="1" Margin="0,0,0,16">
+                        <TextBlock Text="Usuario SSH" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="SshUserInput" Style="{StaticResource DevToolsTextInput}"/>
+                    </StackPanel>
 
-                <TextBlock Text="Mapeamento do Tunel"
-                           FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource AccentBrush}"
-                           Margin="0,0,0,16"/>
+                    <c:PathSelector x:Name="IdentityFileSelector"
+                                    Grid.Row="2"
+                                    Title="Arquivo de Identidade (Chave Privada)"
+                                    IsFolderPicker="False"/>
+                </Grid>
+            </TabItem>
 
-                <Grid>
+            <TabItem Header="Mapeamento do Tunel">
+                <Grid Margin="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="16"/>
@@ -123,8 +108,8 @@
                         </StackPanel>
                     </StackPanel>
                 </Grid>
-            </StackPanel>
-        </ScrollViewer>
+            </TabItem>
+        </TabControl>
     </c:DevToolsToolFrame>
 </Window>
 

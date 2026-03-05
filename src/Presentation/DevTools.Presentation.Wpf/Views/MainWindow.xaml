@@ -793,103 +793,98 @@
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
-                                            
                                             <!-- Grupo: Regras de Filtragem -->
-                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                                <StackPanel>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                        <materialDesign:PackIcon Kind="FilterVariant" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Regras de Filtragem" Style="{DynamicResource DevToolsCardTitle}"/>
-                                                    </StackPanel>
-
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="20"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-
-                                                        <StackPanel>
-                                                            <TextBlock Text="Extensões Permitidas (ex: .cs, .ts)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="HarvestExtensions"
-                                                                 Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
-
-                                                        <StackPanel Grid.Column="2">
-                                                            <TextBlock Text="Pastas Ignoradas (ex: bin, obj)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="HarvestExcludeDirs"
-                                                                 Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
-                                                    </Grid>
-
-                                                    <StackPanel Margin="0,20,0,0" Width="200" HorizontalAlignment="Left">
-                                                        <TextBlock Text="Tamanho Máximo de Arquivo (KB)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                        <TextBox x:Name="HarvestMaxFileSizeInput" Style="{DynamicResource DevToolsTextInput}"/>
-                                                    </StackPanel>
+                                            <StackPanel Margin="0,0,0,16">
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                                    <materialDesign:PackIcon Kind="FilterVariant" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                    <TextBlock Text="Regras de Filtragem" Style="{DynamicResource DevToolsCardTitle}"/>
                                                 </StackPanel>
-                                            </materialDesign:Card>
+
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="20"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel>
+                                                        <TextBlock Text="Extensões Permitidas (ex: .cs, .ts)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="HarvestExtensions" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="2">
+                                                        <TextBlock Text="Pastas Ignoradas (ex: bin, obj)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="HarvestExcludeDirs" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
+                                                </Grid>
+
+                                                <StackPanel Margin="0,20,0,0" Width="280" HorizontalAlignment="Left">
+                                                    <TextBlock Text="Tamanho Máximo de Arquivo (KB)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                    <TextBox x:Name="HarvestMaxFileSizeInput" Style="{DynamicResource DevToolsTextInput}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,0,0,16"/>
 
                                             <!-- Grupo: Limites e Top -->
-                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                                <StackPanel>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                        <materialDesign:PackIcon Kind="ChartLine" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Limites Padrão" Style="{DynamicResource DevToolsCardTitle}"/>
+                                            <StackPanel Margin="0,0,0,16">
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                                    <materialDesign:PackIcon Kind="ChartLine" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                    <TextBlock Text="Limites Padrão" Style="{DynamicResource DevToolsCardTitle}"/>
+                                                </StackPanel>
+
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="20"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel>
+                                                        <TextBlock Text="Score Mínimo (0-100)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="HarvestMinScore" Style="{DynamicResource DevToolsTextInput}"/>
                                                     </StackPanel>
 
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="20"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        
-                                                        <StackPanel>
-                                                            <TextBlock Text="Score Mínimo (0-100)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="HarvestMinScore" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
-                                                        
-                                                        <StackPanel Grid.Column="2">
-                                                            <TextBlock Text="Top Arquivos (Quantidade)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="HarvestTopDefault" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
-                                                    </Grid>
-                                                </StackPanel>
-                                            </materialDesign:Card>
+                                                    <StackPanel Grid.Column="2">
+                                                        <TextBlock Text="Top Arquivos (Quantidade)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="HarvestTopDefault" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </StackPanel>
+
+                                            <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,0,0,16"/>
 
                                             <!-- Grupo: Pesos de IA -->
-                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                                <StackPanel>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                        <materialDesign:PackIcon Kind="Robot" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Pesos de Relevância (IA)" Style="{DynamicResource DevToolsCardTitle}"/>
+                                            <StackPanel Margin="0,0,0,8">
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                                    <materialDesign:PackIcon Kind="Robot" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                    <TextBlock Text="Pesos de Relevância (IA)" Style="{DynamicResource DevToolsCardTitle}"/>
+                                                </StackPanel>
+
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="20"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel>
+                                                        <TextBlock Text="Fan-In (Entradas)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="HarvestWeightFanIn" Style="{DynamicResource DevToolsTextInput}"/>
+
+                                                        <TextBlock Text="Densidade de Keywords" Style="{DynamicResource DevToolsInputLabel}" Margin="0,16,0,6"/>
+                                                        <TextBox x:Name="HarvestWeightDensity" Style="{DynamicResource DevToolsTextInput}"/>
                                                     </StackPanel>
 
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="20"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="2">
+                                                        <TextBlock Text="Fan-Out (Saídas)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="HarvestWeightFanOut" Style="{DynamicResource DevToolsTextInput}"/>
 
-                                                        <StackPanel>
-                                                            <TextBlock Text="Fan-In (Entradas)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="HarvestWeightFanIn" Style="{DynamicResource DevToolsTextInput}"/>
-
-                                                            <TextBlock Text="Densidade de Keywords" Style="{DynamicResource DevToolsInputLabel}" Margin="0,20,0,6"/>
-                                                            <TextBox x:Name="HarvestWeightDensity" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
-
-                                                        <StackPanel Grid.Column="2">
-                                                            <TextBlock Text="Fan-Out (Saídas)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="HarvestWeightFanOut" Style="{DynamicResource DevToolsTextInput}"/>
-
-                                                            <TextBlock Text="Penalidade Dead Code" Style="{DynamicResource DevToolsInputLabel}" Margin="0,20,0,6"/>
-                                                            <TextBox x:Name="HarvestWeightDeadCode" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
-                                                    </Grid>
-                                                </StackPanel>
-                                            </materialDesign:Card>
+                                                        <TextBlock Text="Penalidade Dead Code" Style="{DynamicResource DevToolsInputLabel}" Margin="0,16,0,6"/>
+                                                        <TextBox x:Name="HarvestWeightDeadCode" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </StackPanel>
 
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
                                                 <Button Content="Cancelar" Click="BackToSettingsList_Click" 

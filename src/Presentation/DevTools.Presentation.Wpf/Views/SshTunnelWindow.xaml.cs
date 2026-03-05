@@ -70,7 +70,7 @@ public partial class SshTunnelWindow : Window
         if (profile.Options.TryGetValue("ssh-host", out var sshHost)) SshHostInput.Text = sshHost;
         if (profile.Options.TryGetValue("ssh-port", out var sshPort)) SshPortInput.Text = sshPort;
         if (profile.Options.TryGetValue("ssh-user", out var sshUser)) SshUserInput.Text = sshUser;
-        if (profile.Options.TryGetValue("identity-file", out var identityFile)) IdentityFileInput.Text = identityFile;
+        if (profile.Options.TryGetValue("identity-file", out var identityFile)) IdentityFileSelector.SelectedPath = identityFile;
         if (profile.Options.TryGetValue("local-bind", out var localBind)) LocalBindInput.Text = localBind;
         if (profile.Options.TryGetValue("local-port", out var localPort)) LocalPortInput.Text = localPort;
         if (profile.Options.TryGetValue("remote-host", out var remoteHost)) RemoteHostInput.Text = remoteHost;
@@ -82,7 +82,7 @@ public partial class SshTunnelWindow : Window
         profile.Options["ssh-host"] = SshHostInput.Text;
         profile.Options["ssh-port"] = SshPortInput.Text;
         profile.Options["ssh-user"] = SshUserInput.Text;
-        profile.Options["identity-file"] = IdentityFileInput.Text;
+        profile.Options["identity-file"] = IdentityFileSelector.SelectedPath ?? string.Empty;
         profile.Options["local-bind"] = LocalBindInput.Text;
         profile.Options["local-port"] = LocalPortInput.Text;
         profile.Options["remote-host"] = RemoteHostInput.Text;
@@ -150,7 +150,7 @@ public partial class SshTunnelWindow : Window
             SshHost = SshHostInput.Text,
             SshPort = sshPort > 0 ? sshPort : 22,
             SshUser = SshUserInput.Text,
-            IdentityFile = IdentityFileInput.Text,
+            IdentityFile = IdentityFileSelector.SelectedPath ?? string.Empty,
             LocalBindHost = LocalBindInput.Text,
             LocalPort = localPort,
             RemoteHost = RemoteHostInput.Text,
@@ -165,7 +165,7 @@ public partial class SshTunnelWindow : Window
         if (string.IsNullOrWhiteSpace(SshHostInput.Text)) missing.Add("Host SSH");
         if (string.IsNullOrWhiteSpace(SshPortInput.Text)) missing.Add("Porta SSH");
         if (string.IsNullOrWhiteSpace(SshUserInput.Text)) missing.Add("Usuario SSH");
-        if (string.IsNullOrWhiteSpace(IdentityFileInput.Text)) missing.Add("Arquivo de Chave");
+        if (string.IsNullOrWhiteSpace(IdentityFileSelector.SelectedPath)) missing.Add("Arquivo de Chave");
         if (string.IsNullOrWhiteSpace(LocalBindInput.Text)) missing.Add("Bind Local");
         if (string.IsNullOrWhiteSpace(LocalPortInput.Text)) missing.Add("Porta Local");
         if (string.IsNullOrWhiteSpace(RemoteHostInput.Text)) missing.Add("Host Remoto");
@@ -205,19 +205,6 @@ public partial class SshTunnelWindow : Window
         MainFrame.StatusText = "Status: Parado";
         primaryButton.Content = "Conectar";
         primaryButton.Style = (Style)FindResource("PrimaryButtonStyle");
-    }
-
-    private void BrowseKey_Click(object sender, RoutedEventArgs e)
-    {
-        var dialog = new Microsoft.Win32.OpenFileDialog
-        {
-            Filter = "Key Files|*.pem;*.key;*.ppk|All Files|*.*",
-            Title = "Selecione o arquivo de chave privada"
-        };
-        if (dialog.ShowDialog() == true)
-        {
-            IdentityFileInput.Text = dialog.FileName;
-        }
     }
 
     private void SavePosition()

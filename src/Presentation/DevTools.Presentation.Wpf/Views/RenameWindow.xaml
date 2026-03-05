@@ -3,10 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         Title="Renomear Projeto .NET"
-        Height="780"
-        Width="1120"
-        MinWidth="1020"
-        MinHeight="700"
+        Height="670"
+        Width="1080"
+        MinWidth="980"
+        MinHeight="600"
         WindowStartupLocation="CenterOwner"
         Style="{StaticResource ModernWindowStyle}"
         ShowInTaskbar="False"
@@ -21,13 +21,7 @@
                          SecondaryButtonClick="CloseButton_Click">
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <TextBlock Text="Configuracao"
-                           FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource AccentBrush}"
-                           Margin="0,0,0,16"/>
-
+            <StackPanel Margin="0,12,0,0">
                 <c:PathSelector x:Name="RootPathSelector"
                                 Title="Pasta Raiz"
                                 IsFolderPicker="True"

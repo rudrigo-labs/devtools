@@ -6,10 +6,10 @@
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Organizador de Arquivos"
-        Height="780"
-        Width="1120"
-        MinWidth="1020"
-        MinHeight="700"
+        Height="670"
+        Width="1080"
+        MinWidth="980"
+        MinHeight="600"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
@@ -22,14 +22,8 @@
                          PrimaryButtonClick="RunButton_Click"
                          SecondaryButtonClick="CloseButton_Click"
                          CloseButtonClick="CloseButton_Click">
-        <StackPanel>
-            <TextBlock Text="Configuracao"
-                       FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
-                       FontWeight="SemiBold"
-                       Foreground="{DynamicResource AccentBrush}"
-                       Margin="0,0,0,16"/>
-
-            <c:PathSelector x:Name="InputPathSelector"
+        <StackPanel Margin="0,12,0,0">
+                <c:PathSelector x:Name="InputPathSelector"
                             Title="Pasta de Entrada"
                             IsFolderPicker="True"
                             Margin="0,0,0,16"/>

@@ -30,7 +30,14 @@
                      Style="{StaticResource DevToolsTextInput}"
                      IsReadOnly="True"
                      ToolTip="{Binding SelectedPath, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"/>
-            <Button Grid.Column="1" Content="Procurar" Style="{StaticResource DevToolsSecondaryButton}" Click="Browse_Click" ToolTip="Selecionar pasta/arquivo" Margin="10,0,0,0"/>
+            <Button Grid.Column="1"
+                    Content="Procurar"
+                    Style="{StaticResource DevToolsSecondaryButton}"
+                    Click="Browse_Click"
+                    ToolTip="Selecionar pasta/arquivo"
+                    MinWidth="112"
+                    Padding="12,8"
+                    Margin="8,0,0,0"/>
         </Grid>
     </StackPanel>
 </UserControl>

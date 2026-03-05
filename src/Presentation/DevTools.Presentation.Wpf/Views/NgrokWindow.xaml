@@ -7,10 +7,10 @@
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Ngrok Local Tunnel"
-        Height="780"
-        Width="1120"
-        MinWidth="1020"
-        MinHeight="700"
+        Height="670"
+        Width="1080"
+        MinWidth="980"
+        MinHeight="600"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
@@ -36,14 +36,8 @@
             </Grid.ColumnDefinitions>
 
             <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-                    <TextBlock Text="Configuracao"
-                               FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource AccentBrush}"
-                               Margin="0,0,0,12"/>
-
-                    <Border x:Name="OnboardingPanel"
+                <StackPanel Margin="0,12,0,0">
+                <Border x:Name="OnboardingPanel"
                             Background="{DynamicResource DevToolsSurface}"
                             BorderBrush="{DynamicResource DevToolsBrushBorder}"
                             BorderThickness="1"

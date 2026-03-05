@@ -15,6 +15,7 @@
         <ResourceDictionary Source="pack://application:,,,/DevTools.Presentation.Wpf;component/Theme/Controls/CheckBox.xaml"/>
         <ResourceDictionary Source="pack://application:,,,/DevTools.Presentation.Wpf;component/Theme/Controls/Scroll.xaml"/>
         <ResourceDictionary Source="pack://application:,,,/DevTools.Presentation.Wpf;component/Theme/Controls/Menu.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/DevTools.Presentation.Wpf;component/Theme/Controls/TabControl.xaml"/>
         <ResourceDictionary Source="pack://application:,,,/DevTools.Presentation.Wpf;component/Theme/Controls/Window.xaml"/>
 
         <!-- Components -->
