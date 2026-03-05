@@ -8,7 +8,7 @@ namespace DevTools.Presentation.Wpf.Views;
 
 public partial class AboutWindow : Window
 {
-    private const string RepositoryUrl = "https://github.com/rudrigo-labs/devtools";
+    private const string RepositoryUrl = "https://rudrigo-labs.github.io/devtools/";
 
     public AboutWindow()
     {
@@ -21,7 +21,7 @@ public partial class AboutWindow : Window
         var version = Assembly.GetEntryAssembly()?.GetName().Version;
         if (version != null)
         {
-            VersionText.Text = $"Versão: {version.Major}.{version.Minor}.{version.Build}";
+            VersionText.Text = $"Versao: {version.Major}.{version.Minor}.{version.Build}";
         }
     }
 
@@ -37,7 +37,7 @@ public partial class AboutWindow : Window
         }
         catch (Exception ex)
         {
-            UiMessageService.ShowError("Não foi possível abrir o link do repositório.", "Erro", ex);
+            UiMessageService.ShowError("Nao foi possivel abrir o site do DevTools.", "Erro", ex);
         }
     }
 

@@ -611,7 +611,21 @@ public partial class MainWindow : Window
         var profiles = _profileUIService.LoadProfiles(_currentToolForProfiles);
         ToolProfilesList.ItemsSource = null;
         ToolProfilesList.ItemsSource = profiles;
-        
+
+        if (profiles.Count == 0)
+        {
+            var newProfile = new ToolProfile
+            {
+                Name = "Novo Perfil 1"
+            };
+
+            profiles.Add(newProfile);
+            ToolProfilesList.ItemsSource = null;
+            ToolProfilesList.ItemsSource = profiles;
+            ToolProfilesList.SelectedItem = newProfile;
+            return;
+        }
+
         ToolProfileEditForm.Visibility = Visibility.Collapsed;
         ToolProfilesList.SelectedItem = null;
     }

@@ -19,7 +19,7 @@
                          Title="Sobre o DevTools"
                          HelpText="Informações do produto e autoria."
                          PrimaryButtonContent="Fechar"
-                         SecondaryButtonContent="Abrir GitHub"
+                         SecondaryButtonContent="Abrir Site"
                          PrimaryButtonClick="CloseButton_Click"
                          SecondaryButtonClick="OpenGitHubButton_Click"
                          CloseButtonClick="CloseButton_Click">
