@@ -3,18 +3,25 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:c="clr-namespace:DevTools.Presentation.Wpf.Components"
         mc:Ignorable="d"
         Title="Ngrok Local Tunnel"
-        Height="720"
-        Width="900"
+        Height="760"
+        Width="1180"
+        MinWidth="1000"
+        MinHeight="700"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Style="{StaticResource ModernWindowStyle}">
 
+    <Window.Resources>
+        <sys:Double x:Key="DevToolsContentMaxWidth">1280</sys:Double>
+    </Window.Resources>
+
     <c:DevToolsToolFrame x:Name="MainFrame"
-                         Title="Expor Porta (Ngrok)"
-                         HelpText="Onboarding assistido para criacao e uso de tuneis ngrok."
+                         Title="Expor Porta com Ngrok"
+                         HelpText="Configure o token e inicie tuneis HTTP para sua porta local."
                          StatusText="Ngrok nao configurado."
                          PrimaryButtonContent="Iniciar Tunel"
                          SecondaryButtonContent="Parar Tunel"
@@ -22,77 +29,109 @@
                          SecondaryButtonClick="StopButton_Click"
                          CloseButtonClick="CloseButton_Click">
         <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="360"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Row="0" Margin="0,0,0,16">
-                <Border x:Name="OnboardingPanel"
-                        Background="{DynamicResource DevToolsSurface}"
-                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                        BorderThickness="1"
-                        CornerRadius="6"
-                        Padding="16"
-                        Margin="0,0,0,12"
-                        Visibility="Collapsed">
-                    <StackPanel>
-                        <TextBlock Text="Ngrok nao esta configurado."
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource DevToolsTextPrimary}"/>
-                        <TextBlock Text="Para usar esta funcionalidade e necessario informar seu Authtoken do ngrok."
-                                   Margin="0,8,0,0"
-                                   TextWrapping="Wrap"
-                                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
-                        <TextBlock Text="Se voce ja possui uma conta no ngrok, basta inserir seu token abaixo. Caso ainda nao tenha uma conta, voce pode criar uma gratuitamente."
-                                   Margin="0,4,0,0"
-                                   TextWrapping="Wrap"
-                                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock Text="Configuracao"
+                               FontSize="{DynamicResource DevToolsFontSize.SectionTitle}"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource AccentBrush}"
+                               Margin="0,0,0,12"/>
 
-                        <WrapPanel Margin="0,12,0,0">
-                            <Button Content="Criar conta no ngrok"
-                                    Click="CreateNgrokAccount_Click"
-                                    Margin="0,0,10,10"
-                                    Style="{StaticResource DevToolsSecondaryButton}"/>
-                            <Button Content="Ver guia passo a passo"
-                                    Click="OpenOnboardingHelp_Click"
-                                    Margin="0,0,0,10"
-                                    Style="{StaticResource DevToolsSecondaryButton}"/>
-                        </WrapPanel>
+                    <Border x:Name="OnboardingPanel"
+                            Background="{DynamicResource DevToolsSurface}"
+                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="16"
+                            Margin="0,0,0,12"
+                            Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="Ngrok nao esta configurado."
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource DevToolsTextPrimary}"/>
 
-                        <TextBlock Text="Authtoken do ngrok" Style="{StaticResource DevToolsInputLabel}"/>
-                        <TextBox x:Name="AuthTokenInput"
-                                 MinWidth="360"
-                                 Margin="0,0,0,12"
-                                 Style="{StaticResource DevToolsTextInput}"/>
+                            <TextBlock Text="Para usar esta funcionalidade e necessario informar seu Authtoken."
+                                       Margin="0,8,0,0"
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource DevToolsTextSecondary}"/>
 
-                        <Button Content="Salvar configuracao"
-                                HorizontalAlignment="Right"
-                                Click="SaveNgrokToken_Click"
-                                Style="{StaticResource DevToolsPrimaryButton}"/>
-                    </StackPanel>
-                </Border>
+                            <TextBlock Text="Se voce ainda nao tem conta, crie gratuitamente e siga o guia."
+                                       Margin="0,4,0,0"
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource DevToolsTextSecondary}"/>
 
-                <Border x:Name="TunnelConfigPanel"
-                        Background="{DynamicResource DevToolsSurface}"
-                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                        BorderThickness="1"
-                        CornerRadius="6"
-                        Padding="16"
-                        Visibility="Collapsed">
-                    <StackPanel>
-                        <TextBlock Text="Porta Local" Style="{StaticResource DevToolsInputLabel}"/>
-                        <TextBox x:Name="PortInput"
-                                 Text="5000"
-                                 Width="180"
-                                 PreviewTextInput="NumberValidationTextBox"
-                                 Style="{StaticResource DevToolsTextInput}"/>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
+                            <Grid Margin="0,12,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-            <Grid Grid.Row="1">
+                                <Button Grid.Column="0"
+                                        Content="Criar conta"
+                                        Click="CreateNgrokAccount_Click"
+                                        Style="{StaticResource DevToolsSecondaryButton}"/>
+
+                                <Button Grid.Column="2"
+                                        Content="Ver guia"
+                                        Click="OpenOnboardingHelp_Click"
+                                        Style="{StaticResource DevToolsSecondaryButton}"/>
+                            </Grid>
+
+                            <TextBlock Text="Authtoken do ngrok" Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="AuthTokenInput"
+                                     Margin="0,0,0,12"
+                                     Style="{StaticResource DevToolsTextInput}"/>
+
+                            <Button Content="Salvar configuracao"
+                                    HorizontalAlignment="Right"
+                                    Click="SaveNgrokToken_Click"
+                                    Style="{StaticResource DevToolsPrimaryButton}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border x:Name="TunnelConfigPanel"
+                            Background="{DynamicResource DevToolsSurface}"
+                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="16"
+                            Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="Tunel HTTP Local"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource DevToolsTextPrimary}"
+                                       Margin="0,0,0,12"/>
+
+                            <TextBlock Text="Porta local" Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="PortInput"
+                                     Text="5000"
+                                     Width="200"
+                                     PreviewTextInput="NumberValidationTextBox"
+                                     Style="{StaticResource DevToolsTextInput}"/>
+
+                            <TextBlock Text="Exemplo: 5000 para expor http://localhost:5000"
+                                       Margin="0,8,0,0"
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource DevToolsTextSecondary}"
+                                       FontSize="{DynamicResource DevToolsFontSize.Status}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Content="Matar Processos Ngrok"
+                            Margin="0,12,0,0"
+                            Click="KillAll_Click"
+                            Style="{StaticResource DangerButtonStyle}"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -110,63 +149,65 @@
                             Style="{StaticResource DevToolsSecondaryButton}"/>
                 </Grid>
 
-                <Grid Grid.Row="1">
-                    <ListBox x:Name="TunnelsList"
-                             Background="Transparent"
-                             BorderThickness="0"
-                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="{DynamicResource DevToolsSurface}"
-                                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                                        BorderThickness="1"
-                                        CornerRadius="6"
-                                        Margin="0,0,0,8"
-                                        Padding="12">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
+                <Border Grid.Row="1"
+                        Background="{DynamicResource DevToolsSurface}"
+                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                        BorderThickness="1"
+                        CornerRadius="6"
+                        Padding="12">
+                    <Grid>
+                        <ListBox x:Name="TunnelsList"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource DevToolsWindowBackground}"
+                                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Margin="0,0,0,8"
+                                            Padding="12">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding PublicUrl}"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource AccentBrush}"
-                                                       FontSize="14"/>
-                                            <TextBlock Text="{Binding Config.Addr}"
-                                                       Foreground="{DynamicResource SecondaryTextBrush}"
-                                                       Margin="0,4,0,0"/>
-                                        </StackPanel>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding PublicUrl}"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource AccentBrush}"
+                                                           FontSize="14"/>
+                                                <TextBlock Text="{Binding Proto, StringFormat=Protocolo: {0}}"
+                                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                                           Margin="0,4,0,0"/>
+                                                <TextBlock Text="{Binding Addr, StringFormat=Destino local: {0}}"
+                                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                                           Margin="0,2,0,0"/>
+                                            </StackPanel>
 
-                                        <Button Grid.Column="1"
-                                                Content="Copiar"
-                                                Click="CopyUrl_Click"
-                                                Tag="{Binding PublicUrl}"
-                                                Style="{StaticResource DevToolsSecondaryButton}"
-                                                Margin="12,0,0,0"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                                            <Button Grid.Column="1"
+                                                    Content="Copiar URL"
+                                                    Click="CopyUrl_Click"
+                                                    Tag="{Binding PublicUrl}"
+                                                    Style="{StaticResource DevToolsSecondaryButton}"
+                                                    Margin="12,0,0,0"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
 
-                    <TextBlock x:Name="EmptyStateText"
-                               Text="Nenhum tunel ativo."
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource SecondaryTextBrush}"
-                               Visibility="Collapsed"/>
-                </Grid>
+                        <TextBlock x:Name="EmptyStateText"
+                                   Text="Nenhum tunel ativo."
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
+                                   Visibility="Collapsed"/>
+                    </Grid>
+                </Border>
             </Grid>
-
-            <StackPanel Grid.Row="2"
-                        Orientation="Horizontal"
-                        Margin="0,16,0,0">
-                <Button Content="Matar Processos Ngrok"
-                        Click="KillAll_Click"
-                        Style="{StaticResource DangerButtonStyle}"/>
-            </StackPanel>
         </Grid>
     </c:DevToolsToolFrame>
 </Window>

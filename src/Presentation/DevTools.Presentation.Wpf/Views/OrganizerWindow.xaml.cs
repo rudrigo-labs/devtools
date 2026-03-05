@@ -1,4 +1,3 @@
-﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -22,14 +21,6 @@ public partial class OrganizerWindow : Window
 
         if (!string.IsNullOrEmpty(_settingsService.Settings.LastOrganizerInputPath))
             InputPathSelector.SelectedPath = _settingsService.Settings.LastOrganizerInputPath;
-
-        Loaded += (s, e) =>
-        {
-            var desktopWorkingArea = SystemParameters.WorkArea;
-            Left = desktopWorkingArea.Right - ActualWidth - 20;
-            Top = desktopWorkingArea.Bottom - ActualHeight - 20;
-            Activate();
-        };
 
         Deactivated += (s, e) =>
         {
@@ -85,3 +76,4 @@ public partial class OrganizerWindow : Window
         return true;
     }
 }
+

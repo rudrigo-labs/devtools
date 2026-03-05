@@ -93,15 +93,14 @@ public sealed class DetachedWindowLaunchStrategy : IToolLaunchStrategy
         {
             window.Owner = mainWindow;
             window.ShowInTaskbar = false;
-            window.WindowStartupLocation = WindowStartupLocation.Manual;
+            window.WindowStartupLocation = mainWindow.IsVisible
+                ? WindowStartupLocation.CenterOwner
+                : WindowStartupLocation.CenterScreen;
         }
-
-        window.Loaded += (_, __) =>
+        else
         {
-            var screen = SystemParameters.WorkArea;
-            window.Left = screen.Right - window.ActualWidth - 20;
-            window.Top = screen.Bottom - window.ActualHeight - 20;
-        };
+            window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
     }
 }
 
