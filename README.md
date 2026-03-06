@@ -45,13 +45,13 @@ build\build_installer.bat 1.0.0
 
 ## Documentacao oficial
 
-- Manual detalhado: [MANUAL.md](MANUAL.md)
-- Configuracoes e perfis: [docs/CONFIGURACOES_E_PERFIS_DETALHADO.md](docs/CONFIGURACOES_E_PERFIS_DETALHADO.md)
-- Documento tecnico: [docs/TechnicalDoc.md](docs/TechnicalDoc.md)
-- Cobertura de testes: [docs/INTEGRATION_TEST_COVERAGE.md](docs/INTEGRATION_TEST_COVERAGE.md)
-- Testes manuais pendentes: [docs/TESTES_MANUAIS_PENDENTES_2026-03-05.md](docs/TESTES_MANUAIS_PENDENTES_2026-03-05.md)
-- Pendencias da proxima versao: [docs/PENDENCIAS_UI_E_HUB.md](docs/PENDENCIAS_UI_E_HUB.md)
-- Apresentacao nao tecnica (curriculo/LinkedIn): [docs/APRESENTACAO_DEVTOOLS_LINKEDIN.md](docs/APRESENTACAO_DEVTOOLS_LINKEDIN.md)
+- Manual detalhado: [docs/ativos/MANUAL.md](docs/ativos/MANUAL.md)
+- Configuracoes e perfis: [docs/ativos/CONFIGURACOES_E_PERFIS_DETALHADO.md](docs/ativos/CONFIGURACOES_E_PERFIS_DETALHADO.md)
+- Documento tecnico: [docs/ativos/TechnicalDoc.md](docs/ativos/TechnicalDoc.md)
+- Cobertura de testes: [docs/relatorios/INTEGRATION_TEST_COVERAGE.md](docs/relatorios/INTEGRATION_TEST_COVERAGE.md)
+- Testes manuais pendentes: [docs/relatorios/TESTES_MANUAIS_PENDENTES_2026-03-05.md](docs/relatorios/TESTES_MANUAIS_PENDENTES_2026-03-05.md)
+- Pendencias da proxima versao: [docs/pendencias/PENDENCIAS_UI_E_HUB.md](docs/pendencias/PENDENCIAS_UI_E_HUB.md)
+- Apresentacao nao tecnica (curriculo/LinkedIn): [docs/ativos/APRESENTACAO_DEVTOOLS_LINKEDIN.md](docs/ativos/APRESENTACAO_DEVTOOLS_LINKEDIN.md)
 
 ## Licenca
 

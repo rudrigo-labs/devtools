@@ -25,7 +25,7 @@ O script faz:
 
 1. `dotnet publish` da WPF em `Release` para `win-x64`
 2. geracao do instalador com `build/DEVTOOLS_SETUP_BUILD.iss`
-3. inclusao do manual oficial (`MANUAL.md`) no instalador
+3. inclusao do manual oficial (`docs/ativos/MANUAL.md`) no instalador
 
 Saida:
 
