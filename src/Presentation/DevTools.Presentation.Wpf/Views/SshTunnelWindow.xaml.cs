@@ -18,6 +18,7 @@ public partial class SshTunnelWindow : Window
     private readonly ConfigService _configService;
     private readonly ProfileManager _profileManager;
     private readonly TunnelService _tunnelService;
+    private readonly SshKeyService _sshKeyService;
     private readonly bool _ownsTunnelService;
     private ToolProfile? _currentProfile;
 
@@ -34,7 +35,9 @@ public partial class SshTunnelWindow : Window
         _configService = configService;
         _profileManager = profileManager;
 
-        _tunnelService = sharedTunnelService ?? new TunnelService(new SystemProcessRunner());
+        var processRunner = new SystemProcessRunner();
+        _tunnelService = sharedTunnelService ?? new TunnelService(processRunner);
+        _sshKeyService = new SshKeyService(processRunner);
         _ownsTunnelService = sharedTunnelService == null;
 
         Loaded += OnLoaded;
@@ -230,5 +233,39 @@ public partial class SshTunnelWindow : Window
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    private async void GenerateKeyButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (GenerateKeyButton == null)
+        {
+            return;
+        }
+
+        GenerateKeyButton.IsEnabled = false;
+        var oldContent = GenerateKeyButton.Content;
+        GenerateKeyButton.Content = "Gerando...";
+
+        try
+        {
+            var result = await _sshKeyService.GenerateAsync();
+            IdentityFileSelector.SelectedPath = result.PrivateKeyPath;
+            UiMessageService.ShowInfo(
+                $"Chave SSH gerada com sucesso.\n\nPrivada: {result.PrivateKeyPath}\nPublica: {result.PublicKeyPath}",
+                "Chave SSH criada");
+        }
+        catch (SshTunnelException ex)
+        {
+            UiMessageService.ShowError(ex.Message, "Erro ao gerar chave SSH", ex);
+        }
+        catch (Exception ex)
+        {
+            UiMessageService.ShowError("Falha inesperada ao gerar chave SSH.", "Erro ao gerar chave SSH", ex);
+        }
+        finally
+        {
+            GenerateKeyButton.IsEnabled = true;
+            GenerateKeyButton.Content = oldContent;
+        }
     }
 }

@@ -92,10 +92,21 @@
                             <TextBox x:Name="SshUserInput" Style="{StaticResource DevToolsTextInput}"/>
                         </StackPanel>
 
-                        <c:PathSelector x:Name="IdentityFileSelector"
-                                        Grid.Row="2"
-                                        Title="Arquivo de Identidade (Chave Privada)"
-                                        IsFolderPicker="False"/>
+                        <StackPanel Grid.Row="2">
+                            <c:PathSelector x:Name="IdentityFileSelector"
+                                            Title="Arquivo de Identidade (Chave Privada)"
+                                            IsFolderPicker="False"/>
+
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Right"
+                                        Margin="0,8,0,0">
+                                <Button x:Name="GenerateKeyButton"
+                                        Content="Gerar chave SSH"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        MinWidth="170"
+                                        Click="GenerateKeyButton_Click"/>
+                            </StackPanel>
+                        </StackPanel>
                     </Grid>
                 </TabItem>
 
