@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
 using DevTools.Core.Configuration;
-using DevTools.Core.Models;
 using DevTools.Presentation.Wpf.Services;
 using DevTools.Rename.Engine;
 using DevTools.Rename.Models;
@@ -14,15 +13,12 @@ public partial class RenameWindow : Window
 {
     private readonly JobManager _jobManager = null!;
     private readonly SettingsService _settingsService = null!;
-    private readonly ProfileManager _profileManager = null!;
-    private ToolProfile? _currentProfile;
 
-    public RenameWindow(JobManager jobManager, SettingsService settingsService, ProfileManager profileManager)
+    public RenameWindow(JobManager jobManager, SettingsService settingsService, ToolConfigurationManager toolConfigurationManager)
     {
         InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
-        _profileManager = profileManager;
 
         Loaded += OnLoaded;
     }
@@ -35,15 +31,19 @@ public partial class RenameWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        _currentProfile = _profileManager?.GetDefaultProfile("Rename");
-        if (_currentProfile != null)
-        {
-            if (_currentProfile.Options.TryGetValue("old-text", out var old)) OldTextBox.Text = old;
-            if (_currentProfile.Options.TryGetValue("new-text", out var newText)) NewTextBox.Text = newText;
-            if (_currentProfile.Options.TryGetValue("include", out var inc)) IncludeBox.Text = inc;
-            if (_currentProfile.Options.TryGetValue("exclude", out var exc)) ExcludeBox.Text = exc;
-            return;
-        }
+        if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastRenameRootPath))
+            RootPathSelector.SelectedPath = _settingsService.Settings.LastRenameRootPath;
+        if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastRenameInclude))
+            IncludeBox.Text = _settingsService.Settings.LastRenameInclude;
+        if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastRenameExclude))
+            ExcludeBox.Text = _settingsService.Settings.LastRenameExclude;
+        if (_settingsService.Settings.LastRenameDryRun.HasValue)
+            DryRunCheck.IsChecked = _settingsService.Settings.LastRenameDryRun.Value;
+        if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastRenameUndoLogPath))
+            UndoLogPathInput.Text = _settingsService.Settings.LastRenameUndoLogPath;
+        if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastRenameReportPath))
+            ReportPathInput.Text = _settingsService.Settings.LastRenameReportPath;
+        MaxDiffLinesInput.Text = (_settingsService.Settings.LastRenameMaxDiffLinesPerFile ?? 200).ToString();
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -74,6 +74,9 @@ public partial class RenameWindow : Window
         var dryRun = DryRunCheck.IsChecked ?? false;
         var include = IncludeBox.Text;
         var exclude = ExcludeBox.Text;
+        var undoLogPath = UndoLogPathInput.Text;
+        var reportPath = ReportPathInput.Text;
+        var maxDiffLines = int.TryParse(MaxDiffLinesInput.Text, out var parsedMaxDiff) ? parsedMaxDiff : 200;
 
         if (RememberSettingsCheck.IsChecked == true)
         {
@@ -81,16 +84,10 @@ public partial class RenameWindow : Window
             _settingsService.Settings.LastRenameInclude = include;
             _settingsService.Settings.LastRenameExclude = exclude;
             _settingsService.Settings.LastRenameDryRun = dryRun;
+            _settingsService.Settings.LastRenameUndoLogPath = undoLogPath;
+            _settingsService.Settings.LastRenameReportPath = reportPath;
+            _settingsService.Settings.LastRenameMaxDiffLinesPerFile = maxDiffLines;
             _settingsService.Save();
-
-            if (_currentProfile != null)
-            {
-                _currentProfile.Options["old-text"] = oldText;
-                _currentProfile.Options["new-text"] = newText;
-                _currentProfile.Options["include"] = include ?? string.Empty;
-                _currentProfile.Options["exclude"] = exclude ?? string.Empty;
-                _profileManager.SaveProfile("Rename", _currentProfile);
-            }
         }
 
         var request = new RenameRequest(
@@ -102,7 +99,10 @@ public partial class RenameWindow : Window
             IncludeGlobs: string.IsNullOrWhiteSpace(include) ? null : include.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
             ExcludeGlobs: string.IsNullOrWhiteSpace(exclude) ? null : exclude.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
             BackupEnabled: backup,
-            WriteUndoLog: undo
+            WriteUndoLog: undo,
+            UndoLogPath: string.IsNullOrWhiteSpace(undoLogPath) ? null : undoLogPath.Trim(),
+            ReportPath: string.IsNullOrWhiteSpace(reportPath) ? null : reportPath.Trim(),
+            MaxDiffLinesPerFile: maxDiffLines
         );
 
         var engine = new RenameEngine();
@@ -141,7 +141,14 @@ public partial class RenameWindow : Window
             return false;
         }
 
+        if (!string.IsNullOrWhiteSpace(MaxDiffLinesInput.Text) && (!int.TryParse(MaxDiffLinesInput.Text, out var maxDiff) || maxDiff <= 0))
+        {
+            errorMessage = "Max Diff Lines por Arquivo deve ser um número inteiro maior que zero.";
+            return false;
+        }
+
         errorMessage = string.Empty;
         return true;
     }
 }
+

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -20,7 +20,7 @@ public class TrayService : IDisposable
     private readonly JobManager _jobManager;
     private readonly SettingsService _settingsService;
     private readonly ConfigService _configService;
-    private readonly ProfileManager _profileManager;
+    private readonly ToolConfigurationManager _toolConfigurationManager;
     private readonly GoogleDriveService _googleDriveService;
     private readonly TunnelService _sharedTunnelService;
 
@@ -38,12 +38,12 @@ public class TrayService : IDisposable
     public bool HasActiveTunnel => _sharedTunnelService.IsOn;
     public bool IsInitialized => _taskbarIcon != null;
 
-    public TrayService(JobManager jobManager, SettingsService settingsService, ConfigService configService, ProfileManager profileManager, GoogleDriveService googleDriveService)
+    public TrayService(JobManager jobManager, SettingsService settingsService, ConfigService configService, ToolConfigurationManager toolConfigurationManager, GoogleDriveService googleDriveService)
     {
         _jobManager = jobManager;
         _settingsService = settingsService;
         _configService = configService;
-        _profileManager = profileManager;
+        _toolConfigurationManager = toolConfigurationManager;
         _googleDriveService = googleDriveService;
         _sharedTunnelService = new TunnelService(new SystemProcessRunner());
 
@@ -51,7 +51,7 @@ public class TrayService : IDisposable
             .Add(_jobManager)
             .Add(_settingsService)
             .Add(_configService)
-            .Add(_profileManager)
+            .Add(_toolConfigurationManager)
             .Add(_googleDriveService)
             .Add(_sharedTunnelService);
 
@@ -284,7 +284,7 @@ public class TrayService : IDisposable
             Factory = services => new HarvestWindow(
                 services.GetRequiredService<JobManager>(),
                 services.GetRequiredService<SettingsService>(),
-                services.GetRequiredService<ProfileManager>()),
+                services.GetRequiredService<ToolConfigurationManager>()),
             Category = ToolCategory.Productivity,
             Order = 50,
             IconKey = "Icon.Harvest"
@@ -298,7 +298,7 @@ public class TrayService : IDisposable
             Factory = services => new SearchTextWindow(
                 services.GetRequiredService<JobManager>(),
                 services.GetRequiredService<SettingsService>(),
-                services.GetRequiredService<ProfileManager>()),
+                services.GetRequiredService<ToolConfigurationManager>()),
             Category = ToolCategory.Productivity,
             Order = 60,
             IconKey = "Icon.Search"
@@ -313,7 +313,7 @@ public class TrayService : IDisposable
                 services.GetRequiredService<JobManager>(),
                 services.GetRequiredService<SettingsService>(),
                 services.GetRequiredService<ConfigService>(),
-                services.GetRequiredService<ProfileManager>()),
+                services.GetRequiredService<ToolConfigurationManager>()),
             Category = ToolCategory.Infrastructure,
             Order = 70,
             IconKey = "Icon.Migrations"
@@ -340,7 +340,7 @@ public class TrayService : IDisposable
             Factory = services => new RenameWindow(
                 services.GetRequiredService<JobManager>(),
                 services.GetRequiredService<SettingsService>(),
-                services.GetRequiredService<ProfileManager>()),
+                services.GetRequiredService<ToolConfigurationManager>()),
             Category = ToolCategory.Productivity,
             Order = 90,
             IconKey = "Icon.Rename"
@@ -367,7 +367,7 @@ public class TrayService : IDisposable
             Factory = services => new SnapshotWindow(
                 services.GetRequiredService<JobManager>(),
                 services.GetRequiredService<SettingsService>(),
-                services.GetRequiredService<ProfileManager>()),
+                services.GetRequiredService<ToolConfigurationManager>()),
             Category = ToolCategory.Infrastructure,
             Order = 110,
             IconKey = "Icon.Snapshot"
@@ -382,7 +382,7 @@ public class TrayService : IDisposable
                 services.GetRequiredService<JobManager>(),
                 services.GetRequiredService<SettingsService>(),
                 services.GetRequiredService<ConfigService>(),
-                services.GetRequiredService<ProfileManager>(),
+                services.GetRequiredService<ToolConfigurationManager>(),
                 services.GetRequiredService<TunnelService>()),
             Category = ToolCategory.Infrastructure,
             Order = 120,
@@ -519,3 +519,4 @@ public class TrayService : IDisposable
         });
     }
 }
+

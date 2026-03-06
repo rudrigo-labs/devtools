@@ -33,7 +33,9 @@ public partial class OrganizerWindow : Window
     private void RunButton_Click(object sender, RoutedEventArgs e)
     {
         var inputPath = InputPathSelector.SelectedPath;
-        var outputPath = OutputPathSelector.SelectedPath;
+        var outputPath = string.IsNullOrWhiteSpace(OutputPathSelector.SelectedPath)
+            ? null
+            : OutputPathSelector.SelectedPath;
         var simulate = SimulateCheck.IsChecked ?? false;
 
         if (!ValidateInputs(out var validationError))
@@ -63,9 +65,9 @@ public partial class OrganizerWindow : Window
 
     private bool ValidateInputs(out string errorMessage)
     {
-        if (string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath) || string.IsNullOrWhiteSpace(OutputPathSelector.SelectedPath))
+        if (string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath))
         {
-            errorMessage = "Os campos abaixo nao podem ficar em branco:\n- Pasta de Entrada\n- Pasta de Saida";
+            errorMessage = "Os campos abaixo nao podem ficar em branco:\n- Pasta de Entrada";
             return false;
         }
 

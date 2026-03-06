@@ -44,7 +44,39 @@
                               Content="Case Sensitive"
                               Style="{StaticResource DevToolsCheckBox}"
                               Margin="0,0,20,8"/>
+                    <CheckBox x:Name="WholeWordCheck"
+                              Content="Palavra Inteira"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              Margin="0,0,20,8"/>
+                    <CheckBox x:Name="SkipBinaryFilesCheck"
+                              Content="Ignorar Binários"
+                              IsChecked="True"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              Margin="0,0,20,8"/>
+                    <CheckBox x:Name="ReturnLinesCheck"
+                              Content="Retornar Linhas"
+                              IsChecked="True"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              Margin="0,0,20,8"/>
                 </WrapPanel>
+
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Tamanho Máximo por Arquivo (KB) (Opcional)" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="MaxFileSizeKbInput" Style="{StaticResource DevToolsTextInput}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Máximo de Ocorrências por Arquivo (0 = sem limite)" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="MaxMatchesPerFileInput" Style="{StaticResource DevToolsTextInput}" Text="0"/>
+                    </StackPanel>
+                </Grid>
 
                 <Grid Margin="0,0,0,16">
                     <Grid.ColumnDefinitions>

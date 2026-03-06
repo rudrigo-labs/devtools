@@ -1,4 +1,4 @@
-# DevTools - Cobertura de Testes (Integracao/Smoke)
+﻿# DevTools - Cobertura de Testes (Integracao/Smoke)
 
 Data de referencia: 2026-03-05
 
@@ -10,7 +10,7 @@ Data de referencia: 2026-03-05
 | Registry de ferramentas | `src/Tools/DevTools.Tests/ToolRegistryBehaviorTests.cs` | Filtro, ordenacao e override por ID |
 | Simulacao de uso WPF | `src/Tools/DevTools.Tests/ToolUsageSimulationTests.cs` | Fluxo ponta a ponta de abertura/uso das ferramentas |
 | Validacao de Google Drive na UI | `src/Tools/DevTools.Tests/MainWindowGoogleDriveValidationTests.cs` | Campos obrigatorios e comportamento do painel |
-| Persistencia SQLite | `src/Tools/DevTools.Tests/SqliteStoresIntegrationTests.cs` | Settings, profiles e metadados |
+| Persistencia SQLite | `src/Tools/DevTools.Tests/SqliteStoresIntegrationTests.cs` | Settings, configurations e metadados |
 | Notas (engine e backup) | `src/Tools/DevTools.Tests/NotesEngineIntegrationTests.cs`, `NotesBackupVolumeIntegrationTests.cs` | CRUD, listagem, backup/import e conflitos |
 | Backend bootstrap | `src/Tools/DevTools.Tests/StorageBackendAndBootstrapperTests.cs` | Resolucao de backend e inicializacao SQLite |
 
@@ -74,3 +74,4 @@ Motivo do `Skip`:
 Foi feita validacao bypass ad-hoc dos 2 cenarios skipped em ambiente local, registrada em:
 
 - `docs/RELATORIO_TESTES_BYPASS_WPF_2026-03-05.md`
+

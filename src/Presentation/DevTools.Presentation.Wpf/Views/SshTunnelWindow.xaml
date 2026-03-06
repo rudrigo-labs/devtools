@@ -92,7 +92,32 @@
                             <TextBox x:Name="SshUserInput" Style="{StaticResource DevToolsTextInput}"/>
                         </StackPanel>
 
-                        <StackPanel Grid.Row="2">
+                        <Grid Grid.Row="2" Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="220"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="StrictHostKeyChecking" Style="{StaticResource DevToolsInputLabel}"/>
+                                <ComboBox x:Name="StrictHostKeyCheckingCombo"
+                                          Style="{StaticResource DevToolsSelectInput}"
+                                          SelectedIndex="0">
+                                    <ComboBoxItem Content="Default" Tag="Default"/>
+                                    <ComboBoxItem Content="Yes" Tag="Yes"/>
+                                    <ComboBoxItem Content="No" Tag="No"/>
+                                    <ComboBoxItem Content="AcceptNew" Tag="AcceptNew"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Connect Timeout (s) (Opcional)" Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="ConnectTimeoutInput" Style="{StaticResource DevToolsTextInput}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Grid.Row="3">
                             <c:PathSelector x:Name="IdentityFileSelector"
                                             Title="Arquivo de Identidade (Chave Privada)"
                                             IsFolderPicker="False"/>

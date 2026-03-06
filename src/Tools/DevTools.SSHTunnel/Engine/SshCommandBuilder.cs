@@ -1,10 +1,10 @@
-using DevTools.SSHTunnel.Models;
+﻿using DevTools.SSHTunnel.Models;
 
 namespace DevTools.SSHTunnel.Engine;
 
 public static class SshCommandBuilder
 {
-    public static string BuildArgs(TunnelProfile p)
+    public static string BuildArgs(TunnelConfiguration p)
     {
         var parts = new List<string>
         {
@@ -84,3 +84,4 @@ public static class SshCommandBuilder
         };
     }
 }
+

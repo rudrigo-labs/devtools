@@ -1,4 +1,4 @@
-using DevTools.Presentation.Wpf.Persistence.Entities;
+﻿using DevTools.Presentation.Wpf.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevTools.Presentation.Wpf.Persistence;
@@ -10,7 +10,7 @@ public sealed class DevToolsDbContext : DbContext
     }
 
     public DbSet<AppSettingEntity> AppSettings => Set<AppSettingEntity>();
-    public DbSet<ToolProfileEntity> ToolProfiles => Set<ToolProfileEntity>();
+    public DbSet<ToolConfigurationEntity> ToolConfigurations => Set<ToolConfigurationEntity>();
     public DbSet<NotesSettingsEntity> NotesSettings => Set<NotesSettingsEntity>();
     public DbSet<GoogleDriveSettingsEntity> GoogleDriveSettings => Set<GoogleDriveSettingsEntity>();
     public DbSet<NoteIndexEntity> NoteIndex => Set<NoteIndexEntity>();
@@ -26,9 +26,9 @@ public sealed class DevToolsDbContext : DbContext
             entity.Property(x => x.UpdatedAtUtc).HasColumnName("updated_at").IsRequired();
         });
 
-        modelBuilder.Entity<ToolProfileEntity>(entity =>
+        modelBuilder.Entity<ToolConfigurationEntity>(entity =>
         {
-            entity.ToTable("tool_profiles");
+            entity.ToTable("tool_configurations");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnName("id");
             entity.Property(x => x.ToolKey).HasColumnName("tool_key").IsRequired();
@@ -37,7 +37,7 @@ public sealed class DevToolsDbContext : DbContext
             entity.Property(x => x.OptionsJson).HasColumnName("options_json").IsRequired();
             entity.Property(x => x.CreatedAtUtc).HasColumnName("created_at").IsRequired();
             entity.Property(x => x.UpdatedAtUtc).HasColumnName("updated_at").IsRequired();
-            entity.HasIndex(x => x.ToolKey).HasDatabaseName("ix_tool_profiles_tool_key");
+            entity.HasIndex(x => x.ToolKey).HasDatabaseName("ix_tool_configurations_tool_key");
         });
 
         modelBuilder.Entity<NotesSettingsEntity>(entity =>
@@ -78,4 +78,5 @@ public sealed class DevToolsDbContext : DbContext
         });
     }
 }
+
 

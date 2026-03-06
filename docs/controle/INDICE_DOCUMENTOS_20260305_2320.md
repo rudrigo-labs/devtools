@@ -8,13 +8,13 @@ Arquivos mantidos na raiz por convencao: README.md, CHANGELOG.md, MANUAL.md
 | Documento | Tipo | Status | Caminho |
 | --- | --- | --- | --- |
 | APRESENTACAO_DEVTOOLS_LINKEDIN.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\APRESENTACAO_DEVTOOLS_LINKEDIN.md |
-| CONFIGURACOES_E_PERFIS_DETALHADO.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\CONFIGURACOES_E_PERFIS_DETALHADO.md |
+| CONFIGURACOES_FERRAMENTAS_DETALHADO.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\CONFIGURACOES_FERRAMENTAS_DETALHADO.md |
 | CONFIGURATION.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\CONFIGURATION.md |
 | GUIA_DE_DISTRIBUICAO.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\GUIA_DE_DISTRIBUICAO.md |
 | KICKOFF.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\planejamento\KICKOFF.md |
 | PLAN_UI_FORMS.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\planejamento\PLAN_UI_FORMS.md |
 | PLANO_MELHORIAS_DEVTOOLS.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\planejamento\PLANO_MELHORIAS_DEVTOOLS.md |
-| SETTINGS_AND_PROFILES_GUIDE.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\SETTINGS_AND_PROFILES_GUIDE.md |
+| SETTINGS_AND_CONFIGURATIONS_GUIDE.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\SETTINGS_AND_CONFIGURATIONS_GUIDE.md |
 | TechnicalDoc.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\TechnicalDoc.md |
 | CONTROLE_DOCUMENTOS_PENDENCIAS_20260305_2309.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\controle\CONTROLE_DOCUMENTOS_PENDENCIAS_20260305_2309.md |
 | INDICE_DOCUMENTOS_20260305_2319.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\controle\INDICE_DOCUMENTOS_20260305_2319.md |

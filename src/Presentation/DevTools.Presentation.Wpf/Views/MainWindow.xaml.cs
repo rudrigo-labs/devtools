@@ -30,11 +30,6 @@ public partial class MainWindow : Window
         "--startup-project", "-s", "startup-project", "startupproject",
         "--context", "-c", "context", "dbcontext"
     };
-    private static readonly List<string> DefaultHarvestExcludeDirectories = new()
-    {
-        "bin", "obj", ".git", ".vs", "node_modules",
-        "dist", "build", ".idea", ".vscode", ".next", ".nuxt", ".turbo", "Snapshot"
-    };
 
     private readonly TrayService _trayService;
     private readonly JobManager _jobManager;
@@ -52,12 +47,12 @@ public partial class MainWindow : Window
 
     // State
     private OrganizerCategory? _selectedCategory;
-    private string? _currentToolForProfiles;
-    private ToolProfile? _selectedToolProfile;
-    private readonly HashSet<ToolProfile> _pendingNewToolProfiles = new();
-    private readonly Dictionary<ToolProfile, string> _persistedToolProfileNames = new();
+    private string? _currentToolForConfigurations;
+    private ToolConfiguration? _selectedToolConfiguration;
+    private readonly HashSet<ToolConfiguration> _pendingNewToolConfigurations = new();
+    private readonly Dictionary<ToolConfiguration, string> _persistedToolConfigurationNames = new();
     private OrganizerCategory? _pendingNewOrganizerCategory;
-    private readonly ProfileUIService _profileUIService;
+    private readonly ToolConfigurationUIService _toolConfigurationUIService;
     private bool _isTestingGoogleDriveConnection;
     private bool _allowCloseForShutdown;
     private string? _currentEmbeddedToolId;
@@ -66,13 +61,13 @@ public partial class MainWindow : Window
     private double _lastMainLeft;
     private double _lastMainTop;
 
-    public MainWindow(TrayService trayService, JobManager jobManager, ConfigService configService, ProfileUIService profileUIService, GoogleDriveService googleDriveService)
+    public MainWindow(TrayService trayService, JobManager jobManager, ConfigService configService, ToolConfigurationUIService toolConfigurationUIService, GoogleDriveService googleDriveService)
     {
         InitializeComponent();
         _trayService = trayService;
         _jobManager = jobManager;
         _configService = configService;
-        _profileUIService = profileUIService;
+        _toolConfigurationUIService = toolConfigurationUIService;
         _googleDriveService = googleDriveService;
         _ngrokSetupService = new NgrokSetupService();
 
@@ -111,7 +106,7 @@ public partial class MainWindow : Window
         _trayService = null!;
         _jobManager = null!;
         _configService = null!;
-        _profileUIService = null!;
+        _toolConfigurationUIService = null!;
         _googleDriveService = null!;
         _ngrokSetupService = new NgrokSetupService();
     }
@@ -505,7 +500,7 @@ public partial class MainWindow : Window
         MigrationsSettingsPanel.Visibility = Visibility.Collapsed;
         NgrokSettingsPanel.Visibility = Visibility.Collapsed;
         NotesCloudSettingsPanel.Visibility = Visibility.Collapsed;
-        ToolProfilesSettingsPanel.Visibility = Visibility.Collapsed;
+        ToolConfigurationsSettingsPanel.Visibility = Visibility.Collapsed;
     }
 
     private void OpenStorageSettings_Click(object sender, RoutedEventArgs e)
@@ -564,7 +559,10 @@ public partial class MainWindow : Window
 
     private void SaveStorageSettings_Click(object sender, RoutedEventArgs e)
     {
-        if (StorageBackendCombo.SelectedItem == null)
+        var storageBackendMissing = StorageBackendCombo.SelectedItem == null;
+        SetControlValidationState(StorageBackendCombo, storageBackendMissing);
+
+        if (storageBackendMissing)
         {
             ShowRequiredFieldsWarning("Os campos abaixo não podem ficar em branco:\n- Backend de Armazenamento");
             return;
@@ -601,186 +599,233 @@ public partial class MainWindow : Window
         ShowSettingsList();
     }
 
-    // --- Generic Tool Profiles Management ---
+    // --- Generic Tool Configurations Management ---
 
-    private void OpenToolProfiles_Click(object sender, RoutedEventArgs e)
+    private void OpenToolConfigurations_Click(object sender, RoutedEventArgs e)
     {
         if (sender is System.Windows.Controls.Button btn && btn.CommandParameter is string toolKey)
         {
             ShowSettingsList();
-            _currentToolForProfiles = toolKey;
-            ApplyToolProfileTerminology(toolKey, btn.Content?.ToString());
+            _currentToolForConfigurations = toolKey;
+            ApplyToolConfigurationTerminology(toolKey, btn.Content?.ToString());
             SettingsListPanel.Visibility = Visibility.Collapsed;
-            ToolProfilesSettingsPanel.Visibility = Visibility.Visible;
-            LoadToolProfiles();
+            ToolConfigurationsSettingsPanel.Visibility = Visibility.Visible;
+            LoadToolConfigurations();
         }
     }
 
-    private void ApplyToolProfileTerminology(string toolKey, string? displayName)
+    private void ApplyToolConfigurationTerminology(string toolKey, string? displayName)
     {
-        var isProjectMode = IsProjectProfileMode(toolKey);
+        var text = GetToolConfigurationTerminology(toolKey, displayName);
 
-        ToolProfilesTitle.Text = isProjectMode
-            ? string.Equals(toolKey, "Migrations", StringComparison.OrdinalIgnoreCase)
-                ? "Projetos: EF Core Migrations"
-                : $"Projetos: {displayName ?? toolKey}"
-            : $"Perfis: {displayName ?? toolKey}";
+        ToolConfigurationsTitle.Text = text.Title;
 
-        if (ToolProfileEditorSectionTitle != null)
-            ToolProfileEditorSectionTitle.Text = isProjectMode ? "Configurações do Projeto" : "Configurações do Perfil";
+        if (ToolConfigurationEditorSectionTitle != null)
+            ToolConfigurationEditorSectionTitle.Text = text.EditorSection;
 
-        if (ToolProfileNameLabel != null)
-            ToolProfileNameLabel.Text = isProjectMode ? "Nome do Projeto" : "Nome do Perfil";
+        if (ToolConfigurationNameLabel != null)
+            ToolConfigurationNameLabel.Text = text.NameLabel;
 
-        if (ToolProfileIsDefaultCheck != null)
-            ToolProfileIsDefaultCheck.Content = isProjectMode ? "Usar como projeto padrão" : "Usar como perfil padrão";
+        if (ToolConfigurationIsDefaultCheck != null)
+            ToolConfigurationIsDefaultCheck.Content = text.DefaultToggleLabel;
 
         // ActionBarControl usa labels internas do próprio componente.
     }
 
-    private bool IsMigrationsProfileMode()
+    private bool IsMigrationsConfigurationMode()
     {
-        return string.Equals(_currentToolForProfiles, "Migrations", StringComparison.OrdinalIgnoreCase);
+        return string.Equals(_currentToolForConfigurations, "Migrations", StringComparison.OrdinalIgnoreCase);
     }
 
-    private bool IsProjectProfileMode()
+    private bool IsProjectConfigurationMode()
     {
-        return IsProjectProfileMode(_currentToolForProfiles);
+        return IsProjectConfigurationMode(_currentToolForConfigurations);
     }
 
-    private static bool IsProjectProfileMode(string? toolKey)
+    private static bool IsProjectConfigurationMode(string? toolKey)
     {
         return string.Equals(toolKey, "Migrations", StringComparison.OrdinalIgnoreCase)
             || string.Equals(toolKey, "Snapshot", StringComparison.OrdinalIgnoreCase);
     }
 
-    private void LoadToolProfiles()
+    private static bool IsSshConnectionMode(string? toolKey)
     {
-        if (string.IsNullOrEmpty(_currentToolForProfiles)) return;
+        return string.Equals(toolKey, "SSHTunnel", StringComparison.OrdinalIgnoreCase);
+    }
 
-        var profiles = _profileUIService.LoadProfiles(_currentToolForProfiles);
-        NormalizeProfileDefaultsInMemory(profiles);
-        _pendingNewToolProfiles.Clear();
-        _persistedToolProfileNames.Clear();
-        foreach (var profile in profiles)
+    private static bool IsNgrokConnectionMode(string? toolKey)
+    {
+        return string.Equals(toolKey, "Ngrok", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static (string Title, string EditorSection, string NameLabel, string DefaultToggleLabel) GetToolConfigurationTerminology(string? toolKey, string? displayName)
+    {
+        if (IsProjectConfigurationMode(toolKey))
         {
-            _persistedToolProfileNames[profile] = profile.Name;
+            var title = string.Equals(toolKey, "Migrations", StringComparison.OrdinalIgnoreCase)
+                ? "Projetos: EF Core Migrations"
+                : $"Projetos: {displayName ?? toolKey}";
+            return (
+                title,
+                "Configurações do Projeto",
+                "Nome do Projeto",
+                "Usar como projeto padrão");
         }
 
-        ToolProfilesList.ItemsSource = null;
-        ToolProfilesList.ItemsSource = profiles;
-
-        if (profiles.Count == 0)
+        if (IsSshConnectionMode(toolKey))
         {
-            ToolProfilesList.SelectedItem = null;
-            _selectedToolProfile = null;
-            ToolProfileEditForm.Visibility = Visibility.Collapsed;
-            UpdateToolProfileActionButtonsState();
+            return (
+                $"Túneis SSH: {displayName ?? toolKey}",
+                "Configurações do Túnel",
+                "Nome do Túnel",
+                "Usar como túnel padrão");
+        }
+
+        if (IsNgrokConnectionMode(toolKey))
+        {
+            return (
+                $"Conexões Ngrok: {displayName ?? toolKey}",
+                "Configurações da Conexão",
+                "Nome da Conexão",
+                "Usar como conexão padrão");
+        }
+
+        return (
+            $"Configuracoes: {displayName ?? toolKey}",
+            "Configurações do Configuracao",
+            "Nome do Configuracao",
+            "Usar como configuracao padrão");
+    }
+
+    private void LoadToolConfigurations()
+    {
+        if (string.IsNullOrEmpty(_currentToolForConfigurations)) return;
+
+        var configurations = _toolConfigurationUIService.LoadConfigurations(_currentToolForConfigurations);
+        NormalizeConfigurationDefaultsInMemory(configurations);
+        _pendingNewToolConfigurations.Clear();
+        _persistedToolConfigurationNames.Clear();
+        foreach (var configuration in configurations)
+        {
+            _persistedToolConfigurationNames[configuration] = configuration.Name;
+        }
+
+        ToolConfigurationsList.ItemsSource = null;
+        ToolConfigurationsList.ItemsSource = configurations;
+
+        if (configurations.Count == 0)
+        {
+            ToolConfigurationsList.SelectedItem = null;
+            _selectedToolConfiguration = null;
+            ToolConfigurationEditForm.Visibility = Visibility.Collapsed;
+            UpdateToolConfigurationActionButtonsState();
             return;
         }
 
-        var selected = profiles.FirstOrDefault(p => p.IsDefault) ?? profiles.First();
-        SelectAndDisplayToolProfile(selected);
-        UpdateToolProfileActionButtonsState();
+        var selected = configurations.FirstOrDefault(p => p.IsDefault) ?? configurations.First();
+        SelectAndDisplayToolConfiguration(selected);
+        UpdateToolConfigurationActionButtonsState();
     }
 
-    private void AddToolProfile_Click(object sender, RoutedEventArgs e)
+    private void AddToolConfiguration_Click(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrEmpty(_currentToolForProfiles)) return;
+        if (string.IsNullOrEmpty(_currentToolForConfigurations)) return;
 
-        var newProfile = new ToolProfile
+        var newConfiguration = new ToolConfiguration
         {
-            Name = GenerateNextProfileName((ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>(), _currentToolForProfiles)
+            Name = GenerateNextConfigurationName((ToolConfigurationsList.ItemsSource as List<ToolConfiguration>) ?? new List<ToolConfiguration>(), _currentToolForConfigurations)
         };
 
-        var list = (ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>();
-        list.Add(newProfile);
-        _pendingNewToolProfiles.Add(newProfile);
+        var list = (ToolConfigurationsList.ItemsSource as List<ToolConfiguration>) ?? new List<ToolConfiguration>();
+        list.Add(newConfiguration);
+        _pendingNewToolConfigurations.Add(newConfiguration);
 
-        ToolProfilesList.ItemsSource = null;
-        ToolProfilesList.ItemsSource = list;
-        SelectAndDisplayToolProfile(newProfile);
-        UpdateToolProfileActionButtonsState();
+        ToolConfigurationsList.ItemsSource = null;
+        ToolConfigurationsList.ItemsSource = list;
+        SelectAndDisplayToolConfiguration(newConfiguration);
+        UpdateToolConfigurationActionButtonsState();
     }
 
-    private void ToolProfile_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void ToolConfiguration_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (ToolProfilesList.SelectedItem is ToolProfile profile)
+        if (ToolConfigurationsList.SelectedItem is ToolConfiguration configuration)
         {
-            DisplayToolProfile(profile);
+            DisplayToolConfiguration(configuration);
         }
         else
         {
-            _selectedToolProfile = null;
-            ToolProfileEditForm.Visibility = Visibility.Collapsed;
+            _selectedToolConfiguration = null;
+            ToolConfigurationEditForm.Visibility = Visibility.Collapsed;
         }
 
-        UpdateToolProfileActionButtonsState();
+        UpdateToolConfigurationActionButtonsState();
     }
 
-    private void SaveToolProfile_Click(object sender, RoutedEventArgs e)
+    private void SaveToolConfiguration_Click(object sender, RoutedEventArgs e)
     {
-        if (_selectedToolProfile == null || string.IsNullOrEmpty(_currentToolForProfiles)) return;
+        if (_selectedToolConfiguration == null || string.IsNullOrEmpty(_currentToolForConfigurations)) return;
 
-        if (string.IsNullOrWhiteSpace(ToolProfileNameInput.Text))
+        var configurationNameMissing = string.IsNullOrWhiteSpace(ToolConfigurationNameInput.Text);
+        SetControlValidationState(ToolConfigurationNameInput, configurationNameMissing);
+        if (configurationNameMissing)
         {
-            var fieldLabel = IsProjectProfileMode() ? "Nome do Projeto" : "Nome do Perfil";
+            var fieldLabel = GetToolConfigurationTerminology(_currentToolForConfigurations, null).NameLabel;
             ShowRequiredFieldsWarning($"Os campos abaixo não podem ficar em branco:\n- {fieldLabel}");
             return;
         }
 
-        _selectedToolProfile.Name = ToolProfileNameInput.Text.Trim();
-        _selectedToolProfile.IsDefault = ToolProfileIsDefaultCheck.IsChecked == true;
+        _selectedToolConfiguration.Name = ToolConfigurationNameInput.Text.Trim();
+        _selectedToolConfiguration.IsDefault = ToolConfigurationIsDefaultCheck.IsChecked == true;
 
-        if (ShouldForceSingleProfileAsDefault())
+        if (ShouldForceSingleConfigurationAsDefault())
         {
-            _selectedToolProfile.IsDefault = true;
-            ToolProfileIsDefaultCheck.IsChecked = true;
+            _selectedToolConfiguration.IsDefault = true;
+            ToolConfigurationIsDefaultCheck.IsChecked = true;
         }
 
-        if (!_selectedToolProfile.IsDefault && !HasOtherDefaultProfile())
+        if (!_selectedToolConfiguration.IsDefault && !HasOtherDefaultConfiguration())
         {
-            var defaultLabel = IsProjectProfileMode() ? "Usar como projeto padrão" : "Usar como perfil padrão";
+            var defaultLabel = GetToolConfigurationTerminology(_currentToolForConfigurations, null).DefaultToggleLabel;
             ShowRequiredFieldsWarning($"Para salvar, marque '{defaultLabel}'. Deve existir pelo menos um padrão.");
             return;
         }
 
         // Coletar valores dos campos dinamicos recursivamente
-        CollectProfileOptions(ToolProfileFieldsContainer, _selectedToolProfile.Options);
+        CollectConfigurationOptions(ToolConfigurationFieldsContainer, _selectedToolConfiguration.Options);
 
-        if (IsMigrationsProfileMode())
+        if (IsMigrationsConfigurationMode())
         {
-            _selectedToolProfile.Options.TryGetValue("additional-args", out var profileAdditionalArgs);
-            if (!TryValidateMigrationsAdditionalArgs(profileAdditionalArgs, out var profileArgsError))
+            _selectedToolConfiguration.Options.TryGetValue("additional-args", out var configurationAdditionalArgs);
+            if (!TryValidateMigrationsAdditionalArgs(configurationAdditionalArgs, out var configurationArgsError))
             {
-                ShowRequiredFieldsWarning(profileArgsError);
+                ShowRequiredFieldsWarning(configurationArgsError);
                 return;
             }
         }
 
-        var isPendingNew = _pendingNewToolProfiles.Contains(_selectedToolProfile);
+        var isPendingNew = _pendingNewToolConfigurations.Contains(_selectedToolConfiguration);
         if (!isPendingNew
-            && _persistedToolProfileNames.TryGetValue(_selectedToolProfile, out var persistedName)
-            && !string.Equals(persistedName, _selectedToolProfile.Name, StringComparison.OrdinalIgnoreCase))
+            && _persistedToolConfigurationNames.TryGetValue(_selectedToolConfiguration, out var persistedName)
+            && !string.Equals(persistedName, _selectedToolConfiguration.Name, StringComparison.OrdinalIgnoreCase))
         {
-            _profileUIService.DeleteProfile(_currentToolForProfiles, persistedName);
+            _toolConfigurationUIService.DeleteConfiguration(_currentToolForConfigurations, persistedName);
         }
 
-        _profileUIService.SaveProfile(_currentToolForProfiles, _selectedToolProfile);
+        _toolConfigurationUIService.SaveConfiguration(_currentToolForConfigurations, _selectedToolConfiguration);
         if (isPendingNew)
         {
-            _pendingNewToolProfiles.Remove(_selectedToolProfile);
+            _pendingNewToolConfigurations.Remove(_selectedToolConfiguration);
         }
-        _persistedToolProfileNames[_selectedToolProfile] = _selectedToolProfile.Name;
+        _persistedToolConfigurationNames[_selectedToolConfiguration] = _selectedToolConfiguration.Name;
 
-        ToolProfilesList.Items.Refresh();
-        var successText = IsProjectProfileMode() ? "Projeto salvo com sucesso!" : "Perfil salvo com sucesso.";
+        ToolConfigurationsList.Items.Refresh();
+        var successText = GetToolConfigurationSuccessMessage();
         UiMessageService.ShowInfo(successText, "Sucesso");
         ShowMainStatusInfo(successText);
-        UpdateToolProfileActionButtonsState();
+        UpdateToolConfigurationActionButtonsState();
     }
 
-    private void CollectProfileOptions(DependencyObject container, Dictionary<string, string> options)
+    private void CollectConfigurationOptions(DependencyObject container, Dictionary<string, string> options)
     {
         for (int i = 0; i < VisualTreeHelper.GetChildrenCount(container); i++)
         {
@@ -794,46 +839,50 @@ public partial class MainWindow : Window
             {
                 options[pathKey] = ps.SelectedPath;
             }
+            else if (child is System.Windows.Controls.CheckBox checkBox && checkBox.Tag is string boolKey)
+            {
+                options[boolKey] = (checkBox.IsChecked == true).ToString();
+            }
             else if (child is DependencyObject depObj)
             {
                 // Busca recursiva em containers (Grid, StackPanel, Card, etc.)
-                CollectProfileOptions(depObj, options);
+                CollectConfigurationOptions(depObj, options);
             }
         }
     }
 
-    private void DeleteToolProfile_Click(object sender, RoutedEventArgs e)
+    private void DeleteToolConfiguration_Click(object sender, RoutedEventArgs e)
     {
-        if (_selectedToolProfile == null || string.IsNullOrEmpty(_currentToolForProfiles)) return;
+        if (_selectedToolConfiguration == null || string.IsNullOrEmpty(_currentToolForConfigurations)) return;
 
-        var selectedProfile = _selectedToolProfile;
-        var list = (ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>();
-        var selectedIndex = ToolProfilesList.SelectedIndex;
-        var isPendingNew = _pendingNewToolProfiles.Contains(selectedProfile);
+        var selectedConfiguration = _selectedToolConfiguration;
+        var list = (ToolConfigurationsList.ItemsSource as List<ToolConfiguration>) ?? new List<ToolConfiguration>();
+        var selectedIndex = ToolConfigurationsList.SelectedIndex;
+        var isPendingNew = _pendingNewToolConfigurations.Contains(selectedConfiguration);
 
-        var entityLower = IsProjectProfileMode() ? "projeto" : "perfil";
-        if (UiMessageService.Confirm($"Excluir {entityLower} '{selectedProfile.Name}'?", "Confirmar"))
+        var entityLower = GetToolConfigurationEntityNameLower();
+        if (UiMessageService.Confirm($"Excluir {entityLower} '{selectedConfiguration.Name}'?", "Confirmar"))
         {
             if (!isPendingNew)
             {
-                var persistedName = _persistedToolProfileNames.TryGetValue(selectedProfile, out var currentPersistedName)
+                var persistedName = _persistedToolConfigurationNames.TryGetValue(selectedConfiguration, out var currentPersistedName)
                     ? currentPersistedName
-                    : selectedProfile.Name;
-                _profileUIService.DeleteProfile(_currentToolForProfiles, persistedName);
+                    : selectedConfiguration.Name;
+                _toolConfigurationUIService.DeleteConfiguration(_currentToolForConfigurations, persistedName);
             }
 
-            _pendingNewToolProfiles.Remove(selectedProfile);
-            _persistedToolProfileNames.Remove(selectedProfile);
-            list.Remove(selectedProfile);
+            _pendingNewToolConfigurations.Remove(selectedConfiguration);
+            _persistedToolConfigurationNames.Remove(selectedConfiguration);
+            list.Remove(selectedConfiguration);
 
-            ToolProfilesList.ItemsSource = null;
-            ToolProfilesList.ItemsSource = list;
+            ToolConfigurationsList.ItemsSource = null;
+            ToolConfigurationsList.ItemsSource = list;
 
             if (list.Count == 0)
             {
-                ToolProfilesList.SelectedItem = null;
-                _selectedToolProfile = null;
-                ToolProfileEditForm.Visibility = Visibility.Collapsed;
+                ToolConfigurationsList.SelectedItem = null;
+                _selectedToolConfiguration = null;
+                ToolConfigurationEditForm.Visibility = Visibility.Collapsed;
             }
             else
             {
@@ -843,12 +892,12 @@ public partial class MainWindow : Window
                     nextIndex = list.Count - 1;
                 }
 
-                var nextProfile = list[nextIndex];
-                SelectAndDisplayToolProfile(nextProfile);
+                var nextConfiguration = list[nextIndex];
+                SelectAndDisplayToolConfiguration(nextConfiguration);
             }
         }
 
-        UpdateToolProfileActionButtonsState();
+        UpdateToolConfigurationActionButtonsState();
     }
 
 
@@ -869,7 +918,7 @@ public partial class MainWindow : Window
 
         if (_currentHarvestConfig.Rules.ExcludeDirectories.Count == 0)
         {
-            _currentHarvestConfig.Rules.ExcludeDirectories = new List<string>(DefaultHarvestExcludeDirectories);
+            _currentHarvestConfig.Rules.ExcludeDirectories = HarvestDefaults.DefaultExcludeDirectories.ToList();
         }
 
         // Rules
@@ -892,24 +941,44 @@ public partial class MainWindow : Window
     {
         try
         {
+            var extensionsMissing = string.IsNullOrWhiteSpace(HarvestExtensions.Text);
+            var excludeDirsMissing = string.IsNullOrWhiteSpace(HarvestExcludeDirs.Text);
+            var maxFileSizeMissing = string.IsNullOrWhiteSpace(HarvestMaxFileSizeInput.Text);
+            var minScoreMissing = string.IsNullOrWhiteSpace(HarvestMinScore.Text);
+            var topDefaultMissing = string.IsNullOrWhiteSpace(HarvestTopDefault.Text);
+            var fanInMissing = string.IsNullOrWhiteSpace(HarvestWeightFanIn.Text);
+            var fanOutMissing = string.IsNullOrWhiteSpace(HarvestWeightFanOut.Text);
+            var densityMissing = string.IsNullOrWhiteSpace(HarvestWeightDensity.Text);
+            var deadCodeMissing = string.IsNullOrWhiteSpace(HarvestWeightDeadCode.Text);
+
+            SetControlValidationState(HarvestExtensions, extensionsMissing);
+            SetControlValidationState(HarvestExcludeDirs, excludeDirsMissing);
+            SetControlValidationState(HarvestMaxFileSizeInput, maxFileSizeMissing);
+            SetControlValidationState(HarvestMinScore, minScoreMissing);
+            SetControlValidationState(HarvestTopDefault, topDefaultMissing);
+            SetControlValidationState(HarvestWeightFanIn, fanInMissing);
+            SetControlValidationState(HarvestWeightFanOut, fanOutMissing);
+            SetControlValidationState(HarvestWeightDensity, densityMissing);
+            SetControlValidationState(HarvestWeightDeadCode, deadCodeMissing);
+
             var missingFields = new List<string>();
-            if (string.IsNullOrWhiteSpace(HarvestExtensions.Text))
+            if (extensionsMissing)
                 missingFields.Add("Extensoes permitidas");
-            if (string.IsNullOrWhiteSpace(HarvestExcludeDirs.Text))
+            if (excludeDirsMissing)
                 missingFields.Add("Pastas excluidas");
-            if (string.IsNullOrWhiteSpace(HarvestMaxFileSizeInput.Text))
+            if (maxFileSizeMissing)
                 missingFields.Add("Tamanho maximo por arquivo (KB)");
-            if (string.IsNullOrWhiteSpace(HarvestMinScore.Text))
+            if (minScoreMissing)
                 missingFields.Add("Score minimo");
-            if (string.IsNullOrWhiteSpace(HarvestTopDefault.Text))
+            if (topDefaultMissing)
                 missingFields.Add("Top N default");
-            if (string.IsNullOrWhiteSpace(HarvestWeightFanIn.Text))
+            if (fanInMissing)
                 missingFields.Add("Peso FanIn");
-            if (string.IsNullOrWhiteSpace(HarvestWeightFanOut.Text))
+            if (fanOutMissing)
                 missingFields.Add("Peso FanOut");
-            if (string.IsNullOrWhiteSpace(HarvestWeightDensity.Text))
+            if (densityMissing)
                 missingFields.Add("Peso Keyword Density");
-            if (string.IsNullOrWhiteSpace(HarvestWeightDeadCode.Text))
+            if (deadCodeMissing)
                 missingFields.Add("Peso DeadCode");
 
             if (!TryBuildRequiredFieldsMessage(missingFields, out var requiredMessage))
@@ -920,42 +989,49 @@ public partial class MainWindow : Window
 
             if (!int.TryParse(HarvestMaxFileSizeInput.Text, out int maxFileSizeKb))
             {
+                SetControlValidationState(HarvestMaxFileSizeInput, true);
                 ShowRequiredFieldsWarning("O campo 'Tamanho maximo por arquivo (KB)' deve ser numerico.");
                 return;
             }
 
             if (!int.TryParse(HarvestMinScore.Text, out int minScore))
             {
+                SetControlValidationState(HarvestMinScore, true);
                 ShowRequiredFieldsWarning("O campo 'Score minimo' deve ser numerico.");
                 return;
             }
 
             if (!int.TryParse(HarvestTopDefault.Text, out int topDefault))
             {
+                SetControlValidationState(HarvestTopDefault, true);
                 ShowRequiredFieldsWarning("O campo 'Top N default' deve ser numerico.");
                 return;
             }
 
             if (!double.TryParse(HarvestWeightFanIn.Text, out double fanIn))
             {
+                SetControlValidationState(HarvestWeightFanIn, true);
                 ShowRequiredFieldsWarning("O campo 'Peso FanIn' deve ser numerico.");
                 return;
             }
 
             if (!double.TryParse(HarvestWeightFanOut.Text, out double fanOut))
             {
+                SetControlValidationState(HarvestWeightFanOut, true);
                 ShowRequiredFieldsWarning("O campo 'Peso FanOut' deve ser numerico.");
                 return;
             }
 
             if (!double.TryParse(HarvestWeightDensity.Text, out double density))
             {
+                SetControlValidationState(HarvestWeightDensity, true);
                 ShowRequiredFieldsWarning("O campo 'Peso Keyword Density' deve ser numerico.");
                 return;
             }
 
             if (!double.TryParse(HarvestWeightDeadCode.Text, out double deadCode))
             {
+                SetControlValidationState(HarvestWeightDeadCode, true);
                 ShowRequiredFieldsWarning("O campo 'Peso DeadCode' deve ser numerico.");
                 return;
             }
@@ -1020,7 +1096,17 @@ public partial class MainWindow : Window
     {
         _currentOrganizerConfig = _configService.GetSection<OrganizerConfig>("Organizer");
         if (_currentOrganizerConfig.Categories == null) _currentOrganizerConfig.Categories = new();
+        _currentOrganizerConfig.AllowedExtensions ??= Array.Empty<string>();
+        if (_currentOrganizerConfig.AllowedExtensions.Length == 0)
+            _currentOrganizerConfig.AllowedExtensions = new[] { ".pdf", ".txt", ".md", ".doc", ".docx" };
         _pendingNewOrganizerCategory = null;
+
+        OrgAllowedExtensions.Text = string.Join(", ", _currentOrganizerConfig.AllowedExtensions);
+        OrgMinScoreDefault.Text = _currentOrganizerConfig.MinScoreDefault.ToString();
+        OrgFileNameWeight.Text = _currentOrganizerConfig.FileNameWeight.ToString("F1");
+        OrgDedupByHash.IsChecked = _currentOrganizerConfig.DeduplicateByHash;
+        OrgDedupByName.IsChecked = _currentOrganizerConfig.DeduplicateByName;
+        OrgDedupFirstLines.Text = _currentOrganizerConfig.DeduplicateFirstLines.ToString();
         
         OrganizerCategoriesList.ItemsSource = null;
         OrganizerCategoriesList.ItemsSource = _currentOrganizerConfig.Categories;
@@ -1063,17 +1149,62 @@ public partial class MainWindow : Window
     {
         if (_selectedCategory == null) return;
 
+        var allowedExtensionsMissing = string.IsNullOrWhiteSpace(OrgAllowedExtensions.Text);
+        var minScoreDefaultMissing = string.IsNullOrWhiteSpace(OrgMinScoreDefault.Text);
+        var fileNameWeightMissing = string.IsNullOrWhiteSpace(OrgFileNameWeight.Text);
+        var dedupFirstLinesMissing = string.IsNullOrWhiteSpace(OrgDedupFirstLines.Text);
+        var nameMissing = string.IsNullOrWhiteSpace(OrgCatName.Text);
+        var folderMissing = string.IsNullOrWhiteSpace(OrgCatFolder.Text);
+        var keywordsMissing = string.IsNullOrWhiteSpace(OrgCatKeywords.Text);
+
+        SetControlValidationState(OrgAllowedExtensions, allowedExtensionsMissing);
+        SetControlValidationState(OrgMinScoreDefault, minScoreDefaultMissing);
+        SetControlValidationState(OrgFileNameWeight, fileNameWeightMissing);
+        SetControlValidationState(OrgDedupFirstLines, dedupFirstLinesMissing);
+        SetControlValidationState(OrgCatName, nameMissing);
+        SetControlValidationState(OrgCatFolder, folderMissing);
+        SetControlValidationState(OrgCatKeywords, keywordsMissing);
+
         var missingFields = new List<string>();
-        if (string.IsNullOrWhiteSpace(OrgCatName.Text))
+        if (allowedExtensionsMissing)
+            missingFields.Add("Extensões Permitidas");
+        if (minScoreDefaultMissing)
+            missingFields.Add("Score Mínimo Padrão");
+        if (fileNameWeightMissing)
+            missingFields.Add("Peso do Nome do Arquivo");
+        if (dedupFirstLinesMissing)
+            missingFields.Add("Deduplicar por Primeiras Linhas");
+        if (nameMissing)
             missingFields.Add("Nome da Categoria");
-        if (string.IsNullOrWhiteSpace(OrgCatFolder.Text))
+        if (folderMissing)
             missingFields.Add("Nome da Pasta Destino");
-        if (string.IsNullOrWhiteSpace(OrgCatKeywords.Text))
+        if (keywordsMissing)
             missingFields.Add("Palavras-Chave");
 
         if (!TryBuildRequiredFieldsMessage(missingFields, out var requiredMessage))
         {
             ShowRequiredFieldsWarning(requiredMessage);
+            return;
+        }
+
+        if (!int.TryParse(OrgMinScoreDefault.Text, out var minScoreDefault))
+        {
+            SetControlValidationState(OrgMinScoreDefault, true);
+            ShowRequiredFieldsWarning("Score Mínimo Padrão deve ser numérico.");
+            return;
+        }
+
+        if (!double.TryParse(OrgFileNameWeight.Text, out var fileNameWeight))
+        {
+            SetControlValidationState(OrgFileNameWeight, true);
+            ShowRequiredFieldsWarning("Peso do Nome do Arquivo deve ser numérico.");
+            return;
+        }
+
+        if (!int.TryParse(OrgDedupFirstLines.Text, out var dedupFirstLines) || dedupFirstLines < 0)
+        {
+            SetControlValidationState(OrgDedupFirstLines, true);
+            ShowRequiredFieldsWarning("Deduplicar por Primeiras Linhas deve ser numérico e maior ou igual a zero.");
             return;
         }
 
@@ -1088,6 +1219,28 @@ public partial class MainWindow : Window
             ShowRequiredFieldsWarning("Informe ao menos uma palavra-chave valida.");
             return;
         }
+
+        var allowedExtensions = OrgAllowedExtensions.Text
+            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => s.Trim())
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(s => s.StartsWith(".") ? s : $".{s}")
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (allowedExtensions.Length == 0)
+        {
+            SetControlValidationState(OrgAllowedExtensions, true);
+            ShowRequiredFieldsWarning("Informe ao menos uma extensão válida em 'Extensões Permitidas'.");
+            return;
+        }
+
+        _currentOrganizerConfig.AllowedExtensions = allowedExtensions;
+        _currentOrganizerConfig.MinScoreDefault = minScoreDefault;
+        _currentOrganizerConfig.FileNameWeight = fileNameWeight;
+        _currentOrganizerConfig.DeduplicateByHash = OrgDedupByHash.IsChecked == true;
+        _currentOrganizerConfig.DeduplicateByName = OrgDedupByName.IsChecked == true;
+        _currentOrganizerConfig.DeduplicateFirstLines = dedupFirstLines;
 
         _selectedCategory.Name = OrgCatName.Text;
         _selectedCategory.Folder = OrgCatFolder.Text;
@@ -1123,24 +1276,25 @@ public partial class MainWindow : Window
         UpdateOrganizerActionButtonsState();
     }
 
-    private void UpdateToolProfileActionButtonsState()
+    private void UpdateToolConfigurationActionButtonsState()
     {
-        var hasSelection = _selectedToolProfile != null && ToolProfileEditForm.Visibility == Visibility.Visible;
-        var canDelete = hasSelection;
+        var hasSelection = _selectedToolConfiguration != null && ToolConfigurationEditForm.Visibility == Visibility.Visible;
+        var isEditingPendingNew = hasSelection && _selectedToolConfiguration != null && _pendingNewToolConfigurations.Contains(_selectedToolConfiguration);
+        var canDelete = hasSelection && !isEditingPendingNew;
 
-        if (ToolProfilesActionBar != null)
+        if (ToolConfigurationsActionBar != null)
         {
-            ToolProfilesActionBar.ShowNew = true;
-            ToolProfilesActionBar.ShowSave = hasSelection;
-            ToolProfilesActionBar.ShowDelete = hasSelection;
-            ToolProfilesActionBar.ShowCancel = true;
-            ToolProfilesActionBar.CanNew = true;
-            ToolProfilesActionBar.CanSave = hasSelection;
-            ToolProfilesActionBar.CanDelete = canDelete;
-            ToolProfilesActionBar.CanCancel = true;
+            ToolConfigurationsActionBar.ShowNew = true;
+            ToolConfigurationsActionBar.ShowSave = hasSelection;
+            ToolConfigurationsActionBar.ShowDelete = hasSelection;
+            ToolConfigurationsActionBar.ShowCancel = true;
+            ToolConfigurationsActionBar.CanNew = true;
+            ToolConfigurationsActionBar.CanSave = hasSelection;
+            ToolConfigurationsActionBar.CanDelete = canDelete;
+            ToolConfigurationsActionBar.CanCancel = true;
         }
 
-        UpdateToolProfileDefaultControlState();
+        UpdateToolConfigurationDefaultControlState();
     }
 
     private void UpdateOrganizerActionButtonsState()
@@ -1166,36 +1320,49 @@ public partial class MainWindow : Window
         }
     }
 
-    private bool HasOtherDefaultProfile()
+    private bool HasOtherDefaultConfiguration()
     {
-        var list = (ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>();
-        return list.Any(p => !ReferenceEquals(p, _selectedToolProfile) && p.IsDefault);
+        var list = (ToolConfigurationsList.ItemsSource as List<ToolConfiguration>) ?? new List<ToolConfiguration>();
+        return list.Any(p => !ReferenceEquals(p, _selectedToolConfiguration) && p.IsDefault);
     }
 
-    private static string GenerateNextProfileName(IReadOnlyCollection<ToolProfile> profiles, string? toolKey)
+    private static string GenerateNextConfigurationName(IReadOnlyCollection<ToolConfiguration> configurations, string? toolKey)
     {
-        var isProjectMode = IsProjectProfileMode(toolKey);
-        var prefix = isProjectMode ? "Projeto" : "Perfil";
+        string prefix;
+        if (IsProjectConfigurationMode(toolKey))
+        {
+            prefix = "Projeto";
+        }
+        else if (IsSshConnectionMode(toolKey))
+        {
+            prefix = "Tunel";
+        }
+        else if (IsNgrokConnectionMode(toolKey))
+        {
+            prefix = "Conexao";
+        }
+        else
+        {
+            prefix = "Configuracao";
+        }
+
         var maxNumber = 0;
 
-        foreach (var profile in profiles)
+        foreach (var configuration in configurations)
         {
-            if (profile?.Name is null)
+            if (configuration?.Name is null)
             {
                 continue;
             }
 
-            var trimmed = profile.Name.Trim();
+            var trimmed = configuration.Name.Trim();
             var matchesPrefix = trimmed.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
-            if (!matchesPrefix && !(isProjectMode && trimmed.StartsWith("Perfil", StringComparison.OrdinalIgnoreCase)))
+            if (!matchesPrefix)
             {
                 continue;
             }
 
-            var effectivePrefix = trimmed.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-                ? prefix
-                : "Perfil";
-            var suffix = trimmed.Substring(effectivePrefix.Length).Trim();
+            var suffix = trimmed.Substring(prefix.Length).Trim();
             if (int.TryParse(suffix, out var number) && number > maxNumber)
             {
                 maxNumber = number;
@@ -1205,57 +1372,79 @@ public partial class MainWindow : Window
         return $"{prefix}{maxNumber + 1}";
     }
 
-    private static void NormalizeProfileDefaultsInMemory(List<ToolProfile> profiles)
+    private static void NormalizeConfigurationDefaultsInMemory(List<ToolConfiguration> configurations)
     {
-        if (profiles.Count == 0)
+        if (configurations.Count == 0)
             return;
 
-        var defaults = profiles.Where(p => p.IsDefault).ToList();
+        var defaults = configurations.Where(p => p.IsDefault).ToList();
         if (defaults.Count == 1)
             return;
 
-        foreach (var profile in profiles)
-            profile.IsDefault = false;
+        foreach (var configuration in configurations)
+            configuration.IsDefault = false;
 
-        profiles[0].IsDefault = true;
+        configurations[0].IsDefault = true;
     }
 
-    private void SelectAndDisplayToolProfile(ToolProfile profile)
+    private void SelectAndDisplayToolConfiguration(ToolConfiguration configuration)
     {
-        ToolProfilesList.SelectedItem = profile;
-        ToolProfilesList.ScrollIntoView(profile);
-        DisplayToolProfile(profile);
+        ToolConfigurationsList.SelectedItem = configuration;
+        ToolConfigurationsList.ScrollIntoView(configuration);
+        DisplayToolConfiguration(configuration);
     }
 
-    private void DisplayToolProfile(ToolProfile profile)
+    private void DisplayToolConfiguration(ToolConfiguration configuration)
     {
-        _selectedToolProfile = profile;
-        ToolProfileNameInput.Text = profile.Name;
-        ToolProfileIsDefaultCheck.IsChecked = profile.IsDefault;
-        _profileUIService.GenerateUIForProfile(_currentToolForProfiles!, ToolProfileFieldsContainer, profile);
-        ToolProfileEditForm.Visibility = Visibility.Visible;
-        UpdateToolProfileDefaultControlState();
+        _selectedToolConfiguration = configuration;
+        ToolConfigurationNameInput.Text = configuration.Name;
+        ToolConfigurationIsDefaultCheck.IsChecked = configuration.IsDefault;
+        _toolConfigurationUIService.GenerateUIForConfiguration(_currentToolForConfigurations!, ToolConfigurationFieldsContainer, configuration);
+        ToolConfigurationEditForm.Visibility = Visibility.Visible;
+        UpdateToolConfigurationDefaultControlState();
     }
 
-    private bool ShouldForceSingleProfileAsDefault()
+    private bool ShouldForceSingleConfigurationAsDefault()
     {
-        var list = (ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>();
+        var list = (ToolConfigurationsList.ItemsSource as List<ToolConfiguration>) ?? new List<ToolConfiguration>();
         return list.Count <= 1;
     }
 
-    private void UpdateToolProfileDefaultControlState()
+    private void UpdateToolConfigurationDefaultControlState()
     {
-        if (ToolProfileIsDefaultCheck == null || _selectedToolProfile == null)
+        if (ToolConfigurationIsDefaultCheck == null || _selectedToolConfiguration == null)
             return;
 
-        if (ShouldForceSingleProfileAsDefault())
+        if (ShouldForceSingleConfigurationAsDefault())
         {
-            ToolProfileIsDefaultCheck.IsChecked = true;
-            ToolProfileIsDefaultCheck.IsEnabled = false;
+            ToolConfigurationIsDefaultCheck.IsChecked = true;
+            ToolConfigurationIsDefaultCheck.IsEnabled = false;
             return;
         }
 
-        ToolProfileIsDefaultCheck.IsEnabled = true;
+        ToolConfigurationIsDefaultCheck.IsEnabled = true;
+    }
+
+    private string GetToolConfigurationEntityNameLower()
+    {
+        if (IsProjectConfigurationMode())
+            return "projeto";
+        if (IsSshConnectionMode(_currentToolForConfigurations))
+            return "túnel";
+        if (IsNgrokConnectionMode(_currentToolForConfigurations))
+            return "conexão";
+        return "configuracao";
+    }
+
+    private string GetToolConfigurationSuccessMessage()
+    {
+        if (IsProjectConfigurationMode())
+            return "Projeto salvo com sucesso!";
+        if (IsSshConnectionMode(_currentToolForConfigurations))
+            return "Túnel salvo com sucesso!";
+        if (IsNgrokConnectionMode(_currentToolForConfigurations))
+            return "Conexão salva com sucesso!";
+        return "Configuracao salvo com sucesso.";
     }
 
     private static string GenerateNextCategoryName(IReadOnlyCollection<OrganizerCategory> categories)
@@ -1311,16 +1500,28 @@ public partial class MainWindow : Window
 
     private void SaveMigrationsSettings_Click(object sender, RoutedEventArgs e)
     {
+        var rootMissing = string.IsNullOrWhiteSpace(MigRootPathSelector.SelectedPath);
+        var startupMissing = string.IsNullOrWhiteSpace(MigStartupPathSelector.SelectedPath);
+        var sqlServerMissing = string.IsNullOrWhiteSpace(MigSqlServerTargetSelector.SelectedPath);
+        var sqliteMissing = string.IsNullOrWhiteSpace(MigSqliteTargetSelector.SelectedPath);
+        var contextMissing = string.IsNullOrWhiteSpace(MigContextInput.Text);
+
+        SetPathSelectorValidationState(MigRootPathSelector, rootMissing);
+        SetPathSelectorValidationState(MigStartupPathSelector, startupMissing);
+        SetPathSelectorValidationState(MigSqlServerTargetSelector, sqlServerMissing);
+        SetPathSelectorValidationState(MigSqliteTargetSelector, sqliteMissing);
+        SetControlValidationState(MigContextInput, contextMissing);
+
         var missingFields = new List<string>();
-        if (string.IsNullOrWhiteSpace(MigRootPathSelector.SelectedPath))
+        if (rootMissing)
             missingFields.Add("Caminho Raiz do Projeto (Root Path)");
-        if (string.IsNullOrWhiteSpace(MigStartupPathSelector.SelectedPath))
+        if (startupMissing)
             missingFields.Add("Caminho do Projeto de Startup");
-        if (string.IsNullOrWhiteSpace(MigSqlServerTargetSelector.SelectedPath))
+        if (sqlServerMissing)
             missingFields.Add("Projeto de Migrations (SQL Server)");
-        if (string.IsNullOrWhiteSpace(MigSqliteTargetSelector.SelectedPath))
+        if (sqliteMissing)
             missingFields.Add("Projeto de Migrations (SQLite)");
-        if (string.IsNullOrWhiteSpace(MigContextInput.Text))
+        if (contextMissing)
             missingFields.Add("Nome Completo do DbContext");
 
         if (!TryBuildRequiredFieldsMessage(missingFields, out var requiredMessage))
@@ -1445,8 +1646,11 @@ public partial class MainWindow : Window
 
     private void SaveNgrokSettings_Click(object sender, RoutedEventArgs e)
     {
+        var authTokenMissing = string.IsNullOrWhiteSpace(NgrokAuthTokenInput.Text);
+        SetControlValidationState(NgrokAuthTokenInput, authTokenMissing);
+
         var missingFields = new List<string>();
-        if (string.IsNullOrWhiteSpace(NgrokAuthTokenInput.Text))
+        if (authTokenMissing)
             missingFields.Add("Auth Token");
 
         if (!TryBuildRequiredFieldsMessage(missingFields, out var requiredMessage))
@@ -1556,12 +1760,20 @@ public partial class MainWindow : Window
             _currentNotesSettings.DefaultFormat = (NotesFormatCombo.SelectedItem as ComboBoxItem)?.Content.ToString() ?? ".txt";
             _currentNotesSettings.InitialListDisplay = NormalizeNotesInitialListDisplay((NotesInitialListDisplayCombo.SelectedItem as ComboBoxItem)?.Content?.ToString());
 
+            var notesStorageMissing = string.IsNullOrWhiteSpace(_currentNotesSettings.StoragePath);
+            var defaultFormatMissing = NotesFormatCombo.SelectedItem == null;
+            var initialDisplayMissing = NotesInitialListDisplayCombo.SelectedItem == null;
+
+            SetPathSelectorValidationState(NotesStoragePathSelector, notesStorageMissing);
+            SetControlValidationState(NotesFormatCombo, defaultFormatMissing);
+            SetControlValidationState(NotesInitialListDisplayCombo, initialDisplayMissing);
+
             var missingFields = new List<string>();
-            if (string.IsNullOrWhiteSpace(_currentNotesSettings.StoragePath))
+            if (notesStorageMissing)
                 missingFields.Add("Pasta de Armazenamento");
-            if (NotesFormatCombo.SelectedItem == null)
+            if (defaultFormatMissing)
                 missingFields.Add("Formato Padrao");
-            if (NotesInitialListDisplayCombo.SelectedItem == null)
+            if (initialDisplayMissing)
                 missingFields.Add("Exibicao Inicial da Lista");
 
             if (!TryBuildRequiredFieldsMessage(missingFields, out var notesRequiredMessage))
@@ -1572,8 +1784,16 @@ public partial class MainWindow : Window
 
             // Google Drive
             _currentGoogleDriveSettings = ReadGoogleDriveSettingsFromUi();
+            SetControlValidationState(GDriveClientId, false);
+            SetControlValidationState(GDriveClientSecret, false);
+            SetControlValidationState(GDriveProjectId, false);
+            SetControlValidationState(GDriveFolderName, false);
             if (_currentGoogleDriveSettings.IsEnabled && !ValidateGoogleDriveSettings(_currentGoogleDriveSettings, out var validationMessage))
             {
+                SetControlValidationState(GDriveClientId, string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ClientId));
+                SetControlValidationState(GDriveClientSecret, string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ClientSecret));
+                SetControlValidationState(GDriveProjectId, string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ProjectId));
+                SetControlValidationState(GDriveFolderName, string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.FolderName));
                 ShowRequiredFieldsWarning(validationMessage);
                 return;
             }
@@ -1613,8 +1833,17 @@ public partial class MainWindow : Window
         var tempSettings = ReadGoogleDriveSettingsFromUi();
         tempSettings.IsEnabled = true; // Teste deve funcionar mesmo com o toggle desligado.
 
+        SetControlValidationState(GDriveClientId, false);
+        SetControlValidationState(GDriveClientSecret, false);
+        SetControlValidationState(GDriveProjectId, false);
+        SetControlValidationState(GDriveFolderName, false);
+
         if (!ValidateGoogleDriveSettings(tempSettings, out var validationMessage))
         {
+            SetControlValidationState(GDriveClientId, string.IsNullOrWhiteSpace(tempSettings.ClientId));
+            SetControlValidationState(GDriveClientSecret, string.IsNullOrWhiteSpace(tempSettings.ClientSecret));
+            SetControlValidationState(GDriveProjectId, string.IsNullOrWhiteSpace(tempSettings.ProjectId));
+            SetControlValidationState(GDriveFolderName, string.IsNullOrWhiteSpace(tempSettings.FolderName));
             ShowRequiredFieldsWarning(validationMessage);
             return;
         }
@@ -1651,6 +1880,31 @@ public partial class MainWindow : Window
 
         MainStatusText.Text = message;
         MainStatusText.Foreground = (System.Windows.Media.Brush)FindResource("ErrorBrush");
+    }
+
+    private void SetControlValidationState(System.Windows.Controls.Control? control, bool invalid)
+    {
+        if (control == null)
+            return;
+
+        if (invalid)
+        {
+            control.BorderBrush = (System.Windows.Media.Brush)FindResource("ErrorBrush");
+            control.BorderThickness = new Thickness(1.5);
+            return;
+        }
+
+        control.ClearValue(System.Windows.Controls.Control.BorderBrushProperty);
+        control.ClearValue(System.Windows.Controls.Control.BorderThicknessProperty);
+    }
+
+    private void SetPathSelectorValidationState(PathSelector? selector, bool invalid)
+    {
+        if (selector == null)
+            return;
+
+        var textBox = selector.FindName("PathInput") as System.Windows.Controls.TextBox;
+        SetControlValidationState(textBox, invalid);
     }
 
     private void ShowMainStatusInfo(string message)
@@ -1750,6 +2004,9 @@ public partial class MainWindow : Window
         }
     }
 }
+
+
+
 
 
 

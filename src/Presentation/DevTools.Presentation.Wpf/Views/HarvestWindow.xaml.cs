@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using DevTools.Core.Configuration;
-using DevTools.Core.Models;
 using DevTools.Harvest.Engine;
 using DevTools.Harvest.Models;
 using DevTools.Presentation.Wpf.Services;
@@ -14,17 +12,14 @@ public partial class HarvestWindow : Window
 {
     private readonly JobManager _jobManager = null!;
     private readonly SettingsService _settingsService = null!;
-    private readonly ProfileManager _profileManager = null!;
-    private ToolProfile? _currentProfile;
 
     public HarvestRequest? Result { get; private set; }
 
-    public HarvestWindow(JobManager jobManager, SettingsService settingsService, ProfileManager profileManager)
+    public HarvestWindow(JobManager jobManager, SettingsService settingsService, ToolConfigurationManager toolConfigurationManager)
     {
         InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
-        _profileManager = profileManager;
 
         Loaded += OnLoaded;
     }
@@ -37,17 +32,16 @@ public partial class HarvestWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // Tentar carregar perfil padrao.
-        _currentProfile = _profileManager?.GetDefaultProfile("Harvest");
-        if (_currentProfile != null)
-        {
-            if (_currentProfile.Options.TryGetValue("source-path", out var src)) SourcePathSelector.SelectedPath = src;
-            if (_currentProfile.Options.TryGetValue("output-path", out var outPath)) OutputPathSelector.SelectedPath = outPath;
-            if (_currentProfile.Options.TryGetValue("min-score", out var score)) MinScoreBox.Text = score;
-            return;
-        }
-
-        // Sem fallback automatico de caminho para evitar preenchimento padrao da UI.
+        if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastHarvestSourcePath))
+            SourcePathSelector.SelectedPath = _settingsService.Settings.LastHarvestSourcePath;
+        if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastHarvestOutputPath))
+            OutputPathSelector.SelectedPath = _settingsService.Settings.LastHarvestOutputPath;
+        if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastHarvestConfigPath))
+            ConfigPathSelector.SelectedPath = _settingsService.Settings.LastHarvestConfigPath;
+        if (_settingsService.Settings.LastHarvestMinScore.HasValue)
+            MinScoreBox.Text = _settingsService.Settings.LastHarvestMinScore.Value.ToString();
+        if (_settingsService.Settings.LastHarvestCopyFiles.HasValue)
+            CopyFilesCheck.IsChecked = _settingsService.Settings.LastHarvestCopyFiles.Value;
     }
 
     private bool ValidateInputs(out string errorMessage)
@@ -103,15 +97,6 @@ public partial class HarvestWindow : Window
 
             _settingsService.Settings.LastHarvestCopyFiles = CopyFilesCheck.IsChecked;
             _settingsService.Save();
-
-            // Sincronizar com o perfil padrao se estiver em uso.
-            if (_currentProfile != null)
-            {
-                _currentProfile.Options["source-path"] = SourcePathSelector.SelectedPath ?? string.Empty;
-                _currentProfile.Options["output-path"] = OutputPathSelector.SelectedPath ?? string.Empty;
-                _currentProfile.Options["min-score"] = MinScoreBox.Text ?? string.Empty;
-                _profileManager.SaveProfile("Harvest", _currentProfile);
-            }
         }
 
         Result = new HarvestRequest(
@@ -152,3 +137,4 @@ public partial class HarvestWindow : Window
         Close();
     }
 }
+

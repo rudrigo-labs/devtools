@@ -25,11 +25,6 @@ public static class OrganizerRequestValidator
             errors.Add(new ErrorDetail("organizer.inbox.not_found", "InboxPath not found.", request.InboxPath));
         }
 
-        if (string.IsNullOrWhiteSpace(request.OutputPath))
-        {
-            errors.Add(new ErrorDetail("organizer.output.required", "OutputPath is required."));
-        }
-
         if (request.MinScore.HasValue && request.MinScore.Value < 0)
             errors.Add(new ErrorDetail("organizer.min_score.invalid", "MinScore cannot be negative."));
 

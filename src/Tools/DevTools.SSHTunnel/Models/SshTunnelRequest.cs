@@ -1,5 +1,6 @@
-namespace DevTools.SSHTunnel.Models;
+﻿namespace DevTools.SSHTunnel.Models;
 
 public sealed record SshTunnelRequest(
     SshTunnelAction Action,
-    TunnelProfile? Profile = null);
+    TunnelConfiguration? Configuration = null);
+

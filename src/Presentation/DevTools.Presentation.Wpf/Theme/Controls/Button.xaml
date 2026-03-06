@@ -222,7 +222,7 @@
     <Style x:Key="DevToolsSecondaryButton" TargetType="Button">
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Background" Value="{DynamicResource DevToolsWindowBackground}"/>
         <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource DevToolsBrushBorder}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -263,7 +263,7 @@
         <Setter Property="Foreground" Value="White"/>
     </Style>
     <Style x:Key="DevToolsBrowseButton" TargetType="Button" BasedOn="{StaticResource DevToolsSecondaryButton}">
-        <Setter Property="Background" Value="{DynamicResource ControlHighlightBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource DevToolsWindowBackground}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource DevToolsBrushBorder}"/>
         <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
     </Style>

@@ -1,4 +1,4 @@
-# DevTools - Descricao da Aplicacao (Perfil Profissional)
+﻿# DevTools - Descricao da Aplicacao (Configuracao Profissional)
 
 ## Resumo
 
@@ -32,7 +32,7 @@ O DevTools reduz esse custo operacional com ferramentas integradas em um unico h
 
 1. foco em fluxo real de trabalho de dev
 2. interface centralizada (evita troca constante de ferramentas)
-3. configuracoes e perfis por ferramenta
+3. configuracoes e configuracoes por ferramenta
 4. arquitetura modular para crescimento continuo
 
 ## Publico-alvo
@@ -50,3 +50,4 @@ O DevTools reduz esse custo operacional com ferramentas integradas em um unico h
 ## Texto curto para LinkedIn
 
 "DevTools e uma suite desktop que criei para centralizar automacoes tecnicas do dia a dia de desenvolvimento. A aplicacao integra organizacao de arquivos, busca/renomeacao em lote, notas, migrations e suporte de infraestrutura (SSH/Ngrok), com foco em produtividade, padronizacao e fluxo operacional." 
+

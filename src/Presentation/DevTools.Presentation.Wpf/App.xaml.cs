@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using System.Windows;
 using DevTools.Core.Configuration;
@@ -14,7 +14,7 @@ public partial class App : System.Windows.Application
     private JobManager _jobManager = null!;
     private SettingsService _settingsService = null!;
     private ConfigService _configService = null!;
-    private ProfileManager _profileManager = null!;
+    private ToolConfigurationManager _toolConfigurationManager = null!;
     private TrayService _trayService = null!;
     private GoogleDriveService _googleDriveService = null!;
     private SqliteBootstrapper _sqliteBootstrapper = null!;
@@ -37,14 +37,14 @@ public partial class App : System.Windows.Application
         _configService = new ConfigService();
         _sqliteBootstrapper = new SqliteBootstrapper(new SqlitePathProvider());
         TryInitializeSqlite();
-        _profileManager = CreateProfileManager();
+        _toolConfigurationManager = CreateToolConfigurationManager();
         _googleDriveService = new GoogleDriveService();
 
-        var profileUIService = new ProfileUIService(_profileManager);
-        _trayService = new TrayService(_jobManager, _settingsService, _configService, _profileManager, _googleDriveService);
+        var toolConfigurationUIService = new ToolConfigurationUIService(_toolConfigurationManager);
+        _trayService = new TrayService(_jobManager, _settingsService, _configService, _toolConfigurationManager, _googleDriveService);
 
         // Instancia MainWindow (Hub)
-        var mainWindow = new DevTools.Presentation.Wpf.Views.MainWindow(_trayService, _jobManager, _configService, profileUIService, _googleDriveService);
+        var mainWindow = new DevTools.Presentation.Wpf.Views.MainWindow(_trayService, _jobManager, _configService, toolConfigurationUIService, _googleDriveService);
         _trayService.SetMainWindow(mainWindow);
 
         // Iniciar com a Dashboard aberta
@@ -102,11 +102,11 @@ public partial class App : System.Windows.Application
         }
     }
 
-    private ProfileManager CreateProfileManager()
+    private ToolConfigurationManager CreateToolConfigurationManager()
     {
         if (_storageBackend != StorageBackend.Sqlite)
         {
-            return new ProfileManager();
+            return new ToolConfigurationManager();
         }
 
         try
@@ -116,13 +116,15 @@ public partial class App : System.Windows.Application
                 .UseSqlite(pathProvider.GetConnectionString())
                 .Options;
 
-            var profileStore = new SqliteProfileStore(dbOptions);
-            return new ProfileManager(profileStore);
+            var configurationStore = new SqliteToolConfigurationStore(dbOptions);
+            return new ToolConfigurationManager(configurationStore);
         }
         catch (Exception ex)
         {
-            AppLogger.Error("Failed to initialize SQLite profile store. Falling back to JSON profile store.", ex);
-            return new ProfileManager();
+            AppLogger.Error("Failed to initialize SQLite configuration store. Falling back to JSON configuration store.", ex);
+            return new ToolConfigurationManager();
         }
     }
 }
+
+

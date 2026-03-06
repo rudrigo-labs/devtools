@@ -1,6 +1,6 @@
 ﻿# Indice de Documentos - 20260305_2326
 
-Atualizado em: 2026-03-05 23:26
+Atualizado em: 2026-03-06 14:45
 
 ## Regra da Raiz
 Arquivos mantidos na raiz por convencao: README.md e LICENSE
@@ -9,14 +9,14 @@ Arquivos mantidos na raiz por convencao: README.md e LICENSE
 | --- | --- | --- | --- |
 | APRESENTACAO_DEVTOOLS_LINKEDIN.md | Ativo | Ativo | docs/ativos/APRESENTACAO_DEVTOOLS_LINKEDIN.md |
 | CHANGELOG.md | Ativo | Ativo | docs/ativos/CHANGELOG.md |
-| CONFIGURACOES_E_PERFIS_DETALHADO.md | Ativo | Ativo | docs/ativos/CONFIGURACOES_E_PERFIS_DETALHADO.md |
+| CONFIGURACOES_FERRAMENTAS_DETALHADO.md | Ativo | Ativo | docs/ativos/CONFIGURACOES_FERRAMENTAS_DETALHADO.md |
 | CONFIGURATION.md | Ativo | Ativo | docs/ativos/CONFIGURATION.md |
 | GUIA_DE_DISTRIBUICAO.md | Ativo | Ativo | docs/ativos/GUIA_DE_DISTRIBUICAO.md |
 | MANUAL.md | Ativo | Ativo | docs/ativos/MANUAL.md |
 | KICKOFF.md | Ativo | Ativo | docs/ativos/planejamento/KICKOFF.md |
 | PLAN_UI_FORMS.md | Ativo | Ativo | docs/ativos/planejamento/PLAN_UI_FORMS.md |
 | PLANO_MELHORIAS_DEVTOOLS.md | Ativo | Ativo | docs/ativos/planejamento/PLANO_MELHORIAS_DEVTOOLS.md |
-| SETTINGS_AND_PROFILES_GUIDE.md | Ativo | Ativo | docs/ativos/SETTINGS_AND_PROFILES_GUIDE.md |
+| SETTINGS_AND_CONFIGURATIONS_GUIDE.md | Ativo | Ativo | docs/ativos/SETTINGS_AND_CONFIGURATIONS_GUIDE.md |
 | TechnicalDoc.md | Ativo | Ativo | docs/ativos/TechnicalDoc.md |
 | CONTROLE_DOCUMENTOS_PENDENCIAS_20260305_2309.md | Controle | Controle | docs/controle/CONTROLE_DOCUMENTOS_PENDENCIAS_20260305_2309.md |
 | INDICE_DOCUMENTOS_20260305_2319.md | Controle | Controle | docs/controle/INDICE_DOCUMENTOS_20260305_2319.md |
@@ -40,3 +40,21 @@ Arquivos mantidos na raiz por convencao: README.md e LICENSE
 | PLANO_IMPLEMENTACAO_MODAL_DIALOG.md | Resolvido | Concluido | docs/resolvidos/PLANO_IMPLEMENTACAO_MODAL_DIALOG.md |
 | TEMPLATE_CHECKLIST_FASE.md | Template | Template | docs/templates/TEMPLATE_CHECKLIST_FASE.md |
 | TEMPLATE_PENDENCIAS.md | Template | Template | docs/templates/TEMPLATE_PENDENCIAS.md |
+
+## Atualizacoes posteriores (2026-03-06)
+- docs/controle/REGISTRO_DEMANDAS.md
+- docs/templates/TEMPLATE_DEMANDA.md
+- docs/templates/TEMPLATE_LOG_DEMANDA.md
+- docs/templates/README.md
+- docs/context-log.md
+- docs/architecture.md
+- docs/definicoes/DEFINICAO_REFATORACAO_ENTIDADES_FERRAMENTAS_20260306_1315.md
+- docs/definicoes/DEFINICAO_MODELO_UNIFICADO_CONFIGURACOES_FASE1_20260306_1342.md
+- docs/definicoes/DEFINICAO_PERSISTENCIA_E_MIGRACAO_FASE2_20260306_1342.md
+- docs/pendencias/PENDENCIAS_REFATORACAO_ENTIDADES_FERRAMENTAS_20260306_1315.md
+- docs/pendencias/LOG_DEMANDA_REFATORACAO_ENTIDADES_FERRAMENTAS_20260306_1315.md
+- docs/relatorios/BASELINE_TECNICA_REFATORACAO_ENTIDADES_20260306_1342.md
+
+
+
+

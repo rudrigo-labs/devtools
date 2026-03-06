@@ -1,6 +1,6 @@
-namespace DevTools.SSHTunnel.Models;
+﻿namespace DevTools.SSHTunnel.Models;
 
-public sealed class TunnelProfile
+public sealed class TunnelConfiguration
 {
     public string Name { get; set; } = "default";
 
@@ -23,3 +23,4 @@ public sealed class TunnelProfile
     public SshStrictHostKeyChecking StrictHostKeyChecking { get; set; } = SshStrictHostKeyChecking.Default;
     public int? ConnectTimeoutSeconds { get; set; }
 }
+

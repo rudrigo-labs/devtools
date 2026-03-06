@@ -20,6 +20,17 @@ public partial class Utf8ConvertWindow : Window
         InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
+        Loaded += OnLoaded;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastUtf8RootPath))
+            RootPathSelector.SelectedPath = _settingsService.Settings.LastUtf8RootPath;
+
+        DryRunCheck.IsChecked = _settingsService.Settings.LastUtf8DryRun ?? false;
+        IncludeGlobsInput.Text = _settingsService.Settings.LastUtf8IncludeGlobs ?? string.Empty;
+        ExcludeGlobsInput.Text = _settingsService.Settings.LastUtf8ExcludeGlobs ?? string.Empty;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -43,10 +54,16 @@ public partial class Utf8ConvertWindow : Window
 
         var root = RootPathSelector.SelectedPath;
         var recursive = RecursiveCheck.IsChecked ?? true;
+        var dryRun = DryRunCheck.IsChecked ?? false;
         var backup = BackupCheck.IsChecked ?? true;
         var bom = BomCheck.IsChecked ?? true;
+        var include = ParsePatterns(IncludeGlobsInput.Text);
+        var exclude = ParsePatterns(ExcludeGlobsInput.Text);
 
         _settingsService.Settings.LastUtf8RootPath = root;
+        _settingsService.Settings.LastUtf8DryRun = dryRun;
+        _settingsService.Settings.LastUtf8IncludeGlobs = IncludeGlobsInput.Text;
+        _settingsService.Settings.LastUtf8ExcludeGlobs = ExcludeGlobsInput.Text;
         _settingsService.Save();
 
         Close();
@@ -57,8 +74,11 @@ public partial class Utf8ConvertWindow : Window
             var request = new Utf8ConvertRequest(
                 RootPath: root,
                 Recursive: recursive,
+                DryRun: dryRun,
                 CreateBackup: backup,
-                OutputBom: bom
+                OutputBom: bom,
+                IncludeGlobs: include,
+                ExcludeGlobs: exclude
             );
 
             var result = await engine.ExecuteAsync(request, reporter, ct);
@@ -79,5 +99,13 @@ public partial class Utf8ConvertWindow : Window
 
         errorMessage = string.Empty;
         return true;
+    }
+
+    private static string[] ParsePatterns(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return Array.Empty<string>();
+
+        return input.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 }

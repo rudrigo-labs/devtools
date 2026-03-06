@@ -23,17 +23,17 @@ public partial class MigrationsWindow : Window
     private readonly JobManager _jobManager = null!;
     private readonly SettingsService _settings = null!;
     private readonly ConfigService _config = null!;
-    private readonly ProfileManager _profileManager = null!;
-    private ToolProfile? _currentProfile;
+    private readonly ToolConfigurationManager _toolConfigurationManager = null!;
+    private ToolConfiguration? _currentConfiguration;
     private MigrationsSettings _resolvedSettings = new();
 
-    public MigrationsWindow(JobManager jobManager, SettingsService settings, ConfigService config, ProfileManager profileManager)
+    public MigrationsWindow(JobManager jobManager, SettingsService settings, ConfigService config, ToolConfigurationManager toolConfigurationManager)
     {
         InitializeComponent();
         _jobManager = jobManager;
         _settings = settings;
         _config = config;
-        _profileManager = profileManager;
+        _toolConfigurationManager = toolConfigurationManager;
 
         Loaded += OnLoaded;
         Closing += OnClosing;
@@ -55,26 +55,26 @@ public partial class MigrationsWindow : Window
         DbContextInput.Text = _resolvedSettings.DbContextFullName;
         AdditionalArgsInput.Text = _resolvedSettings.AdditionalArgs ?? string.Empty;
 
-        _currentProfile = _profileManager?.GetDefaultProfile("Migrations");
-        if (_currentProfile is null)
+        _currentConfiguration = _toolConfigurationManager?.GetDefaultConfiguration("Migrations");
+        if (_currentConfiguration is null)
             return;
 
-        if (_currentProfile.Options.TryGetValue("root-path", out var root))
+        if (_currentConfiguration.Options.TryGetValue("root-path", out var root))
             ProjectSelector.SelectedPath = root;
 
-        if (_currentProfile.Options.TryGetValue("startup-path", out var startup))
+        if (_currentConfiguration.Options.TryGetValue("startup-path", out var startup))
             StartupSelector.SelectedPath = startup;
 
-        if (_currentProfile.Options.TryGetValue("dbcontext", out var context))
+        if (_currentConfiguration.Options.TryGetValue("dbcontext", out var context))
             DbContextInput.Text = context;
 
-        if (_currentProfile.Options.TryGetValue("additional-args", out var additionalArgs))
+        if (_currentConfiguration.Options.TryGetValue("additional-args", out var additionalArgs))
             _resolvedSettings.AdditionalArgs = additionalArgs;
 
-        if (_currentProfile.Options.TryGetValue("target-sqlserver-path", out var sqlServerTarget))
+        if (_currentConfiguration.Options.TryGetValue("target-sqlserver-path", out var sqlServerTarget))
             SetTargetPath(_resolvedSettings, DatabaseProvider.SqlServer, sqlServerTarget);
 
-        if (_currentProfile.Options.TryGetValue("target-sqlite-path", out var sqliteTarget))
+        if (_currentConfiguration.Options.TryGetValue("target-sqlite-path", out var sqliteTarget))
             SetTargetPath(_resolvedSettings, DatabaseProvider.Sqlite, sqliteTarget);
 
         AdditionalArgsInput.Text = _resolvedSettings.AdditionalArgs ?? string.Empty;
@@ -155,15 +155,15 @@ public partial class MigrationsWindow : Window
             WorkingDirectory: root
         );
 
-        if (_currentProfile != null)
+        if (_currentConfiguration != null)
         {
-            _currentProfile.Options["root-path"] = root ?? string.Empty;
-            _currentProfile.Options["startup-path"] = startup ?? string.Empty;
-            _currentProfile.Options["dbcontext"] = DbContextInput.Text ?? string.Empty;
-            _currentProfile.Options["additional-args"] = _resolvedSettings.AdditionalArgs ?? string.Empty;
-            _currentProfile.Options["target-sqlserver-path"] = GetTargetPath(_resolvedSettings, DatabaseProvider.SqlServer);
-            _currentProfile.Options["target-sqlite-path"] = GetTargetPath(_resolvedSettings, DatabaseProvider.Sqlite);
-            _profileManager.SaveProfile("Migrations", _currentProfile);
+            _currentConfiguration.Options["root-path"] = root ?? string.Empty;
+            _currentConfiguration.Options["startup-path"] = startup ?? string.Empty;
+            _currentConfiguration.Options["dbcontext"] = DbContextInput.Text ?? string.Empty;
+            _currentConfiguration.Options["additional-args"] = _resolvedSettings.AdditionalArgs ?? string.Empty;
+            _currentConfiguration.Options["target-sqlserver-path"] = GetTargetPath(_resolvedSettings, DatabaseProvider.SqlServer);
+            _currentConfiguration.Options["target-sqlite-path"] = GetTargetPath(_resolvedSettings, DatabaseProvider.Sqlite);
+            _toolConfigurationManager.SaveConfiguration("Migrations", _currentConfiguration);
         }
 
         OutputText.Text = "Iniciando...";
@@ -320,3 +320,5 @@ public partial class MigrationsWindow : Window
         EnsureTarget(settings, provider).MigrationsProjectPath = path ?? string.Empty;
     }
 }
+
+

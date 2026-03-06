@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Linq;
 using DevTools.Core.Configuration;
-using DevTools.Core.Models;
 using DevTools.Presentation.Wpf.Services;
 using DevTools.SSHTunnel.Engine;
 using DevTools.SSHTunnel.Models;
@@ -16,24 +16,21 @@ public partial class SshTunnelWindow : Window
     private readonly JobManager _jobManager;
     private readonly SettingsService _settingsService;
     private readonly ConfigService _configService;
-    private readonly ProfileManager _profileManager;
     private readonly TunnelService _tunnelService;
     private readonly SshKeyService _sshKeyService;
     private readonly bool _ownsTunnelService;
-    private ToolProfile? _currentProfile;
 
     public SshTunnelWindow(
         JobManager jobManager,
         SettingsService settingsService,
         ConfigService configService,
-        ProfileManager profileManager,
+        ToolConfigurationManager toolConfigurationManager,
         TunnelService? sharedTunnelService = null)
     {
         InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
         _configService = configService;
-        _profileManager = profileManager;
 
         var processRunner = new SystemProcessRunner();
         _tunnelService = sharedTunnelService ?? new TunnelService(processRunner);
@@ -61,35 +58,20 @@ public partial class SshTunnelWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        _currentProfile = _profileManager?.GetDefaultProfile("SSHTunnel");
-        if (_currentProfile != null)
+        if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastSshStrictHostKeyChecking))
         {
-            LoadProfile(_currentProfile);
+            var targetTag = _settingsService.Settings.LastSshStrictHostKeyChecking;
+            foreach (var item in StrictHostKeyCheckingCombo.Items.OfType<ComboBoxItem>())
+            {
+                if (string.Equals(item.Tag?.ToString(), targetTag, StringComparison.OrdinalIgnoreCase))
+                {
+                    StrictHostKeyCheckingCombo.SelectedItem = item;
+                    break;
+                }
+            }
         }
-    }
 
-    private void LoadProfile(ToolProfile profile)
-    {
-        if (profile.Options.TryGetValue("ssh-host", out var sshHost)) SshHostInput.Text = sshHost;
-        if (profile.Options.TryGetValue("ssh-port", out var sshPort)) SshPortInput.Text = sshPort;
-        if (profile.Options.TryGetValue("ssh-user", out var sshUser)) SshUserInput.Text = sshUser;
-        if (profile.Options.TryGetValue("identity-file", out var identityFile)) IdentityFileSelector.SelectedPath = identityFile;
-        if (profile.Options.TryGetValue("local-bind", out var localBind)) LocalBindInput.Text = localBind;
-        if (profile.Options.TryGetValue("local-port", out var localPort)) LocalPortInput.Text = localPort;
-        if (profile.Options.TryGetValue("remote-host", out var remoteHost)) RemoteHostInput.Text = remoteHost;
-        if (profile.Options.TryGetValue("remote-port", out var remotePort)) RemotePortInput.Text = remotePort;
-    }
-
-    private void UpdateProfileFromUi(ToolProfile profile)
-    {
-        profile.Options["ssh-host"] = SshHostInput.Text;
-        profile.Options["ssh-port"] = SshPortInput.Text;
-        profile.Options["ssh-user"] = SshUserInput.Text;
-        profile.Options["identity-file"] = IdentityFileSelector.SelectedPath ?? string.Empty;
-        profile.Options["local-bind"] = LocalBindInput.Text;
-        profile.Options["local-port"] = LocalPortInput.Text;
-        profile.Options["remote-host"] = RemoteHostInput.Text;
-        profile.Options["remote-port"] = RemotePortInput.Text;
+        ConnectTimeoutInput.Text = _settingsService.Settings.LastSshConnectTimeoutSeconds?.ToString() ?? string.Empty;
     }
 
     private async void ToggleTunnel_Click(object sender, RoutedEventArgs e)
@@ -116,13 +98,12 @@ public partial class SshTunnelWindow : Window
 
         ValidationUiService.ClearInline(MainFrame);
 
-        var profile = BuildProfileFromUi();
+        var configuration = BuildConfigurationFromUi();
 
-        if (_currentProfile != null)
-        {
-            UpdateProfileFromUi(_currentProfile);
-            _profileManager.SaveProfile("SSHTunnel", _currentProfile);
-        }
+        var strictTag = (StrictHostKeyCheckingCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Default";
+        _settingsService.Settings.LastSshStrictHostKeyChecking = strictTag;
+        _settingsService.Settings.LastSshConnectTimeoutSeconds = configuration.ConnectTimeoutSeconds;
+        _settingsService.Save();
 
         primaryButton.IsEnabled = false;
         primaryButton.Content = "Conectando...";
@@ -130,7 +111,7 @@ public partial class SshTunnelWindow : Window
 
         try
         {
-            await _tunnelService.StartAsync(profile);
+            await _tunnelService.StartAsync(configuration);
         }
         catch (Exception ex)
         {
@@ -143,15 +124,15 @@ public partial class SshTunnelWindow : Window
         }
     }
 
-    private TunnelProfile BuildProfileFromUi()
+    private TunnelConfiguration BuildConfigurationFromUi()
     {
         _ = int.TryParse(SshPortInput.Text, out var sshPort);
         _ = int.TryParse(LocalPortInput.Text, out var localPort);
         _ = int.TryParse(RemotePortInput.Text, out var remotePort);
 
-        return new TunnelProfile
+        return new TunnelConfiguration
         {
-            Name = "Manual",
+            Name = BuildTunnelName(),
             SshHost = SshHostInput.Text,
             SshPort = sshPort > 0 ? sshPort : 22,
             SshUser = SshUserInput.Text,
@@ -159,8 +140,19 @@ public partial class SshTunnelWindow : Window
             LocalBindHost = LocalBindInput.Text,
             LocalPort = localPort,
             RemoteHost = RemoteHostInput.Text,
-            RemotePort = remotePort
+            RemotePort = remotePort,
+            StrictHostKeyChecking = ParseStrictHostKeyChecking(),
+            ConnectTimeoutSeconds = ParseOptionalPositiveInt(ConnectTimeoutInput.Text)
         };
+    }
+
+    private string BuildTunnelName()
+    {
+        var host = string.IsNullOrWhiteSpace(SshHostInput.Text) ? "host" : SshHostInput.Text.Trim();
+        var local = string.IsNullOrWhiteSpace(LocalPortInput.Text) ? "local" : LocalPortInput.Text.Trim();
+        var remoteHost = string.IsNullOrWhiteSpace(RemoteHostInput.Text) ? "remote" : RemoteHostInput.Text.Trim();
+        var remotePort = string.IsNullOrWhiteSpace(RemotePortInput.Text) ? "remote" : RemotePortInput.Text.Trim();
+        return $"{host}:{local}->{remoteHost}:{remotePort}";
     }
 
     private bool ValidateInputs(out string errorMessage)
@@ -190,8 +182,35 @@ public partial class SshTunnelWindow : Window
             return false;
         }
 
+        if (!string.IsNullOrWhiteSpace(ConnectTimeoutInput.Text)
+            && (!int.TryParse(ConnectTimeoutInput.Text, out var timeout) || timeout <= 0))
+        {
+            errorMessage = "Connect Timeout deve ser um número inteiro maior que zero.";
+            return false;
+        }
+
         errorMessage = string.Empty;
         return true;
+    }
+
+    private SshStrictHostKeyChecking ParseStrictHostKeyChecking()
+    {
+        var selectedTag = (StrictHostKeyCheckingCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+        return selectedTag switch
+        {
+            "Yes" => SshStrictHostKeyChecking.Yes,
+            "No" => SshStrictHostKeyChecking.No,
+            "AcceptNew" => SshStrictHostKeyChecking.AcceptNew,
+            _ => SshStrictHostKeyChecking.Default
+        };
+    }
+
+    private static int? ParseOptionalPositiveInt(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        return int.TryParse(value, out var parsed) && parsed > 0 ? parsed : null;
     }
 
     private void UpdateStatusUI()
@@ -269,3 +288,6 @@ public partial class SshTunnelWindow : Window
         }
     }
 }
+
+
+

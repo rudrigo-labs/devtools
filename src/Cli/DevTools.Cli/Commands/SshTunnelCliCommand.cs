@@ -1,4 +1,4 @@
-using DevTools.Cli.Ui;
+﻿using DevTools.Cli.Ui;
 using DevTools.Cli.Logging;
 using DevTools.Cli.App;
 using DevTools.SSHTunnel.Engine;
@@ -23,7 +23,7 @@ public sealed class SshTunnelCliCommand : ICliCommand
 
     public string Key => "sshtunnel";
     public string Name => "SSH Tunnel";
-    public string Description => "Cria e encerra tuneis SSH locais com status e perfis.";
+    public string Description => "Cria e encerra tuneis SSH locais com status e configuracoes.";
 
     public async Task<int> ExecuteAsync(CliLaunchOptions options, CancellationToken ct)
     {
@@ -62,13 +62,13 @@ public sealed class SshTunnelCliCommand : ICliCommand
         }
 
         // 2. Resolve Parameters
-        TunnelProfile? profile = null;
+        TunnelConfiguration? configuration = null;
         if (action == SshTunnelAction.Start)
         {
-            profile = ResolveProfile(options);
+            configuration = ResolveConfiguration(options);
         }
 
-        var request = new SshTunnelRequest(action.Value, profile);
+        var request = new SshTunnelRequest(action.Value, configuration);
 
         using var progress = new CliProgressReporter(_ui.Theme);
         var result = await _engine.ExecuteAsync(request, progress, ct).ConfigureAwait(false);
@@ -83,8 +83,8 @@ public sealed class SshTunnelCliCommand : ICliCommand
             _ui.Section("Status");
             _ui.WriteKeyValue("Estado", response.State.ToString());
             _ui.WriteKeyValue("Rodando", response.IsRunning ? "Sim" : "Nao");
-            if (response.Profile is not null)
-                _ui.WriteKeyValue("Perfil", response.Profile.Name);
+            if (response.Configuration is not null)
+                _ui.WriteKeyValue("Configuracao", response.Configuration.Name);
             if (response.ProcessId.HasValue)
                 _ui.WriteKeyValue("PID", response.ProcessId.Value.ToString());
             if (!string.IsNullOrWhiteSpace(response.LastError))
@@ -96,10 +96,10 @@ public sealed class SshTunnelCliCommand : ICliCommand
         return result.IsSuccess && result.Summary.Failed == 0 ? 0 : 1;
     }
 
-    private TunnelProfile ResolveProfile(CliLaunchOptions options)
+    private TunnelConfiguration ResolveConfiguration(CliLaunchOptions options)
     {
         // Args
-        var name = options.GetOption("profile") ?? options.GetOption("name");
+        var name = options.GetOption("configuration") ?? options.GetOption("name");
         var sshHost = options.GetOption("ssh-host") ?? options.GetOption("host");
         var sshPortStr = options.GetOption("ssh-port") ?? options.GetOption("port");
         var sshUser = options.GetOption("ssh-user") ?? options.GetOption("user");
@@ -130,8 +130,8 @@ public sealed class SshTunnelCliCommand : ICliCommand
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                name = _input.ReadOptional("Nome do perfil", "enter = default");
-                if (!string.IsNullOrWhiteSpace(name)) options.Options["profile"] = name;
+                name = _input.ReadOptional("Nome do configuracao", "enter = default");
+                if (!string.IsNullOrWhiteSpace(name)) options.Options["configuration"] = name;
             }
             
             if (string.IsNullOrWhiteSpace(sshHost))
@@ -222,7 +222,7 @@ public sealed class SshTunnelCliCommand : ICliCommand
         if (string.IsNullOrWhiteSpace(sshHost)) throw new ArgumentException("SSH Host required (--ssh-host)");
         if (string.IsNullOrWhiteSpace(sshUser)) throw new ArgumentException("SSH User required (--ssh-user)");
 
-        return new TunnelProfile
+        return new TunnelConfiguration
         {
             Name = string.IsNullOrWhiteSpace(name) ? "default" : name,
             SshHost = sshHost,
@@ -238,3 +238,4 @@ public sealed class SshTunnelCliCommand : ICliCommand
         };
     }
 }
+

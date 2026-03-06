@@ -27,22 +27,37 @@ public class AppSettings
     public string? LastRenameInclude { get; set; }
     public string? LastRenameExclude { get; set; }
     public bool? LastRenameDryRun { get; set; }
+    public string? LastRenameUndoLogPath { get; set; }
+    public string? LastRenameReportPath { get; set; }
+    public int? LastRenameMaxDiffLinesPerFile { get; set; }
     public double? RenameWindowTop { get; set; }
     public double? RenameWindowLeft { get; set; }
 
     // Snapshot Persistence
     public string? LastSnapshotRootPath { get; set; }
+    public string? LastSnapshotOutputBasePath { get; set; }
+    public string? LastSnapshotIgnoredDirectories { get; set; }
+    public int? LastSnapshotMaxFileSizeKb { get; set; }
+    public bool? LastSnapshotGenerateText { get; set; }
+    public bool? LastSnapshotGenerateHtml { get; set; }
+    public bool? LastSnapshotGenerateJsonNested { get; set; }
+    public bool? LastSnapshotGenerateJsonRecursive { get; set; }
     public double? SnapshotWindowTop { get; set; }
     public double? SnapshotWindowLeft { get; set; }
 
     // Utf8Convert Persistence
     public string? LastUtf8RootPath { get; set; }
+    public bool? LastUtf8DryRun { get; set; }
+    public string? LastUtf8IncludeGlobs { get; set; }
+    public string? LastUtf8ExcludeGlobs { get; set; }
     public double? Utf8WindowTop { get; set; }
     public double? Utf8WindowLeft { get; set; }
 
     // SshTunnel Persistence
     public double? SshWindowTop { get; set; }
     public double? SshWindowLeft { get; set; }
+    public string? LastSshStrictHostKeyChecking { get; set; }
+    public int? LastSshConnectTimeoutSeconds { get; set; }
 
     // Ngrok Persistence
     public double? NgrokWindowTop { get; set; }
@@ -52,6 +67,11 @@ public class AppSettings
     public string? LastSearchTextRootPath { get; set; }
     public string? LastSearchTextInclude { get; set; }
     public string? LastSearchTextExclude { get; set; }
+    public bool? LastSearchTextWholeWord { get; set; }
+    public int? LastSearchTextMaxFileSizeKb { get; set; }
+    public bool? LastSearchTextSkipBinaryFiles { get; set; }
+    public int? LastSearchTextMaxMatchesPerFile { get; set; }
+    public bool? LastSearchTextReturnLines { get; set; }
     public double? SearchTextWindowTop { get; set; }
     public double? SearchTextWindowLeft { get; set; }
 

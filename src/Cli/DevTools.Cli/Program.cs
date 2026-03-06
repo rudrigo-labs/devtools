@@ -1,4 +1,4 @@
-using DevTools.Cli.App;
+﻿using DevTools.Cli.App;
 using DevTools.Cli.Commands;
 using DevTools.Cli.Ui;
 
@@ -11,7 +11,7 @@ var state = new CliState();
 var ui = new CliConsole(theme, state);
 var input = new CliInput(ui);
 var menu = new CliMenu(ui, input);
-var profileManager = new ProfileManager();
+var toolConfigurationManager = new ToolConfigurationManager();
 
 var commands = new List<ICliCommand>
 {
@@ -37,5 +37,6 @@ state.MenuItems = orderedCommands
     .ToList();
 
 var options = ArgParser.Parse(args);
-var app = new CliApp(ui, menu, input, orderedCommands, profileManager);
+var app = new CliApp(ui, menu, input, orderedCommands, toolConfigurationManager);
 return await app.RunAsync(options, CancellationToken.None);
+

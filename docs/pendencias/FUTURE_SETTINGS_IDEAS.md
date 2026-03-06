@@ -1,10 +1,10 @@
-# Roadmap de Evolucao de Configuracoes (Futuro)
+﻿# Roadmap de Evolucao de Configuracoes (Futuro)
 
 Este arquivo lista ideias de melhoria para proximas versoes.
 
 ## 1. Painel de saude por ferramenta
 
-- SSH: quantidade de perfis e ultimo perfil usado
+- SSH: quantidade de configuracoes e ultimo configuracao usado
 - Ngrok: status (instalado/configurado/ativo)
 - Notes: caminho ativo + status de sync
 - Storage: backend atual (JSON/SQLite)
@@ -21,11 +21,12 @@ Este arquivo lista ideias de melhoria para proximas versoes.
 - validacao inline com icone e mensagem contextual
 - padronizacao final de microcopy dos botoes (novo/salvar/remover)
 
-## 4. Perfil operacional
+## 4. Configuracao operacional
 
-- export/import consolidado de perfis e configuracoes
-- sincronizacao opcional de perfis entre maquinas
+- export/import consolidado de configuracoes e configuracoes
+- sincronizacao opcional de configuracoes entre maquinas
 
 ## 5. Observabilidade
 
 - painel unico de status no shell (jobs, tuneis, storage, logs)
+

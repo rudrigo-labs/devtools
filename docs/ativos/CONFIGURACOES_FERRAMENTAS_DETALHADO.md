@@ -1,8 +1,8 @@
-# Configuracoes e Perfis - Guia Detalhado
+﻿# Configuracoes das Ferramentas - Guia Detalhado
 
 Data de referencia: 2026-03-05
 
-Este documento e a referencia completa de configuracoes, persistencia e perfis do DevTools.
+Este documento e a referencia completa de configuracoes e persistencia do DevTools.
 
 ## 1. Visao geral
 
@@ -10,7 +10,7 @@ O DevTools separa dados em 3 grupos:
 
 1. preferencias de aplicacao (`settings.json`)
 2. configuracoes globais por secao (`ConfigService`)
-3. perfis por ferramenta (`ProfileManager`)
+3. configuracoes por ferramenta (`ToolConfigurationManager`)
 
 ## 2. Persistencia: onde cada coisa fica
 
@@ -43,20 +43,20 @@ Ativacao de backend:
 - `DEVTOOLS_STORAGE_BACKEND=sqlite`
 - ou pelo painel: `Configuracoes > Armazenamento`
 
-## 2.3 Perfis por ferramenta
+## 2.3 Configuracoes por ferramenta
 
-- Servico: `ProfileManager` + `ProfileUIService`
+- Servico: `ToolConfigurationManager` + `ToolConfigurationUIService`
 
 Backend JSON:
 
-- pasta `%AppData%\DevTools\profiles\`
+- pasta `%AppData%\DevTools\configurations\`
 - arquivo por ferramenta: `devtools.<ferramenta>.json`
 
 Backend SQLite:
 
-- tabela `ToolProfiles` em `%AppData%\DevTools\devtools.db`
+- tabela `ToolConfigurations` em `%AppData%\DevTools\devtools.db`
 
-Estrutura do perfil:
+Estrutura da configuracao:
 
 - `Name`
 - `IsDefault`
@@ -65,7 +65,7 @@ Estrutura do perfil:
 
 Regra de negocio:
 
-- so um perfil default por ferramenta
+- so uma configuracao default por ferramenta
 
 ## 2.4 Configuracoes Ngrok (store proprio)
 
@@ -88,7 +88,7 @@ Campos:
 ## 2.5 Notas
 
 - Notas sempre ficam em arquivo fisico local (`.txt`/`.md`)
-- Caminho padrao: `%UserProfile%\Documents\DevTools\Notes`
+- Caminho padrao: `%HOMEDRIVE%%HOMEPATH%\Documents\DevTools\Notes`
 - Mesmo com backend SQLite ativo, notas continuam em arquivo
 
 ## 3. Painel de Configuracoes (MainWindow)
@@ -173,10 +173,10 @@ Campos:
 Deteccao automatica implementada:
 
 - localiza executavel (caminho configurado ou PATH)
-- localiza `ngrok.yml` em `%USERPROFILE%\.ngrok2\` ou `%USERPROFILE%\AppData\Local\ngrok\`
+- localiza `ngrok.yml` em `%HOMEDRIVE%%HOMEPATH%\.ngrok2\` ou `%HOMEDRIVE%%HOMEPATH%\AppData\Local\ngrok\`
 - extrai `authtoken:` quando existir no YAML
 
-## 4. Perfis: chaves por ferramenta
+## 4. Configuracoes: chaves por ferramenta
 
 ## 4.1 Rename
 
@@ -222,7 +222,7 @@ Chave:
 
 Chaves principais:
 
-- `ssh-profile-name`
+- `ssh-configuration-name`
 - `ssh-host`
 - `ssh-port`
 - `ssh-user`
@@ -249,3 +249,6 @@ Padrao de obrigatoriedade:
 2. manter backup de `%AppData%\DevTools` em troca de maquina
 3. validar Google Drive e Ngrok com teste real apos cadastrar credenciais
 4. revisar defaults com base no uso real do time (voce ja sinalizou que vai passar defaults finais)
+
+
+

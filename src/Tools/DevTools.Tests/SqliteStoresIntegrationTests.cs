@@ -1,4 +1,4 @@
-using DevTools.Core.Models;
+﻿using DevTools.Core.Models;
 using DevTools.Harvest.Configuration;
 using DevTools.Presentation.Wpf.Models;
 using DevTools.Presentation.Wpf.Persistence;
@@ -56,12 +56,12 @@ public class SqliteStoresIntegrationTests
     }
 
     [Fact]
-    public void SqliteProfileStore_SaveAndLoad_RespectsOrderingAndReplacement()
+    public void SqliteToolConfigurationStore_SaveAndLoad_RespectsOrderingAndReplacement()
     {
         using var scope = new SqliteScope();
-        var store = new SqliteProfileStore(scope.Options);
+        var store = new SqliteToolConfigurationStore(scope.Options);
 
-        store.SaveProfiles("Rename", new List<ToolProfile>
+        store.SaveConfigurations("Rename", new List<ToolConfiguration>
         {
             new()
             {
@@ -77,13 +77,13 @@ public class SqliteStoresIntegrationTests
             }
         });
 
-        var firstLoad = store.LoadProfiles("Rename");
+        var firstLoad = store.LoadConfigurations("Rename");
         Assert.Equal(2, firstLoad.Count);
         Assert.Equal("Alpha", firstLoad[0].Name);
         Assert.True(firstLoad[0].IsDefault);
         Assert.Equal("c:/tmp/a", firstLoad[0].Options["root"]);
 
-        store.SaveProfiles("Rename", new List<ToolProfile>
+        store.SaveConfigurations("Rename", new List<ToolConfiguration>
         {
             new()
             {
@@ -93,7 +93,7 @@ public class SqliteStoresIntegrationTests
             }
         });
 
-        var secondLoad = store.LoadProfiles("Rename");
+        var secondLoad = store.LoadConfigurations("Rename");
         Assert.Single(secondLoad);
         Assert.Equal("Only", secondLoad[0].Name);
     }
@@ -187,3 +187,4 @@ public class SqliteStoresIntegrationTests
         }
     }
 }
+

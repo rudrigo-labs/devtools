@@ -1,6 +1,6 @@
 name: Build and Test
 
-# Perfis de CI:
+# Modos de CI:
 # - quick-dev-check: push em dev (validacao rapida, alvo ~2-5 min)
 # - full-dev-to-main: PR dev -> main (validacao completa, alvo ~8-20 min)
 #
@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Perfil QUICK (dev): roda apenas testes leves/rapidos para feedback curto.
+  # Modo QUICK (dev): roda apenas testes leves/rapidos para feedback curto.
   quick-dev-check:
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     runs-on: windows-latest
@@ -41,7 +41,7 @@ jobs:
           --verbosity minimal
           --filter "(FullyQualifiedName~PathFilterTests|FullyQualifiedName~OrganizerEngineTests|FullyQualifiedName~RenameEngineTests|FullyQualifiedName~RoslynRenamerTests|FullyQualifiedName~HarvestEngineTests|FullyQualifiedName~ToolRouterIntegrationTests|FullyQualifiedName~ToolRegistryBehaviorTests)"
 
-  # Perfil FULL: somente PR de dev para main.
+  # Modo FULL: somente PR de dev para main.
   full-dev-to-main:
     if: github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev'
     runs-on: windows-latest

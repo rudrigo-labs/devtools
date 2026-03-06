@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -39,13 +39,13 @@ public class ToolUsageSimulationTests
                 var jobManager = new JobManager();
                 var settings = new SettingsService();
                 var config = new ConfigService();
-                var profileManager = new ProfileManager();
+                var toolConfigurationManager = new ToolConfigurationManager();
                 var gdrive = new GoogleDriveService();
 
                 if (CanRunTrayRouterSmoke())
                 {
                     stage = "RunTrayRouterSmoke";
-                    RunTrayRouterSmoke(jobManager, settings, config, profileManager, gdrive, s => stage = s);
+                    RunTrayRouterSmoke(jobManager, settings, config, toolConfigurationManager, gdrive, s => stage = s);
                 }
                 else
                 {
@@ -57,21 +57,21 @@ public class ToolUsageSimulationTests
                 stage = "RunUtf8Flow";
                 RunUtf8Flow(jobManager, settings, tempRoot);
                 stage = "RunSnapshotFlow";
-                RunSnapshotFlow(jobManager, settings, profileManager, tempRoot);
+                RunSnapshotFlow(jobManager, settings, toolConfigurationManager, tempRoot);
                 stage = "RunSearchTextFlow";
-                RunSearchTextFlow(jobManager, settings, profileManager, tempRoot);
+                RunSearchTextFlow(jobManager, settings, toolConfigurationManager, tempRoot);
                 stage = "RunRenameFlow";
-                RunRenameFlow(jobManager, settings, profileManager, tempRoot);
+                RunRenameFlow(jobManager, settings, toolConfigurationManager, tempRoot);
                 stage = "RunHarvestFlow";
-                RunHarvestFlow(jobManager, settings, profileManager, tempRoot);
+                RunHarvestFlow(jobManager, settings, toolConfigurationManager, tempRoot);
                 stage = "RunImageSplitFlow";
                 RunImageSplitFlow(jobManager, settings, tempRoot);
                 stage = "RunMigrationsFlow";
-                RunMigrationsFlow(jobManager, settings, config, profileManager, tempRoot);
+                RunMigrationsFlow(jobManager, settings, config, toolConfigurationManager, tempRoot);
                 stage = "RunNotesFlow";
                 RunNotesFlow(settings, config, gdrive, tempRoot);
                 stage = "RunAuxiliaryWindowsFlow";
-                RunAuxiliaryWindowsFlow(jobManager, settings, config, profileManager);
+                RunAuxiliaryWindowsFlow(jobManager, settings, config, toolConfigurationManager);
 
                 Assert.True(true);
             }
@@ -92,11 +92,11 @@ public class ToolUsageSimulationTests
         JobManager jobManager,
         SettingsService settings,
         ConfigService config,
-        ProfileManager profileManager,
+        ToolConfigurationManager toolConfigurationManager,
         GoogleDriveService gdrive,
         Action<string>? updateStage = null)
     {
-        var tray = new TrayService(jobManager, settings, config, profileManager, gdrive);
+        var tray = new TrayService(jobManager, settings, config, toolConfigurationManager, gdrive);
 
         var ids = new[]
         {
@@ -150,13 +150,13 @@ public class ToolUsageSimulationTests
         Assert.True(File.Exists(file));
     }
 
-    private static void RunSnapshotFlow(JobManager jobManager, SettingsService settings, ProfileManager profileManager, string tempRoot)
+    private static void RunSnapshotFlow(JobManager jobManager, SettingsService settings, ToolConfigurationManager toolConfigurationManager, string tempRoot)
     {
         var root = Path.Combine(tempRoot, "snapshot-root");
         Directory.CreateDirectory(root);
         File.WriteAllText(Path.Combine(root, "Program.cs"), "class Program {}");
 
-        var window = new SnapshotWindow(jobManager, settings, profileManager);
+        var window = new SnapshotWindow(jobManager, settings, toolConfigurationManager);
         window.Show();
         PumpDispatcher(3);
 
@@ -169,14 +169,14 @@ public class ToolUsageSimulationTests
         Assert.True(Directory.Exists(snapshotFolder));
     }
 
-    private static void RunSearchTextFlow(JobManager jobManager, SettingsService settings, ProfileManager profileManager, string tempRoot)
+    private static void RunSearchTextFlow(JobManager jobManager, SettingsService settings, ToolConfigurationManager toolConfigurationManager, string tempRoot)
     {
         var root = Path.Combine(tempRoot, "search-root");
         Directory.CreateDirectory(root);
         var token = "TOKEN_FIND_ME_123";
         File.WriteAllText(Path.Combine(root, "search.txt"), token + Environment.NewLine + "other line");
 
-        var window = new SearchTextWindow(jobManager, settings, profileManager);
+        var window = new SearchTextWindow(jobManager, settings, toolConfigurationManager);
         window.Show();
         PumpDispatcher(3);
 
@@ -193,13 +193,13 @@ public class ToolUsageSimulationTests
         window.Close();
     }
 
-    private static void RunRenameFlow(JobManager jobManager, SettingsService settings, ProfileManager profileManager, string tempRoot)
+    private static void RunRenameFlow(JobManager jobManager, SettingsService settings, ToolConfigurationManager toolConfigurationManager, string tempRoot)
     {
         var root = Path.Combine(tempRoot, "rename-root");
         Directory.CreateDirectory(root);
         File.WriteAllText(Path.Combine(root, "OldNameService.txt"), "OldNameService");
 
-        var window = new RenameWindow(jobManager, settings, profileManager);
+        var window = new RenameWindow(jobManager, settings, toolConfigurationManager);
         window.Show();
         PumpDispatcher(3);
 
@@ -217,7 +217,7 @@ public class ToolUsageSimulationTests
         window.Close();
     }
 
-    private static void RunHarvestFlow(JobManager jobManager, SettingsService settings, ProfileManager profileManager, string tempRoot)
+    private static void RunHarvestFlow(JobManager jobManager, SettingsService settings, ToolConfigurationManager toolConfigurationManager, string tempRoot)
     {
         var source = Path.Combine(tempRoot, "harvest-source");
         var output = Path.Combine(tempRoot, "harvest-output");
@@ -225,7 +225,7 @@ public class ToolUsageSimulationTests
         Directory.CreateDirectory(output);
         File.WriteAllText(Path.Combine(source, "Service.cs"), "public class SecurityHelper { void Encrypt(){} }");
 
-        var window = new HarvestWindow(jobManager, settings, profileManager);
+        var window = new HarvestWindow(jobManager, settings, toolConfigurationManager);
         window.Show();
         PumpDispatcher(3);
 
@@ -270,7 +270,7 @@ public class ToolUsageSimulationTests
         Assert.True(Directory.Exists(output));
     }
 
-    private static void RunMigrationsFlow(JobManager jobManager, SettingsService settings, ConfigService config, ProfileManager profileManager, string tempRoot)
+    private static void RunMigrationsFlow(JobManager jobManager, SettingsService settings, ConfigService config, ToolConfigurationManager toolConfigurationManager, string tempRoot)
     {
         var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "..", "src"));
         var startupCsproj = Path.GetFullPath(Path.Combine(
@@ -289,7 +289,7 @@ public class ToolUsageSimulationTests
             }
         });
 
-        var window = new MigrationsWindow(jobManager, settings, config, profileManager);
+        var window = new MigrationsWindow(jobManager, settings, config, toolConfigurationManager);
         window.Show();
         PumpDispatcher(3);
 
@@ -297,7 +297,7 @@ public class ToolUsageSimulationTests
         GetField<PathSelector>(window, "StartupSelector").SelectedPath = startupCsproj;
         GetField<TextBox>(window, "DbContextInput").Text = "Sample.DbContext";
 
-        // Update Database (na implementação atual: qualquer ação != Add é tratada como update)
+        // Update Database (na implementaÃ§Ã£o atual: qualquer aÃ§Ã£o != Add Ã© tratada como update)
         GetField<ComboBox>(window, "ActionCombo").SelectedIndex = 1;
         GetField<CheckBox>(window, "DryRunCheck").IsChecked = true;
 
@@ -368,7 +368,7 @@ public class ToolUsageSimulationTests
         window.Close();
     }
 
-    private static void RunAuxiliaryWindowsFlow(JobManager jobManager, SettingsService settings, ConfigService config, ProfileManager profileManager)
+    private static void RunAuxiliaryWindowsFlow(JobManager jobManager, SettingsService settings, ConfigService config, ToolConfigurationManager toolConfigurationManager)
     {
         var logs = new LogsWindow(settings);
         logs.Show();
@@ -384,7 +384,7 @@ public class ToolUsageSimulationTests
         PumpDispatcher(4);
         ngrok.Close();
 
-        var ssh = new SshTunnelWindow(jobManager, settings, config, profileManager);
+        var ssh = new SshTunnelWindow(jobManager, settings, config, toolConfigurationManager);
         ssh.Show();
         PumpDispatcher(3);
         GetField<TextBox>(ssh, "SshHostInput").Text = "example.local";
@@ -394,8 +394,8 @@ public class ToolUsageSimulationTests
         GetField<TextBox>(ssh, "LocalPortInput").Text = "5432";
         GetField<TextBox>(ssh, "RemoteHostInput").Text = "127.0.0.1";
         GetField<TextBox>(ssh, "RemotePortInput").Text = "5432";
-        var profile = (TunnelProfile)Invoke(ssh, "BuildProfileFromUi")!;
-        Assert.Equal("example.local", profile.SshHost);
+        var configuration = (TunnelConfiguration)Invoke(ssh, "BuildConfigurationFromUi")!;
+        Assert.Equal("example.local", configuration.SshHost);
         ssh.Close();
 
         var help = new HelpWindow();
@@ -576,3 +576,6 @@ public class ToolUsageSimulationTests
         }
     }
 }
+
+
+

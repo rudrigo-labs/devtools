@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -6,14 +6,14 @@ using DevTools.Core.Models;
 
 namespace DevTools.Core.Configuration;
 
-public sealed class JsonFileProfileStore : IProfileStore
+public sealed class JsonFileToolConfigurationStore : IToolConfigurationStore
 {
     private readonly string _basePath;
 
-    public JsonFileProfileStore()
+    public JsonFileToolConfigurationStore()
     {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        _basePath = Path.Combine(appData, "DevTools", "profiles");
+        _basePath = Path.Combine(appData, "DevTools", "configurations");
 
         if (!Directory.Exists(_basePath))
         {
@@ -21,33 +21,33 @@ public sealed class JsonFileProfileStore : IProfileStore
         }
     }
 
-    public List<ToolProfile> LoadProfiles(string toolName)
+    public List<ToolConfiguration> LoadConfigurations(string toolName)
     {
         var path = GetFilePath(toolName);
         if (!File.Exists(path))
         {
-            return new List<ToolProfile>();
+            return new List<ToolConfiguration>();
         }
 
         try
         {
             var json = File.ReadAllText(path);
-            var container = JsonSerializer.Deserialize<ToolProfileContainer>(
+            var container = JsonSerializer.Deserialize<ToolConfigurationContainer>(
                 json,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            return container?.Profiles ?? new List<ToolProfile>();
+            return container?.Configurations ?? new List<ToolConfiguration>();
         }
         catch
         {
-            return new List<ToolProfile>();
+            return new List<ToolConfiguration>();
         }
     }
 
-    public void SaveProfiles(string toolName, List<ToolProfile> profiles)
+    public void SaveConfigurations(string toolName, List<ToolConfiguration> configurations)
     {
         var path = GetFilePath(toolName);
-        var container = new ToolProfileContainer { Profiles = profiles };
+        var container = new ToolConfigurationContainer { Configurations = configurations };
         var json = JsonSerializer.Serialize(container, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(path, json);
     }
@@ -58,4 +58,6 @@ public sealed class JsonFileProfileStore : IProfileStore
         return Path.Combine(_basePath, $"devtools.{safeName.ToLowerInvariant()}.json");
     }
 }
+
+
 

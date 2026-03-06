@@ -9,36 +9,6 @@ internal sealed class SnapshotHtmlWriter
     private const string PrismThemeUrl = PrismBase + "/themes/prism-tomorrow.min.css";
     private const string PrismCoreUrl = PrismBase + "/prism.min.js";
 
-    private static readonly HashSet<string> PreviewExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".cs", ".csx", ".json", ".xml", ".config",
-        ".csproj", ".sln", ".props", ".targets",
-        ".yml", ".yaml",
-        ".md", ".txt",
-        ".editorconfig", ".gitignore", ".gitattributes",
-        ".env", ".ini", ".sql", ".http", ".dockerignore",
-        ".html", ".htm",
-        ".css", ".scss", ".sass", ".less",
-        ".js", ".mjs", ".cjs",
-        ".ts", ".tsx", ".jsx",
-        ".cshtml", ".razor",
-        ".ps1", ".sh", ".bat",
-        ".graphql", ".proto"
-    };
-
-    private static readonly HashSet<string> TextFilesWithoutExtension = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "Dockerfile",
-        "README",
-        "LICENSE",
-        "Makefile"
-    };
-
-    private static readonly HashSet<string> ImageExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".ico"
-    };
-
     private static readonly Dictionary<string, string> PrismByExtension = new(StringComparer.OrdinalIgnoreCase)
     {
         [".cs"] = "csharp",
@@ -113,13 +83,11 @@ internal sealed class SnapshotHtmlWriter
 
         var neededPrism = DetectNeededPrismComponents(rootPath);
         ResolvePrismDependencies(neededPrism);
+        var availablePrism = await EnsurePrismFilesAsync(outDir, neededPrism);
 
-        _prismScripts = neededPrism
-            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+        _prismScripts = availablePrism
             .Select(x => $"../prism-{x}.min.js")
             .ToList();
-
-        await DownloadPrismFiles(outDir, neededPrism);
 
         _firstFileFallback = null;
         _programCsFile = null;
@@ -184,7 +152,7 @@ internal sealed class SnapshotHtmlWriter
 
                 sb.Append($"<li><a href='{WebUtility.HtmlEncode(viewerHref)}' target='viewer'>📄 {WebUtility.HtmlEncode(file.Name)}</a></li>");
             }
-            else if (entry is FileInfo f2 && ImageExtensions.Contains(f2.Extension))
+            else if (entry is FileInfo f2 && SnapshotDefaults.ImageExtensions.Contains(f2.Extension))
             {
                 sb.Append($"<li><span style='opacity:.7'>🖼️ {WebUtility.HtmlEncode(f2.Name)} (image)</span></li>");
             }
@@ -195,16 +163,16 @@ internal sealed class SnapshotHtmlWriter
 
     private static bool IsPreviewable(FileInfo file, long? maxFileSizeBytes)
     {
-        if (ImageExtensions.Contains(file.Extension))
+        if (SnapshotDefaults.ImageExtensions.Contains(file.Extension))
             return false;
 
         if (maxFileSizeBytes.HasValue && file.Length > maxFileSizeBytes.Value)
             return false;
 
         if (string.IsNullOrEmpty(file.Extension))
-            return TextFilesWithoutExtension.Contains(file.Name);
+            return SnapshotDefaults.TextFilesWithoutExtension.Contains(file.Name);
 
-        return PreviewExtensions.Contains(file.Extension);
+        return SnapshotDefaults.PreviewExtensions.Contains(file.Extension);
     }
 
     private async Task GenerateCodeHtmlPageAsync(FileInfo file, string targetPath)
@@ -286,45 +254,64 @@ pre {{ border-radius: 6px; }}
         } while (changed);
     }
 
-    private async Task DownloadPrismFiles(string targetDir, IReadOnlySet<string> components)
+    private async Task<IReadOnlyList<string>> EnsurePrismFilesAsync(string targetDir, IReadOnlySet<string> components)
     {
         Directory.CreateDirectory(targetDir);
+        var cacheDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "DevTools",
+            "Snapshot",
+            "PrismCache",
+            "1.29.0");
+        Directory.CreateDirectory(cacheDir);
+
+        var availableComponents = new List<string>();
+        var fallbackCss = "/* offline fallback */ body{background:#1d1d1d;color:#ccc;} pre{background:#1e1e1e;}";
+        var fallbackJs = "window.Prism=window.Prism||{};window.Prism.highlightAll=window.Prism.highlightAll||function(){};";
+        var fallbackComponentJs = "window.Prism=window.Prism||{};";
 
         using var client = new HttpClient();
         client.DefaultRequestHeaders.UserAgent.ParseAdd("SnapshotGenerator/1.0");
 
-        var downloads = new List<(string url, string fileName)>
-        {
-            (PrismThemeUrl, "prism-tomorrow.min.css"),
-            (PrismCoreUrl, "prism.min.js")
-        };
+        var themeCache = Path.Combine(cacheDir, "prism-tomorrow.min.css");
+        var coreCache = Path.Combine(cacheDir, "prism.min.js");
 
-        foreach (var c in components.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
+        await EnsureAssetCachedAsync(client, PrismThemeUrl, themeCache, fallbackCss);
+        await EnsureAssetCachedAsync(client, PrismCoreUrl, coreCache, fallbackJs);
+
+        File.Copy(themeCache, Path.Combine(targetDir, "prism-tomorrow.min.css"), true);
+        File.Copy(coreCache, Path.Combine(targetDir, "prism.min.js"), true);
+
+        foreach (var component in components.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
         {
-            var url = $"{PrismBase}/components/prism-{c}.min.js";
-            var fileName = $"prism-{c}.min.js";
-            downloads.Add((url, fileName));
+            var fileName = $"prism-{component}.min.js";
+            var sourceUrl = $"{PrismBase}/components/{fileName}";
+            var componentCache = Path.Combine(cacheDir, fileName);
+            await EnsureAssetCachedAsync(client, sourceUrl, componentCache, fallbackComponentJs);
+            File.Copy(componentCache, Path.Combine(targetDir, fileName), true);
+            availableComponents.Add(component);
         }
 
-        var tasks = downloads.Select(d =>
-            DownloadFile(client, d.url, Path.Combine(targetDir, d.fileName))
-        );
-
-        await Task.WhenAll(tasks);
+        return availableComponents;
     }
 
-    private static async Task DownloadFile(HttpClient client, string url, string destination)
+    private static async Task EnsureAssetCachedAsync(HttpClient client, string url, string cachePath, string fallbackContent)
     {
-        if (File.Exists(destination))
+        if (File.Exists(cachePath))
             return;
 
-        using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-        if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException($"Failed to download Prism asset ({response.StatusCode}): {url}");
-
-        await using var httpStream = await response.Content.ReadAsStreamAsync();
-        await using var fileStream = File.Create(destination);
-        await httpStream.CopyToAsync(fileStream);
+        try
+        {
+            using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            await using var httpStream = await response.Content.ReadAsStreamAsync();
+            await using var fileStream = File.Create(cachePath);
+            await httpStream.CopyToAsync(fileStream);
+        }
+        catch
+        {
+            await File.WriteAllTextAsync(cachePath, fallbackContent, Encoding.UTF8);
+        }
     }
 
     private static void BuildHtmlHeader(StringBuilder sb, string title)

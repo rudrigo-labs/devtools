@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using DevTools.Core.Configuration;
-using DevTools.Core.Models;
 using DevTools.Presentation.Wpf.Services;
 using DevTools.SearchText.Engine;
 using DevTools.SearchText.Models;
@@ -15,15 +14,12 @@ public partial class SearchTextWindow : Window
 {
     private readonly JobManager _jobManager = null!;
     private readonly SettingsService _settings = null!;
-    private readonly ProfileManager _profileManager = null!;
-    private ToolProfile? _currentProfile;
 
-    public SearchTextWindow(JobManager jobManager, SettingsService settings, ProfileManager profileManager)
+    public SearchTextWindow(JobManager jobManager, SettingsService settings, ToolConfigurationManager toolConfigurationManager)
     {
         InitializeComponent();
         _jobManager = jobManager;
         _settings = settings;
-        _profileManager = profileManager;
 
         Loaded += OnLoaded;
         Closing += OnClosing;
@@ -37,15 +33,20 @@ public partial class SearchTextWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        _currentProfile = _profileManager?.GetDefaultProfile("SearchText");
-        if (_currentProfile != null)
-        {
-            if (_currentProfile.Options.TryGetValue("root-path", out var root)) PathSelector.SelectedPath = root;
-            if (_currentProfile.Options.TryGetValue("search-pattern", out var pattern)) SearchTextInput.Text = pattern;
-            if (_currentProfile.Options.TryGetValue("include", out var inc)) IncludePatternInput.Text = inc;
-            if (_currentProfile.Options.TryGetValue("exclude", out var exc)) ExcludePatternInput.Text = exc;
-            return;
-        }
+        if (!string.IsNullOrWhiteSpace(_settings.Settings.LastSearchTextRootPath))
+            PathSelector.SelectedPath = _settings.Settings.LastSearchTextRootPath;
+        if (!string.IsNullOrWhiteSpace(_settings.Settings.LastSearchTextInclude))
+            IncludePatternInput.Text = _settings.Settings.LastSearchTextInclude;
+        if (!string.IsNullOrWhiteSpace(_settings.Settings.LastSearchTextExclude))
+            ExcludePatternInput.Text = _settings.Settings.LastSearchTextExclude;
+        else
+            ExcludePatternInput.Text = string.Join(", ", SearchTextDefaults.DefaultExcludeGlobs);
+
+        WholeWordCheck.IsChecked = _settings.Settings.LastSearchTextWholeWord ?? false;
+        SkipBinaryFilesCheck.IsChecked = _settings.Settings.LastSearchTextSkipBinaryFiles ?? true;
+        ReturnLinesCheck.IsChecked = _settings.Settings.LastSearchTextReturnLines ?? true;
+        MaxFileSizeKbInput.Text = _settings.Settings.LastSearchTextMaxFileSizeKb?.ToString() ?? string.Empty;
+        MaxMatchesPerFileInput.Text = (_settings.Settings.LastSearchTextMaxMatchesPerFile ?? 0).ToString();
     }
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
@@ -55,6 +56,11 @@ public partial class SearchTextWindow : Window
         _settings.Settings.LastSearchTextRootPath = PathSelector.SelectedPath;
         _settings.Settings.LastSearchTextInclude = IncludePatternInput.Text;
         _settings.Settings.LastSearchTextExclude = ExcludePatternInput.Text;
+        _settings.Settings.LastSearchTextWholeWord = WholeWordCheck.IsChecked == true;
+        _settings.Settings.LastSearchTextSkipBinaryFiles = SkipBinaryFilesCheck.IsChecked == true;
+        _settings.Settings.LastSearchTextReturnLines = ReturnLinesCheck.IsChecked == true;
+        _settings.Settings.LastSearchTextMaxFileSizeKb = ParseOptionalInt(MaxFileSizeKbInput.Text);
+        _settings.Settings.LastSearchTextMaxMatchesPerFile = ParseOptionalInt(MaxMatchesPerFileInput.Text) ?? 0;
         _settings.Save();
     }
 
@@ -75,23 +81,21 @@ public partial class SearchTextWindow : Window
 
         string root = PathSelector.SelectedPath ?? string.Empty;
         string text = SearchTextInput.Text ?? string.Empty;
-
-        if (_currentProfile != null)
-        {
-            _currentProfile.Options["root-path"] = root;
-            _currentProfile.Options["search-pattern"] = text;
-            _currentProfile.Options["include"] = IncludePatternInput.Text ?? string.Empty;
-            _currentProfile.Options["exclude"] = ExcludePatternInput.Text ?? string.Empty;
-            _profileManager.SaveProfile("SearchText", _currentProfile);
-        }
+        var maxFileSizeKb = ParseOptionalInt(MaxFileSizeKbInput.Text);
+        var maxMatchesPerFile = ParseOptionalInt(MaxMatchesPerFileInput.Text) ?? 0;
 
         var request = new SearchTextRequest(
             RootPath: root,
             Pattern: text,
             UseRegex: UseRegexCheck.IsChecked == true,
             CaseSensitive: CaseSensitiveCheck.IsChecked == true,
+            WholeWord: WholeWordCheck.IsChecked == true,
             IncludeGlobs: ParsePatterns(IncludePatternInput.Text),
-            ExcludeGlobs: ParsePatterns(ExcludePatternInput.Text)
+            ExcludeGlobs: ParsePatterns(ExcludePatternInput.Text),
+            MaxFileSizeKb: maxFileSizeKb,
+            SkipBinaryFiles: SkipBinaryFilesCheck.IsChecked != false,
+            MaxMatchesPerFile: maxMatchesPerFile,
+            ReturnLines: ReturnLinesCheck.IsChecked != false
         );
 
         OutputText.Text = "Buscando...";
@@ -142,7 +146,35 @@ public partial class SearchTextWindow : Window
             return false;
         }
 
+        if (!string.IsNullOrWhiteSpace(MaxFileSizeKbInput.Text) && ParseOptionalInt(MaxFileSizeKbInput.Text) is null)
+        {
+            errorMessage = "Tamanho Máximo por Arquivo (KB) deve ser um número inteiro válido.";
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(MaxMatchesPerFileInput.Text) && ParseOptionalInt(MaxMatchesPerFileInput.Text) is null)
+        {
+            errorMessage = "Máximo de Ocorrências por Arquivo deve ser um número inteiro válido.";
+            return false;
+        }
+
+        var maxMatches = ParseOptionalInt(MaxMatchesPerFileInput.Text) ?? 0;
+        if (maxMatches < 0)
+        {
+            errorMessage = "Máximo de Ocorrências por Arquivo deve ser maior ou igual a zero.";
+            return false;
+        }
+
         errorMessage = string.Empty;
         return true;
     }
+
+    private static int? ParseOptionalInt(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        return int.TryParse(value, out var parsed) ? parsed : null;
+    }
 }
+

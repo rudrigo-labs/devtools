@@ -1,4 +1,4 @@
-using DevTools.Core.Abstractions;
+﻿using DevTools.Core.Abstractions;
 using DevTools.Core.Models;
 using DevTools.Core.Results;
 using DevTools.SSHTunnel.Models;
@@ -41,7 +41,7 @@ public sealed class SshTunnelEngine : IDevToolEngine<SshTunnelRequest, SshTunnel
             {
                 case SshTunnelAction.Start:
                     progress?.Report(new ProgressEvent("Starting SSH tunnel", 10, "start"));
-                    await _service.StartAsync(request.Profile!, null, ct).ConfigureAwait(false);
+                    await _service.StartAsync(request.Configuration!, null, ct).ConfigureAwait(false);
                     progress?.Report(new ProgressEvent("SSH tunnel running", 100, "done"));
                     return RunResult<SshTunnelResponse>.Success(BuildResponse(request.Action));
 
@@ -75,8 +75,9 @@ public sealed class SshTunnelEngine : IDevToolEngine<SshTunnelRequest, SshTunnel
             action,
             _service.State,
             _service.IsOn,
-            _service.CurrentProfile,
+            _service.CurrentConfiguration,
             _service.ProcessId,
             _service.LastError);
     }
 }
+

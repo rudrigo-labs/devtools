@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Windows;
 using DevTools.Presentation.Wpf.Services;
@@ -43,8 +43,8 @@ public class SnapshotWindowTests
                 settings.Save();
 
                 var jobManager = new JobManager();
-                var profileManager = new ProfileManager();
-                var window = new SnapshotWindow(jobManager, settings, profileManager);
+                var toolConfigurationManager = new ToolConfigurationManager();
+                var window = new SnapshotWindow(jobManager, settings, toolConfigurationManager);
 
                 var pathField = typeof(SnapshotWindow).GetField("RootPathSelector", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
                 var selector = (DevTools.Presentation.Wpf.Components.PathSelector?)pathField?.GetValue(window);
@@ -91,3 +91,4 @@ public class SnapshotWindowTests
         Assert.Null(error);
     }
 }
+

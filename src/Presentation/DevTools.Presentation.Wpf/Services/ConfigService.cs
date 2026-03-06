@@ -9,7 +9,7 @@ namespace DevTools.Presentation.Wpf.Services;
 
 public class SshConfigSection
 {
-    public List<TunnelProfile> Profiles { get; set; } = new();
+    public List<TunnelConfiguration> Configurations { get; set; } = new();
 }
 
 public class ConfigService

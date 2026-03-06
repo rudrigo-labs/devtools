@@ -108,9 +108,6 @@ public partial class ImageSplitWindow : Window
         if (string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath))
             missing.Add("Imagem de Entrada");
 
-        if (string.IsNullOrWhiteSpace(OutputPathSelector.SelectedPath))
-            missing.Add("Pasta de Saida");
-
         if (string.IsNullOrWhiteSpace(MinSizeBox.Text))
             missing.Add("Tamanho Minimo");
 

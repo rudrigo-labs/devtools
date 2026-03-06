@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 
 namespace DevTools.Presentation.Wpf.Persistence.Entities;
 
-public sealed class ToolProfileEntity
+public sealed class ToolConfigurationEntity
 {
     public long Id { get; set; }
     public string ToolKey { get; set; } = string.Empty;
@@ -12,4 +12,5 @@ public sealed class ToolProfileEntity
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 }
+
 

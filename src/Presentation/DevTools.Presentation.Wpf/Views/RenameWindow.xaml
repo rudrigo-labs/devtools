@@ -75,6 +75,35 @@
                     </StackPanel>
                 </Grid>
 
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Undo Log Path (Opcional)" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="UndoLogPathInput"
+                                 Style="{StaticResource DevToolsTextInput}"
+                                 ToolTip="Caminho completo para salvar o log de reversão"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Report Path (Opcional)" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="ReportPathInput"
+                                 Style="{StaticResource DevToolsTextInput}"
+                                 ToolTip="Caminho completo para salvar o relatório da execução"/>
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Margin="0,0,0,16" Width="320">
+                    <TextBlock Text="Max Diff Lines por Arquivo" Style="{StaticResource DevToolsInputLabel}"/>
+                    <TextBox x:Name="MaxDiffLinesInput"
+                             Text="200"
+                             Style="{StaticResource DevToolsTextInput}"/>
+                </StackPanel>
+
                 <WrapPanel Margin="0,0,0,16">
                     <CheckBox x:Name="BackupCheck"
                               Content="Criar Backup"

@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using DevTools.Core.Results;
 using DevTools.SSHTunnel.Models;
@@ -25,13 +25,13 @@ public static class SshTunnelRequestValidator
 
         if (request.Action == SshTunnelAction.Start)
         {
-            if (request.Profile is null)
+            if (request.Configuration is null)
             {
-                errors.Add(new ErrorDetail("sshtunnel.profile.required", "Profile is required for Start."));
+                errors.Add(new ErrorDetail("sshtunnel.configuration.required", "Configuration is required for Start."));
                 return errors;
             }
 
-            var p = request.Profile;
+            var p = request.Configuration;
 
             if (string.IsNullOrWhiteSpace(p.SshHost))
                 errors.Add(new ErrorDetail("sshtunnel.sshhost.required", "SshHost is required."));
@@ -86,3 +86,4 @@ public static class SshTunnelRequestValidator
         }
     }
 }
+

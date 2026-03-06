@@ -5,10 +5,10 @@ Atualizado em: 2026-03-05 23:19
 | Documento | Tipo | Status | Caminho |
 | --- | --- | --- | --- |
 | APRESENTACAO_DEVTOOLS_LINKEDIN.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\APRESENTACAO_DEVTOOLS_LINKEDIN.md |
-| CONFIGURACOES_E_PERFIS_DETALHADO.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\CONFIGURACOES_E_PERFIS_DETALHADO.md |
+| CONFIGURACOES_FERRAMENTAS_DETALHADO.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\CONFIGURACOES_FERRAMENTAS_DETALHADO.md |
 | CONFIGURATION.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\CONFIGURATION.md |
 | GUIA_DE_DISTRIBUICAO.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\GUIA_DE_DISTRIBUICAO.md |
-| SETTINGS_AND_PROFILES_GUIDE.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\SETTINGS_AND_PROFILES_GUIDE.md |
+| SETTINGS_AND_CONFIGURATIONS_GUIDE.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\SETTINGS_AND_CONFIGURATIONS_GUIDE.md |
 | TechnicalDoc.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\ativos\TechnicalDoc.md |
 | CONTROLE_DOCUMENTOS_PENDENCIAS_20260305_2309.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\controle\CONTROLE_DOCUMENTOS_PENDENCIAS_20260305_2309.md |
 | POLITICA_GESTAO_DOCUMENTOS_20260305_2319.md | Geral | Ativo | C:\Users\rodrigo\Documents\Projetos\rudrigo-labs\devtools\docs\controle\POLITICA_GESTAO_DOCUMENTOS_20260305_2319.md |

@@ -1,4 +1,4 @@
-# DevTools - Pendencias e Melhorias (Proxima Versao)
+﻿# DevTools - Pendencias e Melhorias (Proxima Versao)
 
 Data: 2026-03-05
 Status: Aberto
@@ -51,7 +51,7 @@ Este arquivo deve conter somente itens que ainda nao foram entregues.
   - endurecer migracao JSON -> SQLite
   - validar rollback e backup automatico
 - Aceite:
-  - runtime estavel com SQLite para configuracoes/perfis
+  - runtime estavel com SQLite para configuracoes/configuracoes
 
 ## 6) Revisao de defaults de configuracao
 
@@ -60,3 +60,4 @@ Este arquivo deve conter somente itens que ainda nao foram entregues.
   - padronizar valores iniciais para reduzir setup manual
 - Aceite:
   - primeira execucao mais orientada, com menos campos vazios
+

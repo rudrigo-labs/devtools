@@ -1,4 +1,4 @@
-# DevTools - Documento Tecnico (Detalhado)
+﻿# DevTools - Documento Tecnico (Detalhado)
 
 Data de referencia: 2026-03-05
 
@@ -70,10 +70,10 @@ Responsabilidade:
   - `JsonSettingsStore`
   - `SqliteSettingsStore`
 
-## 5.3 Perfil por ferramenta
+## 5.3 Configuracao por ferramenta
 
-- facade: `ProfileManager`
-- suporte de UI: `ProfileUIService`
+- facade: `ToolConfigurationManager`
+- suporte de UI: `ToolConfigurationUIService`
 - store JSON e SQLite
 
 ## 5.4 Preferencias da aplicacao
@@ -186,3 +186,5 @@ build\build_installer.bat <versao>
 2. validacao E2E real de Ngrok em ambiente com binario instalado
 3. promover SQLite como padrao (mantendo fallback claro)
 4. consolidar modal padrao propria em toda a aplicacao
+
+

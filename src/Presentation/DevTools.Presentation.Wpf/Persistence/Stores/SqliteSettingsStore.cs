@@ -111,7 +111,7 @@ public sealed class SqliteSettingsStore : ISettingsStore
 
             SaveSection("Ssh", new
             {
-                Profiles = new[]
+                Configurations = new[]
                 {
                     new
                     {
@@ -143,11 +143,7 @@ public sealed class SqliteSettingsStore : ISettingsStore
                 Rules = new HarvestRules
                 {
                     Extensions = new List<string> { ".cs", ".xml", ".json", ".xaml" },
-                    ExcludeDirectories = new List<string>
-                    {
-                        "bin", "obj", ".git", ".vs", "node_modules",
-                        "dist", "build", ".idea", ".vscode", ".next", ".nuxt", ".turbo", "Snapshot"
-                    }
+                    ExcludeDirectories = HarvestDefaults.DefaultExcludeDirectories.ToList()
                 }
             });
         }

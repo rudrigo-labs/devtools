@@ -46,7 +46,7 @@ build\build_installer.bat 1.0.0
 ## Documentacao oficial
 
 - Manual detalhado: [docs/ativos/MANUAL.md](docs/ativos/MANUAL.md)
-- Configuracoes e perfis: [docs/ativos/CONFIGURACOES_E_PERFIS_DETALHADO.md](docs/ativos/CONFIGURACOES_E_PERFIS_DETALHADO.md)
+- Configuracoes das ferramentas: [docs/ativos/CONFIGURACOES_FERRAMENTAS_DETALHADO.md](docs/ativos/CONFIGURACOES_FERRAMENTAS_DETALHADO.md)
 - Documento tecnico: [docs/ativos/TechnicalDoc.md](docs/ativos/TechnicalDoc.md)
 - Cobertura de testes: [docs/relatorios/INTEGRATION_TEST_COVERAGE.md](docs/relatorios/INTEGRATION_TEST_COVERAGE.md)
 - Testes manuais pendentes: [docs/relatorios/TESTES_MANUAIS_PENDENTES_2026-03-05.md](docs/relatorios/TESTES_MANUAIS_PENDENTES_2026-03-05.md)

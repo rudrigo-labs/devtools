@@ -1,4 +1,4 @@
-using DevTools.Cli.Commands;
+﻿using DevTools.Cli.Commands;
 using DevTools.Cli.Logging;
 using DevTools.Cli.Ui;
 using DevTools.Core.Configuration;
@@ -12,15 +12,15 @@ public sealed class CliApp
     private readonly CliMenu _menu;
     private readonly CliInput _input;
     private readonly IReadOnlyList<ICliCommand> _commands;
-    private readonly ProfileManager _profileManager;
+    private readonly ToolConfigurationManager _toolConfigurationManager;
 
-    public CliApp(CliConsole ui, CliMenu menu, CliInput input, IReadOnlyList<ICliCommand> commands, ProfileManager profileManager)
+    public CliApp(CliConsole ui, CliMenu menu, CliInput input, IReadOnlyList<ICliCommand> commands, ToolConfigurationManager toolConfigurationManager)
     {
         _ui = ui;
         _menu = menu;
         _input = input;
         _commands = commands;
-        _profileManager = profileManager;
+        _toolConfigurationManager = toolConfigurationManager;
     }
 
     public async Task<int> RunAsync(CliLaunchOptions options, CancellationToken ct)
@@ -75,16 +75,16 @@ public sealed class CliApp
                 // Pass options only on first run, otherwise empty options for repeated runs
                 var runOptions = isFirstRun ? options : new CliLaunchOptions();
                 
-                // --- Profile Logic Start ---
+                // --- Configuration Logic Start ---
                 
-                // 1. Load Profile from Args (only on first run)
-                if (isFirstRun && runOptions.GetOption("profile") is string profileArg)
+                // 1. Load Configuration from Args (only on first run)
+                if (isFirstRun && runOptions.GetOption("configuration") is string configurationArg)
                 {
-                    var profile = _profileManager.GetProfile(command.Key, profileArg);
-                    if (profile != null)
+                    var configuration = _toolConfigurationManager.GetConfiguration(command.Key, configurationArg);
+                    if (configuration != null)
                     {
-                        _ui.WriteSuccess($"Perfil '{profile.Name}' carregado.");
-                        foreach (var kvp in profile.Options)
+                        _ui.WriteSuccess($"Configuracao '{configuration.Name}' carregado.");
+                        foreach (var kvp in configuration.Options)
                         {
                             if (!runOptions.Options.ContainsKey(kvp.Key))
                             {
@@ -94,26 +94,26 @@ public sealed class CliApp
                     }
                     else
                     {
-                        _ui.WriteWarning($"Perfil '{profileArg}' nao encontrado para a ferramenta '{command.Key}'.");
+                        _ui.WriteWarning($"Configuracao '{configurationArg}' nao encontrado para a ferramenta '{command.Key}'.");
                         if (options.IsNonInteractive) return 1;
                     }
                 }
                 else if (!options.IsNonInteractive)
                 {
-                    // 2. Interactive Profile Selection
-                    var profiles = _profileManager.LoadProfiles(command.Key);
-                    if (profiles.Count > 0)
+                    // 2. Interactive Configuration Selection
+                    var configurations = _toolConfigurationManager.LoadConfigurations(command.Key);
+                    if (configurations.Count > 0)
                     {
-                        var useProfile = _input.ReadYesNo($"Existem {profiles.Count} perfis salvos. Carregar?", false);
-                        if (useProfile)
+                        var useConfiguration = _input.ReadYesNo($"Existem {configurations.Count} configuracoes salvos. Carregar?", false);
+                        if (useConfiguration)
                         {
-                             var profileNames = profiles.Select(p => p.Name).ToList();
-                             var selectedIndex = _menu.ShowOptions("Selecione o perfil", profileNames);
+                             var configurationNames = configurations.Select(p => p.Name).ToList();
+                             var selectedIndex = _menu.ShowOptions("Selecione o configuracao", configurationNames);
                              if (selectedIndex >= 0)
                              {
-                                 var profile = profiles[selectedIndex];
-                                 _ui.WriteSuccess($"Perfil '{profile.Name}' carregado.");
-                                 foreach (var kvp in profile.Options)
+                                 var configuration = configurations[selectedIndex];
+                                 _ui.WriteSuccess($"Configuracao '{configuration.Name}' carregado.");
+                                 foreach (var kvp in configuration.Options)
                                  {
                                      if (!runOptions.Options.ContainsKey(kvp.Key))
                                      {
@@ -125,32 +125,32 @@ public sealed class CliApp
                     }
                 }
                 
-                // --- Profile Logic End ---
+                // --- Configuration Logic End ---
                 
                 lastResult = await command.ExecuteAsync(runOptions, ct).ConfigureAwait(false);
                 
-                // --- Save Profile Logic ---
+                // --- Save Configuration Logic ---
                 if (lastResult == 0) // Only save on success
                 {
                     var optionsToSave = SanitizeOptions(runOptions.Options);
 
-                    if (isFirstRun && runOptions.GetOption("save-profile") is string saveName)
+                    if (isFirstRun && runOptions.GetOption("save-configuration") is string saveName)
                     {
                         // Save requested via args
-                        var profile = new ToolProfile { Name = saveName, Options = optionsToSave, UpdatedUtc = DateTime.UtcNow };
-                        _profileManager.SaveProfile(command.Key, profile);
-                        _ui.WriteSuccess($"Perfil '{saveName}' salvo com sucesso.");
+                        var configuration = new ToolConfiguration { Name = saveName, Options = optionsToSave, UpdatedUtc = DateTime.UtcNow };
+                        _toolConfigurationManager.SaveConfiguration(command.Key, configuration);
+                        _ui.WriteSuccess($"Configuracao '{saveName}' salvo com sucesso.");
                     }
                     else if (!options.IsNonInteractive)
                     {
                         // Interactive save prompt
-                        var save = _input.ReadYesNo("Salvar configuracao atual como perfil?", false);
+                        var save = _input.ReadYesNo("Salvar configuracao atual como configuracao?", false);
                         if (save)
                         {
-                            var name = _input.ReadRequired("Nome do perfil");
-                            var profile = new ToolProfile { Name = name, Options = optionsToSave, UpdatedUtc = DateTime.UtcNow };
-                            _profileManager.SaveProfile(command.Key, profile);
-                            _ui.WriteSuccess($"Perfil '{name}' salvo com sucesso.");
+                            var name = _input.ReadRequired("Nome do configuracao");
+                            var configuration = new ToolConfiguration { Name = name, Options = optionsToSave, UpdatedUtc = DateTime.UtcNow };
+                            _toolConfigurationManager.SaveConfiguration(command.Key, configuration);
+                            _ui.WriteSuccess($"Configuracao '{name}' salvo com sucesso.");
                         }
                     }
                 }
@@ -200,8 +200,8 @@ public sealed class CliApp
     private Dictionary<string, string> SanitizeOptions(Dictionary<string, string> options)
     {
         var clean = new Dictionary<string, string>(options);
-        clean.Remove("profile");
-        clean.Remove("save-profile");
+        clean.Remove("configuration");
+        clean.Remove("save-configuration");
         clean.Remove("non-interactive");
         return clean;
     }
@@ -230,3 +230,5 @@ public sealed class CliApp
         };
     }
 }
+
+

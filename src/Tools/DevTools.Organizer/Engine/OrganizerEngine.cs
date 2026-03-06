@@ -30,7 +30,9 @@ public sealed class OrganizerEngine : IDevToolEngine<OrganizerRequest, Organizer
             return Task.FromResult(RunResult<OrganizerResponse>.Fail(errors));
 
         var inbox = Path.GetFullPath(request.InboxPath);
-        var output = Path.GetFullPath(request.OutputPath);
+        var output = string.IsNullOrWhiteSpace(request.OutputPath)
+            ? inbox
+            : Path.GetFullPath(request.OutputPath);
         _fs.CreateDirectory(output);
 
         var duplicatesDir = Path.Combine(output, "Duplicates");

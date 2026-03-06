@@ -32,6 +32,11 @@
                           IsChecked="True"
                           Style="{StaticResource DevToolsCheckBox}"
                           Margin="0,0,16,8"/>
+                <CheckBox x:Name="DryRunCheck"
+                          Content="Dry Run (somente análise)"
+                          IsChecked="False"
+                          Style="{StaticResource DevToolsCheckBox}"
+                          Margin="0,0,16,8"/>
                 <CheckBox x:Name="BackupCheck"
                           Content="Criar backup"
                           IsChecked="True"
@@ -43,6 +48,28 @@
                           Style="{StaticResource DevToolsCheckBox}"
                           Margin="0,0,16,8"/>
             </WrapPanel>
+
+            <Grid Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Include (Glob) (Opcional)" Style="{StaticResource DevToolsInputLabel}"/>
+                    <TextBox x:Name="IncludeGlobsInput"
+                             Style="{StaticResource DevToolsTextInput}"
+                             ToolTip="Ex: **/*.cs, **/*.json"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Exclude (Glob) (Opcional)" Style="{StaticResource DevToolsInputLabel}"/>
+                    <TextBox x:Name="ExcludeGlobsInput"
+                             Style="{StaticResource DevToolsTextInput}"
+                             ToolTip="Ex: **/bin/**, **/obj/**"/>
+                </StackPanel>
+            </Grid>
         </StackPanel>
     </c:DevToolsToolFrame>
 </Window>

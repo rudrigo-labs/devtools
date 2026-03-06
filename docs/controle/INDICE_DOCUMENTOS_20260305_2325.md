@@ -9,14 +9,14 @@ Arquivos mantidos na raiz por convencao: README.md e LICENSE
 | --- | --- | --- | --- |
 | APRESENTACAO_DEVTOOLS_LINKEDIN.md | Geral | Ativo |  |
 | CHANGELOG.md | Geral | Ativo |  |
-| CONFIGURACOES_E_PERFIS_DETALHADO.md | Geral | Ativo |  |
+| CONFIGURACOES_FERRAMENTAS_DETALHADO.md | Geral | Ativo |  |
 | CONFIGURATION.md | Geral | Ativo |  |
 | GUIA_DE_DISTRIBUICAO.md | Geral | Ativo |  |
 | MANUAL.md | Geral | Ativo |  |
 | KICKOFF.md | Geral | Ativo |  |
 | PLAN_UI_FORMS.md | Geral | Ativo |  |
 | PLANO_MELHORIAS_DEVTOOLS.md | Geral | Ativo |  |
-| SETTINGS_AND_PROFILES_GUIDE.md | Geral | Ativo |  |
+| SETTINGS_AND_CONFIGURATIONS_GUIDE.md | Geral | Ativo |  |
 | TechnicalDoc.md | Geral | Ativo |  |
 | CONTROLE_DOCUMENTOS_PENDENCIAS_20260305_2309.md | Geral | Ativo |  |
 | INDICE_DOCUMENTOS_20260305_2319.md | Geral | Ativo |  |

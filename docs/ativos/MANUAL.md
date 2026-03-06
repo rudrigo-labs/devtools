@@ -1,4 +1,4 @@
-# Manual do Usuario - DevTools (Detalhado)
+﻿# Manual do Usuario - DevTools (Detalhado)
 
 Data de referencia: 2026-03-05
 
@@ -38,12 +38,12 @@ Mostra tarefas em execucao/finalizadas, status e logs resumidos.
 
 ## 3.3 Configuracoes
 
-Centraliza configuracoes globais e perfis por ferramenta.
+Centraliza configuracoes globais e configuracoes por ferramenta.
 
 ## 4. Fluxo recomendado de uso
 
 1. Abra `Configuracoes` e ajuste caminhos/defaults.
-2. Configure perfis das ferramentas que voce mais usa.
+2. Configure configuracoes das ferramentas que voce mais usa.
 3. Execute ferramentas pela aba `Ferramentas`.
 4. Monitore execucao na aba `Jobs`.
 
@@ -223,7 +223,7 @@ Painel `Configuracoes Gerais`:
 - Ngrok
 - Notes e Nuvem
 
-Painel `Perfis de Ferramentas`:
+Painel `Configuracoes de Ferramentas`:
 
 - Rename
 - Migrations
@@ -256,7 +256,7 @@ Ou seja:
 
 Detalhes completos:
 
-- `docs/CONFIGURACOES_E_PERFIS_DETALHADO.md`
+- `docs/ativos/CONFIGURACOES_FERRAMENTAS_DETALHADO.md`
 
 ## 9. Build/Testes/Instalador
 
@@ -308,3 +308,4 @@ build\build_installer.bat 1.0.0
 Checklist manual desses cenarios:
 
 - `docs/TESTES_MANUAIS_PENDENTES_2026-03-05.md`
+

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -10,26 +10,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DevTools.Presentation.Wpf.Persistence.Stores;
 
-public sealed class SqliteProfileStore : IProfileStore
+public sealed class SqliteToolConfigurationStore : IToolConfigurationStore
 {
     private readonly DbContextOptions<DevToolsDbContext> _dbOptions;
 
-    public SqliteProfileStore(DbContextOptions<DevToolsDbContext> dbOptions)
+    public SqliteToolConfigurationStore(DbContextOptions<DevToolsDbContext> dbOptions)
     {
         _dbOptions = dbOptions;
     }
 
-    public List<ToolProfile> LoadProfiles(string toolName)
+    public List<ToolConfiguration> LoadConfigurations(string toolName)
     {
         if (string.IsNullOrWhiteSpace(toolName))
         {
-            return new List<ToolProfile>();
+            return new List<ToolConfiguration>();
         }
 
         try
         {
             using var db = new DevToolsDbContext(_dbOptions);
-            var rows = db.ToolProfiles
+            var rows = db.ToolConfigurations
                 .Where(x => x.ToolKey == toolName)
                 .OrderByDescending(x => x.IsDefault)
                 .ThenBy(x => x.Name)
@@ -39,12 +39,12 @@ public sealed class SqliteProfileStore : IProfileStore
         }
         catch (Exception ex)
         {
-            AppLogger.Error($"Failed to load profiles for tool '{toolName}' from SQLite.", ex);
-            return new List<ToolProfile>();
+            AppLogger.Error($"Failed to load configurations for tool '{toolName}' from SQLite.", ex);
+            return new List<ToolConfiguration>();
         }
     }
 
-    public void SaveProfiles(string toolName, List<ToolProfile> profiles)
+    public void SaveConfigurations(string toolName, List<ToolConfiguration> configurations)
     {
         if (string.IsNullOrWhiteSpace(toolName))
         {
@@ -56,26 +56,27 @@ public sealed class SqliteProfileStore : IProfileStore
             using var db = new DevToolsDbContext(_dbOptions);
             using var tx = db.Database.BeginTransaction();
 
-            var existing = db.ToolProfiles.Where(x => x.ToolKey == toolName).ToList();
+            var existing = db.ToolConfigurations.Where(x => x.ToolKey == toolName).ToList();
             if (existing.Count > 0)
             {
-                db.ToolProfiles.RemoveRange(existing);
+                db.ToolConfigurations.RemoveRange(existing);
                 db.SaveChanges();
             }
 
-            foreach (var profile in profiles)
+            foreach (var configuration in configurations)
             {
                 var now = DateTime.UtcNow;
-                var entity = new ToolProfileEntity
+                ToolConfigurationMetadata.WriteToOptions(configuration);
+                var entity = new ToolConfigurationEntity
                 {
                     ToolKey = toolName,
-                    Name = profile.Name,
-                    IsDefault = profile.IsDefault,
-                    OptionsJson = JsonSerializer.Serialize(profile.Options ?? new Dictionary<string, string>()),
-                    CreatedAtUtc = now,
-                    UpdatedAtUtc = profile.UpdatedUtc == default ? now : profile.UpdatedUtc
+                    Name = configuration.Name,
+                    IsDefault = configuration.IsDefault,
+                    OptionsJson = JsonSerializer.Serialize(configuration.Options ?? new Dictionary<string, string>()),
+                    CreatedAtUtc = configuration.CreatedUtc == default ? now : configuration.CreatedUtc,
+                    UpdatedAtUtc = configuration.UpdatedUtc == default ? now : configuration.UpdatedUtc
                 };
-                db.ToolProfiles.Add(entity);
+                db.ToolConfigurations.Add(entity);
             }
 
             db.SaveChanges();
@@ -83,11 +84,11 @@ public sealed class SqliteProfileStore : IProfileStore
         }
         catch (Exception ex)
         {
-            AppLogger.Error($"Failed to save profiles for tool '{toolName}' into SQLite.", ex);
+            AppLogger.Error($"Failed to save configurations for tool '{toolName}' into SQLite.", ex);
         }
     }
 
-    private static ToolProfile ToModel(ToolProfileEntity entity)
+    private static ToolConfiguration ToModel(ToolConfigurationEntity entity)
     {
         Dictionary<string, string> options;
         try
@@ -100,13 +101,20 @@ public sealed class SqliteProfileStore : IProfileStore
             options = new Dictionary<string, string>();
         }
 
-        return new ToolProfile
+        var configuration = new ToolConfiguration
         {
+            ToolSlug = entity.ToolKey,
             Name = entity.Name,
             IsDefault = entity.IsDefault,
             Options = options,
+            CreatedUtc = entity.CreatedAtUtc,
             UpdatedUtc = entity.UpdatedAtUtc
         };
+
+        ToolConfigurationMetadata.ReadFromOptions(configuration);
+        return configuration;
     }
 }
+
+
 

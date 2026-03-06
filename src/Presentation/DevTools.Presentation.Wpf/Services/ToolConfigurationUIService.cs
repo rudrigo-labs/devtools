@@ -11,58 +11,79 @@ using Application = System.Windows.Application;
 
 namespace DevTools.Presentation.Wpf.Services;
 
-public class ProfileUIService
+public class ToolConfigurationUIService
 {
-    private readonly ProfileManager _profileManager;
+    private readonly ToolConfigurationManager _toolConfigurationManager;
 
-    public ProfileUIService(ProfileManager profileManager)
+    public ToolConfigurationUIService(ToolConfigurationManager toolConfigurationManager)
     {
-        _profileManager = profileManager;
+        _toolConfigurationManager = toolConfigurationManager;
     }
 
-    public List<ToolProfile> LoadProfiles(string toolName)
+    public List<ToolConfiguration> LoadConfigurations(string toolName)
     {
-        return _profileManager.LoadProfiles(toolName);
-    }
-
-    public void SaveProfile(string toolName, ToolProfile profile)
-    {
-        var profiles = _profileManager.LoadProfiles(toolName);
-
-        if (profile.IsDefault)
+        var configurations = _toolConfigurationManager.LoadConfigurations(toolName);
+        foreach (var configuration in configurations)
         {
-            foreach (var p in profiles.Where(p => !p.Name.Equals(profile.Name, System.StringComparison.OrdinalIgnoreCase)))
+            configuration.ToolSlug = string.IsNullOrWhiteSpace(configuration.ToolSlug) ? toolName : configuration.ToolSlug;
+            if (configuration.CreatedUtc == default)
+            {
+                configuration.CreatedUtc = System.DateTime.UtcNow;
+            }
+        }
+
+        return configurations;
+    }
+
+    public void SaveConfiguration(string toolName, ToolConfiguration configuration)
+    {
+        var configurations = _toolConfigurationManager.LoadConfigurations(toolName);
+
+        if (configuration.IsDefault)
+        {
+            foreach (var p in configurations.Where(p => !p.Name.Equals(configuration.Name, System.StringComparison.OrdinalIgnoreCase)))
             {
                 p.IsDefault = false;
             }
         }
 
-        var existing = profiles.FirstOrDefault(p => p.Name.Equals(profile.Name, System.StringComparison.OrdinalIgnoreCase));
+        var existing = configurations.FirstOrDefault(p => p.Name.Equals(configuration.Name, System.StringComparison.OrdinalIgnoreCase));
         if (existing != null)
         {
-            profiles.Remove(existing);
+            configurations.Remove(existing);
         }
 
-        profile.UpdatedUtc = System.DateTime.UtcNow;
-        profiles.Add(profile);
+        configuration.UpdatedUtc = System.DateTime.UtcNow;
+        if (configuration.CreatedUtc == default)
+        {
+            configuration.CreatedUtc = configuration.UpdatedUtc;
+        }
 
-        _profileManager.SaveProfiles(toolName, profiles);
+        if (string.IsNullOrWhiteSpace(configuration.ToolSlug))
+        {
+            configuration.ToolSlug = toolName;
+        }
+
+        configuration.IsActive = true;
+        configurations.Add(configuration);
+
+        _toolConfigurationManager.SaveConfigurations(toolName, configurations);
     }
 
-    public void DeleteProfile(string toolName, string profileName)
+    public void DeleteConfiguration(string toolName, string configurationName)
     {
-        _profileManager.DeleteProfile(toolName, profileName);
+        _toolConfigurationManager.DeleteConfiguration(toolName, configurationName);
     }
 
-    public ToolProfile? GetDefaultProfile(string toolName)
+    public ToolConfiguration? GetDefaultConfiguration(string toolName)
     {
-        return _profileManager.GetDefaultProfile(toolName);
+        return _toolConfigurationManager.GetDefaultConfiguration(toolName);
     }
 
-    public void GenerateUIForProfile(string toolName, StackPanel container, ToolProfile profile)
+    public void GenerateUIForConfiguration(string toolName, StackPanel container, ToolConfiguration configuration)
     {
         container.Children.Clear();
-        var options = profile.Options;
+        var options = configuration.Options;
 
         switch (toolName)
         {
@@ -170,6 +191,15 @@ public class ProfileUIService
                 stack.Children.Add(CreatePathSelector("Pasta de Saida (Opcional)", "output-base-path", options, isFolderPicker: true, new Thickness(0, 16, 0, 0)));
                 stack.Children.Add(CreateLabeledTextBox("Diretorios Ignorados (separados por virgula)", "ignored-directories", options, new Thickness(0, 16, 0, 0)));
                 stack.Children.Add(CreateLabeledTextBox("Tamanho Maximo por Arquivo (KB) (Opcional)", "max-file-size-kb", options, new Thickness(0, 16, 0, 0)));
+                var outputDefaults = new WrapPanel
+                {
+                    Margin = new Thickness(0, 16, 0, 0)
+                };
+                outputDefaults.Children.Add(CreateOptionCheckBox("Texto (.txt)", "generate-text", options, true));
+                outputDefaults.Children.Add(CreateOptionCheckBox("HTML (.html)", "generate-html", options, false));
+                outputDefaults.Children.Add(CreateOptionCheckBox("JSON Aninhado (.json)", "generate-json-nested", options, false));
+                outputDefaults.Children.Add(CreateOptionCheckBox("JSON Recursivo (.json)", "generate-json-recursive", options, false));
+                stack.Children.Add(outputDefaults);
                 card.Child = stack;
                 container.Children.Add(card);
                 break;
@@ -180,10 +210,18 @@ public class ProfileUIService
                 var connectionCard = CreateMaterialCard();
                 var connectionStack = new StackPanel();
                 connectionStack.Children.Add(CreateCardHeader("ServerNetwork", "Dados de Conexão (SSH)"));
-                connectionStack.Children.Add(CreateLabeledTextBox("Nome do Perfil", "ssh-profile-name", options));
+                connectionStack.Children.Add(CreateLabeledTextBox("Nome do Túnel", "ssh-configuration-name", options));
                 connectionStack.Children.Add(CreateSshConnectionGrid(options, new Thickness(0, 16, 0, 0)));
                 connectionStack.Children.Add(CreateLabeledTextBox("Usuário SSH", "ssh-user", options, new Thickness(0, 16, 0, 0)));
                 connectionStack.Children.Add(CreatePathSelector("Caminho da Chave Privada (.pem/.ppk)", "identity-file", options, false, new Thickness(0, 16, 0, 0)));
+                connectionStack.Children.Add(CreateGridWithTwoLabeledTextBoxes(
+                    "StrictHostKeyChecking (Default/Yes/No/AcceptNew)",
+                    "strict-host-key-checking",
+                    options,
+                    "Connect Timeout (s)",
+                    "connect-timeout-seconds",
+                    options,
+                    new Thickness(0, 16, 0, 0)));
                 connectionCard.Child = connectionStack;
                 container.Children.Add(connectionCard);
 
@@ -195,10 +233,24 @@ public class ProfileUIService
                 container.Children.Add(tunnelCard);
                 break;
             }
+
+            case "Ngrok":
+            {
+                var ngrokCard = CreateMaterialCard();
+                var ngrokStack = new StackPanel();
+                ngrokStack.Children.Add(CreateCardHeader("Cloud", "Dados da Conexão Ngrok"));
+                ngrokStack.Children.Add(CreateLabeledTextBox("Nome da Conexão", "connection-name", options));
+                ngrokStack.Children.Add(CreatePathSelector("Executável do Ngrok (ngrok.exe)", "executable-path", options, false, new Thickness(0, 16, 0, 0)));
+                ngrokStack.Children.Add(CreateLabeledTextBox("Authtoken", "auth-token", options, new Thickness(0, 16, 0, 0)));
+                ngrokStack.Children.Add(CreateLabeledTextBox("Argumentos Adicionais (Opcional)", "additional-args", options, new Thickness(0, 16, 0, 0)));
+                ngrokCard.Child = ngrokStack;
+                container.Children.Add(ngrokCard);
+                break;
+            }
         }
     }
 
-    private void AddProfileField(StackPanel container, string labelText, string key, Dictionary<string, string> options, bool isPath = false)
+    private void AddConfigurationField(StackPanel container, string labelText, string key, Dictionary<string, string> options, bool isPath = false)
     {
         var value = options.TryGetValue(key, out var val) ? val : "";
 
@@ -455,6 +507,30 @@ public class ProfileUIService
         return Regex.IsMatch(args, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     }
 
+    private static System.Windows.Controls.CheckBox CreateOptionCheckBox(string content, string key, Dictionary<string, string> options, bool defaultValue)
+    {
+        var isChecked = defaultValue;
+        if (options.TryGetValue(key, out var value) && bool.TryParse(value, out var parsed))
+        {
+            isChecked = parsed;
+        }
+
+        var checkBox = new System.Windows.Controls.CheckBox
+        {
+            Content = content,
+            IsChecked = isChecked,
+            Style = (Style)Application.Current.FindResource("DevToolsCheckBox"),
+            Margin = new Thickness(0, 0, 20, 8),
+            Tag = key
+        };
+
+        checkBox.Checked += (_, _) => options[key] = true.ToString();
+        checkBox.Unchecked += (_, _) => options[key] = false.ToString();
+        options[key] = isChecked.ToString();
+
+        return checkBox;
+    }
+
     private Grid CreateTunnelMappingGrid(Dictionary<string, string> options)
     {
         var grid = new Grid();
@@ -522,3 +598,5 @@ public class ProfileUIService
         return grid;
     }
 }
+
+

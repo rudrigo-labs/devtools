@@ -26,6 +26,29 @@
                             IsFolderPicker="True"
                             Margin="0,0,0,16"/>
 
+                <c:PathSelector x:Name="OutputBasePathSelector"
+                            Title="Pasta de Saída (Opcional)"
+                            IsFolderPicker="True"
+                            Margin="0,0,0,16"/>
+
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Diretórios Ignorados (separados por vírgula) (Opcional)" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="IgnoredDirectoriesInput" Style="{StaticResource DevToolsTextInput}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Tamanho Máximo por Arquivo (KB) (Opcional)" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="MaxFileSizeKbInput" Style="{StaticResource DevToolsTextInput}"/>
+                    </StackPanel>
+                </Grid>
+
             <TextBlock Text="Formatos de Saida"
                        Style="{StaticResource DevToolsInputLabel}"/>
 
