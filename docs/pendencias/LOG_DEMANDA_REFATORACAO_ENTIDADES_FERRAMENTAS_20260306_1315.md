@@ -4,7 +4,7 @@
 - Status: Em andamento
 - Responsavel: Equipe DevTools
 - Iniciado em: 2026-03-06 13:15
-- Atualizado em: 2026-03-06 15:07
+- Atualizado em: 2026-03-06 15:28
 
 ## Entradas de log
 - [2026-03-06 13:15] Demanda iniciada com pacote completo de documentacao.
@@ -22,6 +22,8 @@
 - [2026-03-06 15:07] Configuracoes nomeadas habilitadas no painel de configuracoes (cards e formularios dinamicos para ferramentas restantes).
 - [2026-03-06 15:07] Janelas de execucao atualizadas para carregar configuracao padrao por ferramenta ao abrir.
 - [2026-03-06 15:07] Validacao tecnica da rodada: `dotnet build` WPF OK e `dotnet test` DevTools.Tests OK (`36 aprovados`, `2 ignorados`).
+- [2026-03-06 15:28] Fase 4 item 1 executado: validacao obrigatoria com realce inline aplicada nas janelas de execucao (`Harvest`, `SearchText`, `Rename`, `Organizer`, `Snapshot`, `ImageSplitter`, `Utf8Convert`, `SSH`, `Migrations`, `Ngrok`).
+- [2026-03-06 15:28] Fase 4 item 4 executado: `dotnet build` WPF e `dotnet test` DevTools.Tests concluídos com sucesso (`36 aprovados`, `2 ignorados`).
 
 ## Mudancas de escopo
 - Nenhuma ate o momento.
@@ -37,6 +39,6 @@
 
 ## Proximos passos
 1. Concluir o item de `Notes` na Fase 3 (pontos estritamente desta demanda).
-2. Revisar ajustes finais de persistencia por ferramenta (payload e defaults).
-3. Preparar Fase 4 (validacoes e hardening).
+2. Revisar Fase 4 itens 2 e 3 (`mensagens/comportamento de erro` e `compatibilidade de configuracoes antigas`).
+3. Avancar para Fase 5 de fechamento.
 

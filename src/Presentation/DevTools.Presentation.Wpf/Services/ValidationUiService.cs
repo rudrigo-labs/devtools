@@ -57,4 +57,33 @@ public static class ValidationUiService
         return statusText.StartsWith("Validacao:", StringComparison.OrdinalIgnoreCase)
             || statusText.StartsWith("Campos obrigatorios:", StringComparison.OrdinalIgnoreCase);
     }
+
+    public static void SetControlInvalid(System.Windows.Controls.Control? control, bool invalid)
+    {
+        if (control == null)
+            return;
+
+        if (invalid)
+        {
+            if (System.Windows.Application.Current?.TryFindResource("ErrorBrush") is System.Windows.Media.Brush errorBrush)
+            {
+                control.BorderBrush = errorBrush;
+            }
+
+            control.BorderThickness = new System.Windows.Thickness(1.5);
+            return;
+        }
+
+        control.ClearValue(System.Windows.Controls.Control.BorderBrushProperty);
+        control.ClearValue(System.Windows.Controls.Control.BorderThicknessProperty);
+    }
+
+    public static void SetPathSelectorInvalid(PathSelector? selector, bool invalid)
+    {
+        if (selector == null)
+            return;
+
+        var textBox = selector.FindName("PathInput") as System.Windows.Controls.TextBox;
+        SetControlInvalid(textBox, invalid);
+    }
 }

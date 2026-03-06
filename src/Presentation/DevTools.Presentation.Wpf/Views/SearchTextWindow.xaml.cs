@@ -178,10 +178,21 @@ public partial class SearchTextWindow : Window
 
     private bool ValidateInputs(out string errorMessage)
     {
+        var rootMissing = string.IsNullOrWhiteSpace(PathSelector.SelectedPath);
+        var patternMissing = string.IsNullOrWhiteSpace(SearchTextInput.Text);
+        var maxFileSizeInvalid = !string.IsNullOrWhiteSpace(MaxFileSizeKbInput.Text) && ParseOptionalInt(MaxFileSizeKbInput.Text) is null;
+        var maxMatchesInvalid = !string.IsNullOrWhiteSpace(MaxMatchesPerFileInput.Text) && ParseOptionalInt(MaxMatchesPerFileInput.Text) is null;
+        var maxMatchesNegative = !maxMatchesInvalid && (ParseOptionalInt(MaxMatchesPerFileInput.Text) ?? 0) < 0;
+
+        ValidationUiService.SetPathSelectorInvalid(PathSelector, rootMissing);
+        ValidationUiService.SetControlInvalid(SearchTextInput, patternMissing);
+        ValidationUiService.SetControlInvalid(MaxFileSizeKbInput, maxFileSizeInvalid);
+        ValidationUiService.SetControlInvalid(MaxMatchesPerFileInput, maxMatchesInvalid || maxMatchesNegative);
+
         var missing = new List<string>();
-        if (string.IsNullOrWhiteSpace(PathSelector.SelectedPath))
+        if (rootMissing)
             missing.Add("Diretorio de Busca");
-        if (string.IsNullOrWhiteSpace(SearchTextInput.Text))
+        if (patternMissing)
             missing.Add("Texto de Pesquisa");
 
         if (missing.Count > 0)
@@ -190,20 +201,19 @@ public partial class SearchTextWindow : Window
             return false;
         }
 
-        if (!string.IsNullOrWhiteSpace(MaxFileSizeKbInput.Text) && ParseOptionalInt(MaxFileSizeKbInput.Text) is null)
+        if (maxFileSizeInvalid)
         {
             errorMessage = "Tamanho Máximo por Arquivo (KB) deve ser um número inteiro válido.";
             return false;
         }
 
-        if (!string.IsNullOrWhiteSpace(MaxMatchesPerFileInput.Text) && ParseOptionalInt(MaxMatchesPerFileInput.Text) is null)
+        if (maxMatchesInvalid)
         {
             errorMessage = "Máximo de Ocorrências por Arquivo deve ser um número inteiro válido.";
             return false;
         }
 
-        var maxMatches = ParseOptionalInt(MaxMatchesPerFileInput.Text) ?? 0;
-        if (maxMatches < 0)
+        if (maxMatchesNegative)
         {
             errorMessage = "Máximo de Ocorrências por Arquivo deve ser maior ou igual a zero.";
             return false;

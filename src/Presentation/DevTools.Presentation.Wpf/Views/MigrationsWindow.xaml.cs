@@ -206,7 +206,9 @@ public partial class MigrationsWindow : Window
             _ => default
         };
 
-        if (actionTag is not ("Add" or "Update"))
+        var actionInvalid = actionTag is not ("Add" or "Update");
+        ValidationUiService.SetControlInvalid(ActionCombo, actionInvalid);
+        if (actionInvalid)
         {
             errorMessage = "Acao de migration invalida.";
             provider = default;
@@ -224,7 +226,9 @@ public partial class MigrationsWindow : Window
             _ => default
         };
 
-        if (providerTag is not ("SqlServer" or "Sqlite"))
+        var providerInvalid = providerTag is not ("SqlServer" or "Sqlite");
+        ValidationUiService.SetControlInvalid(ProviderCombo, providerInvalid);
+        if (providerInvalid)
         {
             errorMessage = "Provider invalido.";
             root = string.Empty;
@@ -238,13 +242,23 @@ public partial class MigrationsWindow : Window
         migrationName = (MigrationNameInput.Text ?? string.Empty).Trim();
 
         var missing = new List<string>();
-        if (string.IsNullOrWhiteSpace(root))
+        var rootMissing = string.IsNullOrWhiteSpace(root);
+        var startupMissing = string.IsNullOrWhiteSpace(startup);
+        var migrationNameMissing = action == MigrationsAction.AddMigration && string.IsNullOrWhiteSpace(migrationName);
+        var dbContextMissing = string.IsNullOrWhiteSpace(DbContextInput.Text);
+
+        ValidationUiService.SetPathSelectorInvalid(ProjectSelector, rootMissing);
+        ValidationUiService.SetPathSelectorInvalid(StartupSelector, startupMissing);
+        ValidationUiService.SetControlInvalid(MigrationNameInput, migrationNameMissing);
+        ValidationUiService.SetControlInvalid(DbContextInput, dbContextMissing);
+
+        if (rootMissing)
             missing.Add("Pasta Raiz do Projeto");
-        if (string.IsNullOrWhiteSpace(startup))
+        if (startupMissing)
             missing.Add("Arquivo do Startup Project (.csproj)");
-        if (action == MigrationsAction.AddMigration && string.IsNullOrWhiteSpace(migrationName))
+        if (migrationNameMissing)
             missing.Add("Nome da Migration");
-        if (string.IsNullOrWhiteSpace(DbContextInput.Text))
+        if (dbContextMissing)
             missing.Add("Nome completo do DbContext");
 
         if (string.IsNullOrWhiteSpace(GetTargetPath(_resolvedSettings, provider)))
@@ -258,10 +272,12 @@ public partial class MigrationsWindow : Window
 
         if (!TryValidateAdditionalArgs(_resolvedSettings.AdditionalArgs, out var argsError))
         {
+            ValidationUiService.SetControlInvalid(AdditionalArgsInput, true);
             errorMessage = argsError;
             return false;
         }
 
+        ValidationUiService.SetControlInvalid(AdditionalArgsInput, false);
         errorMessage = string.Empty;
         return true;
     }

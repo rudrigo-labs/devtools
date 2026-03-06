@@ -27,3 +27,8 @@
 - Painel de configuracoes recebeu cards e formularios dinamicos para essas ferramentas.
 - Janelas de execucao dessas ferramentas agora carregam configuracao padrao no bootstrap.
 - Validacao tecnica executada com sucesso (build WPF + testes DevTools.Tests).
+
+## 2026-03-06 15:28
+- Fase 4 item 1 executado com validacao obrigatoria inline (realce de campo) nas janelas de execucao.
+- Fase 4 item 4 executado com validacao tecnica verde (`dotnet build` WPF + `dotnet test` DevTools.Tests).
+- Fase 4 itens 2 e 3 mantidos pendentes para revisao conjunta.

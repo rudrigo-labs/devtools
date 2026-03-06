@@ -159,14 +159,32 @@ public partial class SshTunnelWindow : Window
     {
         var missing = new List<string>();
 
-        if (string.IsNullOrWhiteSpace(SshHostInput.Text)) missing.Add("Host SSH");
-        if (string.IsNullOrWhiteSpace(SshPortInput.Text)) missing.Add("Porta SSH");
-        if (string.IsNullOrWhiteSpace(SshUserInput.Text)) missing.Add("Usuario SSH");
-        if (string.IsNullOrWhiteSpace(IdentityFileSelector.SelectedPath)) missing.Add("Arquivo de Chave");
-        if (string.IsNullOrWhiteSpace(LocalBindInput.Text)) missing.Add("Bind Local");
-        if (string.IsNullOrWhiteSpace(LocalPortInput.Text)) missing.Add("Porta Local");
-        if (string.IsNullOrWhiteSpace(RemoteHostInput.Text)) missing.Add("Host Remoto");
-        if (string.IsNullOrWhiteSpace(RemotePortInput.Text)) missing.Add("Porta Remota");
+        var sshHostMissing = string.IsNullOrWhiteSpace(SshHostInput.Text);
+        var sshPortMissing = string.IsNullOrWhiteSpace(SshPortInput.Text);
+        var sshUserMissing = string.IsNullOrWhiteSpace(SshUserInput.Text);
+        var identityMissing = string.IsNullOrWhiteSpace(IdentityFileSelector.SelectedPath);
+        var localBindMissing = string.IsNullOrWhiteSpace(LocalBindInput.Text);
+        var localPortMissing = string.IsNullOrWhiteSpace(LocalPortInput.Text);
+        var remoteHostMissing = string.IsNullOrWhiteSpace(RemoteHostInput.Text);
+        var remotePortMissing = string.IsNullOrWhiteSpace(RemotePortInput.Text);
+
+        if (sshHostMissing) missing.Add("Host SSH");
+        if (sshPortMissing) missing.Add("Porta SSH");
+        if (sshUserMissing) missing.Add("Usuario SSH");
+        if (identityMissing) missing.Add("Arquivo de Chave");
+        if (localBindMissing) missing.Add("Bind Local");
+        if (localPortMissing) missing.Add("Porta Local");
+        if (remoteHostMissing) missing.Add("Host Remoto");
+        if (remotePortMissing) missing.Add("Porta Remota");
+
+        ValidationUiService.SetControlInvalid(SshHostInput, sshHostMissing);
+        ValidationUiService.SetControlInvalid(SshPortInput, sshPortMissing);
+        ValidationUiService.SetControlInvalid(SshUserInput, sshUserMissing);
+        ValidationUiService.SetPathSelectorInvalid(IdentityFileSelector, identityMissing);
+        ValidationUiService.SetControlInvalid(LocalBindInput, localBindMissing);
+        ValidationUiService.SetControlInvalid(LocalPortInput, localPortMissing);
+        ValidationUiService.SetControlInvalid(RemoteHostInput, remoteHostMissing);
+        ValidationUiService.SetControlInvalid(RemotePortInput, remotePortMissing);
 
         if (missing.Count > 0)
         {
@@ -174,16 +192,25 @@ public partial class SshTunnelWindow : Window
             return false;
         }
 
-        if (!int.TryParse(SshPortInput.Text, out _)
-            || !int.TryParse(LocalPortInput.Text, out _)
-            || !int.TryParse(RemotePortInput.Text, out _))
+        var sshPortInvalid = !int.TryParse(SshPortInput.Text, out _);
+        var localPortInvalid = !int.TryParse(LocalPortInput.Text, out _);
+        var remotePortInvalid = !int.TryParse(RemotePortInput.Text, out _);
+
+        ValidationUiService.SetControlInvalid(SshPortInput, sshPortInvalid);
+        ValidationUiService.SetControlInvalid(LocalPortInput, localPortInvalid);
+        ValidationUiService.SetControlInvalid(RemotePortInput, remotePortInvalid);
+
+        if (sshPortInvalid || localPortInvalid || remotePortInvalid)
         {
             errorMessage = "Portas SSH, Local e Remota devem ser numericas.";
             return false;
         }
 
-        if (!string.IsNullOrWhiteSpace(ConnectTimeoutInput.Text)
-            && (!int.TryParse(ConnectTimeoutInput.Text, out var timeout) || timeout <= 0))
+        var timeoutInvalid = !string.IsNullOrWhiteSpace(ConnectTimeoutInput.Text)
+            && (!int.TryParse(ConnectTimeoutInput.Text, out var timeout) || timeout <= 0);
+        ValidationUiService.SetControlInvalid(ConnectTimeoutInput, timeoutInvalid);
+
+        if (timeoutInvalid)
         {
             errorMessage = "Connect Timeout deve ser um número inteiro maior que zero.";
             return false;

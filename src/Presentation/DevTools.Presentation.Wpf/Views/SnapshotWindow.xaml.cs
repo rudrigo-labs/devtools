@@ -144,13 +144,19 @@ public partial class SnapshotWindow : Window
 
     private bool ValidateInputs(out string errorMessage)
     {
-        if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
+        var rootMissing = string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath);
+        var maxFileSizeInvalid = !string.IsNullOrWhiteSpace(MaxFileSizeKbInput.Text) && ParseOptionalInt(MaxFileSizeKbInput.Text) is null;
+
+        ValidationUiService.SetPathSelectorInvalid(RootPathSelector, rootMissing);
+        ValidationUiService.SetControlInvalid(MaxFileSizeKbInput, maxFileSizeInvalid);
+
+        if (rootMissing)
         {
             errorMessage = "Os campos abaixo nao podem ficar em branco:\n- Pasta do Projeto";
             return false;
         }
 
-        if (!string.IsNullOrWhiteSpace(MaxFileSizeKbInput.Text) && ParseOptionalInt(MaxFileSizeKbInput.Text) is null)
+        if (maxFileSizeInvalid)
         {
             errorMessage = "Tamanho Máximo por Arquivo (KB) deve ser um número inteiro válido.";
             return false;

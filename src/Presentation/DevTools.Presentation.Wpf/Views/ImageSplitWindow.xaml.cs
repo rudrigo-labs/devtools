@@ -140,15 +140,25 @@ public partial class ImageSplitWindow : Window
 
     private bool ValidateInputs(out string errorMessage)
     {
+        var inputMissing = string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath);
+        var minSizeMissing = string.IsNullOrWhiteSpace(MinSizeBox.Text);
+        var alphaMissing = string.IsNullOrWhiteSpace(AlphaBox.Text);
+        var minSizeInvalid = !minSizeMissing && !int.TryParse(MinSizeBox.Text, out _);
+        var alphaInvalid = !alphaMissing && !byte.TryParse(AlphaBox.Text, out _);
+
+        ValidationUiService.SetPathSelectorInvalid(InputPathSelector, inputMissing);
+        ValidationUiService.SetControlInvalid(MinSizeBox, minSizeMissing || minSizeInvalid);
+        ValidationUiService.SetControlInvalid(AlphaBox, alphaMissing || alphaInvalid);
+
         var missing = new List<string>();
 
-        if (string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath))
+        if (inputMissing)
             missing.Add("Imagem de Entrada");
 
-        if (string.IsNullOrWhiteSpace(MinSizeBox.Text))
+        if (minSizeMissing)
             missing.Add("Tamanho Minimo");
 
-        if (string.IsNullOrWhiteSpace(AlphaBox.Text))
+        if (alphaMissing)
             missing.Add("Alpha");
 
         if (missing.Count > 0)
@@ -157,13 +167,13 @@ public partial class ImageSplitWindow : Window
             return false;
         }
 
-        if (!int.TryParse(MinSizeBox.Text, out _))
+        if (minSizeInvalid)
         {
             errorMessage = "Tamanho minimo deve ser um numero inteiro valido.";
             return false;
         }
 
-        if (!byte.TryParse(AlphaBox.Text, out _))
+        if (alphaInvalid)
         {
             errorMessage = "Alpha deve ser um numero entre 0 e 255.";
             return false;

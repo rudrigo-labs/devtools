@@ -3,7 +3,7 @@
 - Status: Em andamento
 - Responsavel: Equipe DevTools
 - Criado em: 2026-03-06 13:15
-- Atualizado em: 2026-03-06 15:07
+- Atualizado em: 2026-03-06 15:28
 - Relacionado a: `DEFINICAO_REFATORACAO_ENTIDADES_FERRAMENTAS_20260306_1315.md`
 
 ## Fase 0 - Preparacao e baseline
@@ -40,10 +40,10 @@
 - [x] UTF8 Convert
 
 ## Fase 4 - Validacoes e hardening
-- [ ] Aplicar validacoes obrigatorias de campos.
+- [x] Aplicar validacoes obrigatorias de campos.
 - [ ] Revisar mensagens e comportamento de erro.
 - [ ] Revisar compatibilidade de configuracoes antigas.
-- [ ] Executar testes tecnicos por fase.
+- [x] Executar testes tecnicos por fase.
 
 ## Fase 5 - Fechamento
 - [ ] Atualizar documentacao tecnica e manual.

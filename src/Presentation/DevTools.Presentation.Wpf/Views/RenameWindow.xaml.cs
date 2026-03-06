@@ -174,12 +174,23 @@ public partial class RenameWindow : Window
 
     private bool ValidateInputs(out string errorMessage)
     {
+        var rootMissing = string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath);
+        var oldTextMissing = string.IsNullOrWhiteSpace(OldTextBox.Text);
+        var newTextMissing = string.IsNullOrWhiteSpace(NewTextBox.Text);
+        var maxDiffInvalid = !string.IsNullOrWhiteSpace(MaxDiffLinesInput.Text)
+            && (!int.TryParse(MaxDiffLinesInput.Text, out var maxDiff) || maxDiff <= 0);
+
+        ValidationUiService.SetPathSelectorInvalid(RootPathSelector, rootMissing);
+        ValidationUiService.SetControlInvalid(OldTextBox, oldTextMissing);
+        ValidationUiService.SetControlInvalid(NewTextBox, newTextMissing);
+        ValidationUiService.SetControlInvalid(MaxDiffLinesInput, maxDiffInvalid);
+
         var missing = new List<string>();
-        if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
+        if (rootMissing)
             missing.Add("Pasta Raiz");
-        if (string.IsNullOrWhiteSpace(OldTextBox.Text))
+        if (oldTextMissing)
             missing.Add("Texto Antigo");
-        if (string.IsNullOrWhiteSpace(NewTextBox.Text))
+        if (newTextMissing)
             missing.Add("Texto Novo");
 
         if (missing.Count > 0)
@@ -188,7 +199,7 @@ public partial class RenameWindow : Window
             return false;
         }
 
-        if (!string.IsNullOrWhiteSpace(MaxDiffLinesInput.Text) && (!int.TryParse(MaxDiffLinesInput.Text, out var maxDiff) || maxDiff <= 0))
+        if (maxDiffInvalid)
         {
             errorMessage = "Max Diff Lines por Arquivo deve ser um número inteiro maior que zero.";
             return false;

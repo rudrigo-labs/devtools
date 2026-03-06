@@ -94,7 +94,10 @@ public partial class OrganizerWindow : Window
 
     private bool ValidateInputs(out string errorMessage)
     {
-        if (string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath))
+        var inputMissing = string.IsNullOrWhiteSpace(InputPathSelector.SelectedPath);
+        ValidationUiService.SetPathSelectorInvalid(InputPathSelector, inputMissing);
+
+        if (inputMissing)
         {
             errorMessage = "Os campos abaixo nao podem ficar em branco:\n- Pasta de Entrada";
             return false;

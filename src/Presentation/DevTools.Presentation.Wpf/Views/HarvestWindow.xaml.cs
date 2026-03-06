@@ -72,16 +72,18 @@ public partial class HarvestWindow : Window
 
     private bool ValidateInputs(out string errorMessage)
     {
+        var sourceMissing = string.IsNullOrWhiteSpace(SourcePathSelector.SelectedPath);
+        var outputMissing = string.IsNullOrWhiteSpace(OutputPathSelector.SelectedPath);
+        var minScoreMissing = string.IsNullOrWhiteSpace(MinScoreBox.Text);
+
+        ValidationUiService.SetPathSelectorInvalid(SourcePathSelector, sourceMissing);
+        ValidationUiService.SetPathSelectorInvalid(OutputPathSelector, outputMissing);
+        ValidationUiService.SetControlInvalid(MinScoreBox, minScoreMissing);
+
         var missing = new List<string>();
-
-        if (string.IsNullOrWhiteSpace(SourcePathSelector.SelectedPath))
-            missing.Add("Diretorio de Origem");
-
-        if (string.IsNullOrWhiteSpace(OutputPathSelector.SelectedPath))
-            missing.Add("Diretorio de Destino");
-
-        if (string.IsNullOrWhiteSpace(MinScoreBox.Text))
-            missing.Add("Score Minimo");
+        if (sourceMissing) missing.Add("Diretorio de Origem");
+        if (outputMissing) missing.Add("Diretorio de Destino");
+        if (minScoreMissing) missing.Add("Score Minimo");
 
         if (missing.Count > 0)
         {
@@ -91,10 +93,12 @@ public partial class HarvestWindow : Window
 
         if (!int.TryParse(MinScoreBox.Text, out _))
         {
+            ValidationUiService.SetControlInvalid(MinScoreBox, true);
             errorMessage = "Score minimo deve ser um numero inteiro valido.";
             return false;
         }
 
+        ValidationUiService.SetControlInvalid(MinScoreBox, false);
         errorMessage = string.Empty;
         return true;
     }

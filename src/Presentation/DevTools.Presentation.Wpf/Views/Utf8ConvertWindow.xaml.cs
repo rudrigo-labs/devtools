@@ -124,7 +124,10 @@ public partial class Utf8ConvertWindow : Window
 
     private bool ValidateInputs(out string errorMessage)
     {
-        if (string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath))
+        var rootMissing = string.IsNullOrWhiteSpace(RootPathSelector.SelectedPath);
+        ValidationUiService.SetPathSelectorInvalid(RootPathSelector, rootMissing);
+
+        if (rootMissing)
         {
             errorMessage = "Os campos abaixo nao podem ficar em branco:\n- Pasta Raiz";
             return false;

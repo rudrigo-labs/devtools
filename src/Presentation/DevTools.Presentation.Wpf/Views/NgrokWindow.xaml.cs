@@ -122,7 +122,10 @@ public partial class NgrokWindow : Window
     private void SaveNgrokToken_Click(object sender, RoutedEventArgs e)
     {
         var token = (AuthTokenInput.Text ?? string.Empty).Trim();
-        if (string.IsNullOrWhiteSpace(token))
+        var tokenMissing = string.IsNullOrWhiteSpace(token);
+        ValidationUiService.SetControlInvalid(AuthTokenInput, tokenMissing);
+
+        if (tokenMissing)
         {
             ValidationUiService.ShowInline(MainFrame, "Campos obrigatorios: Authtoken do ngrok.");
             return;
@@ -173,7 +176,9 @@ public partial class NgrokWindow : Window
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(PortInput.Text))
+        var portMissing = string.IsNullOrWhiteSpace(PortInput.Text);
+        ValidationUiService.SetControlInvalid(PortInput, portMissing);
+        if (portMissing)
         {
             ValidationUiService.ShowInline(MainFrame, "Campos obrigatorios: Porta Local.");
             return;
@@ -183,6 +188,7 @@ public partial class NgrokWindow : Window
 
         if (int.TryParse(PortInput.Text, out var port) && port >= 1 && port <= 65535)
         {
+            ValidationUiService.SetControlInvalid(PortInput, false);
             startButton.IsEnabled = false;
             startButton.Content = "Iniciando...";
 
@@ -210,6 +216,7 @@ public partial class NgrokWindow : Window
         }
         else
         {
+            ValidationUiService.SetControlInvalid(PortInput, true);
             ValidationUiService.ShowInline(MainFrame, "Porta invalida. Informe um valor entre 1 e 65535.");
         }
     }
