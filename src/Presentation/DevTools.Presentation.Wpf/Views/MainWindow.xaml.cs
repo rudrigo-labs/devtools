@@ -12,8 +12,10 @@ using DevTools.Ngrok.Engine;
 using DevTools.Ngrok.Models;
 using DevTools.Presentation.Wpf.Models;
 using DevTools.Presentation.Wpf.Persistence;
+using DevTools.Presentation.Wpf.Components;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using DevTools.Core.Models;
 using System.Windows.Media;
 
@@ -22,6 +24,12 @@ namespace DevTools.Presentation.Wpf.Views;
 public partial class MainWindow : Window
 {
     private const string StorageBackendEnvVar = "DEVTOOLS_STORAGE_BACKEND";
+    private static readonly string[] BlockedMigrationsArgs =
+    {
+        "--project", "-p", "project",
+        "--startup-project", "-s", "startup-project", "startupproject",
+        "--context", "-c", "context", "dbcontext"
+    };
     private static readonly List<string> DefaultHarvestExcludeDirectories = new()
     {
         "bin", "obj", ".git", ".vs", "node_modules",
@@ -46,7 +54,8 @@ public partial class MainWindow : Window
     private OrganizerCategory? _selectedCategory;
     private string? _currentToolForProfiles;
     private ToolProfile? _selectedToolProfile;
-    private ToolProfile? _pendingNewToolProfile;
+    private readonly HashSet<ToolProfile> _pendingNewToolProfiles = new();
+    private readonly Dictionary<ToolProfile, string> _persistedToolProfileNames = new();
     private OrganizerCategory? _pendingNewOrganizerCategory;
     private readonly ProfileUIService _profileUIService;
     private bool _isTestingGoogleDriveConnection;
@@ -598,12 +607,51 @@ public partial class MainWindow : Window
     {
         if (sender is System.Windows.Controls.Button btn && btn.CommandParameter is string toolKey)
         {
+            ShowSettingsList();
             _currentToolForProfiles = toolKey;
-            ToolProfilesTitle.Text = $"Perfis: {btn.Content}";
+            ApplyToolProfileTerminology(toolKey, btn.Content?.ToString());
             SettingsListPanel.Visibility = Visibility.Collapsed;
             ToolProfilesSettingsPanel.Visibility = Visibility.Visible;
             LoadToolProfiles();
         }
+    }
+
+    private void ApplyToolProfileTerminology(string toolKey, string? displayName)
+    {
+        var isProjectMode = IsProjectProfileMode(toolKey);
+
+        ToolProfilesTitle.Text = isProjectMode
+            ? string.Equals(toolKey, "Migrations", StringComparison.OrdinalIgnoreCase)
+                ? "Projetos: EF Core Migrations"
+                : $"Projetos: {displayName ?? toolKey}"
+            : $"Perfis: {displayName ?? toolKey}";
+
+        if (ToolProfileEditorSectionTitle != null)
+            ToolProfileEditorSectionTitle.Text = isProjectMode ? "Configurações do Projeto" : "Configurações do Perfil";
+
+        if (ToolProfileNameLabel != null)
+            ToolProfileNameLabel.Text = isProjectMode ? "Nome do Projeto" : "Nome do Perfil";
+
+        if (ToolProfileIsDefaultCheck != null)
+            ToolProfileIsDefaultCheck.Content = isProjectMode ? "Usar como projeto padrão" : "Usar como perfil padrão";
+
+        // ActionBarControl usa labels internas do próprio componente.
+    }
+
+    private bool IsMigrationsProfileMode()
+    {
+        return string.Equals(_currentToolForProfiles, "Migrations", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool IsProjectProfileMode()
+    {
+        return IsProjectProfileMode(_currentToolForProfiles);
+    }
+
+    private static bool IsProjectProfileMode(string? toolKey)
+    {
+        return string.Equals(toolKey, "Migrations", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(toolKey, "Snapshot", StringComparison.OrdinalIgnoreCase);
     }
 
     private void LoadToolProfiles()
@@ -611,28 +659,28 @@ public partial class MainWindow : Window
         if (string.IsNullOrEmpty(_currentToolForProfiles)) return;
 
         var profiles = _profileUIService.LoadProfiles(_currentToolForProfiles);
-        _pendingNewToolProfile = null;
+        NormalizeProfileDefaultsInMemory(profiles);
+        _pendingNewToolProfiles.Clear();
+        _persistedToolProfileNames.Clear();
+        foreach (var profile in profiles)
+        {
+            _persistedToolProfileNames[profile] = profile.Name;
+        }
+
         ToolProfilesList.ItemsSource = null;
         ToolProfilesList.ItemsSource = profiles;
 
         if (profiles.Count == 0)
         {
-            var newProfile = new ToolProfile
-            {
-                Name = GenerateNextProfileName(profiles)
-            };
-
-            profiles.Add(newProfile);
-            _pendingNewToolProfile = newProfile;
-            ToolProfilesList.ItemsSource = null;
-            ToolProfilesList.ItemsSource = profiles;
-            ToolProfilesList.SelectedItem = newProfile;
+            ToolProfilesList.SelectedItem = null;
+            _selectedToolProfile = null;
+            ToolProfileEditForm.Visibility = Visibility.Collapsed;
             UpdateToolProfileActionButtonsState();
             return;
         }
 
-        ToolProfileEditForm.Visibility = Visibility.Collapsed;
-        ToolProfilesList.SelectedItem = null;
+        var selected = profiles.FirstOrDefault(p => p.IsDefault) ?? profiles.First();
+        SelectAndDisplayToolProfile(selected);
         UpdateToolProfileActionButtonsState();
     }
 
@@ -640,18 +688,18 @@ public partial class MainWindow : Window
     {
         if (string.IsNullOrEmpty(_currentToolForProfiles)) return;
 
-        var newProfile = new ToolProfile 
-        { 
-            Name = GenerateNextProfileName((ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>())
+        var newProfile = new ToolProfile
+        {
+            Name = GenerateNextProfileName((ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>(), _currentToolForProfiles)
         };
-        
+
         var list = (ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>();
         list.Add(newProfile);
-        _pendingNewToolProfile = newProfile;
-        
+        _pendingNewToolProfiles.Add(newProfile);
+
         ToolProfilesList.ItemsSource = null;
         ToolProfilesList.ItemsSource = list;
-        ToolProfilesList.SelectedItem = newProfile;
+        SelectAndDisplayToolProfile(newProfile);
         UpdateToolProfileActionButtonsState();
     }
 
@@ -659,12 +707,7 @@ public partial class MainWindow : Window
     {
         if (ToolProfilesList.SelectedItem is ToolProfile profile)
         {
-            _selectedToolProfile = profile;
-            ToolProfileNameInput.Text = profile.Name;
-            ToolProfileIsDefaultCheck.IsChecked = profile.IsDefault;
-            
-            _profileUIService.GenerateUIForProfile(_currentToolForProfiles!, ToolProfileFieldsContainer, profile);
-            ToolProfileEditForm.Visibility = Visibility.Visible;
+            DisplayToolProfile(profile);
         }
         else
         {
@@ -681,30 +724,59 @@ public partial class MainWindow : Window
 
         if (string.IsNullOrWhiteSpace(ToolProfileNameInput.Text))
         {
-            ShowRequiredFieldsWarning("Os campos abaixo não podem ficar em branco:\n- Nome do Perfil");
+            var fieldLabel = IsProjectProfileMode() ? "Nome do Projeto" : "Nome do Perfil";
+            ShowRequiredFieldsWarning($"Os campos abaixo não podem ficar em branco:\n- {fieldLabel}");
             return;
         }
 
         _selectedToolProfile.Name = ToolProfileNameInput.Text.Trim();
         _selectedToolProfile.IsDefault = ToolProfileIsDefaultCheck.IsChecked == true;
 
+        if (ShouldForceSingleProfileAsDefault())
+        {
+            _selectedToolProfile.IsDefault = true;
+            ToolProfileIsDefaultCheck.IsChecked = true;
+        }
+
         if (!_selectedToolProfile.IsDefault && !HasOtherDefaultProfile())
         {
-            ShowRequiredFieldsWarning("Para salvar, marque 'Usar como perfil padrão'. Deve existir pelo menos um perfil padrão.");
+            var defaultLabel = IsProjectProfileMode() ? "Usar como projeto padrão" : "Usar como perfil padrão";
+            ShowRequiredFieldsWarning($"Para salvar, marque '{defaultLabel}'. Deve existir pelo menos um padrão.");
             return;
         }
 
         // Coletar valores dos campos dinamicos recursivamente
         CollectProfileOptions(ToolProfileFieldsContainer, _selectedToolProfile.Options);
 
-        _profileUIService.SaveProfile(_currentToolForProfiles, _selectedToolProfile);
-        if (ReferenceEquals(_selectedToolProfile, _pendingNewToolProfile))
+        if (IsMigrationsProfileMode())
         {
-            _pendingNewToolProfile = null;
+            _selectedToolProfile.Options.TryGetValue("additional-args", out var profileAdditionalArgs);
+            if (!TryValidateMigrationsAdditionalArgs(profileAdditionalArgs, out var profileArgsError))
+            {
+                ShowRequiredFieldsWarning(profileArgsError);
+                return;
+            }
         }
+
+        var isPendingNew = _pendingNewToolProfiles.Contains(_selectedToolProfile);
+        if (!isPendingNew
+            && _persistedToolProfileNames.TryGetValue(_selectedToolProfile, out var persistedName)
+            && !string.Equals(persistedName, _selectedToolProfile.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            _profileUIService.DeleteProfile(_currentToolForProfiles, persistedName);
+        }
+
+        _profileUIService.SaveProfile(_currentToolForProfiles, _selectedToolProfile);
+        if (isPendingNew)
+        {
+            _pendingNewToolProfiles.Remove(_selectedToolProfile);
+        }
+        _persistedToolProfileNames[_selectedToolProfile] = _selectedToolProfile.Name;
+
         ToolProfilesList.Items.Refresh();
-        UiMessageService.ShowInfo("Perfil salvo com sucesso!", "Sucesso");
-        ShowMainStatusInfo("Perfil salvo com sucesso.");
+        var successText = IsProjectProfileMode() ? "Projeto salvo com sucesso!" : "Perfil salvo com sucesso.";
+        UiMessageService.ShowInfo(successText, "Sucesso");
+        ShowMainStatusInfo(successText);
         UpdateToolProfileActionButtonsState();
     }
 
@@ -734,14 +806,46 @@ public partial class MainWindow : Window
     {
         if (_selectedToolProfile == null || string.IsNullOrEmpty(_currentToolForProfiles)) return;
 
-        if (UiMessageService.Confirm($"Excluir perfil '{_selectedToolProfile.Name}'?", "Confirmar"))
+        var selectedProfile = _selectedToolProfile;
+        var list = (ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>();
+        var selectedIndex = ToolProfilesList.SelectedIndex;
+        var isPendingNew = _pendingNewToolProfiles.Contains(selectedProfile);
+
+        var entityLower = IsProjectProfileMode() ? "projeto" : "perfil";
+        if (UiMessageService.Confirm($"Excluir {entityLower} '{selectedProfile.Name}'?", "Confirmar"))
         {
-            if (ReferenceEquals(_selectedToolProfile, _pendingNewToolProfile))
+            if (!isPendingNew)
             {
-                _pendingNewToolProfile = null;
+                var persistedName = _persistedToolProfileNames.TryGetValue(selectedProfile, out var currentPersistedName)
+                    ? currentPersistedName
+                    : selectedProfile.Name;
+                _profileUIService.DeleteProfile(_currentToolForProfiles, persistedName);
             }
-            _profileUIService.DeleteProfile(_currentToolForProfiles, _selectedToolProfile.Name);
-            LoadToolProfiles();
+
+            _pendingNewToolProfiles.Remove(selectedProfile);
+            _persistedToolProfileNames.Remove(selectedProfile);
+            list.Remove(selectedProfile);
+
+            ToolProfilesList.ItemsSource = null;
+            ToolProfilesList.ItemsSource = list;
+
+            if (list.Count == 0)
+            {
+                ToolProfilesList.SelectedItem = null;
+                _selectedToolProfile = null;
+                ToolProfileEditForm.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                var nextIndex = selectedIndex;
+                if (nextIndex < 0 || nextIndex >= list.Count)
+                {
+                    nextIndex = list.Count - 1;
+                }
+
+                var nextProfile = list[nextIndex];
+                SelectAndDisplayToolProfile(nextProfile);
+            }
         }
 
         UpdateToolProfileActionButtonsState();
@@ -1003,6 +1107,7 @@ public partial class MainWindow : Window
     private void DeleteOrganizerCategory_Click(object sender, RoutedEventArgs e)
     {
         if (_selectedCategory == null) return;
+        if (ReferenceEquals(_selectedCategory, _pendingNewOrganizerCategory)) return;
         
         if (UiMessageService.Confirm($"Excluir categoria '{_selectedCategory.Name}'?", "Confirmar"))
         {
@@ -1021,32 +1126,33 @@ public partial class MainWindow : Window
     private void UpdateToolProfileActionButtonsState()
     {
         var hasSelection = _selectedToolProfile != null && ToolProfileEditForm.Visibility == Visibility.Visible;
-        var isEditingPendingNew = hasSelection && ReferenceEquals(_selectedToolProfile, _pendingNewToolProfile);
+        var canDelete = hasSelection;
 
-        if (DeleteToolProfileButton != null)
+        if (ToolProfilesActionBar != null)
         {
-            DeleteToolProfileButton.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
+            ToolProfilesActionBar.ShowNew = true;
+            ToolProfilesActionBar.ShowSave = hasSelection;
+            ToolProfilesActionBar.ShowDelete = hasSelection;
+            ToolProfilesActionBar.ShowCancel = true;
+            ToolProfilesActionBar.CanNew = true;
+            ToolProfilesActionBar.CanSave = hasSelection;
+            ToolProfilesActionBar.CanDelete = canDelete;
+            ToolProfilesActionBar.CanCancel = true;
         }
 
-        if (SaveToolProfileButton != null)
-        {
-            SaveToolProfileButton.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        if (AddToolProfileButton != null)
-        {
-            AddToolProfileButton.IsEnabled = !isEditingPendingNew;
-        }
+        UpdateToolProfileDefaultControlState();
     }
 
     private void UpdateOrganizerActionButtonsState()
     {
         var hasSelection = _selectedCategory != null && OrganizerEditForm.Visibility == Visibility.Visible;
         var isEditingPendingNew = hasSelection && ReferenceEquals(_selectedCategory, _pendingNewOrganizerCategory);
+        var canDelete = hasSelection && !isEditingPendingNew;
 
         if (DeleteOrganizerCategoryButton != null)
         {
             DeleteOrganizerCategoryButton.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
+            DeleteOrganizerCategoryButton.IsEnabled = canDelete;
         }
 
         if (SaveOrganizerCategoryButton != null)
@@ -1066,8 +1172,10 @@ public partial class MainWindow : Window
         return list.Any(p => !ReferenceEquals(p, _selectedToolProfile) && p.IsDefault);
     }
 
-    private static string GenerateNextProfileName(IReadOnlyCollection<ToolProfile> profiles)
+    private static string GenerateNextProfileName(IReadOnlyCollection<ToolProfile> profiles, string? toolKey)
     {
+        var isProjectMode = IsProjectProfileMode(toolKey);
+        var prefix = isProjectMode ? "Projeto" : "Perfil";
         var maxNumber = 0;
 
         foreach (var profile in profiles)
@@ -1078,19 +1186,76 @@ public partial class MainWindow : Window
             }
 
             var trimmed = profile.Name.Trim();
-            if (!trimmed.StartsWith("Perfil", StringComparison.OrdinalIgnoreCase))
+            var matchesPrefix = trimmed.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+            if (!matchesPrefix && !(isProjectMode && trimmed.StartsWith("Perfil", StringComparison.OrdinalIgnoreCase)))
             {
                 continue;
             }
 
-            var suffix = trimmed.Substring("Perfil".Length).Trim();
+            var effectivePrefix = trimmed.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                ? prefix
+                : "Perfil";
+            var suffix = trimmed.Substring(effectivePrefix.Length).Trim();
             if (int.TryParse(suffix, out var number) && number > maxNumber)
             {
                 maxNumber = number;
             }
         }
 
-        return $"Perfil{maxNumber + 1}";
+        return $"{prefix}{maxNumber + 1}";
+    }
+
+    private static void NormalizeProfileDefaultsInMemory(List<ToolProfile> profiles)
+    {
+        if (profiles.Count == 0)
+            return;
+
+        var defaults = profiles.Where(p => p.IsDefault).ToList();
+        if (defaults.Count == 1)
+            return;
+
+        foreach (var profile in profiles)
+            profile.IsDefault = false;
+
+        profiles[0].IsDefault = true;
+    }
+
+    private void SelectAndDisplayToolProfile(ToolProfile profile)
+    {
+        ToolProfilesList.SelectedItem = profile;
+        ToolProfilesList.ScrollIntoView(profile);
+        DisplayToolProfile(profile);
+    }
+
+    private void DisplayToolProfile(ToolProfile profile)
+    {
+        _selectedToolProfile = profile;
+        ToolProfileNameInput.Text = profile.Name;
+        ToolProfileIsDefaultCheck.IsChecked = profile.IsDefault;
+        _profileUIService.GenerateUIForProfile(_currentToolForProfiles!, ToolProfileFieldsContainer, profile);
+        ToolProfileEditForm.Visibility = Visibility.Visible;
+        UpdateToolProfileDefaultControlState();
+    }
+
+    private bool ShouldForceSingleProfileAsDefault()
+    {
+        var list = (ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>();
+        return list.Count <= 1;
+    }
+
+    private void UpdateToolProfileDefaultControlState()
+    {
+        if (ToolProfileIsDefaultCheck == null || _selectedToolProfile == null)
+            return;
+
+        if (ShouldForceSingleProfileAsDefault())
+        {
+            ToolProfileIsDefaultCheck.IsChecked = true;
+            ToolProfileIsDefaultCheck.IsEnabled = false;
+            return;
+        }
+
+        ToolProfileIsDefaultCheck.IsEnabled = true;
     }
 
     private static string GenerateNextCategoryName(IReadOnlyCollection<OrganizerCategory> categories)
@@ -1134,9 +1299,12 @@ public partial class MainWindow : Window
     private void LoadMigrationsConfig()
     {
         _currentMigrationsConfig = _configService.GetSection<MigrationsSettings>("Migrations");
+        NormalizeMigrationsSettings(_currentMigrationsConfig);
         
         MigRootPathSelector.SelectedPath = _currentMigrationsConfig.RootPath;
         MigStartupPathSelector.SelectedPath = _currentMigrationsConfig.StartupProjectPath;
+        MigSqlServerTargetSelector.SelectedPath = GetMigrationsTargetPath(_currentMigrationsConfig, DatabaseProvider.SqlServer);
+        MigSqliteTargetSelector.SelectedPath = GetMigrationsTargetPath(_currentMigrationsConfig, DatabaseProvider.Sqlite);
         MigContextInput.Text = _currentMigrationsConfig.DbContextFullName;
         MigArgsInput.Text = _currentMigrationsConfig.AdditionalArgs;
     }
@@ -1148,10 +1316,12 @@ public partial class MainWindow : Window
             missingFields.Add("Caminho Raiz do Projeto (Root Path)");
         if (string.IsNullOrWhiteSpace(MigStartupPathSelector.SelectedPath))
             missingFields.Add("Caminho do Projeto de Startup");
+        if (string.IsNullOrWhiteSpace(MigSqlServerTargetSelector.SelectedPath))
+            missingFields.Add("Projeto de Migrations (SQL Server)");
+        if (string.IsNullOrWhiteSpace(MigSqliteTargetSelector.SelectedPath))
+            missingFields.Add("Projeto de Migrations (SQLite)");
         if (string.IsNullOrWhiteSpace(MigContextInput.Text))
             missingFields.Add("Nome Completo do DbContext");
-        if (string.IsNullOrWhiteSpace(MigArgsInput.Text))
-            missingFields.Add("Argumentos Adicionais");
 
         if (!TryBuildRequiredFieldsMessage(missingFields, out var requiredMessage))
         {
@@ -1159,14 +1329,99 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (!TryValidateMigrationsAdditionalArgs(MigArgsInput.Text, out var additionalArgsError))
+        {
+            ShowRequiredFieldsWarning(additionalArgsError);
+            return;
+        }
+
+        NormalizeMigrationsSettings(_currentMigrationsConfig);
         _currentMigrationsConfig.RootPath = MigRootPathSelector.SelectedPath;
         _currentMigrationsConfig.StartupProjectPath = MigStartupPathSelector.SelectedPath;
+        SetMigrationsTargetPath(_currentMigrationsConfig, DatabaseProvider.SqlServer, MigSqlServerTargetSelector.SelectedPath);
+        SetMigrationsTargetPath(_currentMigrationsConfig, DatabaseProvider.Sqlite, MigSqliteTargetSelector.SelectedPath);
         _currentMigrationsConfig.DbContextFullName = MigContextInput.Text.Trim();
-        _currentMigrationsConfig.AdditionalArgs = MigArgsInput.Text.Trim();
+        _currentMigrationsConfig.AdditionalArgs = string.IsNullOrWhiteSpace(MigArgsInput.Text)
+            ? null
+            : MigArgsInput.Text.Trim();
 
         _configService.SaveSection("Migrations", _currentMigrationsConfig);
         UiMessageService.ShowInfo("Configuracoes do Migrations salvas!", "Sucesso");
         ShowMainStatusInfo("Configuracoes do Migrations salvas.");
+    }
+
+    private void MigArgChip_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Button button || button.Content is not string argToken || string.IsNullOrWhiteSpace(argToken))
+            return;
+
+        if (ContainsMigrationsArgToken(MigArgsInput.Text, argToken))
+        {
+            ShowMainStatusInfo($"Argumento já adicionado: {argToken}");
+            return;
+        }
+
+        var current = (MigArgsInput.Text ?? string.Empty).Trim();
+        MigArgsInput.Text = string.IsNullOrWhiteSpace(current) ? argToken : $"{current} {argToken}";
+        MigArgsInput.Focus();
+        MigArgsInput.CaretIndex = MigArgsInput.Text.Length;
+    }
+
+    private static bool TryValidateMigrationsAdditionalArgs(string? args, out string error)
+    {
+        error = string.Empty;
+        if (string.IsNullOrWhiteSpace(args))
+            return true;
+
+        var blocked = BlockedMigrationsArgs.Where(token => ContainsMigrationsArgToken(args, token)).Distinct().ToList();
+        if (blocked.Count == 0)
+            return true;
+
+        error = "Os argumentos abaixo não podem ser usados em 'Argumentos Adicionais' para Migrations:\n- "
+            + string.Join("\n- ", blocked)
+            + "\n\nUse os campos próprios da tela para Projeto/Startup/DbContext.";
+        return false;
+    }
+
+    private static bool ContainsMigrationsArgToken(string? args, string token)
+    {
+        if (string.IsNullOrWhiteSpace(args) || string.IsNullOrWhiteSpace(token))
+            return false;
+
+        var pattern = $@"(?<!\S){Regex.Escape(token)}(?=\s|$|=)";
+        return Regex.IsMatch(args, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    }
+
+    private static void NormalizeMigrationsSettings(MigrationsSettings settings)
+    {
+        settings.Targets ??= new List<MigrationTarget>();
+        EnsureMigrationsTarget(settings, DatabaseProvider.SqlServer);
+        EnsureMigrationsTarget(settings, DatabaseProvider.Sqlite);
+    }
+
+    private static MigrationTarget EnsureMigrationsTarget(MigrationsSettings settings, DatabaseProvider provider)
+    {
+        var target = settings.Targets.FirstOrDefault(item => item.Provider == provider);
+        if (target is not null)
+            return target;
+
+        target = new MigrationTarget
+        {
+            Provider = provider,
+            MigrationsProjectPath = string.Empty
+        };
+        settings.Targets.Add(target);
+        return target;
+    }
+
+    private static string GetMigrationsTargetPath(MigrationsSettings settings, DatabaseProvider provider)
+    {
+        return EnsureMigrationsTarget(settings, provider).MigrationsProjectPath;
+    }
+
+    private static void SetMigrationsTargetPath(MigrationsSettings settings, DatabaseProvider provider, string path)
+    {
+        EnsureMigrationsTarget(settings, provider).MigrationsProjectPath = path ?? string.Empty;
     }
 
     // --- Ngrok Settings ---

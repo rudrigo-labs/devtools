@@ -10,11 +10,11 @@ Consolidar as pendencias de configuracoes identificadas na varredura completa da
 ## Prioridade P0 (bloqueia consistencia/fluxo)
 
 ### Migrations
-- [ ] Alinhar acoes da UI com o engine (remover `Remove Migration` da tela ou implementar no engine).
-- [ ] Alinhar providers da UI com o enum real (hoje enum suporta `SqlServer` e `Sqlite`; UI mostra `PostgreSQL`).
-- [ ] Corrigir seletores de caminho para comportamento de arquivo/projeto conforme validacao real do engine.
-- [ ] Garantir que `MigrationsSettings.Targets` seja configurado/salvo pela configuracao (hoje validator exige e a UI de execucao nao monta).
-- [ ] Tornar `AdditionalArgs` opcional na configuracao (hoje esta sendo exigido na tela, mas o modelo permite vazio).
+- [x] Alinhar acoes da UI com o engine (remover `Remove Migration` da tela ou implementar no engine).
+- [x] Alinhar providers da UI com o enum real (hoje enum suporta `SqlServer` e `Sqlite`; UI mostra `PostgreSQL`).
+- [x] Corrigir seletores de caminho para comportamento de arquivo/projeto conforme validacao real do engine.
+- [x] Garantir que `MigrationsSettings.Targets` seja configurado/salvo pela configuracao (hoje validator exige e a UI de execucao nao monta).
+- [x] Tornar `AdditionalArgs` opcional na configuracao (hoje esta sendo exigido na tela, mas o modelo permite vazio).
 
 ### Organizer
 - [ ] Corrigir regra de "Pasta de Saida (Opcional)" para realmente opcional no fluxo da janela (hoje validacao exige preenchimento).
@@ -22,10 +22,15 @@ Consolidar as pendencias de configuracoes identificadas na varredura completa da
 ### ImageSplit
 - [ ] Corrigir regra de "Pasta de Saida (Opcional)" para realmente opcional no fluxo da janela (engine ja tem fallback).
 
+### Validacoes (UI configuracoes)
+- [ ] Implementar validacao inline para campos obrigatorios (sem depender apenas de dialog/modal).
+- [ ] Regra global: botao `Remover` so habilita para objeto ja salvo/existente (desabilitado para item novo pendente).
+
 ## Prioridade P1 (lacunas de configuracao)
 
 ### Snapshot
-- [ ] Expor em configuracao os campos ja suportados pela Tool: `OutputBasePath`, `IgnoredDirectories`, `MaxFileSizeKb`.
+- [x] Tratar Snapshot como `Projeto` (nao `Perfil`) na tela de configuracao/perfis.
+- [x] Expor em configuracao os campos ja suportados pela Tool: `OutputBasePath`, `IgnoredDirectories`, `MaxFileSizeKb`.
 - [ ] Permitir defaults de formatos de saida (txt/json/html) via perfil/config.
 - [ ] Remover duplicacao de listas de extensoes entre `SnapshotDefaults` e `SnapshotHtmlWriter`.
 - [ ] Definir estrategia para assets do HTML preview (CDN/offline/cache).
@@ -58,6 +63,10 @@ Consolidar as pendencias de configuracoes identificadas na varredura completa da
 
 ## Prioridade P2 (higiene e manutencao de defaults)
 
+### UI das Janelas de Ferramentas
+- [ ] Verificar ajuste do botao secundario para manter contraste correto com o rodape (evitar mesma cor de fundo do rodape).
+- [ ] Verificar checkboxes nas telas de configuracao e perfis com espacamento vertical/horizontal excessivo e padronizar com o restante da UI.
+
 ### Harvest
 - [ ] Centralizar defaults de exclusao para evitar drift entre:
   - Tool (`HarvestConfig.json`)
@@ -66,6 +75,7 @@ Consolidar as pendencias de configuracoes identificadas na varredura completa da
 - [ ] Definir fonte unica de verdade para defaults de configuracao.
 
 ### Organizer (configuracao geral)
+- [ ] Revisar barra de acao do Organizer (layout da barra, posicao e regras de habilitar/desabilitar por estado do item).
 - [ ] Expandir tela de configuracao para cobrir campos alem de categorias:
   - [ ] `AllowedExtensions`
   - [ ] `MinScoreDefault`
@@ -88,3 +98,11 @@ Consolidar as pendencias de configuracoes identificadas na varredura completa da
 - Documento criado em: 2026-03-05 23:09 (America/Sao_Paulo)
 - Responsavel atual: Time DevTools
 - Estado: Aberto
+
+## Pendencia Adicionada (UX Perfis/Projetos)
+- [ ] Implementar fluxo de abertura com selecao de perfil/projeto no clique do card da ferramenta:
+  - [ ] Se existir perfil/projeto salvo, abrir modal com `Selecionar e continuar` e `Seguir sem perfil`.
+  - [ ] Se seguir sem perfil, mostrar dica com checkbox `Nao exibir novamente`.
+  - [ ] Persistir preferencia por ferramenta (nao global).
+  - [ ] Permitir reset da preferencia nas configuracoes.
+- Referencia detalhada: `docs/pendencias/EXPERIENCIA_PERFIS_FERRAMENTAS_20260306_0551.md`.

@@ -34,13 +34,13 @@
 
                     <c:PathSelector x:Name="ProjectSelector"
                                     Grid.Column="0"
-                                    Title="Pasta Raiz do Projeto (onde esta o .csproj)"
+                                    Title="Pasta Raiz do Projeto"
                                     IsFolderPicker="True"/>
 
                     <c:PathSelector x:Name="StartupSelector"
                                     Grid.Column="2"
-                                    Title="Startup Project (API/Web)"
-                                    IsFolderPicker="True"/>
+                                    Title="Arquivo do Startup Project (.csproj)"
+                                    IsFolderPicker="False"/>
                 </Grid>
 
                 <Grid Margin="0,0,0,16">
@@ -57,7 +57,6 @@
                                   SelectedIndex="0"
                                   Style="{StaticResource DevToolsSelectInput}">
                             <ComboBoxItem Content="Add Migration" Tag="Add"/>
-                            <ComboBoxItem Content="Remove Migration" Tag="Remove"/>
                             <ComboBoxItem Content="Update Database" Tag="Update"/>
                         </ComboBox>
                     </StackPanel>
@@ -69,7 +68,6 @@
                                   Style="{StaticResource DevToolsSelectInput}">
                             <ComboBoxItem Content="SQL Server" Tag="SqlServer"/>
                             <ComboBoxItem Content="SQLite" Tag="Sqlite"/>
-                            <ComboBoxItem Content="PostgreSQL" Tag="PostgreSql"/>
                         </ComboBox>
                     </StackPanel>
                 </Grid>
@@ -94,10 +92,62 @@
                     </StackPanel>
                 </Grid>
 
-                <CheckBox x:Name="DryRunCheck"
-                          Content="Dry Run (gerar comando sem executar)"
-                          Style="{StaticResource DevToolsCheckBox}"
-                          Margin="0,0,0,16"/>
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <CheckBox x:Name="DryRunCheck"
+                              Grid.Column="0"
+                              Content="Dry Run (gerar comando sem executar)"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              VerticalAlignment="Center"/>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Argumentos Adicionais (opcional)" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="AdditionalArgsInput"
+                                 Style="{StaticResource DevToolsTextInput}"/>
+                        <TextBlock Text="Atalhos comuns (clique para adicionar):"
+                                   Style="{StaticResource DevToolsInputLabel}"
+                                   Margin="0,10,0,6"/>
+                        <WrapPanel>
+                            <Button Content="--verbose"
+                                    Style="{StaticResource DevToolsBrowseButton}"
+                                    MinWidth="0"
+                                    MinHeight="30"
+                                    Width="Auto"
+                                    Padding="10,6"
+                                    Margin="0,0,8,8"
+                                    Click="AdditionalArgChip_Click"/>
+                            <Button Content="--no-build"
+                                    Style="{StaticResource DevToolsBrowseButton}"
+                                    MinWidth="0"
+                                    MinHeight="30"
+                                    Width="Auto"
+                                    Padding="10,6"
+                                    Margin="0,0,8,8"
+                                    Click="AdditionalArgChip_Click"/>
+                            <Button Content="--no-color"
+                                    Style="{StaticResource DevToolsBrowseButton}"
+                                    MinWidth="0"
+                                    MinHeight="30"
+                                    Width="Auto"
+                                    Padding="10,6"
+                                    Margin="0,0,8,8"
+                                    Click="AdditionalArgChip_Click"/>
+                            <Button Content="--prefix-output"
+                                    Style="{StaticResource DevToolsBrowseButton}"
+                                    MinWidth="0"
+                                    MinHeight="30"
+                                    Width="Auto"
+                                    Padding="10,6"
+                                    Margin="0,0,8,8"
+                                    Click="AdditionalArgChip_Click"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Grid>
 
                 <Expander IsExpanded="True">
                     <Expander.Header>

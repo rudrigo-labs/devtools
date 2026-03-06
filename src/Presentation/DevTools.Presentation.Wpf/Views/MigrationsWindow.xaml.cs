@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using DevTools.Core.Configuration;
@@ -13,11 +14,18 @@ namespace DevTools.Presentation.Wpf.Views;
 
 public partial class MigrationsWindow : Window
 {
+    private static readonly string[] BlockedMigrationsArgs =
+    {
+        "--project", "-p", "project",
+        "--startup-project", "-s", "startup-project", "startupproject",
+        "--context", "-c", "context", "dbcontext"
+    };
     private readonly JobManager _jobManager = null!;
     private readonly SettingsService _settings = null!;
     private readonly ConfigService _config = null!;
     private readonly ProfileManager _profileManager = null!;
     private ToolProfile? _currentProfile;
+    private MigrationsSettings _resolvedSettings = new();
 
     public MigrationsWindow(JobManager jobManager, SettingsService settings, ConfigService config, ProfileManager profileManager)
     {
@@ -39,14 +47,37 @@ public partial class MigrationsWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        _resolvedSettings = _config.GetSection<MigrationsSettings>("Migrations");
+        NormalizeMigrationsSettings(_resolvedSettings);
+
+        ProjectSelector.SelectedPath = _resolvedSettings.RootPath;
+        StartupSelector.SelectedPath = _resolvedSettings.StartupProjectPath;
+        DbContextInput.Text = _resolvedSettings.DbContextFullName;
+        AdditionalArgsInput.Text = _resolvedSettings.AdditionalArgs ?? string.Empty;
+
         _currentProfile = _profileManager?.GetDefaultProfile("Migrations");
-        if (_currentProfile != null)
-        {
-            if (_currentProfile.Options.TryGetValue("root-path", out var root)) ProjectSelector.SelectedPath = root;
-            if (_currentProfile.Options.TryGetValue("startup-path", out var startup)) StartupSelector.SelectedPath = startup;
-            if (_currentProfile.Options.TryGetValue("dbcontext", out var context)) DbContextInput.Text = context;
+        if (_currentProfile is null)
             return;
-        }
+
+        if (_currentProfile.Options.TryGetValue("root-path", out var root))
+            ProjectSelector.SelectedPath = root;
+
+        if (_currentProfile.Options.TryGetValue("startup-path", out var startup))
+            StartupSelector.SelectedPath = startup;
+
+        if (_currentProfile.Options.TryGetValue("dbcontext", out var context))
+            DbContextInput.Text = context;
+
+        if (_currentProfile.Options.TryGetValue("additional-args", out var additionalArgs))
+            _resolvedSettings.AdditionalArgs = additionalArgs;
+
+        if (_currentProfile.Options.TryGetValue("target-sqlserver-path", out var sqlServerTarget))
+            SetTargetPath(_resolvedSettings, DatabaseProvider.SqlServer, sqlServerTarget);
+
+        if (_currentProfile.Options.TryGetValue("target-sqlite-path", out var sqliteTarget))
+            SetTargetPath(_resolvedSettings, DatabaseProvider.Sqlite, sqliteTarget);
+
+        AdditionalArgsInput.Text = _resolvedSettings.AdditionalArgs ?? string.Empty;
     }
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
@@ -64,6 +95,20 @@ public partial class MigrationsWindow : Window
         Close();
     }
 
+    private void AdditionalArgChip_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Button button || button.Content is not string argToken || string.IsNullOrWhiteSpace(argToken))
+            return;
+
+        var current = (AdditionalArgsInput.Text ?? string.Empty).Trim();
+        if (ContainsArgToken(current, argToken))
+            return;
+
+        AdditionalArgsInput.Text = string.IsNullOrWhiteSpace(current) ? argToken : $"{current} {argToken}";
+        AdditionalArgsInput.Focus();
+        AdditionalArgsInput.CaretIndex = AdditionalArgsInput.Text.Length;
+    }
+
     private void ActionCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (MigrationNamePanel == null) return;
@@ -74,6 +119,10 @@ public partial class MigrationsWindow : Window
 
     private void Execute_Click(object sender, RoutedEventArgs e)
     {
+        _resolvedSettings.AdditionalArgs = string.IsNullOrWhiteSpace(AdditionalArgsInput.Text)
+            ? null
+            : AdditionalArgsInput.Text.Trim();
+
         if (!ValidateInputs(out var validationError, out var action, out var provider, out var root, out var startup, out var migrationName))
         {
             ValidationUiService.ShowInline(MainFrame, validationError);
@@ -89,7 +138,17 @@ public partial class MigrationsWindow : Window
             {
                 RootPath = root,
                 StartupProjectPath = startup,
-                DbContextFullName = DbContextInput.Text
+                DbContextFullName = DbContextInput.Text.Trim(),
+                Targets = _resolvedSettings.Targets
+                    .Select(target => new MigrationTarget
+                    {
+                        Provider = target.Provider,
+                        MigrationsProjectPath = target.MigrationsProjectPath
+                    })
+                    .ToList(),
+                AdditionalArgs = string.IsNullOrWhiteSpace(_resolvedSettings.AdditionalArgs)
+                    ? null
+                    : _resolvedSettings.AdditionalArgs.Trim()
             },
             MigrationName: migrationName,
             DryRun: DryRunCheck.IsChecked == true,
@@ -101,6 +160,9 @@ public partial class MigrationsWindow : Window
             _currentProfile.Options["root-path"] = root ?? string.Empty;
             _currentProfile.Options["startup-path"] = startup ?? string.Empty;
             _currentProfile.Options["dbcontext"] = DbContextInput.Text ?? string.Empty;
+            _currentProfile.Options["additional-args"] = _resolvedSettings.AdditionalArgs ?? string.Empty;
+            _currentProfile.Options["target-sqlserver-path"] = GetTargetPath(_resolvedSettings, DatabaseProvider.SqlServer);
+            _currentProfile.Options["target-sqlite-path"] = GetTargetPath(_resolvedSettings, DatabaseProvider.Sqlite);
             _profileManager.SaveProfile("Migrations", _currentProfile);
         }
 
@@ -136,29 +198,57 @@ public partial class MigrationsWindow : Window
         out string startup,
         out string migrationName)
     {
-        root = ProjectSelector.SelectedPath;
-        startup = StartupSelector.SelectedPath;
-        migrationName = MigrationNameInput.Text;
-
         var actionTag = (ActionCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-        action = actionTag == "Add" ? MigrationsAction.AddMigration : MigrationsAction.UpdateDatabase;
+        action = actionTag switch
+        {
+            "Add" => MigrationsAction.AddMigration,
+            "Update" => MigrationsAction.UpdateDatabase,
+            _ => default
+        };
+
+        if (actionTag is not ("Add" or "Update"))
+        {
+            errorMessage = "Acao de migration invalida.";
+            provider = default;
+            root = string.Empty;
+            startup = string.Empty;
+            migrationName = string.Empty;
+            return false;
+        }
 
         var providerTag = (ProviderCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString();
         provider = providerTag switch
         {
             "Sqlite" => DatabaseProvider.Sqlite,
-            _ => DatabaseProvider.SqlServer
+            "SqlServer" => DatabaseProvider.SqlServer,
+            _ => default
         };
+
+        if (providerTag is not ("SqlServer" or "Sqlite"))
+        {
+            errorMessage = "Provider invalido.";
+            root = string.Empty;
+            startup = string.Empty;
+            migrationName = string.Empty;
+            return false;
+        }
+
+        root = ProjectSelector.SelectedPath;
+        startup = StartupSelector.SelectedPath;
+        migrationName = (MigrationNameInput.Text ?? string.Empty).Trim();
 
         var missing = new List<string>();
         if (string.IsNullOrWhiteSpace(root))
-            missing.Add("Diretorio do Projeto");
+            missing.Add("Pasta Raiz do Projeto");
         if (string.IsNullOrWhiteSpace(startup))
-            missing.Add("Diretorio do Startup Project");
+            missing.Add("Arquivo do Startup Project (.csproj)");
         if (action == MigrationsAction.AddMigration && string.IsNullOrWhiteSpace(migrationName))
             missing.Add("Nome da Migration");
         if (string.IsNullOrWhiteSpace(DbContextInput.Text))
             missing.Add("Nome completo do DbContext");
+
+        if (string.IsNullOrWhiteSpace(GetTargetPath(_resolvedSettings, provider)))
+            missing.Add($"Projeto de Migrations para {provider}");
 
         if (missing.Count > 0)
         {
@@ -166,7 +256,67 @@ public partial class MigrationsWindow : Window
             return false;
         }
 
+        if (!TryValidateAdditionalArgs(_resolvedSettings.AdditionalArgs, out var argsError))
+        {
+            errorMessage = argsError;
+            return false;
+        }
+
         errorMessage = string.Empty;
         return true;
+    }
+
+    private static bool TryValidateAdditionalArgs(string? args, out string error)
+    {
+        error = string.Empty;
+        if (string.IsNullOrWhiteSpace(args))
+            return true;
+
+        var blocked = BlockedMigrationsArgs.Where(token => ContainsArgToken(args, token)).Distinct().ToList();
+        if (blocked.Count == 0)
+            return true;
+
+        error = "Argumentos adicionais invalidos para Migrations:\n- "
+            + string.Join("\n- ", blocked)
+            + "\n\nUse os campos proprios para Projeto/Startup/DbContext.";
+        return false;
+    }
+
+    private static bool ContainsArgToken(string args, string token)
+    {
+        var pattern = $@"(?<!\S){Regex.Escape(token)}(?=\s|$|=)";
+        return Regex.IsMatch(args, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    }
+
+    private static void NormalizeMigrationsSettings(MigrationsSettings settings)
+    {
+        settings.Targets ??= new List<MigrationTarget>();
+        EnsureTarget(settings, DatabaseProvider.SqlServer);
+        EnsureTarget(settings, DatabaseProvider.Sqlite);
+    }
+
+    private static MigrationTarget EnsureTarget(MigrationsSettings settings, DatabaseProvider provider)
+    {
+        var target = settings.Targets.FirstOrDefault(item => item.Provider == provider);
+        if (target is not null)
+            return target;
+
+        target = new MigrationTarget
+        {
+            Provider = provider,
+            MigrationsProjectPath = string.Empty
+        };
+        settings.Targets.Add(target);
+        return target;
+    }
+
+    private static string GetTargetPath(MigrationsSettings settings, DatabaseProvider provider)
+    {
+        return EnsureTarget(settings, provider).MigrationsProjectPath;
+    }
+
+    private static void SetTargetPath(MigrationsSettings settings, DatabaseProvider provider, string path)
+    {
+        EnsureTarget(settings, provider).MigrationsProjectPath = path ?? string.Empty;
     }
 }
