@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using DevTools.Core.Configuration;
+using DevTools.Migrations.Models;
 using DevTools.Notes.Models;
 using DevTools.Presentation.Wpf.Components;
 using DevTools.Presentation.Wpf.Models;
@@ -276,6 +277,18 @@ public class ToolUsageSimulationTests
             AppContext.BaseDirectory, "..", "..", "..", "..", "..", "..",
             "src", "Tools", "DevTools.Tests", "DevTools.Tests.csproj"));
 
+        config.SaveSection("Migrations", new MigrationsSettings
+        {
+            RootPath = root,
+            StartupProjectPath = startupCsproj,
+            DbContextFullName = "Sample.DbContext",
+            Targets = new List<MigrationTarget>
+            {
+                new() { Provider = DatabaseProvider.SqlServer, MigrationsProjectPath = startupCsproj },
+                new() { Provider = DatabaseProvider.Sqlite, MigrationsProjectPath = startupCsproj }
+            }
+        });
+
         var window = new MigrationsWindow(jobManager, settings, config, profileManager);
         window.Show();
         PumpDispatcher(3);
@@ -285,7 +298,7 @@ public class ToolUsageSimulationTests
         GetField<TextBox>(window, "DbContextInput").Text = "Sample.DbContext";
 
         // Update Database (na implementação atual: qualquer ação != Add é tratada como update)
-        GetField<ComboBox>(window, "ActionCombo").SelectedIndex = 2;
+        GetField<ComboBox>(window, "ActionCombo").SelectedIndex = 1;
         GetField<CheckBox>(window, "DryRunCheck").IsChecked = true;
 
         Invoke(window, "Execute_Click", window, new RoutedEventArgs());

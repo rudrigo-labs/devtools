@@ -20,6 +20,7 @@
 
         <!-- Components -->
         <ResourceDictionary Source="pack://application:,,,/DevTools.Presentation.Wpf;component/Theme/Components/ToolFrame.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/DevTools.Presentation.Wpf;component/Theme/Components/ActionBar.xaml"/>
 
         <!-- Assets & Resources -->
         <ResourceDictionary Source="pack://application:,,,/DevTools.Presentation.Wpf;component/Theme/Icons.xaml"/>

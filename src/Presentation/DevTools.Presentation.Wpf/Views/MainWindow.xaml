@@ -99,6 +99,7 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
         </ResourceDictionary>
     </Window.Resources>
 
@@ -482,8 +483,11 @@
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Organizer}" Content="Organizer" 
                                                 ToolTip="Categorias e regras de organização" Width="200" Click="OpenOrganizerSettings_Click"/>
 
-                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="Migrations" 
-                                                ToolTip="Caminhos e contextos do EF Core" Width="200" Click="OpenMigrationsSettings_Click"/>
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="EF Core Migrations" 
+                                                ToolTip="Projetos/perfis de execução para migrations" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Migrations"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Snapshot}" Content="Snapshot" 
+                                                ToolTip="Projetos de snapshot" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Snapshot"/>
 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Ngrok}" Content="Ngrok" 
                                                 ToolTip="Caminho do executável e token" Width="200" Click="OpenNgrokSettings_Click"/>
@@ -498,17 +502,11 @@
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Rename}" Content="Renomeação" 
                                                 ToolTip="Perfis de renomeação de projeto" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Rename"/>
 
-                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="EF Migrations" 
-                                                ToolTip="Perfis de execução de migrations" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Migrations"/>
-
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Harvest}" Content="Harvest" 
                                                 ToolTip="Perfis de coleta de arquivos" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Harvest"/>
                                                 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.SearchText}" Content="Busca de Texto" 
                                                 ToolTip="Perfis de busca de texto em arquivos" Width="200" Click="OpenToolProfiles_Click" CommandParameter="SearchText"/>
-
-                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Snapshot}" Content="Snapshot" 
-                                                ToolTip="Perfis de snapshot de projeto" Width="200" Click="OpenToolProfiles_Click" CommandParameter="Snapshot"/>
 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.SSHTunnel}" Content="Túnel SSH" 
                                                 ToolTip="Perfis de conexão e túnel SSH" Width="200" Click="OpenToolProfiles_Click" CommandParameter="SSHTunnel"/>
@@ -542,10 +540,12 @@
                                                            Margin="0,0,0,12"
                                                            TextWrapping="Wrap"/>
 
-                                                <StackPanel Width="360">
+                                                <StackPanel Width="440" HorizontalAlignment="Left">
                                                     <TextBlock Text="Modo de Armazenamento" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
                                                     <ComboBox x:Name="StorageBackendCombo"
                                                               Style="{DynamicResource DevToolsSelectInput}"
+                                                              HorizontalAlignment="Left"
+                                                              Width="440"
                                                               SelectionChanged="StorageBackendCombo_SelectionChanged">
                                                         <ComboBoxItem Tag="json" Content="Arquivo JSON (appsettings.json)"/>
                                                         <ComboBoxItem Tag="sqlite" Content="Banco SQLite (devtools.db)"/>
@@ -595,77 +595,79 @@
 
                                     <!-- Conteúdo Gestão de Perfis -->
                                     <Grid Grid.Row="1">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="250"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
 
-                                        <!-- Lista de Perfis -->
-                                        <Border BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="0" Padding="0,0,10,0">
-                                            <DockPanel>
-                                                <ListBox x:Name="ToolProfilesList"
-                                                     Style="{DynamicResource SettingsListBoxStyle}"
-                                                     ItemContainerStyle="{DynamicResource SettingsListBoxItemStyle}"
-                                                     SelectionChanged="ToolProfile_SelectionChanged">
-                                                    <ListBox.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <Grid Margin="0,2">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                                                                <TextBlock Grid.Column="1" Text="&#x2605;" Foreground="{DynamicResource DevToolsAccent}" 
-                                                                           Visibility="{Binding IsDefault, Converter={StaticResource BooleanToVisibilityConverter}}" 
-                                                                           ToolTip="Perfil Padrão" Margin="5,0,0,0"/>
-                                                            </Grid>
-                                                        </DataTemplate>
-                                                    </ListBox.ItemTemplate>
-                                                </ListBox>
-                                            </DockPanel>
-                                        </Border>
+                                        <c:ActionBarControl x:Name="ToolProfilesActionBar"
+                                                            Grid.Row="0"
+                                                            HorizontalAlignment="Right"
+                                                            ActionNew="AddToolProfile_Click"
+                                                            ActionSave="SaveToolProfile_Click"
+                                                            ActionDelete="DeleteToolProfile_Click"
+                                                            ActionCancel="BackToSettingsList_Click"/>
 
-                                                <!-- Editor de Perfil -->
-                                        <ScrollViewer Grid.Column="1" Margin="20,0,0,0" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
-                                            <StackPanel x:Name="ToolProfileEditForm" Visibility="Collapsed">
-                                                
-                                                <StackPanel>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                        <materialDesign:PackIcon Kind="Settings" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Configurações do Perfil" Style="{DynamicResource DevToolsCardTitle}"/>
-                                                    </StackPanel>
+                                        <Border Grid.Row="1" Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,0,0,12"/>
 
+                                        <Grid Grid.Row="2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="250"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Lista de Perfis -->
+                                            <Border BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="0" Padding="0,0,10,0">
+                                                <DockPanel>
+                                                    <ListBox x:Name="ToolProfilesList"
+                                                         Style="{DynamicResource SettingsListBoxStyle}"
+                                                         ItemContainerStyle="{DynamicResource SettingsListBoxItemStyle}"
+                                                         SelectionChanged="ToolProfile_SelectionChanged">
+                                                        <ListBox.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Grid Margin="0,2">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                                                    <TextBlock Grid.Column="1" Text="&#x2605;" Foreground="{DynamicResource DevToolsAccent}" 
+                                                                               Visibility="{Binding IsDefault, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                                                               ToolTip="Perfil Padrão" Margin="5,0,0,0"/>
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </ListBox.ItemTemplate>
+                                                    </ListBox>
+                                                </DockPanel>
+                                            </Border>
+
+                                            <!-- Editor de Perfil -->
+                                            <ScrollViewer Grid.Column="1" Margin="20,0,0,0" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
+                                                <StackPanel x:Name="ToolProfileEditForm" Visibility="Collapsed">
                                                     <StackPanel>
-                                                        <TextBlock Text="Nome do Perfil" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                        <TextBox x:Name="ToolProfileNameInput" Style="{DynamicResource DevToolsTextInput}"/>
+                                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                                            <materialDesign:PackIcon Kind="Settings" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                            <TextBlock x:Name="ToolProfileEditorSectionTitle" Text="Configurações do Perfil" Style="{DynamicResource DevToolsCardTitle}"/>
+                                                        </StackPanel>
+
+                                                        <StackPanel>
+                                                            <TextBlock x:Name="ToolProfileNameLabel" Text="Nome do Perfil" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                            <TextBox x:Name="ToolProfileNameInput" Style="{DynamicResource DevToolsTextInput}"/>
+                                                        </StackPanel>
+
+                                                        <!-- Container para campos específicos injetados -->
+                                                        <StackPanel x:Name="ToolProfileFieldsContainer" Margin="0,20,0,0"/>
+
+                                                        <CheckBox x:Name="ToolProfileIsDefaultCheck" 
+                                                              Content="Usar como perfil padrão" 
+                                                              Margin="0,24,0,0"
+                                                              Style="{DynamicResource DevToolsCheckBox}"/>
                                                     </StackPanel>
-
-                                                    <!-- Container para campos específicos injetados -->
-                                                    <StackPanel x:Name="ToolProfileFieldsContainer" Margin="0,20,0,0"/>
-
-                                                    <CheckBox x:Name="ToolProfileIsDefaultCheck" 
-                                                          Content="Usar como perfil padrão" 
-                                                          Margin="0,24,0,0"
-                                                          Style="{DynamicResource DevToolsCheckBox}"/>
                                                 </StackPanel>
-
-                                            </StackPanel>
-                                        </ScrollViewer>
+                                            </ScrollViewer>
+                                        </Grid>
                                     </Grid>
-
-                                    <StackPanel Grid.Row="2"
-                                                Orientation="Horizontal"
-                                                HorizontalAlignment="Right"
-                                                Margin="0,10,0,8">
-                                        <Button x:Name="AddToolProfileButton" Content="Novo" Click="AddToolProfile_Click" 
-                                                Style="{DynamicResource DevToolsSuccessButton}" Width="120" Margin="0,0,10,0"/>
-                                        <Button x:Name="DeleteToolProfileButton" Content="Remover" Click="DeleteToolProfile_Click" 
-                                                Style="{DynamicResource DevToolsDangerButton}" Width="120" Margin="0,0,10,0"/>
-                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" 
-                                                Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
-                                        <Button x:Name="SaveToolProfileButton" Content="Salvar" Click="SaveToolProfile_Click" 
-                                                Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
-                                    </StackPanel>
                                 </Grid>
 
 
@@ -999,9 +1001,22 @@
                                         <TextBlock Text="Configuração: EF Core Migrations" Style="{DynamicResource DevToolsPanelTitle}"/>
                                     </StackPanel>
 
-                                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                    <Grid Grid.Row="1">
                                         <StackPanel Margin="0,0,20,0">
                                             
+                                            <!-- Grupo: Projetos EF Core -->
+                                            <StackPanel Margin="0,0,0,16">
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                                    <materialDesign:PackIcon Kind="FolderAccount" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                    <TextBlock Text="Projetos EF Core" Style="{DynamicResource DevToolsCardTitle}"/>
+                                                </StackPanel>
+                                                <TextBlock Text="Use o card 'Projetos EF Core' na lista de configurações para criar/editar projetos de migration."
+                                                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                                                           TextWrapping="Wrap"/>
+                                            </StackPanel>
+
+                                            <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,0,0,16"/>
+
                                             <!-- Grupo: Caminhos do Projeto -->
                                             <StackPanel Margin="0,0,0,16">
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
@@ -1009,13 +1024,51 @@
                                                     <TextBlock Text="Caminhos do Projeto" Style="{DynamicResource DevToolsCardTitle}"/>
                                                 </StackPanel>
 
-                                                <StackPanel Margin="0,0,0,20">
-                                                    <c:PathSelector x:Name="MigRootPathSelector" Title="Caminho Raiz do Projeto (Root Path)" IsFolderPicker="True"/>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="16"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <c:PathSelector x:Name="MigRootPathSelector"
+                                                                    Grid.Column="0"
+                                                                    Title="Caminho Raiz do Projeto (Root Path)"
+                                                                    IsFolderPicker="True"/>
+
+                                                    <c:PathSelector x:Name="MigStartupPathSelector"
+                                                                    Grid.Column="2"
+                                                                    Title="Arquivo do Projeto de Startup (.csproj)"
+                                                                    IsFolderPicker="False"/>
+                                                </Grid>
+                                            </StackPanel>
+
+                                            <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,0,0,16"/>
+
+                                            <!-- Grupo: Projetos de Migrations por Provider -->
+                                            <StackPanel Margin="0,0,0,16">
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                                    <materialDesign:PackIcon Kind="Database" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                    <TextBlock Text="Projetos de Migrations por Provider" Style="{DynamicResource DevToolsCardTitle}"/>
                                                 </StackPanel>
 
-                                                <StackPanel>
-                                                    <c:PathSelector x:Name="MigStartupPathSelector" Title="Caminho do Projeto de Startup (Startup Project)" IsFolderPicker="True"/>
-                                                </StackPanel>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="16"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <c:PathSelector x:Name="MigSqlServerTargetSelector"
+                                                                    Grid.Column="0"
+                                                                    Title="Projeto de Migrations (SQL Server) - arquivo .csproj"
+                                                                    IsFolderPicker="False"/>
+
+                                                    <c:PathSelector x:Name="MigSqliteTargetSelector"
+                                                                    Grid.Column="2"
+                                                                    Title="Projeto de Migrations (SQLite) - arquivo .csproj"
+                                                                    IsFolderPicker="False"/>
+                                                </Grid>
                                             </StackPanel>
 
                                             <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,0,0,16"/>
@@ -1027,19 +1080,68 @@
                                                     <TextBlock Text="Configuração do Contexto" Style="{DynamicResource DevToolsCardTitle}"/>
                                                 </StackPanel>
 
-                                                <StackPanel>
-                                                    <TextBlock Text="Nome Completo do DbContext (ex: MyApp.Data.AppDbContext)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                    <TextBox x:Name="MigContextInput" Style="{DynamicResource DevToolsTextInput}"/>
-                                                </StackPanel>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="16"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
 
-                                                <StackPanel Margin="0,20,0,0">
-                                                    <TextBlock Text="Argumentos Adicionais (dotnet ef ...)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                    <TextBox x:Name="MigArgsInput" Style="{DynamicResource DevToolsTextInput}"/>
-                                                </StackPanel>
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="Nome Completo do DbContext (ex: MyApp.Data.AppDbContext)"
+                                                                   Style="{DynamicResource DevToolsInputLabel}"
+                                                                   Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="MigContextInput" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="2">
+                                                        <TextBlock Text="Argumentos Adicionais (dotnet ef ...)"
+                                                                   Style="{DynamicResource DevToolsInputLabel}"
+                                                                   Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="MigArgsInput" Style="{DynamicResource DevToolsTextInput}"/>
+                                                        <TextBlock Text="Atalhos comuns (clique para adicionar):"
+                                                                   Style="{DynamicResource DevToolsInputLabel}"
+                                                                   Margin="0,10,0,6"/>
+                                                        <WrapPanel>
+                                                            <Button Content="--verbose"
+                                                                    Style="{DynamicResource DevToolsBrowseButton}"
+                                                                    MinWidth="0"
+                                                                    MinHeight="30"
+                                                                    Width="Auto"
+                                                                    Padding="8,4"
+                                                                    Margin="0,0,6,6"
+                                                                    Click="MigArgChip_Click"/>
+                                                            <Button Content="--no-build"
+                                                                    Style="{DynamicResource DevToolsBrowseButton}"
+                                                                    MinWidth="0"
+                                                                    MinHeight="30"
+                                                                    Width="Auto"
+                                                                    Padding="8,4"
+                                                                    Margin="0,0,6,6"
+                                                                    Click="MigArgChip_Click"/>
+                                                            <Button Content="--no-color"
+                                                                    Style="{DynamicResource DevToolsBrowseButton}"
+                                                                    MinWidth="0"
+                                                                    MinHeight="30"
+                                                                    Width="Auto"
+                                                                    Padding="8,4"
+                                                                    Margin="0,0,6,6"
+                                                                    Click="MigArgChip_Click"/>
+                                                            <Button Content="--prefix-output"
+                                                                    Style="{DynamicResource DevToolsBrowseButton}"
+                                                                    MinWidth="0"
+                                                                    MinHeight="30"
+                                                                    Width="Auto"
+                                                                    Padding="8,4"
+                                                                    Margin="0,0,6,6"
+                                                                    Click="MigArgChip_Click"/>
+                                                        </WrapPanel>
+                                                    </StackPanel>
+                                                </Grid>
                                             </StackPanel>
 
                                         </StackPanel>
-                                    </ScrollViewer>
+                                    </Grid>
 
                                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
                                         <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
