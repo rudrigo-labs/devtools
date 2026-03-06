@@ -17,6 +17,7 @@ public class NotesSettings
     public string StoragePath { get; set; } = NotesStorageDefaults.GetDefaultPath();
     public string DefaultFormat { get; set; } = ".txt"; // .txt ou .md
     public bool AutoCloudSync { get; set; } = false;
+    public string InitialListDisplay { get; set; } = "Auto"; // Auto | 8 | 15 | 20
 }
 
 public class GoogleDriveSettings

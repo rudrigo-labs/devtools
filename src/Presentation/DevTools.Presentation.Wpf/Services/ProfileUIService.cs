@@ -157,7 +157,7 @@ public class ProfileUIService
                 var connectionStack = new StackPanel();
                 connectionStack.Children.Add(CreateCardHeader("ServerNetwork", "Dados de Conexão (SSH)"));
                 connectionStack.Children.Add(CreateLabeledTextBox("Nome do Perfil", "ssh-profile-name", options));
-                connectionStack.Children.Add(CreateGridWithTwoLabeledTextBoxes("Host SSH (Servidor)", "ssh-host", options, "Porta", "ssh-port", options, new Thickness(0, 16, 0, 0)));
+                connectionStack.Children.Add(CreateSshConnectionGrid(options, new Thickness(0, 16, 0, 0)));
                 connectionStack.Children.Add(CreateLabeledTextBox("Usuário SSH", "ssh-user", options, new Thickness(0, 16, 0, 0)));
                 connectionStack.Children.Add(CreatePathSelector("Caminho da Chave Privada (.pem/.ppk)", "identity-file", options, false, new Thickness(0, 16, 0, 0)));
                 connectionCard.Child = connectionStack;
@@ -216,12 +216,11 @@ public class ProfileUIService
     {
         return new Border
         {
-            Padding = new Thickness(20),
+            Padding = new Thickness(0),
             Margin = new Thickness(0, 0, 0, 24),
-            Background = (System.Windows.Media.Brush)Application.Current.FindResource("DevToolsSurface"),
-            CornerRadius = new CornerRadius(8),
-            BorderBrush = (System.Windows.Media.Brush)Application.Current.FindResource("DevToolsBrushBorder"),
-            BorderThickness = new Thickness(1)
+            Background = System.Windows.Media.Brushes.Transparent,
+            CornerRadius = new CornerRadius(0),
+            BorderThickness = new Thickness(0)
         };
     }
 
@@ -358,6 +357,30 @@ public class ProfileUIService
         remotePort.Margin = new Thickness(5, 0, 0, 0);
         Grid.SetColumn(remotePort, 4);
         grid.Children.Add(remotePort);
+
+        return grid;
+    }
+
+    private Grid CreateSshConnectionGrid(Dictionary<string, string> options, Thickness? margin = null)
+    {
+        var grid = new Grid();
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(16) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+        var hostStack = CreateLabeledTextBox("Host SSH (Servidor)", "ssh-host", options);
+        Grid.SetColumn(hostStack, 0);
+        grid.Children.Add(hostStack);
+
+        var portStack = CreateLabeledTextBox("Porta", "ssh-port", options);
+        portStack.Width = 140;
+        Grid.SetColumn(portStack, 2);
+        grid.Children.Add(portStack);
+
+        if (margin.HasValue)
+        {
+            grid.Margin = margin.Value;
+        }
 
         return grid;
     }

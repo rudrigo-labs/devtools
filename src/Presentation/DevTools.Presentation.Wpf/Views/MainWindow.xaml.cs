@@ -22,6 +22,11 @@ namespace DevTools.Presentation.Wpf.Views;
 public partial class MainWindow : Window
 {
     private const string StorageBackendEnvVar = "DEVTOOLS_STORAGE_BACKEND";
+    private static readonly List<string> DefaultHarvestExcludeDirectories = new()
+    {
+        "bin", "obj", ".git", ".vs", "node_modules",
+        "dist", "build", ".idea", ".vscode", ".next", ".nuxt", ".turbo", "Snapshot"
+    };
 
     private readonly TrayService _trayService;
     private readonly JobManager _jobManager;
@@ -41,6 +46,8 @@ public partial class MainWindow : Window
     private OrganizerCategory? _selectedCategory;
     private string? _currentToolForProfiles;
     private ToolProfile? _selectedToolProfile;
+    private ToolProfile? _pendingNewToolProfile;
+    private OrganizerCategory? _pendingNewOrganizerCategory;
     private readonly ProfileUIService _profileUIService;
     private bool _isTestingGoogleDriveConnection;
     private bool _allowCloseForShutdown;
@@ -604,11 +611,29 @@ public partial class MainWindow : Window
         if (string.IsNullOrEmpty(_currentToolForProfiles)) return;
 
         var profiles = _profileUIService.LoadProfiles(_currentToolForProfiles);
+        _pendingNewToolProfile = null;
         ToolProfilesList.ItemsSource = null;
         ToolProfilesList.ItemsSource = profiles;
-        
+
+        if (profiles.Count == 0)
+        {
+            var newProfile = new ToolProfile
+            {
+                Name = GenerateNextProfileName(profiles)
+            };
+
+            profiles.Add(newProfile);
+            _pendingNewToolProfile = newProfile;
+            ToolProfilesList.ItemsSource = null;
+            ToolProfilesList.ItemsSource = profiles;
+            ToolProfilesList.SelectedItem = newProfile;
+            UpdateToolProfileActionButtonsState();
+            return;
+        }
+
         ToolProfileEditForm.Visibility = Visibility.Collapsed;
         ToolProfilesList.SelectedItem = null;
+        UpdateToolProfileActionButtonsState();
     }
 
     private void AddToolProfile_Click(object sender, RoutedEventArgs e)
@@ -617,15 +642,17 @@ public partial class MainWindow : Window
 
         var newProfile = new ToolProfile 
         { 
-            Name = "Novo Perfil " + (ToolProfilesList.Items.Count + 1)
+            Name = GenerateNextProfileName((ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>())
         };
         
         var list = (ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>();
         list.Add(newProfile);
+        _pendingNewToolProfile = newProfile;
         
         ToolProfilesList.ItemsSource = null;
         ToolProfilesList.ItemsSource = list;
         ToolProfilesList.SelectedItem = newProfile;
+        UpdateToolProfileActionButtonsState();
     }
 
     private void ToolProfile_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -644,6 +671,8 @@ public partial class MainWindow : Window
             _selectedToolProfile = null;
             ToolProfileEditForm.Visibility = Visibility.Collapsed;
         }
+
+        UpdateToolProfileActionButtonsState();
     }
 
     private void SaveToolProfile_Click(object sender, RoutedEventArgs e)
@@ -659,13 +688,24 @@ public partial class MainWindow : Window
         _selectedToolProfile.Name = ToolProfileNameInput.Text.Trim();
         _selectedToolProfile.IsDefault = ToolProfileIsDefaultCheck.IsChecked == true;
 
+        if (!_selectedToolProfile.IsDefault && !HasOtherDefaultProfile())
+        {
+            ShowRequiredFieldsWarning("Para salvar, marque 'Usar como perfil padrão'. Deve existir pelo menos um perfil padrão.");
+            return;
+        }
+
         // Coletar valores dos campos dinamicos recursivamente
         CollectProfileOptions(ToolProfileFieldsContainer, _selectedToolProfile.Options);
 
         _profileUIService.SaveProfile(_currentToolForProfiles, _selectedToolProfile);
+        if (ReferenceEquals(_selectedToolProfile, _pendingNewToolProfile))
+        {
+            _pendingNewToolProfile = null;
+        }
         ToolProfilesList.Items.Refresh();
         UiMessageService.ShowInfo("Perfil salvo com sucesso!", "Sucesso");
         ShowMainStatusInfo("Perfil salvo com sucesso.");
+        UpdateToolProfileActionButtonsState();
     }
 
     private void CollectProfileOptions(DependencyObject container, Dictionary<string, string> options)
@@ -696,9 +736,15 @@ public partial class MainWindow : Window
 
         if (UiMessageService.Confirm($"Excluir perfil '{_selectedToolProfile.Name}'?", "Confirmar"))
         {
+            if (ReferenceEquals(_selectedToolProfile, _pendingNewToolProfile))
+            {
+                _pendingNewToolProfile = null;
+            }
             _profileUIService.DeleteProfile(_currentToolForProfiles, _selectedToolProfile.Name);
             LoadToolProfiles();
         }
+
+        UpdateToolProfileActionButtonsState();
     }
 
 
@@ -716,6 +762,11 @@ public partial class MainWindow : Window
     {
         _currentHarvestConfig = _configService.GetSection<HarvestConfig>("Harvest");
         _currentHarvestConfig.Normalize();
+
+        if (_currentHarvestConfig.Rules.ExcludeDirectories.Count == 0)
+        {
+            _currentHarvestConfig.Rules.ExcludeDirectories = new List<string>(DefaultHarvestExcludeDirectories);
+        }
 
         // Rules
         HarvestExtensions.Text = string.Join(", ", _currentHarvestConfig.Rules.Extensions);
@@ -865,20 +916,24 @@ public partial class MainWindow : Window
     {
         _currentOrganizerConfig = _configService.GetSection<OrganizerConfig>("Organizer");
         if (_currentOrganizerConfig.Categories == null) _currentOrganizerConfig.Categories = new();
+        _pendingNewOrganizerCategory = null;
         
         OrganizerCategoriesList.ItemsSource = null;
         OrganizerCategoriesList.ItemsSource = _currentOrganizerConfig.Categories;
         OrganizerCategoriesList.SelectedItem = null;
         OrganizerEditForm.Visibility = Visibility.Collapsed;
+        UpdateOrganizerActionButtonsState();
     }
 
     private void AddOrganizerCategory_Click(object sender, RoutedEventArgs e)
     {
-        var newCat = new OrganizerCategory("Nova Categoria", "NovaPasta", Array.Empty<string>());
+        var newCat = new OrganizerCategory(GenerateNextCategoryName(_currentOrganizerConfig.Categories), "NovaPasta", Array.Empty<string>());
         _currentOrganizerConfig.Categories.Add(newCat);
+        _pendingNewOrganizerCategory = newCat;
         OrganizerCategoriesList.ItemsSource = null;
         OrganizerCategoriesList.ItemsSource = _currentOrganizerConfig.Categories;
         OrganizerCategoriesList.SelectedItem = newCat;
+        UpdateOrganizerActionButtonsState();
     }
 
     private void OrganizerCategory_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -896,6 +951,8 @@ public partial class MainWindow : Window
             _selectedCategory = null;
             OrganizerEditForm.Visibility = Visibility.Collapsed;
         }
+
+        UpdateOrganizerActionButtonsState();
     }
 
     private void SaveOrganizerCategory_Click(object sender, RoutedEventArgs e)
@@ -931,11 +988,16 @@ public partial class MainWindow : Window
         _selectedCategory.Name = OrgCatName.Text;
         _selectedCategory.Folder = OrgCatFolder.Text;
         _selectedCategory.Keywords = keywords;
+        if (ReferenceEquals(_selectedCategory, _pendingNewOrganizerCategory))
+        {
+            _pendingNewOrganizerCategory = null;
+        }
 
         _configService.SaveSection("Organizer", _currentOrganizerConfig);
         OrganizerCategoriesList.Items.Refresh();
         UiMessageService.ShowInfo("Categoria salva!", "Sucesso");
         ShowMainStatusInfo("Categoria salva com sucesso.");
+        UpdateOrganizerActionButtonsState();
     }
 
     private void DeleteOrganizerCategory_Click(object sender, RoutedEventArgs e)
@@ -944,10 +1006,118 @@ public partial class MainWindow : Window
         
         if (UiMessageService.Confirm($"Excluir categoria '{_selectedCategory.Name}'?", "Confirmar"))
         {
+            if (ReferenceEquals(_selectedCategory, _pendingNewOrganizerCategory))
+            {
+                _pendingNewOrganizerCategory = null;
+            }
             _currentOrganizerConfig.Categories.Remove(_selectedCategory);
             _configService.SaveSection("Organizer", _currentOrganizerConfig);
             LoadOrganizerConfig();
         }
+
+        UpdateOrganizerActionButtonsState();
+    }
+
+    private void UpdateToolProfileActionButtonsState()
+    {
+        var hasSelection = _selectedToolProfile != null && ToolProfileEditForm.Visibility == Visibility.Visible;
+        var isEditingPendingNew = hasSelection && ReferenceEquals(_selectedToolProfile, _pendingNewToolProfile);
+
+        if (DeleteToolProfileButton != null)
+        {
+            DeleteToolProfileButton.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        if (SaveToolProfileButton != null)
+        {
+            SaveToolProfileButton.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        if (AddToolProfileButton != null)
+        {
+            AddToolProfileButton.IsEnabled = !isEditingPendingNew;
+        }
+    }
+
+    private void UpdateOrganizerActionButtonsState()
+    {
+        var hasSelection = _selectedCategory != null && OrganizerEditForm.Visibility == Visibility.Visible;
+        var isEditingPendingNew = hasSelection && ReferenceEquals(_selectedCategory, _pendingNewOrganizerCategory);
+
+        if (DeleteOrganizerCategoryButton != null)
+        {
+            DeleteOrganizerCategoryButton.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        if (SaveOrganizerCategoryButton != null)
+        {
+            SaveOrganizerCategoryButton.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        if (OrganizerAddCategoryButton != null)
+        {
+            OrganizerAddCategoryButton.IsEnabled = !isEditingPendingNew;
+        }
+    }
+
+    private bool HasOtherDefaultProfile()
+    {
+        var list = (ToolProfilesList.ItemsSource as List<ToolProfile>) ?? new List<ToolProfile>();
+        return list.Any(p => !ReferenceEquals(p, _selectedToolProfile) && p.IsDefault);
+    }
+
+    private static string GenerateNextProfileName(IReadOnlyCollection<ToolProfile> profiles)
+    {
+        var maxNumber = 0;
+
+        foreach (var profile in profiles)
+        {
+            if (profile?.Name is null)
+            {
+                continue;
+            }
+
+            var trimmed = profile.Name.Trim();
+            if (!trimmed.StartsWith("Perfil", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var suffix = trimmed.Substring("Perfil".Length).Trim();
+            if (int.TryParse(suffix, out var number) && number > maxNumber)
+            {
+                maxNumber = number;
+            }
+        }
+
+        return $"Perfil{maxNumber + 1}";
+    }
+
+    private static string GenerateNextCategoryName(IReadOnlyCollection<OrganizerCategory> categories)
+    {
+        var maxNumber = 0;
+
+        foreach (var category in categories)
+        {
+            if (string.IsNullOrWhiteSpace(category?.Name))
+            {
+                continue;
+            }
+
+            var trimmed = category.Name.Trim();
+            if (!trimmed.StartsWith("Categoria", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var suffix = trimmed.Substring("Categoria".Length).Trim();
+            if (int.TryParse(suffix, out var number) && number > maxNumber)
+            {
+                maxNumber = number;
+            }
+        }
+
+        return $"Categoria{maxNumber + 1}";
     }
 
 
@@ -1055,6 +1225,7 @@ public partial class MainWindow : Window
 
         // Local Storage
         _currentNotesSettings.StoragePath = ResolveNotesStoragePath(_currentNotesSettings.StoragePath);
+        _currentNotesSettings.InitialListDisplay = NormalizeNotesInitialListDisplay(_currentNotesSettings.InitialListDisplay);
         NotesStoragePathSelector.SelectedPath = _currentNotesSettings.StoragePath;
         NotesAutoCloudSyncCheck.IsChecked = _currentNotesSettings.AutoCloudSync;
         
@@ -1073,8 +1244,43 @@ public partial class MainWindow : Window
             NotesFormatCombo.SelectedIndex = 0;
         }
 
+        foreach (ComboBoxItem item in NotesInitialListDisplayCombo.Items)
+        {
+            if (item.Content?.ToString() == _currentNotesSettings.InitialListDisplay)
+            {
+                NotesInitialListDisplayCombo.SelectedItem = item;
+                break;
+            }
+        }
+
+        if (NotesInitialListDisplayCombo.SelectedItem == null && NotesInitialListDisplayCombo.Items.Count > 0)
+        {
+            NotesInitialListDisplayCombo.SelectedIndex = 0;
+        }
+
         // Google Drive
-        GDriveEnabledCheck.IsChecked = _currentGoogleDriveSettings.IsEnabled;
+        var hasAnyGoogleDriveValue =
+            !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ClientId)
+            || !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ClientSecret)
+            || !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ProjectId)
+            || !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.FolderName)
+            || _currentGoogleDriveSettings.IsEnabled;
+
+        var hasRequiredGoogleDriveCredentials =
+            !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ClientId)
+            && !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ClientSecret)
+            && !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.ProjectId)
+            && !string.IsNullOrWhiteSpace(_currentGoogleDriveSettings.FolderName);
+
+        if (_currentGoogleDriveSettings.IsEnabled && !hasRequiredGoogleDriveCredentials)
+        {
+            // Protege primeira abertura/estado incompleto para nao aparecer marcado por engano.
+            _currentGoogleDriveSettings.IsEnabled = false;
+        }
+
+        GDriveEnabledCheck.IsChecked = hasAnyGoogleDriveValue
+            ? _currentGoogleDriveSettings.IsEnabled
+            : false;
         GDriveClientId.Text = _currentGoogleDriveSettings.ClientId;
         GDriveClientSecret.Text = _currentGoogleDriveSettings.ClientSecret;
         GDriveProjectId.Text = _currentGoogleDriveSettings.ProjectId;
@@ -1093,12 +1299,15 @@ public partial class MainWindow : Window
             NotesStoragePathSelector.SelectedPath = _currentNotesSettings.StoragePath;
             _currentNotesSettings.AutoCloudSync = NotesAutoCloudSyncCheck.IsChecked == true;
             _currentNotesSettings.DefaultFormat = (NotesFormatCombo.SelectedItem as ComboBoxItem)?.Content.ToString() ?? ".txt";
+            _currentNotesSettings.InitialListDisplay = NormalizeNotesInitialListDisplay((NotesInitialListDisplayCombo.SelectedItem as ComboBoxItem)?.Content?.ToString());
 
             var missingFields = new List<string>();
             if (string.IsNullOrWhiteSpace(_currentNotesSettings.StoragePath))
                 missingFields.Add("Pasta de Armazenamento");
             if (NotesFormatCombo.SelectedItem == null)
                 missingFields.Add("Formato Padrao");
+            if (NotesInitialListDisplayCombo.SelectedItem == null)
+                missingFields.Add("Exibicao Inicial da Lista");
 
             if (!TryBuildRequiredFieldsMessage(missingFields, out var notesRequiredMessage))
             {
@@ -1221,6 +1430,17 @@ public partial class MainWindow : Window
         var fullPath = System.IO.Path.GetFullPath(resolved);
         System.IO.Directory.CreateDirectory(fullPath);
         return fullPath;
+    }
+
+    private static string NormalizeNotesInitialListDisplay(string? value)
+    {
+        return value switch
+        {
+            "8" => "8",
+            "15" => "15",
+            "20" => "20",
+            _ => "Auto"
+        };
     }
 
     private GoogleDriveSettings ReadGoogleDriveSettingsFromUi()

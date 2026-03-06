@@ -258,6 +258,15 @@
         <Setter Property="Background" Value="{DynamicResource ErrorBrush}"/>
         <Setter Property="Foreground" Value="White"/>
     </Style>
+    <Style x:Key="DevToolsSuccessButton" TargetType="Button" BasedOn="{StaticResource DevToolsPrimaryButton}">
+        <Setter Property="Background" Value="{DynamicResource DevToolsStatusOk}"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style x:Key="DevToolsBrowseButton" TargetType="Button" BasedOn="{StaticResource DevToolsSecondaryButton}">
+        <Setter Property="Background" Value="{DynamicResource ControlHighlightBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource DevToolsBrushBorder}"/>
+        <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
+    </Style>
     <Style x:Key="DevToolsCardButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>

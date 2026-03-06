@@ -7,7 +7,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="DevTools Hub" Height="900" Width="1440" MinHeight="760" MinWidth="1180"
-        Icon="/Assets/application.ico"
+        Icon="pack://application:,,,/DevTools.Presentation.Wpf;component/Assets/application.ico"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowState="Normal">
 
@@ -163,9 +163,9 @@
                         </StackPanel>
 
                         <Button Content="Ferramentas" Style="{DynamicResource SidebarButtonStyle}" Tag="Tools" Click="NavButton_Click" Margin="0,0,0,5"/>
-                        <Button Content="Execuções (Jobs)" Style="{DynamicResource SidebarButtonStyle}" Tag="Jobs" Click="NavButton_Click" Margin="0,0,0,5"/>
-                        <Button Content="Configurações" Style="{DynamicResource SidebarButtonStyle}" Tag="Settings" Click="NavButton_Click" Margin="0,0,0,20"/>
-                        <Button Content="Sobre" Style="{DynamicResource SidebarButtonStyle}" Click="OpenAbout_Click" Margin="0,0,0,20"/>
+                        <Button Content="Configurações" Style="{DynamicResource SidebarButtonStyle}" Tag="Settings" Click="NavButton_Click" Margin="0,0,0,5"/>
+                        <Button Content="Central de Execuções" Style="{DynamicResource SidebarButtonStyle}" Tag="Jobs" Click="NavButton_Click" Margin="0,0,0,5"/>
+                        <Button Content="Sobre" Style="{DynamicResource SidebarButtonStyle}" Click="OpenAbout_Click" Margin="0,0,0,5"/>
 
                         <Button Content="Encerrar"
                             Style="{DynamicResource SidebarButtonStyle}"
@@ -521,6 +521,7 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
@@ -530,53 +531,52 @@
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
-                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                                <StackPanel>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                        <materialDesign:PackIcon Kind="Database" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Backend de Configurações" Style="{DynamicResource DevToolsCardTitle}"/>
-                                                    </StackPanel>
-
-                                                    <TextBlock Text="Selecione onde as configurações e perfis serão persistidos."
-                                                               Foreground="{DynamicResource DevToolsTextSecondary}"
-                                                               Margin="0,0,0,12"
-                                                               TextWrapping="Wrap"/>
-
-                                                    <StackPanel Width="360">
-                                                        <TextBlock Text="Modo de Armazenamento" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                        <ComboBox x:Name="StorageBackendCombo"
-                                                                  Style="{DynamicResource DevToolsSelectInput}"
-                                                                  SelectionChanged="StorageBackendCombo_SelectionChanged">
-                                                            <ComboBoxItem Tag="json" Content="Arquivo JSON (appsettings.json)"/>
-                                                            <ComboBoxItem Tag="sqlite" Content="Banco SQLite (devtools.db)"/>
-                                                        </ComboBox>
-                                                    </StackPanel>
-
-                                                    <TextBlock x:Name="StorageBackendHintText"
-                                                               Margin="0,12,0,0"
-                                                               Foreground="{DynamicResource DevToolsTextSecondary}"
-                                                               TextWrapping="Wrap"/>
+                                            <StackPanel Margin="0,0,0,16">
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                                    <materialDesign:PackIcon Kind="Database" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                    <TextBlock Text="Backend de Configurações" Style="{DynamicResource DevToolsCardTitle}"/>
                                                 </StackPanel>
-                                            </materialDesign:Card>
 
-                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                                <StackPanel>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                                        <materialDesign:PackIcon Kind="InformationOutline" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Observação" Style="{DynamicResource DevToolsCardTitle}"/>
-                                                    </StackPanel>
-                                                    <TextBlock Text="A troca de backend exige reiniciar o DevTools para ser aplicada."
-                                                               Foreground="{DynamicResource DevToolsTextSecondary}"
-                                                               TextWrapping="Wrap"/>
+                                                <TextBlock Text="Selecione onde as configurações e perfis serão persistidos."
+                                                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                                                           Margin="0,0,0,12"
+                                                           TextWrapping="Wrap"/>
+
+                                                <StackPanel Width="360">
+                                                    <TextBlock Text="Modo de Armazenamento" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                    <ComboBox x:Name="StorageBackendCombo"
+                                                              Style="{DynamicResource DevToolsSelectInput}"
+                                                              SelectionChanged="StorageBackendCombo_SelectionChanged">
+                                                        <ComboBoxItem Tag="json" Content="Arquivo JSON (appsettings.json)"/>
+                                                        <ComboBoxItem Tag="sqlite" Content="Banco SQLite (devtools.db)"/>
+                                                    </ComboBox>
                                                 </StackPanel>
-                                            </materialDesign:Card>
 
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
-                                                <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
-                                                <Button Content="Salvar" Click="SaveStorageSettings_Click" Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
+                                                <TextBlock x:Name="StorageBackendHintText"
+                                                           Margin="0,12,0,0"
+                                                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                                                           TextWrapping="Wrap"/>
                                             </StackPanel>
+
+                                            <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,0,0,16"/>
+
+                                            <StackPanel Margin="0,0,0,8">
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                                    <materialDesign:PackIcon Kind="InformationOutline" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                    <TextBlock Text="Observação" Style="{DynamicResource DevToolsCardTitle}"/>
+                                                </StackPanel>
+                                                <TextBlock Text="A troca de backend exige reiniciar o DevTools para ser aplicada."
+                                                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                                                           TextWrapping="Wrap"/>
+                                            </StackPanel>
+
                                         </StackPanel>
                                     </ScrollViewer>
+
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button Content="Salvar" Click="SaveStorageSettings_Click" Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
+                                    </StackPanel>
                                 </Grid>
 
                                 <!-- Painel: Gestão de Perfis de Ferramenta -->
@@ -584,6 +584,7 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
                                     <!-- Header com Voltar -->
@@ -602,8 +603,6 @@
                                         <!-- Lista de Perfis -->
                                         <Border BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="0" Padding="0,0,10,0">
                                             <DockPanel>
-                                                <Button DockPanel.Dock="Bottom" Content="+ Novo Perfil" Style="{DynamicResource DevToolsSecondaryButton}" 
-                                                    Margin="0,10,0,0" Click="AddToolProfile_Click"/>
                                                 <ListBox x:Name="ToolProfilesList"
                                                      Style="{DynamicResource SettingsListBoxStyle}"
                                                      ItemContainerStyle="{DynamicResource SettingsListBoxItemStyle}"
@@ -630,39 +629,43 @@
                                         <ScrollViewer Grid.Column="1" Margin="20,0,0,0" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
                                             <StackPanel x:Name="ToolProfileEditForm" Visibility="Collapsed">
                                                 
-                                                <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                                    <StackPanel>
-                                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                            <materialDesign:PackIcon Kind="Settings" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                            <TextBlock Text="Configurações do Perfil" Style="{DynamicResource DevToolsCardTitle}"/>
-                                                        </StackPanel>
-
-                                                        <StackPanel>
-                                                            <TextBlock Text="Nome do Perfil" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="ToolProfileNameInput" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
-
-                                                        <!-- Container para campos específicos injetados -->
-                                                        <StackPanel x:Name="ToolProfileFieldsContainer" Margin="0,20,0,0"/>
-
-                                                        <CheckBox x:Name="ToolProfileIsDefaultCheck" 
-                                                              Content="Usar como perfil padrão" 
-                                                              Margin="0,24,0,0"
-                                                              Style="{DynamicResource DevToolsCheckBox}"/>
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                                        <materialDesign:PackIcon Kind="Settings" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                        <TextBlock Text="Configurações do Perfil" Style="{DynamicResource DevToolsCardTitle}"/>
                                                     </StackPanel>
-                                                </materialDesign:Card>
 
-                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
-                                                    <Button Content="Remover" Click="DeleteToolProfile_Click" 
-                                                            Style="{DynamicResource DevToolsDangerButton}" Width="120" Margin="0,0,10,0"/>
-                                                    <Button Content="Cancelar" Click="BackToSettingsList_Click" 
-                                                            Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
-                                                    <Button Content="Salvar" Click="SaveToolProfile_Click" 
-                                                            Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
+                                                    <StackPanel>
+                                                        <TextBlock Text="Nome do Perfil" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="ToolProfileNameInput" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
+
+                                                    <!-- Container para campos específicos injetados -->
+                                                    <StackPanel x:Name="ToolProfileFieldsContainer" Margin="0,20,0,0"/>
+
+                                                    <CheckBox x:Name="ToolProfileIsDefaultCheck" 
+                                                          Content="Usar como perfil padrão" 
+                                                          Margin="0,24,0,0"
+                                                          Style="{DynamicResource DevToolsCheckBox}"/>
                                                 </StackPanel>
+
                                             </StackPanel>
                                         </ScrollViewer>
                                     </Grid>
+
+                                    <StackPanel Grid.Row="2"
+                                                Orientation="Horizontal"
+                                                HorizontalAlignment="Right"
+                                                Margin="0,10,0,8">
+                                        <Button x:Name="AddToolProfileButton" Content="Novo" Click="AddToolProfile_Click" 
+                                                Style="{DynamicResource DevToolsSuccessButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button x:Name="DeleteToolProfileButton" Content="Remover" Click="DeleteToolProfile_Click" 
+                                                Style="{DynamicResource DevToolsDangerButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" 
+                                                Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button x:Name="SaveToolProfileButton" Content="Salvar" Click="SaveToolProfile_Click" 
+                                                Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
+                                    </StackPanel>
                                 </Grid>
 
 
@@ -672,6 +675,7 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
@@ -681,102 +685,110 @@
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
-                                            
                                             <!-- Grupo: Armazenamento Local -->
-                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                                <StackPanel>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                                                        <materialDesign:PackIcon Kind="Folder" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                        <TextBlock Text="Armazenamento Local" Style="{DynamicResource DevToolsCardTitle}"/>
+                                            <StackPanel Margin="0,0,0,16">
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                                    <materialDesign:PackIcon Kind="Folder" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                    <TextBlock Text="Armazenamento Local" Style="{DynamicResource DevToolsCardTitle}"/>
+                                                </StackPanel>
+
+                                                <c:PathSelector x:Name="NotesStoragePathSelector" Title="Pasta de Armazenamento" IsFolderPicker="True" Margin="0,0,0,20"/>
+
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="20"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel>
+                                                        <TextBlock Text="Formato Padrão" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <ComboBox x:Name="NotesFormatCombo" Style="{DynamicResource DevToolsSelectInput}">
+                                                            <ComboBoxItem Content=".txt"/>
+                                                            <ComboBoxItem Content=".md"/>
+                                                        </ComboBox>
                                                     </StackPanel>
 
-                                                    <c:PathSelector x:Name="NotesStoragePathSelector" Title="Pasta de Armazenamento" IsFolderPicker="True" Margin="0,0,0,20"/>
+                                                    <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                                                        <CheckBox x:Name="NotesAutoCloudSyncCheck" Content="Backup Automático na Nuvem ao Salvar" Style="{DynamicResource DevToolsCheckBox}"/>
+                                                    </StackPanel>
+                                                </Grid>
 
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="20"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-
-                                                        <StackPanel>
-                                                            <TextBlock Text="Formato Padrão" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <ComboBox x:Name="NotesFormatCombo" Style="{DynamicResource DevToolsSelectInput}">
-                                                                <ComboBoxItem Content=".txt"/>
-                                                                <ComboBoxItem Content=".md"/>
-                                                            </ComboBox>
-                                                        </StackPanel>
-
-                                                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
-                                                            <CheckBox x:Name="NotesAutoCloudSyncCheck" Content="Backup Automático na Nuvem ao Salvar" Style="{DynamicResource DevToolsCheckBox}"/>
-                                                        </StackPanel>
-                                                    </Grid>
+                                                <StackPanel Margin="0,20,0,0" Width="320">
+                                                    <TextBlock Text="Exibição Inicial da Lista" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                    <ComboBox x:Name="NotesInitialListDisplayCombo" Style="{DynamicResource DevToolsSelectInput}">
+                                                        <ComboBoxItem Content="Auto"/>
+                                                        <ComboBoxItem Content="8"/>
+                                                        <ComboBoxItem Content="15"/>
+                                                        <ComboBoxItem Content="20"/>
+                                                    </ComboBox>
                                                 </StackPanel>
-                                            </materialDesign:Card>
+                                            </StackPanel>
+
+                                            <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,0,0,16"/>
 
                                             <!-- Grupo: Google Drive (Backup) -->
-                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                                <StackPanel>
-                                                    <DockPanel LastChildFill="False" Margin="0,0,0,20">
-                                                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                                                            <materialDesign:PackIcon Kind="GoogleDrive" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
-                                                            <TextBlock Text="Backup Google Drive" Style="{DynamicResource DevToolsCardTitle}"/>
-                                                        </StackPanel>
-                                                        <Button DockPanel.Dock="Right" Content="Como configurar?" Style="{DynamicResource DevToolsSecondaryButton}" 
-                                                            Padding="12,8" MinWidth="140" Click="OpenHelp_Click"/>
-                                                    </DockPanel>
+                                            <StackPanel Margin="0,0,0,8">
+                                                <DockPanel LastChildFill="False" Margin="0,0,0,20">
+                                                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                                                        <materialDesign:PackIcon Kind="GoogleDrive" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
+                                                        <TextBlock Text="Backup Google Drive" Style="{DynamicResource DevToolsCardTitle}"/>
+                                                    </StackPanel>
+                                                    <Button DockPanel.Dock="Right" Content="Como configurar?" Style="{DynamicResource DevToolsSecondaryButton}" 
+                                                        Padding="12,8" MinWidth="140" Click="OpenHelp_Click"/>
+                                                </DockPanel>
 
-                                                    <CheckBox x:Name="GDriveEnabledCheck" Content="Habilitar Backup no Google Drive" 
-                                                              Margin="0,0,0,20" Style="{DynamicResource DevToolsCheckBox}"
-                                                              Checked="GDriveEnabledCheck_Changed" Unchecked="GDriveEnabledCheck_Changed"/>
+                                                <CheckBox x:Name="GDriveEnabledCheck" Content="Habilitar Backup no Google Drive" 
+                                                          Margin="0,0,0,20" Style="{DynamicResource DevToolsCheckBox}"
+                                                          Checked="GDriveEnabledCheck_Changed" Unchecked="GDriveEnabledCheck_Changed"/>
 
-                                                    <Grid x:Name="GDriveConfigGrid" IsEnabled="{Binding IsChecked, ElementName=GDriveEnabledCheck}">
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                        </Grid.RowDefinitions>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="20"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
+                                                <Grid x:Name="GDriveConfigGrid" IsEnabled="{Binding IsChecked, ElementName=GDriveEnabledCheck}">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="20"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
 
-                                                        <StackPanel Grid.Row="0" Grid.Column="0">
-                                                            <TextBlock Text="Client ID" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="GDriveClientId" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
+                                                    <StackPanel Grid.Row="0" Grid.Column="0">
+                                                        <TextBlock Text="Client ID" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="GDriveClientId" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
 
-                                                        <StackPanel Grid.Row="0" Grid.Column="2">
-                                                            <TextBlock Text="Client Secret" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="GDriveClientSecret" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
+                                                    <StackPanel Grid.Row="0" Grid.Column="2">
+                                                        <TextBlock Text="Client Secret" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="GDriveClientSecret" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
 
-                                                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,20,0,0">
-                                                            <TextBlock Text="Project ID" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="GDriveProjectId" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
+                                                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,20,0,0">
+                                                        <TextBlock Text="Project ID" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="GDriveProjectId" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
 
-                                                        <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,20,0,0">
-                                                            <TextBlock Text="Nome da Pasta no Drive" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
-                                                            <TextBox x:Name="GDriveFolderName" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
+                                                    <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,20,0,0">
+                                                        <TextBlock Text="Nome da Pasta no Drive" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,6"/>
+                                                        <TextBox x:Name="GDriveFolderName" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
 
-                                                        <Button x:Name="GDriveTestConnectionButton" Grid.Row="2" Grid.Column="0" Content="Testar Conexão" Click="TestConnection_Click" 
-                                                            Style="{DynamicResource DevToolsSecondaryButton}" Width="150" HorizontalAlignment="Left" Margin="0,20,0,0"/>
-                                                        <TextBlock x:Name="GDriveTestConnectionStatus" Grid.Row="2" Grid.Column="2" Margin="0,24,0,0"
-                                                                   Foreground="{DynamicResource DevToolsTextSecondary}" FontSize="13"
-                                                                   TextWrapping="Wrap" VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </StackPanel>
-                                            </materialDesign:Card>
-
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
-                                                <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
-                                                <Button Content="Salvar" Click="SaveNotesCloudSettings_Click" Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
+                                                    <Button x:Name="GDriveTestConnectionButton" Grid.Row="2" Grid.Column="0" Content="Testar Conexão" Click="TestConnection_Click" 
+                                                        Style="{DynamicResource DevToolsSecondaryButton}" Width="150" HorizontalAlignment="Left" Margin="0,20,0,0"/>
+                                                    <TextBlock x:Name="GDriveTestConnectionStatus" Grid.Row="2" Grid.Column="2" Margin="0,24,0,0"
+                                                               Foreground="{DynamicResource DevToolsTextSecondary}" FontSize="13"
+                                                               TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                </Grid>
                                             </StackPanel>
+
                                         </StackPanel>
                                     </ScrollViewer>
+
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button Content="Salvar" Click="SaveNotesCloudSettings_Click" Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
+                                    </StackPanel>
                                 </Grid>
 
                                 <!-- Painel: Configuração Harvest -->
@@ -784,6 +796,7 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
@@ -886,14 +899,15 @@
                                                 </Grid>
                                             </StackPanel>
 
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
-                                                <Button Content="Cancelar" Click="BackToSettingsList_Click" 
-                                                        Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
-                                                <Button Content="Salvar" Click="SaveHarvestSettings_Click" 
-                                                        Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
-                                            </StackPanel>
                                         </StackPanel>
                                     </ScrollViewer>
+
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" 
+                                                Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button Content="Salvar" Click="SaveHarvestSettings_Click" 
+                                                Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
+                                    </StackPanel>
                                 </Grid>
 
                                 <!-- Painel: Configuração Organizer -->
@@ -901,6 +915,7 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
@@ -917,8 +932,6 @@
                                         <!-- Lista de Categorias -->
                                         <Border BorderBrush="{DynamicResource DevToolsBrushBorder}" BorderThickness="0" Padding="0,0,10,0">
                                             <DockPanel>
-                                                <Button DockPanel.Dock="Bottom" Content="+ Nova Categoria" Style="{DynamicResource DevToolsSecondaryButton}" 
-                                                    Margin="0,10,0,0" Click="AddOrganizerCategory_Click"/>
                                                 <ListBox x:Name="OrganizerCategoriesList"
                                                      Style="{DynamicResource SettingsListBoxStyle}"
                                                      ItemContainerStyle="{DynamicResource SettingsListBoxItemStyle}"
@@ -932,41 +945,45 @@
                                             <StackPanel x:Name="OrganizerEditForm" Visibility="Collapsed">
                                                 
                                                 <!-- Grupo: Detalhes da Categoria -->
-                                                <materialDesign:Card Style="{DynamicResource SettingsCardStyle}" Margin="0,0,0,16">
-                                                    <StackPanel>
-                                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                                            <materialDesign:PackIcon Kind="Category" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                                            <TextBlock Text="Detalhes da Categoria" Style="{DynamicResource DevToolsCardTitle}"/>
-                                                        </StackPanel>
-
-                                                        <StackPanel>
-                                                            <TextBlock Text="Nome da Categoria" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,2"/>
-                                                            <TextBox x:Name="OrgCatName" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
-
-                                                        <StackPanel Margin="0,16,0,0">
-                                                            <TextBlock Text="Nome da Pasta Destino" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,2"/>
-                                                            <TextBox x:Name="OrgCatFolder" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
-
-                                                        <StackPanel Margin="0,16,0,0">
-                                                            <TextBlock Text="Palavras-Chave (separadas por vírgula)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,2"/>
-                                                            <TextBox x:Name="OrgCatKeywords" Style="{DynamicResource DevToolsTextInput}"/>
-                                                        </StackPanel>
+                                                <StackPanel Margin="0,0,0,16">
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                                        <materialDesign:PackIcon Kind="Category" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="Detalhes da Categoria" Style="{DynamicResource DevToolsCardTitle}"/>
                                                     </StackPanel>
-                                                </materialDesign:Card>
 
-                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
-                                                    <Button Content="Remover" Click="DeleteOrganizerCategory_Click" 
-                                                            Style="{DynamicResource DevToolsDangerButton}" Width="120" Margin="0,0,10,0"/>
-                                                    <Button Content="Cancelar" Click="BackToSettingsList_Click" 
-                                                            Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
-                                                    <Button Content="Salvar" Click="SaveOrganizerCategory_Click" 
-                                                            Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
+                                                    <StackPanel>
+                                                        <TextBlock Text="Nome da Categoria" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,2"/>
+                                                        <TextBox x:Name="OrgCatName" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
+
+                                                    <StackPanel Margin="0,16,0,0">
+                                                        <TextBlock Text="Nome da Pasta Destino" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,2"/>
+                                                        <TextBox x:Name="OrgCatFolder" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
+
+                                                    <StackPanel Margin="0,16,0,0">
+                                                        <TextBlock Text="Palavras-Chave (separadas por vírgula)" Style="{DynamicResource DevToolsInputLabel}" Margin="0,0,0,2"/>
+                                                        <TextBox x:Name="OrgCatKeywords" Style="{DynamicResource DevToolsTextInput}"/>
+                                                    </StackPanel>
                                                 </StackPanel>
+
                                             </StackPanel>
                                         </ScrollViewer>
                                     </Grid>
+
+                                    <StackPanel Grid.Row="2"
+                                                Orientation="Horizontal"
+                                                HorizontalAlignment="Right"
+                                                Margin="0,10,0,8">
+                                        <Button x:Name="OrganizerAddCategoryButton" Content="Novo" Click="AddOrganizerCategory_Click" 
+                                                Style="{DynamicResource DevToolsSuccessButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button x:Name="DeleteOrganizerCategoryButton" Content="Remover" Click="DeleteOrganizerCategory_Click" 
+                                                Style="{DynamicResource DevToolsDangerButton}" Width="120" Margin="0,0,10,0" Visibility="Collapsed"/>
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" 
+                                                Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button x:Name="SaveOrganizerCategoryButton" Content="Salvar" Click="SaveOrganizerCategory_Click" 
+                                                Style="{DynamicResource DevToolsPrimaryButton}" Width="120" Visibility="Collapsed"/>
+                                    </StackPanel>
                                 </Grid>
 
                                 <!-- Painel: Configuração Migrations -->
@@ -974,6 +991,7 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
@@ -985,9 +1003,8 @@
                                         <StackPanel Margin="0,0,20,0">
                                             
                                             <!-- Grupo: Caminhos do Projeto -->
-                                            <materialDesign:Card Style="{DynamicResource SettingsCardStyle}" Margin="0,0,0,16">
-                                                <StackPanel>
-                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                            <StackPanel Margin="0,0,0,16">
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                     <materialDesign:PackIcon Kind="Folder" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
                                                     <TextBlock Text="Caminhos do Projeto" Style="{DynamicResource DevToolsCardTitle}"/>
                                                 </StackPanel>
@@ -1000,11 +1017,11 @@
                                                     <c:PathSelector x:Name="MigStartupPathSelector" Title="Caminho do Projeto de Startup (Startup Project)" IsFolderPicker="True"/>
                                                 </StackPanel>
                                             </StackPanel>
-                                        </materialDesign:Card>
 
-                                        <!-- Grupo: Configuração do Contexto -->
-                                        <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                            <StackPanel>
+                                            <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,0,0,16"/>
+
+                                            <!-- Grupo: Configuração do Contexto -->
+                                            <StackPanel Margin="0,0,0,8">
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                     <materialDesign:PackIcon Kind="DatabaseSettings" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
                                                     <TextBlock Text="Configuração do Contexto" Style="{DynamicResource DevToolsCardTitle}"/>
@@ -1020,15 +1037,15 @@
                                                     <TextBox x:Name="MigArgsInput" Style="{DynamicResource DevToolsTextInput}"/>
                                                 </StackPanel>
                                             </StackPanel>
-                                        </materialDesign:Card>
 
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
-                                            <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
-                                            <Button Content="Salvar" Click="SaveMigrationsSettings_Click" 
-                                                Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
-                                        </StackPanel>
                                         </StackPanel>
                                     </ScrollViewer>
+
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button Content="Salvar" Click="SaveMigrationsSettings_Click" 
+                                            Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
+                                    </StackPanel>
                                 </Grid>
 
                                 <!-- Painel: Configuração Ngrok -->
@@ -1036,6 +1053,7 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
@@ -1045,10 +1063,8 @@
 
                                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                         <StackPanel Margin="0,0,20,0">
-                                            
                                             <!-- Grupo: Execução Local -->
-                                        <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                            <StackPanel>
+                                            <StackPanel Margin="0,0,0,16">
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                     <materialDesign:PackIcon Kind="PlayCircle" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
                                                     <TextBlock Text="Execução Local" Style="{DynamicResource DevToolsCardTitle}"/>
@@ -1056,11 +1072,11 @@
 
                                                 <c:PathSelector x:Name="NgrokExeSelector" Title="Caminho do Executável do Ngrok (ngrok.exe)" IsFolderPicker="False"/>
                                             </StackPanel>
-                                        </materialDesign:Card>
 
-                                        <!-- Grupo: Autenticação e Argumentos -->
-                                        <materialDesign:Card Style="{DynamicResource SettingsCardStyle}">
-                                            <StackPanel>
+                                            <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,0,0,16"/>
+
+                                            <!-- Grupo: Autenticação e Argumentos -->
+                                            <StackPanel Margin="0,0,0,8">
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                                     <materialDesign:PackIcon Kind="KeyVariant" Foreground="{DynamicResource DevToolsAccent}" VerticalAlignment="Center" Margin="0,0,10,0" Width="20" Height="20"/>
                                                     <TextBlock Text="Autenticação e Argumentos" Style="{DynamicResource DevToolsCardTitle}"/>
@@ -1076,15 +1092,15 @@
                                                     <TextBox x:Name="NgrokArgsInput" Style="{DynamicResource DevToolsTextInput}"/>
                                                 </StackPanel>
                                             </StackPanel>
-                                        </materialDesign:Card>
 
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,20">
-                                            <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsSecondaryButton}" Width="120" Margin="0,0,10,0"/>
-                                            <Button Content="Salvar" Click="SaveNgrokSettings_Click" 
-                                                Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
-                                        </StackPanel>
                                         </StackPanel>
                                     </ScrollViewer>
+
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,8">
+                                        <Button Content="Cancelar" Click="BackToSettingsList_Click" Style="{DynamicResource DevToolsBrowseButton}" Width="120" Margin="0,0,10,0"/>
+                                        <Button Content="Salvar" Click="SaveNgrokSettings_Click" 
+                                            Style="{DynamicResource DevToolsPrimaryButton}" Width="120"/>
+                                    </StackPanel>
                                 </Grid>
                             </Grid>
                         </TabItem>
@@ -1096,24 +1112,15 @@
                             BorderBrush="{DynamicResource DevToolsBrushBorder}"
                             BorderThickness="0,1,0,0"
                             Padding="20,0,0,0">
-                        <Grid IsSharedSizeScope="True">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="MainFooterButton"/>
-                            </Grid.ColumnDefinitions>
-
+                        <Grid>
                             <TextBlock x:Name="MainStatusText"
-                                       Grid.Column="0"
                                        Text="DevTools Hub pronto."
                                        Foreground="{DynamicResource DevToolsTextSecondary}"
                                        FontSize="{DynamicResource DevToolsFontSize.Status}"
-                                       VerticalAlignment="Center"/>
-
-                            <Button Grid.Column="1"
-                                    Content="Abrir Jobs"
-                                    Tag="Jobs"
-                                    Click="NavButton_Click"
-                                    Style="{DynamicResource DevToolsPrimaryButton}"/>
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       Margin="0,0,20,0"
+                                       TextAlignment="Right"/>
                         </Grid>
                     </Border>
                 </Grid>

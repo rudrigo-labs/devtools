@@ -17,9 +17,9 @@
 
     <c:DevToolsToolFrame x:Name="MainFrame"
                          Title="Sobre o DevTools"
-                         HelpText="Informações do produto e autoria."
+                         HelpText="Informacoes do produto e autoria."
                          PrimaryButtonContent="Fechar"
-                         SecondaryButtonContent="Abrir GitHub"
+                         SecondaryButtonContent="Abrir Site"
                          PrimaryButtonClick="CloseButton_Click"
                          SecondaryButtonClick="OpenGitHubButton_Click"
                          CloseButtonClick="CloseButton_Click">
@@ -41,7 +41,7 @@
                             <TextBlock Text="DevTools"
                                        Style="{DynamicResource DevToolsCardTitle}"/>
                         </StackPanel>
-                        <TextBlock Text="Suíte de produtividade para engenharia de software."
+                        <TextBlock Text="Suite de produtividade para engenharia de software."
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -63,12 +63,12 @@
                             <TextBlock Text="Desenvolvedor"
                                        Style="{DynamicResource DevToolsCardTitle}"/>
                         </StackPanel>
-                        <TextBlock Text="Rodrigo — Rudrigo Labs"
+                        <TextBlock Text="Rodrigo - Rudrigo Labs"
                                    Foreground="{DynamicResource DevToolsTextPrimary}"
                                    FontSize="15"
                                    FontWeight="SemiBold"
                                    Margin="0,0,0,6"/>
-                        <TextBlock Text="Projeto desenvolvido para centralizar ferramentas técnicas em uma experiência única, consistente e escalável."
+                        <TextBlock Text="Projeto desenvolvido para centralizar ferramentas tecnicas em uma experiencia unica, consistente e escalavel."
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -86,7 +86,7 @@
                                                      Width="20"
                                                      Height="20"
                                                      Margin="0,0,10,0"/>
-                            <TextBlock Text="Versão e Tecnologias"
+                            <TextBlock Text="Versao e Tecnologias"
                                        Style="{DynamicResource DevToolsCardTitle}"/>
                         </StackPanel>
                         <TextBlock Text="Interface: WPF (.NET)"
@@ -96,7 +96,7 @@
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    Margin="0,0,0,4"/>
                         <TextBlock x:Name="VersionText"
-                                   Text="Versão: 1.0.0"
+                                   Text="Versao: 1.0.0"
                                    Foreground="{DynamicResource DevToolsTextSecondary}"/>
                     </StackPanel>
                 </Border>

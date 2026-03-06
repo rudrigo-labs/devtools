@@ -12,7 +12,7 @@ set "WPF_PROJ=%REPO_ROOT%\src\Presentation\DevTools.Presentation.Wpf\DevTools.Pr
 
 :: Icone para o rosto do Instalador (ApplicationIcon)
 set "ICO_APP=%REPO_ROOT%\src\Presentation\DevTools.Presentation.Wpf\Assets\application.ico"
-set "MANUAL_FILE=%REPO_ROOT%\MANUAL.md"
+set "MANUAL_FILE=%REPO_ROOT%\docs\ativos\MANUAL.md"
 
 :: Versao (pode ser passada como primeiro argumento)
 set "APP_VERSION=%~1"

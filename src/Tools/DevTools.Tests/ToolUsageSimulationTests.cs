@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using DevTools.Core.Configuration;
+using DevTools.Notes.Models;
 using DevTools.Presentation.Wpf.Components;
 using DevTools.Presentation.Wpf.Models;
 using DevTools.Presentation.Wpf.Services;
@@ -22,9 +23,12 @@ public class ToolUsageSimulationTests
     public void TrayRouter_OpenAllTools_AndCoreWorkflows_RunWithoutCrash()
     {
         var stage = "startup";
-        RunInSta(() =>
+        UiMessageService.DialogOverrideForTests = static (_, _, _, _, _) => true;
+        try
         {
-            EnsureApplicationWithTheme();
+            RunInSta(() =>
+            {
+                EnsureApplicationWithTheme();
 
             var tempRoot = Path.Combine(Path.GetTempPath(), "devtools-integration-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(tempRoot);
@@ -75,7 +79,12 @@ public class ToolUsageSimulationTests
                 SafeCloseAllWindows();
                 SafeDeleteDirectory(tempRoot);
             }
-        }, () => stage);
+            }, () => stage);
+        }
+        finally
+        {
+            UiMessageService.DialogOverrideForTests = null;
+        }
     }
 
     private static void RunTrayRouterSmoke(
@@ -318,6 +327,31 @@ public class ToolUsageSimulationTests
                   && (Directory.GetFiles(Path.Combine(notesRoot, "items"), "*.txt", SearchOption.AllDirectories).Any()
                       || Directory.GetFiles(Path.Combine(notesRoot, "items"), "*.md", SearchOption.AllDirectories).Any()),
             timeoutMs: 12000);
+
+        var list = GetField<ListBox>(window, "NotesList");
+        WaitUntil(() => list.Items.Count > 0, timeoutMs: 12000);
+        var first = Assert.IsType<NoteListItem>(list.Items[0]);
+
+        UiMessageService.ConfirmOverrideForTests = (_, _) => true;
+        try
+        {
+            if (Invoke(window, "DeleteNoteByKeyAsync", first.FileName, first.Title) is Task deleteTask)
+            {
+                WaitUntil(() => deleteTask.IsCompleted, timeoutMs: 12000);
+                if (deleteTask.IsFaulted)
+                {
+                    throw deleteTask.Exception?.GetBaseException() ?? new InvalidOperationException("Falha ao excluir nota no fluxo de simulacao.");
+                }
+            }
+        }
+        finally
+        {
+            UiMessageService.ConfirmOverrideForTests = null;
+        }
+
+        var deletedPath = Path.Combine(notesRoot, "items", first.FileName.Replace('/', Path.DirectorySeparatorChar));
+        WaitUntil(() => !File.Exists(deletedPath), timeoutMs: 12000);
+        WaitUntil(() => list.Items.Cast<object>().All(i => !string.Equals(((NoteListItem)i).FileName, first.FileName, StringComparison.OrdinalIgnoreCase)), timeoutMs: 12000);
         window.Close();
     }
 
