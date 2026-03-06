@@ -692,9 +692,9 @@ public partial class MainWindow : Window
 
         return (
             $"Configuracoes: {displayName ?? toolKey}",
-            "Configurações do Configuracao",
-            "Nome do Configuracao",
-            "Usar como configuracao padrão");
+            "Configurações da Execução",
+            "Nome da Configuração",
+            "Usar como configuração padrão");
     }
 
     private void LoadToolConfigurations()
@@ -1444,7 +1444,7 @@ public partial class MainWindow : Window
             return "Túnel salvo com sucesso!";
         if (IsNgrokConnectionMode(_currentToolForConfigurations))
             return "Conexão salva com sucesso!";
-        return "Configuracao salvo com sucesso.";
+        return "Configuração salva com sucesso.";
     }
 
     private static string GenerateNextCategoryName(IReadOnlyCollection<OrganizerCategory> categories)

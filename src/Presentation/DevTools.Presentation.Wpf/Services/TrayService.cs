@@ -270,7 +270,8 @@ public class TrayService : IDisposable
             LaunchMode = ToolLaunchMode.DetachedWindow,
             Factory = services => new OrganizerWindow(
                 services.GetRequiredService<JobManager>(),
-                services.GetRequiredService<SettingsService>()),
+                services.GetRequiredService<SettingsService>(),
+                services.GetRequiredService<ToolConfigurationManager>()),
             Category = ToolCategory.Productivity,
             Order = 40,
             IconKey = "Icon.Organizer"
@@ -326,7 +327,8 @@ public class TrayService : IDisposable
             LaunchMode = ToolLaunchMode.DetachedWindow,
             Factory = services => new ImageSplitWindow(
                 services.GetRequiredService<JobManager>(),
-                services.GetRequiredService<SettingsService>()),
+                services.GetRequiredService<SettingsService>(),
+                services.GetRequiredService<ToolConfigurationManager>()),
             Category = ToolCategory.Productivity,
             Order = 80,
             IconKey = "Icon.ImageSplitter"
@@ -353,7 +355,8 @@ public class TrayService : IDisposable
             LaunchMode = ToolLaunchMode.DetachedWindow,
             Factory = services => new Utf8ConvertWindow(
                 services.GetRequiredService<JobManager>(),
-                services.GetRequiredService<SettingsService>()),
+                services.GetRequiredService<SettingsService>(),
+                services.GetRequiredService<ToolConfigurationManager>()),
             Category = ToolCategory.Infrastructure,
             Order = 100,
             IconKey = "Icon.Utf8Convert"

@@ -12,6 +12,7 @@ public partial class HarvestWindow : Window
 {
     private readonly JobManager _jobManager = null!;
     private readonly SettingsService _settingsService = null!;
+    private readonly ToolConfigurationManager _toolConfigurationManager = null!;
 
     public HarvestRequest? Result { get; private set; }
 
@@ -20,6 +21,7 @@ public partial class HarvestWindow : Window
         InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
+        _toolConfigurationManager = toolConfigurationManager;
 
         Loaded += OnLoaded;
     }
@@ -32,6 +34,8 @@ public partial class HarvestWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        ApplyDefaultConfiguration();
+
         if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastHarvestSourcePath))
             SourcePathSelector.SelectedPath = _settingsService.Settings.LastHarvestSourcePath;
         if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastHarvestOutputPath))
@@ -42,6 +46,28 @@ public partial class HarvestWindow : Window
             MinScoreBox.Text = _settingsService.Settings.LastHarvestMinScore.Value.ToString();
         if (_settingsService.Settings.LastHarvestCopyFiles.HasValue)
             CopyFilesCheck.IsChecked = _settingsService.Settings.LastHarvestCopyFiles.Value;
+    }
+
+    private void ApplyDefaultConfiguration()
+    {
+        var configuration = _toolConfigurationManager.GetDefaultConfiguration("Harvest");
+        if (configuration == null)
+            return;
+
+        if (configuration.Options.TryGetValue("source-path", out var sourcePath) && !string.IsNullOrWhiteSpace(sourcePath))
+            SourcePathSelector.SelectedPath = sourcePath;
+
+        if (configuration.Options.TryGetValue("output-path", out var outputPath) && !string.IsNullOrWhiteSpace(outputPath))
+            OutputPathSelector.SelectedPath = outputPath;
+
+        if (configuration.Options.TryGetValue("config-path", out var configPath) && !string.IsNullOrWhiteSpace(configPath))
+            ConfigPathSelector.SelectedPath = configPath;
+
+        if (configuration.Options.TryGetValue("min-score", out var minScore) && !string.IsNullOrWhiteSpace(minScore))
+            MinScoreBox.Text = minScore;
+
+        if (configuration.Options.TryGetValue("copy-files", out var copyFiles) && bool.TryParse(copyFiles, out var parsedCopyFiles))
+            CopyFilesCheck.IsChecked = parsedCopyFiles;
     }
 
     private bool ValidateInputs(out string errorMessage)

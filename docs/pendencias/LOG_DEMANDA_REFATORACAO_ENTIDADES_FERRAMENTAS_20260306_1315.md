@@ -4,7 +4,7 @@
 - Status: Em andamento
 - Responsavel: Equipe DevTools
 - Iniciado em: 2026-03-06 13:15
-- Atualizado em: 2026-03-06 14:35
+- Atualizado em: 2026-03-06 15:07
 
 ## Entradas de log
 - [2026-03-06 13:15] Demanda iniciada com pacote completo de documentacao.
@@ -18,6 +18,10 @@
 - [2026-03-06 14:35] Remocao da nomenclatura antiga aplicada no codigo fonte: classes, services, stores, XAML e fluxo SSH migrados para `Configuration`.
 - [2026-03-06 14:35] Renomeacao de arquivos concluida (`ToolConfiguration*` e `*ToolConfigurationStore`) para eliminar residuos de nomenclatura antiga.
 - [2026-03-06 14:35] Validacao tecnica apos refatoracao: build e testes verdes (`36 aprovados`, `2 ignorados`).
+- [2026-03-06 15:07] Fase 3 estendida para ferramentas restantes de execucao: `Harvest`, `Organizer`, `SearchText`, `Rename`, `ImageSplitter`, `Utf8Convert`.
+- [2026-03-06 15:07] Configuracoes nomeadas habilitadas no painel de configuracoes (cards e formularios dinamicos para ferramentas restantes).
+- [2026-03-06 15:07] Janelas de execucao atualizadas para carregar configuracao padrao por ferramenta ao abrir.
+- [2026-03-06 15:07] Validacao tecnica da rodada: `dotnet build` WPF OK e `dotnet test` DevTools.Tests OK (`36 aprovados`, `2 ignorados`).
 
 ## Mudancas de escopo
 - Nenhuma ate o momento.
@@ -32,7 +36,7 @@
 - Eliminacao de nomenclatura antiga validada em `src` (sem ocorrencias no dominio das ferramentas; mantido apenas identificador do sistema operacional para pasta do usuario).
 
 ## Proximos passos
-1. Avancar Fase 3 nas ferramentas restantes (Harvest, Organizer, SearchText, Rename, Notes, Image, UTF8).
+1. Concluir o item de `Notes` na Fase 3 (pontos estritamente desta demanda).
 2. Revisar ajustes finais de persistencia por ferramenta (payload e defaults).
 3. Preparar Fase 4 (validacoes e hardening).
 

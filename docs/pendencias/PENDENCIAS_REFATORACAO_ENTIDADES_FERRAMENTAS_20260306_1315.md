@@ -3,7 +3,7 @@
 - Status: Em andamento
 - Responsavel: Equipe DevTools
 - Criado em: 2026-03-06 13:15
-- Atualizado em: 2026-03-06 14:35
+- Atualizado em: 2026-03-06 15:07
 - Relacionado a: `DEFINICAO_REFATORACAO_ENTIDADES_FERRAMENTAS_20260306_1315.md`
 
 ## Fase 0 - Preparacao e baseline
@@ -31,13 +31,13 @@
 - [x] Snapshot
 - [x] SSH Tunnel
 - [x] Ngrok
-- [ ] Harvest
-- [ ] Organizer
-- [ ] SearchText
-- [ ] Rename
+- [x] Harvest
+- [x] Organizer
+- [x] SearchText
+- [x] Rename
 - [ ] Notes (somente pontos desta demanda)
-- [ ] Image Splitter
-- [ ] UTF8 Convert
+- [x] Image Splitter
+- [x] UTF8 Convert
 
 ## Fase 4 - Validacoes e hardening
 - [ ] Aplicar validacoes obrigatorias de campos.

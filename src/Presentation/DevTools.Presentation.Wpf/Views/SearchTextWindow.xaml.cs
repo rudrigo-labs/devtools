@@ -14,12 +14,14 @@ public partial class SearchTextWindow : Window
 {
     private readonly JobManager _jobManager = null!;
     private readonly SettingsService _settings = null!;
+    private readonly ToolConfigurationManager _toolConfigurationManager = null!;
 
     public SearchTextWindow(JobManager jobManager, SettingsService settings, ToolConfigurationManager toolConfigurationManager)
     {
         InitializeComponent();
         _jobManager = jobManager;
         _settings = settings;
+        _toolConfigurationManager = toolConfigurationManager;
 
         Loaded += OnLoaded;
         Closing += OnClosing;
@@ -33,6 +35,8 @@ public partial class SearchTextWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        ApplyDefaultConfiguration();
+
         if (!string.IsNullOrWhiteSpace(_settings.Settings.LastSearchTextRootPath))
             PathSelector.SelectedPath = _settings.Settings.LastSearchTextRootPath;
         if (!string.IsNullOrWhiteSpace(_settings.Settings.LastSearchTextInclude))
@@ -47,6 +51,46 @@ public partial class SearchTextWindow : Window
         ReturnLinesCheck.IsChecked = _settings.Settings.LastSearchTextReturnLines ?? true;
         MaxFileSizeKbInput.Text = _settings.Settings.LastSearchTextMaxFileSizeKb?.ToString() ?? string.Empty;
         MaxMatchesPerFileInput.Text = (_settings.Settings.LastSearchTextMaxMatchesPerFile ?? 0).ToString();
+    }
+
+    private void ApplyDefaultConfiguration()
+    {
+        var configuration = _toolConfigurationManager.GetDefaultConfiguration("SearchText");
+        if (configuration == null)
+            return;
+
+        if (configuration.Options.TryGetValue("root-path", out var rootPath) && !string.IsNullOrWhiteSpace(rootPath))
+            PathSelector.SelectedPath = rootPath;
+
+        if (configuration.Options.TryGetValue("search-pattern", out var pattern))
+            SearchTextInput.Text = pattern ?? string.Empty;
+
+        if (configuration.Options.TryGetValue("include", out var include))
+            IncludePatternInput.Text = include ?? string.Empty;
+
+        if (configuration.Options.TryGetValue("exclude", out var exclude))
+            ExcludePatternInput.Text = exclude ?? string.Empty;
+
+        if (configuration.Options.TryGetValue("max-file-size-kb", out var maxFileSize))
+            MaxFileSizeKbInput.Text = maxFileSize ?? string.Empty;
+
+        if (configuration.Options.TryGetValue("max-matches-per-file", out var maxMatches) && !string.IsNullOrWhiteSpace(maxMatches))
+            MaxMatchesPerFileInput.Text = maxMatches;
+
+        if (configuration.Options.TryGetValue("use-regex", out var useRegex) && bool.TryParse(useRegex, out var parsedUseRegex))
+            UseRegexCheck.IsChecked = parsedUseRegex;
+
+        if (configuration.Options.TryGetValue("case-sensitive", out var caseSensitive) && bool.TryParse(caseSensitive, out var parsedCaseSensitive))
+            CaseSensitiveCheck.IsChecked = parsedCaseSensitive;
+
+        if (configuration.Options.TryGetValue("whole-word", out var wholeWord) && bool.TryParse(wholeWord, out var parsedWholeWord))
+            WholeWordCheck.IsChecked = parsedWholeWord;
+
+        if (configuration.Options.TryGetValue("skip-binary-files", out var skipBinary) && bool.TryParse(skipBinary, out var parsedSkipBinary))
+            SkipBinaryFilesCheck.IsChecked = parsedSkipBinary;
+
+        if (configuration.Options.TryGetValue("return-lines", out var returnLines) && bool.TryParse(returnLines, out var parsedReturnLines))
+            ReturnLinesCheck.IsChecked = parsedReturnLines;
     }
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)

@@ -53,9 +53,9 @@ public class ToolUsageSimulationTests
                 }
 
                 stage = "RunOrganizerFlow";
-                RunOrganizerFlow(jobManager, settings, tempRoot);
+                RunOrganizerFlow(jobManager, settings, toolConfigurationManager, tempRoot);
                 stage = "RunUtf8Flow";
-                RunUtf8Flow(jobManager, settings, tempRoot);
+                RunUtf8Flow(jobManager, settings, toolConfigurationManager, tempRoot);
                 stage = "RunSnapshotFlow";
                 RunSnapshotFlow(jobManager, settings, toolConfigurationManager, tempRoot);
                 stage = "RunSearchTextFlow";
@@ -65,7 +65,7 @@ public class ToolUsageSimulationTests
                 stage = "RunHarvestFlow";
                 RunHarvestFlow(jobManager, settings, toolConfigurationManager, tempRoot);
                 stage = "RunImageSplitFlow";
-                RunImageSplitFlow(jobManager, settings, tempRoot);
+                RunImageSplitFlow(jobManager, settings, toolConfigurationManager, tempRoot);
                 stage = "RunMigrationsFlow";
                 RunMigrationsFlow(jobManager, settings, config, toolConfigurationManager, tempRoot);
                 stage = "RunNotesFlow";
@@ -114,13 +114,13 @@ public class ToolUsageSimulationTests
         }
     }
 
-    private static void RunOrganizerFlow(JobManager jobManager, SettingsService settings, string tempRoot)
+    private static void RunOrganizerFlow(JobManager jobManager, SettingsService settings, ToolConfigurationManager toolConfigurationManager, string tempRoot)
     {
         var input = Path.Combine(tempRoot, "organizer-input");
         Directory.CreateDirectory(input);
         File.WriteAllText(Path.Combine(input, "sample.txt"), "hello organizer");
 
-        var window = new OrganizerWindow(jobManager, settings);
+        var window = new OrganizerWindow(jobManager, settings, toolConfigurationManager);
         window.Show();
         PumpDispatcher(3);
 
@@ -132,14 +132,14 @@ public class ToolUsageSimulationTests
         Assert.Contains(jobManager.Jobs, j => string.Equals(j.Name, "Organizer", StringComparison.OrdinalIgnoreCase));
     }
 
-    private static void RunUtf8Flow(JobManager jobManager, SettingsService settings, string tempRoot)
+    private static void RunUtf8Flow(JobManager jobManager, SettingsService settings, ToolConfigurationManager toolConfigurationManager, string tempRoot)
     {
         var root = Path.Combine(tempRoot, "utf8-root");
         Directory.CreateDirectory(root);
         var file = Path.Combine(root, "legacy.txt");
         File.WriteAllText(file, "conteudo utf8");
 
-        var window = new Utf8ConvertWindow(jobManager, settings);
+        var window = new Utf8ConvertWindow(jobManager, settings, toolConfigurationManager);
         window.Show();
         PumpDispatcher(3);
 
@@ -239,7 +239,7 @@ public class ToolUsageSimulationTests
         window.Close();
     }
 
-    private static void RunImageSplitFlow(JobManager jobManager, SettingsService settings, string tempRoot)
+    private static void RunImageSplitFlow(JobManager jobManager, SettingsService settings, ToolConfigurationManager toolConfigurationManager, string tempRoot)
     {
         var imageRoot = Path.Combine(tempRoot, "image-split");
         var output = Path.Combine(imageRoot, "out");
@@ -254,7 +254,7 @@ public class ToolUsageSimulationTests
             bitmap.Save(inputImage, System.Drawing.Imaging.ImageFormat.Png);
         }
 
-        var window = new ImageSplitWindow(jobManager, settings);
+        var window = new ImageSplitWindow(jobManager, settings, toolConfigurationManager);
         window.Show();
         PumpDispatcher(3);
 

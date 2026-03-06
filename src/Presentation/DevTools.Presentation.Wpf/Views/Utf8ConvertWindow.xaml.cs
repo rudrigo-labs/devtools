@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using DevTools.Core.Configuration;
 using DevTools.Core.Models;
 using DevTools.Presentation.Wpf.Services;
 using DevTools.Utf8Convert.Engine;
@@ -14,23 +15,55 @@ public partial class Utf8ConvertWindow : Window
 {
     private readonly JobManager _jobManager;
     private readonly SettingsService _settingsService;
+    private readonly ToolConfigurationManager _toolConfigurationManager;
 
-    public Utf8ConvertWindow(JobManager jobManager, SettingsService settingsService)
+    public Utf8ConvertWindow(JobManager jobManager, SettingsService settingsService, ToolConfigurationManager toolConfigurationManager)
     {
         InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
+        _toolConfigurationManager = toolConfigurationManager;
         Loaded += OnLoaded;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        ApplyDefaultConfiguration();
+
         if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastUtf8RootPath))
             RootPathSelector.SelectedPath = _settingsService.Settings.LastUtf8RootPath;
 
         DryRunCheck.IsChecked = _settingsService.Settings.LastUtf8DryRun ?? false;
         IncludeGlobsInput.Text = _settingsService.Settings.LastUtf8IncludeGlobs ?? string.Empty;
         ExcludeGlobsInput.Text = _settingsService.Settings.LastUtf8ExcludeGlobs ?? string.Empty;
+    }
+
+    private void ApplyDefaultConfiguration()
+    {
+        var configuration = _toolConfigurationManager.GetDefaultConfiguration("Utf8Convert");
+        if (configuration == null)
+            return;
+
+        if (configuration.Options.TryGetValue("root-path", out var rootPath) && !string.IsNullOrWhiteSpace(rootPath))
+            RootPathSelector.SelectedPath = rootPath;
+
+        if (configuration.Options.TryGetValue("include", out var include))
+            IncludeGlobsInput.Text = include ?? string.Empty;
+
+        if (configuration.Options.TryGetValue("exclude", out var exclude))
+            ExcludeGlobsInput.Text = exclude ?? string.Empty;
+
+        if (configuration.Options.TryGetValue("recursive", out var recursive) && bool.TryParse(recursive, out var parsedRecursive))
+            RecursiveCheck.IsChecked = parsedRecursive;
+
+        if (configuration.Options.TryGetValue("dry-run", out var dryRun) && bool.TryParse(dryRun, out var parsedDryRun))
+            DryRunCheck.IsChecked = parsedDryRun;
+
+        if (configuration.Options.TryGetValue("create-backup", out var createBackup) && bool.TryParse(createBackup, out var parsedBackup))
+            BackupCheck.IsChecked = parsedBackup;
+
+        if (configuration.Options.TryGetValue("output-bom", out var outputBom) && bool.TryParse(outputBom, out var parsedOutputBom))
+            BomCheck.IsChecked = parsedOutputBom;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

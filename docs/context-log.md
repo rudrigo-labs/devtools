@@ -21,3 +21,9 @@
 - Remocao da nomenclatura antiga concluida no codigo-fonte (migrada para Configuration).
 - Classes/servicos/stores/entidades e nomes de arquivo atualizados para o padrao Configuration.
 - Fluxo SSH migrado para TunnelConfiguration (sem residuos da nomenclatura antiga no dominio da ferramenta).
+
+## 2026-03-06 15:07
+- Fase 3 avancada para `Harvest`, `Organizer`, `SearchText`, `Rename`, `ImageSplitter` e `Utf8Convert`.
+- Painel de configuracoes recebeu cards e formularios dinamicos para essas ferramentas.
+- Janelas de execucao dessas ferramentas agora carregam configuracao padrao no bootstrap.
+- Validacao tecnica executada com sucesso (build WPF + testes DevTools.Tests).

@@ -480,14 +480,32 @@
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Harvest}" Content="Harvest" 
                                                 ToolTip="Configurar regras de extração e IA" Width="200" Click="OpenHarvestSettings_Click"/>
 
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Harvest}" Content="Configurações Harvest"
+                                                ToolTip="Configurações nomeadas de execução do Harvest" Width="200" Click="OpenToolConfigurations_Click" CommandParameter="Harvest"/>
+
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Organizer}" Content="Organizer" 
                                                 ToolTip="Categorias e regras de organização" Width="200" Click="OpenOrganizerSettings_Click"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Organizer}" Content="Configurações Organizer"
+                                                ToolTip="Configurações nomeadas de execução do Organizer" Width="200" Click="OpenToolConfigurations_Click" CommandParameter="Organizer"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.SearchText}" Content="Configurações SearchText"
+                                                ToolTip="Configurações nomeadas de execução para busca de texto" Width="200" Click="OpenToolConfigurations_Click" CommandParameter="SearchText"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Rename}" Content="Configurações Rename"
+                                                ToolTip="Configurações nomeadas de execução para renomeação" Width="200" Click="OpenToolConfigurations_Click" CommandParameter="Rename"/>
 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Migrations}" Content="EF Core Migrations" 
                                                 ToolTip="Projetos/configuracoes de execução para migrations" Width="200" Click="OpenToolConfigurations_Click" CommandParameter="Migrations"/>
 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Snapshot}" Content="Snapshot" 
                                                 ToolTip="Projetos de snapshot" Width="200" Click="OpenToolConfigurations_Click" CommandParameter="Snapshot"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.ImageSplitter}" Content="Configurações Image Splitter"
+                                                ToolTip="Configurações nomeadas de execução para divisão de imagens" Width="200" Click="OpenToolConfigurations_Click" CommandParameter="ImageSplitter"/>
+
+                                            <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.Utf8Convert}" Content="Configurações UTF-8 Convert"
+                                                ToolTip="Configurações nomeadas de execução para conversão UTF-8" Width="200" Click="OpenToolConfigurations_Click" CommandParameter="Utf8Convert"/>
 
                                             <Button Style="{DynamicResource ToolCardStyle}" Tag="{DynamicResource Icon.SSHTunnel}" Content="Conexões SSH"
                                                 ToolTip="Conexões nomeadas para túnel SSH" Width="200" Click="OpenToolConfigurations_Click" CommandParameter="SSHTunnel"/>

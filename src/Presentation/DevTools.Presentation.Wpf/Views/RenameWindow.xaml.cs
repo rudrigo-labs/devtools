@@ -13,12 +13,14 @@ public partial class RenameWindow : Window
 {
     private readonly JobManager _jobManager = null!;
     private readonly SettingsService _settingsService = null!;
+    private readonly ToolConfigurationManager _toolConfigurationManager = null!;
 
     public RenameWindow(JobManager jobManager, SettingsService settingsService, ToolConfigurationManager toolConfigurationManager)
     {
         InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
+        _toolConfigurationManager = toolConfigurationManager;
 
         Loaded += OnLoaded;
     }
@@ -31,6 +33,8 @@ public partial class RenameWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        ApplyDefaultConfiguration();
+
         if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastRenameRootPath))
             RootPathSelector.SelectedPath = _settingsService.Settings.LastRenameRootPath;
         if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastRenameInclude))
@@ -44,6 +48,49 @@ public partial class RenameWindow : Window
         if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastRenameReportPath))
             ReportPathInput.Text = _settingsService.Settings.LastRenameReportPath;
         MaxDiffLinesInput.Text = (_settingsService.Settings.LastRenameMaxDiffLinesPerFile ?? 200).ToString();
+    }
+
+    private void ApplyDefaultConfiguration()
+    {
+        var configuration = _toolConfigurationManager.GetDefaultConfiguration("Rename");
+        if (configuration == null)
+            return;
+
+        if (configuration.Options.TryGetValue("root-path", out var rootPath) && !string.IsNullOrWhiteSpace(rootPath))
+            RootPathSelector.SelectedPath = rootPath;
+
+        if (configuration.Options.TryGetValue("old-text", out var oldText))
+            OldTextBox.Text = oldText ?? string.Empty;
+
+        if (configuration.Options.TryGetValue("new-text", out var newText))
+            NewTextBox.Text = newText ?? string.Empty;
+
+        if (configuration.Options.TryGetValue("include", out var include))
+            IncludeBox.Text = include ?? string.Empty;
+
+        if (configuration.Options.TryGetValue("exclude", out var exclude))
+            ExcludeBox.Text = exclude ?? string.Empty;
+
+        if (configuration.Options.TryGetValue("mode", out var mode))
+            ModeCombo.SelectedIndex = string.Equals(mode, "namespace", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+
+        if (configuration.Options.TryGetValue("backup-enabled", out var backupEnabled) && bool.TryParse(backupEnabled, out var parsedBackup))
+            BackupCheck.IsChecked = parsedBackup;
+
+        if (configuration.Options.TryGetValue("write-undo-log", out var writeUndoLog) && bool.TryParse(writeUndoLog, out var parsedUndoLog))
+            UndoLogCheck.IsChecked = parsedUndoLog;
+
+        if (configuration.Options.TryGetValue("dry-run", out var dryRun) && bool.TryParse(dryRun, out var parsedDryRun))
+            DryRunCheck.IsChecked = parsedDryRun;
+
+        if (configuration.Options.TryGetValue("undo-log-path", out var undoLogPath))
+            UndoLogPathInput.Text = undoLogPath ?? string.Empty;
+
+        if (configuration.Options.TryGetValue("report-path", out var reportPath))
+            ReportPathInput.Text = reportPath ?? string.Empty;
+
+        if (configuration.Options.TryGetValue("max-diff-lines-per-file", out var maxDiffLines) && !string.IsNullOrWhiteSpace(maxDiffLines))
+            MaxDiffLinesInput.Text = maxDiffLines;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

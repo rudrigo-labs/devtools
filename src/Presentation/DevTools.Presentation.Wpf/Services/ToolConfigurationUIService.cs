@@ -89,6 +89,13 @@ public class ToolConfigurationUIService
         {
             case "Rename":
             {
+                var pathCard = CreateMaterialCard();
+                var pathStack = new StackPanel();
+                pathStack.Children.Add(CreateCardHeader("FolderArrowRight", "Caminho"));
+                pathStack.Children.Add(CreatePathSelector("Pasta Raiz", "root-path", options, isFolderPicker: true));
+                pathCard.Child = pathStack;
+                container.Children.Add(pathCard);
+
                 var replaceCard = CreateMaterialCard();
                 var replaceStack = new StackPanel();
                 replaceStack.Children.Add(CreateCardHeader("FormTextbox", "Substituição de Texto"));
@@ -100,6 +107,27 @@ public class ToolConfigurationUIService
                 var filterStack = new StackPanel();
                 filterStack.Children.Add(CreateCardHeader("FilterVariant", "Filtros (Glob)"));
                 filterStack.Children.Add(CreateGridWithTwoLabeledTextBoxes("Include", "include", options, "Exclude", "exclude", options));
+                filterStack.Children.Add(CreateGridWithTwoLabeledTextBoxes(
+                    "Undo Log Path (Opcional)",
+                    "undo-log-path",
+                    options,
+                    "Report Path (Opcional)",
+                    "report-path",
+                    options,
+                    new Thickness(0, 16, 0, 0)));
+                filterStack.Children.Add(CreateGridWithTwoLabeledTextBoxes(
+                    "Modo (general/namespace)",
+                    "mode",
+                    options,
+                    "Max Diff Lines por Arquivo",
+                    "max-diff-lines-per-file",
+                    options,
+                    new Thickness(0, 16, 0, 0)));
+                var flags = new WrapPanel { Margin = new Thickness(0, 16, 0, 0) };
+                flags.Children.Add(CreateOptionCheckBox("Criar Backup", "backup-enabled", options, true));
+                flags.Children.Add(CreateOptionCheckBox("Log de Reversão", "write-undo-log", options, true));
+                flags.Children.Add(CreateOptionCheckBox("Dry Run", "dry-run", options, false));
+                filterStack.Children.Add(flags);
                 filterCard.Child = filterStack;
                 container.Children.Add(filterCard);
                 break;
@@ -151,6 +179,7 @@ public class ToolConfigurationUIService
                 pathStack.Children.Add(CreateCardHeader("FolderArrowRight", "Caminhos"));
                 pathStack.Children.Add(CreatePathSelector("Origem", "source-path", options, isFolderPicker: true));
                 pathStack.Children.Add(CreatePathSelector("Destino", "output-path", options, isFolderPicker: true, new Thickness(0, 16, 0, 0)));
+                pathStack.Children.Add(CreatePathSelector("Arquivo de Configuração (Opcional)", "config-path", options, isFolderPicker: false, new Thickness(0, 16, 0, 0)));
                 pathCard.Child = pathStack;
                 container.Children.Add(pathCard);
 
@@ -158,8 +187,28 @@ public class ToolConfigurationUIService
                 var limitStack = new StackPanel();
                 limitStack.Children.Add(CreateCardHeader("ChartLine", "Limites de Coleta"));
                 limitStack.Children.Add(CreateLabeledTextBox("Score Mínimo (0-100)", "min-score", options));
+                limitStack.Children.Add(CreateOptionCheckBox("Copiar arquivos", "copy-files", options, true));
                 limitCard.Child = limitStack;
                 container.Children.Add(limitCard);
+                break;
+            }
+
+            case "Organizer":
+            {
+                var pathCard = CreateMaterialCard();
+                var pathStack = new StackPanel();
+                pathStack.Children.Add(CreateCardHeader("FolderArrowRight", "Caminhos de Execução"));
+                pathStack.Children.Add(CreatePathSelector("Pasta de Entrada", "input-path", options, isFolderPicker: true));
+                pathStack.Children.Add(CreatePathSelector("Pasta de Saída (Opcional)", "output-path", options, isFolderPicker: true, new Thickness(0, 16, 0, 0)));
+                pathCard.Child = pathStack;
+                container.Children.Add(pathCard);
+
+                var behaviorCard = CreateMaterialCard();
+                var behaviorStack = new StackPanel();
+                behaviorStack.Children.Add(CreateCardHeader("FilterVariant", "Comportamento"));
+                behaviorStack.Children.Add(CreateOptionCheckBox("Simular (não move arquivos)", "simulate", options, false));
+                behaviorCard.Child = behaviorStack;
+                container.Children.Add(behaviorCard);
                 break;
             }
 
@@ -177,8 +226,80 @@ public class ToolConfigurationUIService
                 configStack.Children.Add(CreateCardHeader("Magnify", "Configuração da Busca"));
                 configStack.Children.Add(CreateLabeledTextBox("Padrão de Busca", "search-pattern", options));
                 configStack.Children.Add(CreateGridWithTwoLabeledTextBoxes("Include (Glob)", "include", options, "Exclude (Glob)", "exclude", options, new Thickness(0, 16, 0, 0)));
+                var flags = new WrapPanel { Margin = new Thickness(0, 16, 0, 0) };
+                flags.Children.Add(CreateOptionCheckBox("Usar Regex", "use-regex", options, false));
+                flags.Children.Add(CreateOptionCheckBox("Case Sensitive", "case-sensitive", options, false));
+                flags.Children.Add(CreateOptionCheckBox("Palavra Inteira", "whole-word", options, false));
+                flags.Children.Add(CreateOptionCheckBox("Ignorar Binários", "skip-binary-files", options, true));
+                flags.Children.Add(CreateOptionCheckBox("Retornar Linhas", "return-lines", options, true));
+                configStack.Children.Add(flags);
+                configStack.Children.Add(CreateGridWithTwoLabeledTextBoxes(
+                    "Máximo por Arquivo (0 = sem limite)",
+                    "max-matches-per-file",
+                    options,
+                    "Tamanho Máximo (KB) (Opcional)",
+                    "max-file-size-kb",
+                    options,
+                    new Thickness(0, 16, 0, 0)));
                 configCard.Child = configStack;
                 container.Children.Add(configCard);
+                break;
+            }
+
+            case "ImageSplitter":
+            {
+                var pathCard = CreateMaterialCard();
+                var pathStack = new StackPanel();
+                pathStack.Children.Add(CreateCardHeader("FolderArrowRight", "Entradas e Saída"));
+                pathStack.Children.Add(CreatePathSelector("Imagem de Entrada", "input-path", options, isFolderPicker: false));
+                pathStack.Children.Add(CreatePathSelector("Pasta de Saída (Opcional)", "output-path", options, isFolderPicker: true, new Thickness(0, 16, 0, 0)));
+                pathCard.Child = pathStack;
+                container.Children.Add(pathCard);
+
+                var settingsCard = CreateMaterialCard();
+                var settingsStack = new StackPanel();
+                settingsStack.Children.Add(CreateCardHeader("PackageVariant", "Parâmetros de Divisão"));
+                settingsStack.Children.Add(CreateGridWithTwoLabeledTextBoxes(
+                    "Limiar Alpha (0-255)",
+                    "alpha-threshold",
+                    options,
+                    "Tamanho Mínimo (px)",
+                    "min-size",
+                    options));
+                settingsStack.Children.Add(CreateOptionCheckBox("Sobrescrever arquivos existentes", "overwrite", options, false));
+                settingsCard.Child = settingsStack;
+                container.Children.Add(settingsCard);
+                break;
+            }
+
+            case "Utf8Convert":
+            {
+                var pathCard = CreateMaterialCard();
+                var pathStack = new StackPanel();
+                pathStack.Children.Add(CreateCardHeader("FolderArrowRight", "Diretório"));
+                pathStack.Children.Add(CreatePathSelector("Pasta Raiz", "root-path", options, isFolderPicker: true));
+                pathCard.Child = pathStack;
+                container.Children.Add(pathCard);
+
+                var flagsCard = CreateMaterialCard();
+                var flagsStack = new StackPanel();
+                flagsStack.Children.Add(CreateCardHeader("FormTextbox", "Opções"));
+                var flags = new WrapPanel();
+                flags.Children.Add(CreateOptionCheckBox("Recursivo", "recursive", options, true));
+                flags.Children.Add(CreateOptionCheckBox("Dry Run", "dry-run", options, false));
+                flags.Children.Add(CreateOptionCheckBox("Criar backup", "create-backup", options, true));
+                flags.Children.Add(CreateOptionCheckBox("Adicionar BOM", "output-bom", options, true));
+                flagsStack.Children.Add(flags);
+                flagsStack.Children.Add(CreateGridWithTwoLabeledTextBoxes(
+                    "Include (Glob) (Opcional)",
+                    "include",
+                    options,
+                    "Exclude (Glob) (Opcional)",
+                    "exclude",
+                    options,
+                    new Thickness(0, 16, 0, 0)));
+                flagsCard.Child = flagsStack;
+                container.Children.Add(flagsCard);
                 break;
             }
 

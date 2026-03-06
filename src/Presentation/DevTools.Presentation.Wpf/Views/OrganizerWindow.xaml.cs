@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using DevTools.Core.Configuration;
 using DevTools.Core.Models;
 using DevTools.Organizer.Engine;
 using DevTools.Organizer.Models;
@@ -12,17 +13,45 @@ public partial class OrganizerWindow : Window
 {
     private readonly JobManager _jobManager;
     private readonly SettingsService _settingsService;
+    private readonly ToolConfigurationManager _toolConfigurationManager;
 
-    public OrganizerWindow(JobManager jobManager, SettingsService settingsService)
+    public OrganizerWindow(JobManager jobManager, SettingsService settingsService, ToolConfigurationManager toolConfigurationManager)
     {
         InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
+        _toolConfigurationManager = toolConfigurationManager;
 
         Deactivated += (s, e) =>
         {
             // Mantido aberto para evitar fechamento acidental.
         };
+
+        Loaded += OnLoaded;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        ApplyDefaultConfiguration();
+
+        if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastOrganizerInputPath))
+            InputPathSelector.SelectedPath = _settingsService.Settings.LastOrganizerInputPath;
+    }
+
+    private void ApplyDefaultConfiguration()
+    {
+        var configuration = _toolConfigurationManager.GetDefaultConfiguration("Organizer");
+        if (configuration == null)
+            return;
+
+        if (configuration.Options.TryGetValue("input-path", out var inputPath) && !string.IsNullOrWhiteSpace(inputPath))
+            InputPathSelector.SelectedPath = inputPath;
+
+        if (configuration.Options.TryGetValue("output-path", out var outputPath) && !string.IsNullOrWhiteSpace(outputPath))
+            OutputPathSelector.SelectedPath = outputPath;
+
+        if (configuration.Options.TryGetValue("simulate", out var simulate) && bool.TryParse(simulate, out var parsedSimulate))
+            SimulateCheck.IsChecked = parsedSimulate;
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)

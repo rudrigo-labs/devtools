@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using DevTools.Core.Configuration;
 using DevTools.Core.Models;
 using DevTools.Image.Engine;
 using DevTools.Image.Models;
@@ -15,12 +16,48 @@ public partial class ImageSplitWindow : Window
 {
     private readonly JobManager _jobManager;
     private readonly SettingsService _settingsService;
+    private readonly ToolConfigurationManager _toolConfigurationManager;
 
-    public ImageSplitWindow(JobManager jobManager, SettingsService settingsService)
+    public ImageSplitWindow(JobManager jobManager, SettingsService settingsService, ToolConfigurationManager toolConfigurationManager)
     {
         InitializeComponent();
         _jobManager = jobManager;
         _settingsService = settingsService;
+        _toolConfigurationManager = toolConfigurationManager;
+        Loaded += OnLoaded;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        ApplyDefaultConfiguration();
+
+        if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastImageSplitInputPath))
+            InputPathSelector.SelectedPath = _settingsService.Settings.LastImageSplitInputPath;
+
+        if (!string.IsNullOrWhiteSpace(_settingsService.Settings.LastImageSplitOutputDir))
+            OutputPathSelector.SelectedPath = _settingsService.Settings.LastImageSplitOutputDir;
+    }
+
+    private void ApplyDefaultConfiguration()
+    {
+        var configuration = _toolConfigurationManager.GetDefaultConfiguration("ImageSplitter");
+        if (configuration == null)
+            return;
+
+        if (configuration.Options.TryGetValue("input-path", out var inputPath) && !string.IsNullOrWhiteSpace(inputPath))
+            InputPathSelector.SelectedPath = inputPath;
+
+        if (configuration.Options.TryGetValue("output-path", out var outputPath) && !string.IsNullOrWhiteSpace(outputPath))
+            OutputPathSelector.SelectedPath = outputPath;
+
+        if (configuration.Options.TryGetValue("alpha-threshold", out var alphaThreshold) && !string.IsNullOrWhiteSpace(alphaThreshold))
+            AlphaBox.Text = alphaThreshold;
+
+        if (configuration.Options.TryGetValue("min-size", out var minSize) && !string.IsNullOrWhiteSpace(minSize))
+            MinSizeBox.Text = minSize;
+
+        if (configuration.Options.TryGetValue("overwrite", out var overwrite) && bool.TryParse(overwrite, out var parsedOverwrite))
+            OverwriteCheck.IsChecked = parsedOverwrite;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
