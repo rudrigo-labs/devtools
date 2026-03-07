@@ -1,0 +1,1 @@
+Responda sempre em português brasileiro (pt-BR), independentemente do idioma da pergunta ou dos arquivos de código.

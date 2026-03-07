@@ -2,11 +2,11 @@
   <Folder Name="/Core/">
     <Project Path="Core/DevTools.Core/DevTools.Core.csproj" />
   </Folder>
-  <Folder Name="/Presentation/">
+  <Folder Name="/Hosts/">
     <Project Path="Presentation/DevTools.Presentation.Wpf/DevTools.Presentation.Wpf.csproj" />
   </Folder>
-  <Folder Name="/Tests/">
-    <Project Path="Tools/DevTools.Tests/DevTools.Tests.csproj" />
+  <Folder Name="/Infrastructure/">
+    <Project Path="Infrastructure/DevTools.Infrastructure/DevTools.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/Tools/">
     <Project Path="Tools/DevTools.Harvest/DevTools.Harvest.csproj" />

@@ -2,6 +2,12 @@
 
 Suite desktop para produtividade tecnica no dia a dia de desenvolvimento.
 
+## Aviso
+
+Este projeto esta em construcao e passando por reestruturacao interna.
+Funcionalidades, arquitetura e documentacao podem mudar entre versoes.
+Nao considerar o estado atual como release final estabilizada.
+
 ## Estado atual
 
 - Interface oficial: WPF
@@ -45,13 +51,10 @@ build\build_installer.bat 1.0.0
 
 ## Documentacao oficial
 
-- Manual detalhado: [docs/ativos/MANUAL.md](docs/ativos/MANUAL.md)
-- Configuracoes das ferramentas: [docs/ativos/CONFIGURACOES_FERRAMENTAS_DETALHADO.md](docs/ativos/CONFIGURACOES_FERRAMENTAS_DETALHADO.md)
-- Documento tecnico: [docs/ativos/TechnicalDoc.md](docs/ativos/TechnicalDoc.md)
-- Cobertura de testes: [docs/relatorios/INTEGRATION_TEST_COVERAGE.md](docs/relatorios/INTEGRATION_TEST_COVERAGE.md)
-- Testes manuais pendentes: [docs/relatorios/TESTES_MANUAIS_PENDENTES_2026-03-05.md](docs/relatorios/TESTES_MANUAIS_PENDENTES_2026-03-05.md)
-- Pendencias da proxima versao: [docs/pendencias/PENDENCIAS_UI_E_HUB.md](docs/pendencias/PENDENCIAS_UI_E_HUB.md)
-- Apresentacao nao tecnica (curriculo/LinkedIn): [docs/ativos/APRESENTACAO_DEVTOOLS_LINKEDIN.md](docs/ativos/APRESENTACAO_DEVTOOLS_LINKEDIN.md)
+- Nova fase: [docs/README.md](docs/README.md)
+- Arquitetura canonica atual: [docs/architecture.md](docs/architecture.md)
+- Registro de demandas (nova fase): [docs/controle/REGISTRO_DEMANDAS.md](docs/controle/REGISTRO_DEMANDAS.md)
+- Historico/documentacao anterior: [legacy-v1/docs/README.md](legacy-v1/docs/README.md)
 
 ## Licenca
 

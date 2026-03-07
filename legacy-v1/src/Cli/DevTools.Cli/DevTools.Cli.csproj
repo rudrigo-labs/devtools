@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\\..\\Core\\DevTools.Core\\DevTools.Core.csproj" />
+    <ProjectReference Include="..\\..\\Tools\\DevTools.Harvest\\DevTools.Harvest.csproj" />
+    <ProjectReference Include="..\\..\\Tools\\DevTools.Image\\DevTools.Image.csproj" />
+    <ProjectReference Include="..\\..\\Tools\\DevTools.Migrations\\DevTools.Migrations.csproj" />
+    <ProjectReference Include="..\\..\\Tools\\DevTools.Ngrok\\DevTools.Ngrok.csproj" />
+    <ProjectReference Include="..\\..\\Tools\\DevTools.Notes\\DevTools.Notes.csproj" />
+    <ProjectReference Include="..\\..\\Tools\\DevTools.Organizer\\DevTools.Organizer.csproj" />
+    <ProjectReference Include="..\\..\\Tools\\DevTools.Rename\\DevTools.Rename.csproj" />
+    <ProjectReference Include="..\\..\\Tools\\DevTools.SearchText\\DevTools.SearchText.csproj" />
+    <ProjectReference Include="..\\..\\Tools\\DevTools.Snapshot\\DevTools.Snapshot.csproj" />
+    <ProjectReference Include="..\\..\\Tools\\DevTools.SSHTunnel\\DevTools.SSHTunnel.csproj" />
+    <ProjectReference Include="..\\..\\Tools\\DevTools.Utf8Convert\\DevTools.Utf8Convert.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.2" />
+  </ItemGroup>
+
+</Project>
