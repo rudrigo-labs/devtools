@@ -1,4 +1,4 @@
-﻿# REGRAS ESPECIFICAS DO PROJETO - DEVTOOLS
+# REGRAS ESPECIFICAS DO PROJETO - DEVTOOLS
 
 Estas regras descrevem a estrutura oficial do projeto DevTools.
 
@@ -12,15 +12,18 @@ Todos os projetos devem estar dentro de:
 
 Organizacao atual:
 
-- `src/Presentation/` (WPF e camada de interface)
+- `src/Hosts/` (host da interface)
+- `src/Core/` (contratos e tipos compartilhados)
 - `src/Tools/` (bibliotecas de cada ferramenta)
-- `src/Shared/` (componentes compartilhados, quando existir)
+- `src/Infrastructure/` (implementacoes tecnicas, persistencia e integracoes)
 
 ## Regra de arquitetura
 
-- A camada WPF orquestra e chama as ferramentas.
+- O Host WPF orquestra e chama as ferramentas.
 - Logica de dominio deve ficar nas bibliotecas de ferramenta.
-- UI nao deve virar dominio.
+- Host/UI nao deve virar dominio.
+- Fluxo oficial: `Host -> Tool -> Infrastructure -> Database`.
+- Escopo atual: sem CLI nesta fase.
 
 ## Regra de frameworks
 
