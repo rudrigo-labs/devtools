@@ -44,3 +44,8 @@
 - Decisao: consolidar tutorial operacional unico para criacao de novas ferramentas.
 - Motivo: padronizar onboarding tecnico e reduzir variacao de implementacao entre demandas.
 - Impacto tecnico: fluxo de criacao passa a ter checklist oficial, com rastreabilidade obrigatoria no pacote minimo da demanda.
+
+## 2026-03-07 03:04
+- Decisao: importar base visual IDE style do legado para o novo Host WPF de forma enxuta e modular.
+- Motivo: recuperar consistencia de UI (tema, action bar e validacao inline) sem reintroduzir acoplamentos antigos.
+- Impacto tecnico: Host passa a operar com `MainWindow` modular + `SnapshotWorkspaceView`, mantendo regra de orquestracao (UI chama Tool/Service, sem dominio no shell).

@@ -1,0 +1,17 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <sys:Double x:Key="DevToolsSpacing.LabelToField">8</sys:Double>
+    <sys:Double x:Key="DevToolsSpacing.FieldGroup">16</sys:Double>
+    <sys:Double x:Key="DevToolsFormMaxWidth">700</sys:Double>
+    <sys:Double x:Key="DevToolsContentMaxWidth">1400</sys:Double>
+    <sys:Double x:Key="DevToolsActionButtonWidth">180</sys:Double>
+    <GridLength x:Key="DevToolsHeaderHeight">48</GridLength>
+    <GridLength x:Key="DevToolsFooterHeight">72</GridLength>
+    <sys:Double x:Key="DevToolsSpacing.ContentVertical">24</sys:Double>
+    <sys:Double x:Key="DevToolsSpacing.ContentHorizontal">24</sys:Double>
+    <sys:Double x:Key="DevToolsSpacing.LabelBottom">6</sys:Double>
+    <Thickness x:Key="DevToolsSpacing.LabelMargin">0,0,0,6</Thickness>
+    <Thickness x:Key="DevToolsContentMargin">24</Thickness>
+</ResourceDictionary>
+

@@ -1,0 +1,27 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{DynamicResource  WindowBackgroundColor}"/>
+    <SolidColorBrush x:Key="ControlBackgroundBrush" Color="{DynamicResource  ControlBackgroundColor}"/>
+    <SolidColorBrush x:Key="ControlHighlightBrush" Color="{DynamicResource  ControlHighlightColor}"/>
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="{DynamicResource  PrimaryTextColor}"/>
+    <SolidColorBrush x:Key="SecondaryTextBrush" Color="{DynamicResource  SecondaryTextColor}"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{DynamicResource  AccentColor}"/>
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{DynamicResource  AccentHoverColor}"/>
+    <SolidColorBrush x:Key="ErrorBrush" Color="{DynamicResource  ErrorColor}"/>
+    <SolidColorBrush x:Key="DevToolsBrushBorder" Color="{DynamicResource  DevToolsColorBorder}"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="{DynamicResource  BorderColor}"/>
+    <SolidColorBrush x:Key="DropdownBackgroundBrush" Color="#2D2D2D"/>
+    <SolidColorBrush x:Key="DropdownForegroundBrush" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="DevToolsWindowBackground" Color="{DynamicResource  DevToolsWindowBackgroundColor}"/>
+    <SolidColorBrush x:Key="DevToolsSurface" Color="{DynamicResource  DevToolsSurfaceColor}"/>
+    <SolidColorBrush x:Key="DevToolsBorder" Color="{DynamicResource  DevToolsBorderColor}"/>
+    <SolidColorBrush x:Key="DevToolsAccent" Color="{DynamicResource  DevToolsAccentColor}"/>
+    <SolidColorBrush x:Key="DevToolsAccentHover" Color="{DynamicResource  DevToolsAccentHoverColor}"/>
+    <SolidColorBrush x:Key="DevToolsTextPrimary" Color="{DynamicResource  DevToolsPrimaryTextColor}"/>
+    <SolidColorBrush x:Key="DevToolsTextSecondary" Color="{DynamicResource  DevToolsSecondaryTextColor}"/>
+    <SolidColorBrush x:Key="DevToolsStatusIdle" Color="{DynamicResource  DevToolsStatusIdleColor}"/>
+    <SolidColorBrush x:Key="DevToolsStatusOk" Color="{DynamicResource  DevToolsStatusOkColor}"/>
+    <SolidColorBrush x:Key="DevToolsStatusError" Color="{DynamicResource  DevToolsStatusErrorColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignCardBackground" Color="{DynamicResource MaterialDesignCardBackgroundColor}"/>
+</ResourceDictionary>
+
