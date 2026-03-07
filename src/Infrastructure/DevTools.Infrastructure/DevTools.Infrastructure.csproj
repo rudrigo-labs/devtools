@@ -8,12 +8,15 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\DevTools.Core\DevTools.Core.csproj" />
-    <ProjectReference Include="..\..\Tools\DevTools.Harvest\DevTools.Harvest.csproj" />
-    <ProjectReference Include="..\..\Tools\DevTools.Notes\DevTools.Notes.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.Snapshot\DevTools.Snapshot.csproj" />
   </ItemGroup>
 
 </Project>
