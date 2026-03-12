@@ -1,0 +1,169 @@
+<UserControl x:Class="DevTools.Host.Wpf.Views.RenameWorkspaceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:DevTools.Host.Wpf.Components">
+
+    <Grid x:Name="WorkspaceRoot" Margin="0">
+        <Grid HorizontalAlignment="Stretch"
+              VerticalAlignment="Top"
+              Margin="0,8,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ==================== TOOL HEADER ==================== -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                <TextBlock Text="Rename"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource DevToolsTextPrimary}"/>
+                <TextBlock Text="Renomeia identificadores e namespaces em lote em todos os arquivos do projeto."
+                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                           FontSize="12"
+                           Margin="0,4,0,0"
+                           TextWrapping="Wrap"/>
+                <Border Height="1"
+                        Background="{DynamicResource DevToolsBrushBorder}"
+                        Margin="0,10,0,0"/>
+            </StackPanel>
+
+            <!-- ==================== ACTION BAR ==================== -->
+            <c:ActionBarControl Grid.Row="1"
+                                x:Name="Actions"
+                                ShowNew="False"
+                                ShowSave="True"
+                                ShowDelete="False"
+                                ShowCancel="True"
+                                ActionSave="ActionSave_Click"
+                                ActionCancel="ActionCancel_Click"/>
+
+            <!-- ==================== TOOL BODY ==================== -->
+            <ScrollViewer Grid.Row="2"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Margin="0,4,0,0">
+
+                    <!-- ===== Substituição ===== -->
+                    <TextBlock Text="Substituição"
+                               Style="{StaticResource DevToolsCardTitle}"
+                               Margin="0,0,0,10"/>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Texto antigo *"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="OldTextInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     ToolTip="Identificador ou namespace a substituir. Ex: OldCompany.Module"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Texto novo *"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="NewTextInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     ToolTip="Novo identificador ou namespace. Ex: NewCompany.Module"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- ===== Pasta raiz ===== -->
+                    <c:PathSelector x:Name="RootPathSelector"
+                                    Title="Pasta raiz do projeto *"
+                                    IsFolderPicker="True"
+                                    Margin="0,0,0,12"/>
+
+                    <!-- ===== Modo ===== -->
+                    <TextBlock Text="Modo"
+                               Style="{StaticResource DevToolsCardTitle}"
+                               Margin="0,4,0,10"/>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <RadioButton x:Name="ModeGeneralRadio"
+                                     Grid.Column="0"
+                                     Content="Geral"
+                                     Style="{StaticResource DevToolsRadioButton}"
+                                     IsChecked="True"
+                                     GroupName="RenameMode"
+                                     ToolTip="Substitui em todos os arquivos, nomes de arquivo e pastas."/>
+
+                        <RadioButton x:Name="ModeNamespaceRadio"
+                                     Grid.Column="2"
+                                     Content="Somente namespace"
+                                     Style="{StaticResource DevToolsRadioButton}"
+                                     GroupName="RenameMode"
+                                     ToolTip="Substitui apenas em .cs, .csproj, .sln e renomeia pastas que correspondem ao namespace."/>
+                    </Grid>
+
+                    <!-- ===== Filtros de arquivo ===== -->
+                    <TextBlock Text="Filtros de arquivo"
+                               Style="{StaticResource DevToolsCardTitle}"
+                               Margin="0,4,0,10"/>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="Diretórios ignorados (separados por vírgula)"
+                                   Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="IgnoredDirectoriesInput"
+                                 Style="{StaticResource DevToolsTextInput}"
+                                 ToolTip="Ex: bin, obj, .git, node_modules"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="Extensões ignoradas (separadas por vírgula)"
+                                   Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="IgnoredExtensionsInput"
+                                 Style="{StaticResource DevToolsTextInput}"
+                                 ToolTip="Ex: .dll, .exe, .png, .jpg"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="Extensões permitidas (separadas por vírgula)"
+                                   Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="IncludedExtensionsInput"
+                                 Style="{StaticResource DevToolsTextInput}"
+                                 ToolTip="Deixe vazio para processar todas as não ignoradas. Ex: .cs, .csproj, .json"/>
+                    </StackPanel>
+
+                    <!-- ===== Opções ===== -->
+                    <TextBlock Text="Opções"
+                               Style="{StaticResource DevToolsCardTitle}"
+                               Margin="0,4,0,10"/>
+
+                    <CheckBox x:Name="ValidateDotNetCheck"
+                              Content="Validar projeto .NET (exige .csproj, .sln ou .slnx na pasta raiz)"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              IsChecked="True"
+                              Margin="0,0,0,8"
+                              ToolTip="Antes de executar, verifica se existe um arquivo .csproj, .sln ou .slnx na pasta raiz. Desmarque para executar em qualquer diretório."/>
+
+                    <CheckBox x:Name="DryRunCheck"
+                              Content="Simulação (sem alterar arquivos)"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              Margin="0,0,0,12"
+                              ToolTip="Mostra o que seria alterado sem modificar nenhum arquivo."/>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ==================== STATUS ==================== -->
+            <TextBlock x:Name="ExecutionStatusText"
+                       Grid.Row="3"
+                       Margin="0,10,0,0"
+                       Foreground="{DynamicResource DevToolsTextSecondary}"/>
+        </Grid>
+    </Grid>
+</UserControl>

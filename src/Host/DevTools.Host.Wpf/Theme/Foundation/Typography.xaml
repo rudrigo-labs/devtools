@@ -1,0 +1,11 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <sys:Double x:Key="DevToolsFontSize.WindowTitle">18</sys:Double>
+    <sys:Double x:Key="DevToolsFontSize.SectionTitle">16</sys:Double>
+    <sys:Double x:Key="DevToolsFontSize.Label">13</sys:Double>
+    <sys:Double x:Key="DevToolsFontSize.Input">14</sys:Double>
+    <sys:Double x:Key="DevToolsFontSize.Button">14</sys:Double>
+    <sys:Double x:Key="DevToolsFontSize.Status">13</sys:Double>
+</ResourceDictionary>
+

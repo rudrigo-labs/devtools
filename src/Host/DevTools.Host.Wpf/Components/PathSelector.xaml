@@ -1,0 +1,45 @@
+﻿<UserControl x:Class="DevTools.Host.Wpf.Components.PathSelector"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="400">
+    <StackPanel>
+        <TextBlock x:Name="TitleBlock"
+                   Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource DevToolsInputLabel}">
+                    <Style.Triggers>
+                        <Trigger Property="Text" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="Text" Value="">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="PathInput"
+                     Text="{Binding SelectedPath, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource DevToolsTextInput}"
+                     IsReadOnly="True"
+                     ToolTip="{Binding SelectedPath, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}"/>
+            <Button Grid.Column="1"
+                    Content="Procurar"
+                    Style="{StaticResource DevToolsBrowseButton}"
+                    Click="Browse_Click"
+                    ToolTip="Selecionar pasta/arquivo"
+                    MinWidth="112"
+                    Padding="12,8"
+                    Margin="8,0,0,0"/>
+        </Grid>
+    </StackPanel>
+</UserControl>
+
+

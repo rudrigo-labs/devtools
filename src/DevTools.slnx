@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/Core/">
+    <Project Path="Core/DevTools.Core/DevTools.Core.csproj" />
+  </Folder>
+  <Folder Name="/Hosts/">
+    <Project Path="Host/DevTools.Host.Wpf/DevTools.Host.Wpf.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="Infrastructure/DevTools.Infrastructure/DevTools.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Tools/">
+    <Project Path="Tools/DevTools.Snapshot/DevTools.Snapshot.csproj" />
+    <Project Path="Tools/DevTools.Rename/DevTools.Rename.csproj" />
+    <Project Path="Tools/DevTools.Harvest/DevTools.Harvest.csproj" />
+  </Folder>
+</Solution>

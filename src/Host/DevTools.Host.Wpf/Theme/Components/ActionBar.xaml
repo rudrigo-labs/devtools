@@ -1,0 +1,52 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style x:Key="ActionBarButton" TargetType="Button">
+        <Setter Property="Width" Value="100"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Margin" Value="5"/>
+        <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="Background" Value="{DynamicResource DevToolsSurface}"/>
+        <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource DevToolsBrushBorder}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="4"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ControlHighlightBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Opacity" Value="0.6"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ActionBarNewButton" TargetType="Button" BasedOn="{StaticResource ActionBarButton}">
+    </Style>
+
+    <Style x:Key="ActionBarSaveButton" TargetType="Button" BasedOn="{StaticResource ActionBarButton}">
+    </Style>
+
+    <Style x:Key="ActionBarDeleteButton" TargetType="Button" BasedOn="{StaticResource ActionBarButton}">
+    </Style>
+
+    <Style x:Key="ActionBarCancelButton" TargetType="Button" BasedOn="{StaticResource ActionBarButton}">
+    </Style>
+
+</ResourceDictionary>

@@ -1,0 +1,186 @@
+<UserControl x:Class="DevTools.Host.Wpf.Views.HarvestWorkspaceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:DevTools.Host.Wpf.Components">
+
+    <Grid x:Name="WorkspaceRoot" Margin="0">
+        <Grid HorizontalAlignment="Stretch"
+              VerticalAlignment="Top"
+              Margin="0,8,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ==================== TOOL HEADER ==================== -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                <TextBlock Text="Harvest"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource DevToolsTextPrimary}"/>
+                <TextBlock Text="Minera código reutilizável em projetos .NET. Identifica utilitários, helpers e extension methods por relevância."
+                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                           FontSize="12"
+                           Margin="0,4,0,0"
+                           TextWrapping="Wrap"/>
+                <Border Height="1"
+                        Background="{DynamicResource DevToolsBrushBorder}"
+                        Margin="0,10,0,0"/>
+            </StackPanel>
+
+            <!-- ==================== ACTION BAR ==================== -->
+            <c:ActionBarControl Grid.Row="1"
+                                x:Name="Actions"
+                                ShowNew="True"
+                                ShowSave="True"
+                                ShowDelete="True"
+                                ShowCancel="True"
+                                ActionNew="ActionNew_Click"
+                                ActionSave="ActionSave_Click"
+                                ActionDelete="ActionDelete_Click"
+                                ActionCancel="ActionCancel_Click"/>
+
+            <!-- ==================== TOOL BODY ==================== -->
+            <ScrollViewer Grid.Row="2"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Margin="0,4,0,0">
+
+                    <!-- Seletor de configuração (condicional) -->
+                    <StackPanel x:Name="ConfigurationsLabel"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="Configurações salvas"
+                                   Style="{StaticResource DevToolsCardTitle}"/>
+                        <Border Margin="8,0,0,0"
+                                VerticalAlignment="Center"
+                                Width="16" Height="16"
+                                CornerRadius="8"
+                                BorderThickness="1"
+                                BorderBrush="{DynamicResource DevToolsTextSecondary}"
+                                ToolTipService.InitialShowDelay="200"
+                                ToolTipService.ShowDuration="30000">
+                            <Border.ToolTip>
+                                <ToolTip Placement="Right" MaxWidth="360">
+                                    <TextBlock TextWrapping="Wrap"
+                                               Text="Escolha uma configuração salva ou selecione 'Configurar manualmente' para preencher os campos e executar sem usar configuração salva."/>
+                                </ToolTip>
+                            </Border.ToolTip>
+                            <TextBlock Text="?"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                        </Border>
+                    </StackPanel>
+                    <ComboBox x:Name="ConfigurationsCombo"
+                              Margin="0,8,0,16"
+                              Style="{StaticResource DevToolsSelectInput}"
+                              SelectionChanged="ConfigurationsCombo_SelectionChanged"
+                              DisplayMemberPath="Name"/>
+
+                    <!-- ===== Caminhos ===== -->
+                    <c:PathSelector x:Name="RootPathSelector"
+                                    Title="Pasta de origem *"
+                                    IsFolderPicker="True"
+                                    Margin="0,0,0,12"/>
+
+                    <c:PathSelector x:Name="OutputPathSelector"
+                                    Title="Pasta de destino *"
+                                    IsFolderPicker="True"
+                                    Margin="0,0,0,12"/>
+
+                    <!-- ===== Filtros de arquivo ===== -->
+                    <TextBlock Text="Filtros de arquivo"
+                               Style="{StaticResource DevToolsCardTitle}"
+                               Margin="0,4,0,10"/>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="Diretórios ignorados (separados por vírgula)"
+                                   Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="IgnoredDirectoriesInput"
+                                 Style="{StaticResource DevToolsTextInput}"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="Extensões ignoradas (separadas por vírgula)"
+                                   Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="IgnoredExtensionsInput"
+                                 Style="{StaticResource DevToolsTextInput}"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="Extensões permitidas (separadas por vírgula)"
+                                   Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="IncludedExtensionsInput"
+                                 Style="{StaticResource DevToolsTextInput}"
+                                 ToolTip="Deixe vazio para processar todas as não ignoradas. Ex: .cs, .ts, .js"/>
+                    </StackPanel>
+
+                    <!-- ===== Execução ===== -->
+                    <TextBlock Text="Execução"
+                               Style="{StaticResource DevToolsCardTitle}"
+                               Margin="0,4,0,10"/>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Score mínimo"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="MinScoreInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     ToolTip="Arquivos com score abaixo deste valor são descartados. Padrão: 0 (inclui todos)."/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2"
+                                    VerticalAlignment="Bottom">
+                            <CheckBox x:Name="CopyFilesCheck"
+                                      Content="Copiar arquivos para pasta de destino"
+                                      Style="{StaticResource DevToolsCheckBox}"
+                                      IsChecked="True"
+                                      ToolTip="Quando marcado, copia os arquivos selecionados para a pasta de destino preservando a estrutura de diretórios. Quando desmarcado, apenas gera o relatório (dry run)."/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- ===== Campos de configuração (modo Configuração) ===== -->
+                    <Grid x:Name="ConfigurationMetadataSection"
+                          Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Nome"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="NameInput"
+                                     Style="{StaticResource DevToolsTextInput}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Descrição"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="DescriptionInput"
+                                     Style="{StaticResource DevToolsTextInput}"/>
+                        </StackPanel>
+                    </Grid>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ==================== STATUS ==================== -->
+            <TextBlock x:Name="ExecutionStatusText"
+                       Grid.Row="3"
+                       Margin="0,10,0,0"
+                       Foreground="{DynamicResource DevToolsTextSecondary}"/>
+        </Grid>
+    </Grid>
+</UserControl>
