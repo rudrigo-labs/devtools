@@ -141,6 +141,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<INgrokFacade, NgrokFacade>();
 
         // Host WPF
+        services.AddSingleton<HomeLauncherView>();
         services.AddSingleton<RenameWorkspaceView>();
         services.AddSingleton<SnapshotWorkspaceView>();
         services.AddSingleton<HarvestWorkspaceView>();

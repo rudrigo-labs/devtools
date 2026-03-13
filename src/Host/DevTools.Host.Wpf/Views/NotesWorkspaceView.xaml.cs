@@ -63,6 +63,22 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         await ReloadEntitiesAsync().ConfigureAwait(true);
     }
 
+    public void ActivateExecutionMode()
+    {
+        if (_currentEntity is null)
+            CreateNewEntity();
+
+        SetMode(NotesWorkspaceMode.Execution);
+    }
+
+    public void ActivateConfigurationMode()
+    {
+        if (_currentEntity is null)
+            CreateNewEntity();
+
+        SetMode(NotesWorkspaceMode.Configuration);
+    }
+
     // ── Atalho Ctrl+S ────────────────────────────────────────────────────────
 
     protected override void OnPreviewKeyDown(KeyEventArgs e)
@@ -88,7 +104,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
     {
         if (_isBusy) return;
         _currentMode = mode;
-        ExecutionPanel.Visibility     = mode == NotesWorkspaceMode.Execution     ? Visibility.Visible : Visibility.Collapsed;
+        NotesPanel.Visibility         = mode == NotesWorkspaceMode.Execution     ? Visibility.Visible : Visibility.Collapsed;
         ConfigurationPanel.Visibility = mode == NotesWorkspaceMode.Configuration ? Visibility.Visible : Visibility.Collapsed;
         ApplyModeState();
     }
@@ -653,8 +669,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         Actions.ShowSave = inConfiguration || inEditor;
         Actions.ShowDelete = inConfiguration;
         Actions.ShowCancel = inConfiguration || inEditor;
-        Actions.Visibility = Visibility.Collapsed;
-        ConfigurationModeBar.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+        Actions.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
 
         Actions.NewText = "Novo";
         Actions.SaveText = inConfiguration ? "Salvar" : "Salvar nota";

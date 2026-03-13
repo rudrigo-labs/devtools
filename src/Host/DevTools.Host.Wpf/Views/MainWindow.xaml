@@ -143,7 +143,7 @@
                             <TextBlock Text="DevTools"
                                        Style="{StaticResource DevToolsSectionTitle}"/>
                         </StackPanel>
-                        <TextBlock Text="Ferramentas"
+                        <TextBlock Text="TOOLS"
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    FontSize="11"
                                    Margin="0,6,0,0"/>
@@ -157,10 +157,15 @@
 
                     <!-- Itens de navegação -->
                     <StackPanel DockPanel.Dock="Top">
+                        <Button x:Name="NavHome"
+                                Content="Home"
+                                Tag="Home"
+                                Style="{StaticResource SidebarNavButtonActiveStyle}"
+                                Click="NavButton_Click"/>
                         <Button x:Name="NavSnapshot"
                                 Content="Snapshot"
                                 Tag="Snapshot"
-                                Style="{StaticResource SidebarNavButtonActiveStyle}"
+                                Style="{StaticResource SidebarNavButtonStyle}"
                                 Click="NavButton_Click"/>
                         <Button x:Name="NavRename"
                                 Content="Rename"
@@ -234,7 +239,7 @@
                 <Border BorderBrush="{DynamicResource DevToolsBrushBorder}"
                         BorderThickness="0,0,0,1"/>
                 <TextBlock x:Name="ActiveToolLabel"
-                           Text="Snapshot"
+                           Text="Home"
                            Foreground="{DynamicResource DevToolsTextSecondary}"
                            VerticalAlignment="Center"
                            Margin="16,0,0,0"/>

@@ -48,8 +48,6 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
     private void SetMode(NgrokWorkspaceMode mode, string status)
     {
         _currentMode = mode;
-        ExecutionPanel.Visibility = mode == NgrokWorkspaceMode.Execution ? Visibility.Visible : Visibility.Collapsed;
-        ConfigurationPanel.Visibility = mode == NgrokWorkspaceMode.Configuration ? Visibility.Visible : Visibility.Collapsed;
         ExecutionStatusText.Text = status;
         ApplyModeState();
     }
@@ -245,10 +243,12 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
             {
                 case NgrokAction.ListTunnels:
                     var tunnels = data.Tunnels ?? [];
-                    
+
+                    TunnelListPanel.Visibility = Visibility.Visible;
                     TunnelList.ItemsSource = tunnels;
+                    TunnelListHeader.Text = tunnels.Count == 0 ? "Tuneis ativos" : $"Tuneis ativos ({tunnels.Count})";
                     EmptyStateText.Visibility = tunnels.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-                    
+
                     ExecutionStatusText.Text = $"Listados {tunnels.Count} túnel(is).";
                     break;
 
@@ -345,6 +345,9 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         var inConfiguration = _currentMode == NgrokWorkspaceMode.Configuration;
         var hasPersistedConfiguration = _currentEntity is not null && !string.IsNullOrWhiteSpace(_currentEntity.Id);
 
+        ConfigurationModeHint.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+        ConfigurationMetadataSection.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+
         WorkspaceTitleText.Text = inConfiguration ? "Ngrok - Configuracao" : "Ngrok";
         WorkspaceSubtitleText.Text = inConfiguration
             ? "Salve uma configuracao com token e caminhos para reutilizar."
@@ -366,3 +369,4 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         Actions.CanCancel = inConfiguration;
     }
 }
+

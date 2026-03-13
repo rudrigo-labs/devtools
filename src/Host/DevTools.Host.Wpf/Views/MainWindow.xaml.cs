@@ -9,12 +9,22 @@ namespace DevTools.Host.Wpf.Views;
 public partial class MainWindow : Window
 {
     private const uint MonitorDefaultToNearest = 0x00000002;
+    private enum WorkspaceIntent { Default, Configuration, Execution }
 
     // Mapa de tool tag -> UserControl factory. Adicionar novas tools aqui.
     private readonly Dictionary<string, Func<System.Windows.Controls.UserControl>> _toolRegistry;
+    private static readonly HashSet<string> ConfigurationFirstTools = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Snapshot",
+        "Migrations",
+        "Utf8Convert",
+        "Notes"
+    };
     private string _activeToolTag = string.Empty;
+    private WorkspaceIntent _activeIntent = WorkspaceIntent.Default;
 
     public MainWindow(
+        HomeLauncherView homeLauncherView,
         SnapshotWorkspaceView snapshotWorkspaceView,
         RenameWorkspaceView renameWorkspaceView,
         HarvestWorkspaceView harvestWorkspaceView,
@@ -31,6 +41,7 @@ public partial class MainWindow : Window
 
         _toolRegistry = new Dictionary<string, Func<System.Windows.Controls.UserControl>>(StringComparer.OrdinalIgnoreCase)
         {
+            ["Home"]        = () => homeLauncherView,
             ["Snapshot"]    = () => snapshotWorkspaceView,
             ["Rename"]      = () => renameWorkspaceView,
             ["Harvest"]     = () => harvestWorkspaceView,
@@ -44,10 +55,13 @@ public partial class MainWindow : Window
             ["Notes"]       = () => notesWorkspaceView,
         };
 
+        homeLauncherView.OpenToolRequested += toolTag =>
+            ActivateTool(toolTag, WorkspaceIntent.Configuration);
+
         Loaded += (_, _) =>
         {
             WindowState = WindowState.Maximized;
-            ActivateTool("Snapshot");
+            ActivateTool("Home");
         };
     }
 
@@ -60,21 +74,66 @@ public partial class MainWindow : Window
         if (sender is not System.Windows.Controls.Button btn || btn.Tag is not string tag)
             return;
 
-        ActivateTool(tag);
+        if (string.Equals(tag, "Home", StringComparison.OrdinalIgnoreCase))
+        {
+            ActivateTool("Home");
+            return;
+        }
+
+        var intent = ConfigurationFirstTools.Contains(tag)
+            ? WorkspaceIntent.Configuration
+            : WorkspaceIntent.Default;
+
+        ActivateTool(tag, intent);
     }
 
-    private void ActivateTool(string tag)
+    private void ActivateTool(string tag, WorkspaceIntent intent = WorkspaceIntent.Default)
     {
-        if (string.Equals(_activeToolTag, tag, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(_activeToolTag, tag, StringComparison.OrdinalIgnoreCase) && _activeIntent == intent)
             return;
 
         if (!_toolRegistry.TryGetValue(tag, out var factory))
             return;
 
+        var workspace = factory();
+
+        switch (workspace)
+        {
+            case SnapshotWorkspaceView snapshot:
+                if (intent == WorkspaceIntent.Configuration) snapshot.ActivateConfigurationMode();
+                else if (intent == WorkspaceIntent.Execution) snapshot.ActivateExecutionMode();
+                break;
+            case MigrationsWorkspaceView migrations:
+                if (intent == WorkspaceIntent.Configuration) migrations.ActivateConfigurationMode();
+                else if (intent == WorkspaceIntent.Execution) migrations.ActivateExecutionMode();
+                break;
+            case NotesWorkspaceView notes:
+                if (intent == WorkspaceIntent.Configuration) notes.ActivateConfigurationMode();
+                else if (intent == WorkspaceIntent.Execution) notes.ActivateExecutionMode();
+                break;
+        }
+
         _activeToolTag = tag;
-        WorkspaceHost.Content = factory();
-        ActiveToolLabel.Text = tag;
-        MainStatusText.Text = $"{tag} ativo.";
+        _activeIntent = intent;
+        WorkspaceHost.Content = workspace;
+
+        if (string.Equals(tag, "Home", StringComparison.OrdinalIgnoreCase))
+        {
+            ActiveToolLabel.Text = "Home";
+            MainStatusText.Text = "Selecione uma ferramenta para começar.";
+        }
+        else
+        {
+            var suffix = intent switch
+            {
+                WorkspaceIntent.Configuration => "Configuration",
+                WorkspaceIntent.Execution => "Execution",
+                _ => string.Empty
+            };
+
+            ActiveToolLabel.Text = string.IsNullOrWhiteSpace(suffix) ? tag : $"{tag} {suffix}";
+            MainStatusText.Text = $"{ActiveToolLabel.Text} ativo.";
+        }
 
         UpdateNavStyles();
     }

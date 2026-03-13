@@ -31,347 +31,404 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="0,4,0,0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Grid x:Name="WorkspaceRoot" Margin="0">
+        <Grid HorizontalAlignment="Stretch"
+              VerticalAlignment="Top"
+              Margin="0,4,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- HEADER -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,12">
-            <TextBlock Text="Notes"
-                       FontSize="18" FontWeight="SemiBold"
-                       Foreground="{DynamicResource DevToolsTextPrimary}"/>
-            <TextBlock Text="Crie e edite notas em .md ou .txt, salvas localmente e sincronizadas com o Google Drive."
-                       Foreground="{DynamicResource DevToolsTextSecondary}"
-                       FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap"/>
-            <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,10,0,0"/>
-        </StackPanel>        <!-- ACTION BAR (desativada para Notes; a configuracao usa barra propria) -->
-        <c:ActionBarControl Grid.Row="1" x:Name="Actions"
-                            Visibility="Collapsed"
-                            ShowNew="True" ShowSave="True" ShowDelete="True" ShowCancel="True"
-                            ShowHelp="True"
-                            HelpText="Use a lista para abrir notas. Na configuracao, ajuste pasta local e integracao com Google Drive."
-                            ActionNew="ActionNew_Click"
-                            ActionSave="ActionSave_Click"
-                            ActionDelete="ActionDelete_Click"
-                            ActionCancel="ActionCancel_Click"/>
+            <!-- ==================== TOOL HEADER ==================== -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                <TextBlock x:Name="WorkspaceTitleText"
+                           Text="Notes"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource DevToolsTextPrimary}"/>
+                <TextBlock x:Name="WorkspaceSubtitleText"
+                           Text="Crie e edite notas em .md ou .txt, salvas localmente e sincronizadas com o Google Drive."
+                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                           FontSize="12"
+                           Margin="0,4,0,0"
+                           TextWrapping="Wrap"/>
+                <Border Height="1"
+                        Background="{DynamicResource DevToolsBrushBorder}"
+                        Margin="0,10,0,0"/>
+            </StackPanel>
 
-        <!-- SELETOR DE CONFIGURAÇÃO + MODO -->        <!-- Barra de configuracao -->        <!-- Barra de configuracao unica -->
-        <Grid x:Name="ConfigurationModeBar" Grid.Row="2" Margin="0,0,0,12" Visibility="Collapsed">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0"
-                       Text="Configuracao do Notes"
-                       VerticalAlignment="Center"
-                       FontWeight="SemiBold"
-                       Foreground="{DynamicResource DevToolsTextPrimary}"/>
-            <ComboBox x:Name="ConfigurationsCombo"
-                      Grid.Column="1"
-                      Visibility="Collapsed"
-                      Style="{StaticResource DevToolsSelectInput}"
-                      DisplayMemberPath="Label"
-                      SelectionChanged="ConfigurationsCombo_SelectionChanged"/>
-            <Button Grid.Column="3" Content="Salvar"
-                    Style="{StaticResource DevToolsPrimaryButton}"
-                    Click="ActionSave_Click"/>
-            <Button Grid.Column="5" Content="Voltar para notas"
-                    Style="{StaticResource DevToolsSecondaryButton}"
-                    Click="SwitchToExecution_Click"/>
-        </Grid>
+            <!-- ==================== ACTION BAR ==================== -->
+            <c:ActionBarControl Grid.Row="1"
+                                x:Name="Actions"
+                                ShowNew="True"
+                                ShowSave="True"
+                                ShowDelete="True"
+                                ShowCancel="True"
+                                ShowHelp="True"
+                                HelpText="Use Configurar para definir pasta local e Google Drive. Use Nova nota para criar e editar notas."
+                                ActionNew="ActionNew_Click"
+                                ActionSave="ActionSave_Click"
+                                ActionDelete="ActionDelete_Click"
+                                ActionCancel="ActionCancel_Click"/>
 
-        <!-- BODY -->
-        <Grid Grid.Row="3">
+            <!-- ==================== TOOL BODY ==================== -->
+            <Grid Grid.Row="2">
 
-            <!-- ═══ MODO NOTAS ═══ -->
-            <Grid x:Name="ExecutionPanel">
+                <!-- MODO NOTAS: lista + editor -->
+                <Grid x:Name="NotesPanel">
 
-                <!-- LISTA DE NOTAS -->
-                <Grid x:Name="ListGrid">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                    <!-- LISTA DE NOTAS -->
+                    <Grid x:Name="ListGrid">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0"
-                               x:Name="NotesStoragePathHint"
-                               Foreground="{DynamicResource DevToolsTextSecondary}"
-                               FontSize="11"
-                               TextTrimming="CharacterEllipsis"
-                               Margin="0,0,0,8"
-                               ToolTipService.ShowDuration="60000"/>
+                        <TextBlock Grid.Row="0"
+                                   x:Name="NotesStoragePathHint"
+                                   Foreground="{DynamicResource DevToolsTextSecondary}"
+                                   FontSize="11"
+                                   TextTrimming="CharacterEllipsis"
+                                   Margin="0,0,0,8"
+                                   ToolTipService.ShowDuration="60000"/>
 
-                    <ListBox x:Name="NotesList" Grid.Row="1"
-                             Background="Transparent" BorderThickness="0"
-                             Foreground="{DynamicResource DevToolsTextPrimary}"
-                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                             ScrollViewer.VerticalScrollBarVisibility="Auto"
-                             KeyDown="NotesList_KeyDown"
-                             MouseDoubleClick="NotesList_MouseDoubleClick">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderThickness="0,0,0,1"
-                                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                                        Padding="4,10">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Text="{Binding Title}"
-                                                       FontSize="14" FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource DevToolsTextPrimary}"
-                                                       TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock Text="{Binding UpdatedUtc, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}"
-                                                       FontSize="11"
-                                                       Foreground="{DynamicResource DevToolsTextSecondary}"
-                                                       Margin="0,2,0,0"/>
-                                        </StackPanel>
-                                        <Button Grid.Column="1"
-                                                Style="{StaticResource AppBarButtonStyle}"
-                                                Width="32" Height="32"
-                                                ToolTip="Excluir nota"
-                                                Click="DeleteItemButton_Click"
-                                                Tag="{Binding FileName}"
-                                                CommandParameter="{Binding Title}"
-                                                Margin="8,0,0,0">
-                                            <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
-                                        </Button>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                        <ListBox.ItemContainerStyle>
-                            <Style TargetType="ListBoxItem">
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                <EventSetter Event="MouseDoubleClick" Handler="NotesListItem_MouseDoubleClick"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="ListBoxItem">
-                                            <Border Background="{TemplateBinding Background}" Padding="2">
-                                                <ContentPresenter/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#15FFFFFF"/>
-                                                </Trigger>
-                                                <Trigger Property="IsSelected" Value="True">
-                                                    <Setter Property="Background" Value="#25FFFFFF"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </ListBox.ItemContainerStyle>
-                    </ListBox>
+                        <ListBox x:Name="NotesList"
+                                 Grid.Row="1"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Foreground="{DynamicResource DevToolsTextPrimary}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 KeyDown="NotesList_KeyDown"
+                                 MouseDoubleClick="NotesList_MouseDoubleClick">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderThickness="0,0,0,1"
+                                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                            Padding="4,10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding Title}"
+                                                           FontSize="14" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource DevToolsTextPrimary}"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding UpdatedUtc, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}"
+                                                           FontSize="11"
+                                                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                                                           Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                            <Button Grid.Column="1"
+                                                    Style="{StaticResource AppBarButtonStyle}"
+                                                    Width="32" Height="32"
+                                                    ToolTip="Excluir nota"
+                                                    Click="DeleteItemButton_Click"
+                                                    Tag="{Binding FileName}"
+                                                    CommandParameter="{Binding Title}"
+                                                    Margin="8,0,0,0">
+                                                <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <EventSetter Event="MouseDoubleClick" Handler="NotesListItem_MouseDoubleClick"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <Border Background="{TemplateBinding Background}" Padding="2">
+                                                    <ContentPresenter/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#15FFFFFF"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="#25FFFFFF"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
 
-                    <!-- AppBar da lista -->
-                    <Border Grid.Row="2"
-                            Background="{DynamicResource DevToolsSurface}"
-                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                            BorderThickness="0,1,0,0"
-                            Padding="0,4">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button Style="{StaticResource AppBarButtonStyle}" ToolTip="Nova nota" Click="AddButton_Click">
-                                <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
-                            </Button>
-                            <Button Style="{StaticResource AppBarButtonStyle}" ToolTip="Configuracoes (Google Drive)" Click="SwitchToConfiguration_Click" Margin="8,0">
-                                <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
-                            </Button>
-                            <Button Style="{StaticResource AppBarButtonStyle}" ToolTip="Exportar backup (ZIP)" Click="ExportButton_Click" Margin="8,0">
-                                <TextBlock Text="&#xE78C;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
-                            </Button>
-                            <Button Style="{StaticResource AppBarButtonStyle}" ToolTip="Importar backup (ZIP)" Click="ImportButton_Click" Margin="0,0,8,0">
-                                <TextBlock Text="&#xE8B5;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
-                            </Button>
+                        <!-- AppBar da lista -->
+                        <Border Grid.Row="2"
+                                Background="{DynamicResource DevToolsSurface}"
+                                BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                BorderThickness="0,1,0,0"
+                                Padding="0,4">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Style="{StaticResource AppBarButtonStyle}"
+                                        ToolTip="Nova nota"
+                                        Click="AddButton_Click">
+                                    <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
+                                </Button>
+                                <Button Style="{StaticResource AppBarButtonStyle}"
+                                        ToolTip="Exportar backup (ZIP)"
+                                        Click="ExportButton_Click"
+                                        Margin="8,0">
+                                    <TextBlock Text="&#xE78C;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
+                                </Button>
+                                <Button Style="{StaticResource AppBarButtonStyle}"
+                                        ToolTip="Importar backup (ZIP)"
+                                        Click="ImportButton_Click"
+                                        Margin="0,0,8,0">
+                                    <TextBlock Text="&#xE8B5;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- EDITOR DE NOTA -->
+                    <Grid x:Name="EditGrid" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Margin="0,0,0,8">
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="110"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="NoteTitleInput"
+                                         Grid.Column="0"
+                                         Style="{StaticResource DevToolsTextInput}"
+                                         FontSize="16" FontWeight="SemiBold"
+                                         ToolTip="Titulo da nota"/>
+                                <ComboBox x:Name="ExtensionCombo"
+                                          Grid.Column="2"
+                                          Style="{StaticResource DevToolsSelectInput}"
+                                          ToolTip="Formato do arquivo"/>
+                            </Grid>
+                            <Border x:Name="DriveStatusBanner"
+                                    Visibility="Collapsed"
+                                    BorderThickness="1" CornerRadius="4"
+                                    BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                    Padding="8,4">
+                                <TextBlock x:Name="DriveStatusText"
+                                           FontSize="11" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                            </Border>
                         </StackPanel>
-                    </Border>
+
+                        <TextBox x:Name="NoteContentInput"
+                                 Grid.Row="1"
+                                 Style="{StaticResource DevToolsTextInput}"
+                                 FontFamily="Consolas" FontSize="13"
+                                 AcceptsReturn="True" AcceptsTab="True"
+                                 TextWrapping="Wrap"
+                                 HorizontalContentAlignment="Left"
+                                 TextAlignment="Left"
+                                 VerticalContentAlignment="Top"
+                                 Padding="12,10"
+                                 VerticalScrollBarVisibility="Auto"/>
+
+                        <!-- AppBar do editor -->
+                        <Border Grid.Row="2"
+                                Background="{DynamicResource DevToolsSurface}"
+                                BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                BorderThickness="0,1,0,0"
+                                Padding="0,4">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Style="{StaticResource AppBarButtonStyle}"
+                                        ToolTip="Voltar para lista"
+                                        Click="BackButton_Click"
+                                        Margin="0,0,8,0">
+                                    <TextBlock Text="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
+                                </Button>
+                                <Button Style="{StaticResource AppBarButtonStyle}"
+                                        ToolTip="Salvar (Ctrl+S)"
+                                        Click="SaveNote_Click"
+                                        Margin="0,0,8,0">
+                                    <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
+                                </Button>
+                                <Button Style="{StaticResource AppBarButtonStyle}"
+                                        ToolTip="Excluir esta nota"
+                                        Click="DeleteCurrentNote_Click">
+                                    <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
                 </Grid>
 
-                <!-- EDITOR DE NOTA -->
-                <Grid x:Name="EditGrid" Visibility="Collapsed">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                <!-- MODO CONFIGURAÇÃO -->
+                <ScrollViewer x:Name="ConfigurationPanel"
+                              Visibility="Collapsed"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="0,0,0,0">
 
-                    <!-- Título + formato -->
-                    <StackPanel Grid.Row="0" Margin="0,0,0,8">
-                        <Grid Margin="0,0,0,8">
+                        <!-- Seletor de configuração (condicional) -->
+                        <StackPanel x:Name="ConfigurationsLabel"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="Configurações salvas"
+                                       Style="{StaticResource DevToolsCardTitle}"/>
+                            <Border Margin="8,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Width="16" Height="16"
+                                    CornerRadius="8"
+                                    BorderThickness="1"
+                                    BorderBrush="{DynamicResource DevToolsTextSecondary}"
+                                    ToolTipService.InitialShowDelay="200"
+                                    ToolTipService.ShowDuration="30000">
+                                <Border.ToolTip>
+                                    <ToolTip Placement="Right" MaxWidth="360">
+                                        <TextBlock TextWrapping="Wrap"
+                                                   Text="Escolha uma configuração salva ou selecione 'Configurar manualmente' para preencher os campos sem usar configuração salva."/>
+                                    </ToolTip>
+                                </Border.ToolTip>
+                                <TextBlock Text="?"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                            </Border>
+                        </StackPanel>
+                        <ComboBox x:Name="ConfigurationsCombo"
+                                  Margin="0,8,0,16"
+                                  Style="{StaticResource DevToolsSelectInput}"
+                                  SelectionChanged="ConfigurationsCombo_SelectionChanged"
+                                  DisplayMemberPath="Label"/>
+
+                        <Border x:Name="ConfigurationModeHint"
+                                Visibility="Collapsed"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                Background="{DynamicResource DevToolsSurface}"
+                                Padding="10,8"
+                                Margin="0,0,0,12">
+                            <TextBlock Text="Modo configuracao: preencha os campos abaixo para salvar uma configuracao reutilizavel."
+                                       Foreground="{DynamicResource DevToolsTextSecondary}"
+                                       TextWrapping="Wrap"/>
+                        </Border>
+
+                        <!-- ===== Campos de configuracao (modo Configuracao) ===== -->
+                        <Grid x:Name="ConfigurationMetadataSection"
+                              Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="12"/>
-                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="NoteTitleInput"
-                                     Grid.Column="0"
-                                     Style="{StaticResource DevToolsTextInput}"
-                                     FontSize="16" FontWeight="SemiBold"
-                                     ToolTip="Título da nota"/>
-                            <ComboBox x:Name="ExtensionCombo"
-                                      Grid.Column="2"
-                                      Style="{StaticResource DevToolsSelectInput}"
-                                      ToolTip="Formato do arquivo"/>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Nome"
+                                           Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="NameInput"
+                                         Style="{StaticResource DevToolsTextInput}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Descricao"
+                                           Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="DescriptionInput"
+                                         Style="{StaticResource DevToolsTextInput}"/>
+                            </StackPanel>
                         </Grid>
 
-                        <!-- Banner Drive -->
-                        <Border x:Name="DriveStatusBanner" Visibility="Collapsed"
-                                BorderThickness="1" CornerRadius="4"
-                                BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                                Padding="8,4">
-                            <TextBlock x:Name="DriveStatusText"
-                                       FontSize="11" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource DevToolsTextSecondary}"/>
-                        </Border>
-                    </StackPanel>
+                        <!-- ===== Caminhos ===== -->
+                        <c:PathSelector x:Name="LocalRootPathSelector"
+                                        Title="Pasta local das notas *"
+                                        IsFolderPicker="True"
+                                        Margin="0,0,0,12"/>
 
-                    <!-- Conteúdo -->
-                    <TextBox x:Name="NoteContentInput" Grid.Row="1"
-                             Style="{StaticResource DevToolsTextInput}"
-                             FontFamily="Consolas" FontSize="13"
-                             AcceptsReturn="True" AcceptsTab="True"
-                             TextWrapping="Wrap"
-                             HorizontalContentAlignment="Left"
-                             TextAlignment="Left"
-                             VerticalContentAlignment="Top"
-                             Padding="12,10"
-                             VerticalScrollBarVisibility="Auto"/>
+                        <CheckBox x:Name="IsDefaultCheck"
+                                  Content="Marcar como configuracao padrao"
+                                  Style="{StaticResource DevToolsCheckBox}"
+                                  Margin="0,0,0,12"/>
 
-                    <!-- AppBar do editor -->
-                    <Border Grid.Row="2"
-                            Background="{DynamicResource DevToolsSurface}"
-                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                            BorderThickness="0,1,0,0"
-                            Padding="0,4">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button Style="{StaticResource AppBarButtonStyle}" ToolTip="Voltar para lista" Click="BackButton_Click" Margin="0,0,8,0">
-                                <TextBlock Text="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
-                            </Button>
-                            <Button Style="{StaticResource AppBarButtonStyle}" ToolTip="Salvar (Ctrl+S)" Click="SaveNote_Click" Margin="0,0,8,0">
-                                <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
-                            </Button>
-                            <Button Style="{StaticResource AppBarButtonStyle}" ToolTip="Excluir esta nota" Click="DeleteCurrentNote_Click">
-                                <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
-                            </Button>
+                        <!-- ===== Google Drive ===== -->
+                        <TextBlock Text="Google Drive"
+                                   Style="{StaticResource DevToolsCardTitle}"
+                                   Margin="0,4,0,10"/>
+
+                        <CheckBox x:Name="GoogleDriveEnabledCheck"
+                                  Content="Sincronizar notas com o Google Drive"
+                                  Style="{StaticResource DevToolsCheckBox}"
+                                  Margin="0,0,0,12"
+                                  Checked="GoogleDriveEnabledCheck_Changed"
+                                  Unchecked="GoogleDriveEnabledCheck_Changed"/>
+
+                        <StackPanel x:Name="GoogleDriveFieldsPanel" Visibility="Collapsed">
+
+                            <c:PathSelector x:Name="CredentialsPathSelector"
+                                            Title="Caminho do credentials.json *"
+                                            IsFolderPicker="False"
+                                            Margin="0,0,0,12"/>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock Text="ID da pasta no Google Drive *"
+                                           Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="FolderIdInput"
+                                         Style="{StaticResource DevToolsTextInput}"
+                                         ToolTip="Copie o ID da URL: drive.google.com/drive/folders/[ID_AQUI]"/>
+                            </StackPanel>
+
+                            <c:PathSelector x:Name="OAuthTokenCachePathSelector"
+                                            Title="Pasta para armazenar o token OAuth2 *"
+                                            IsFolderPicker="True"
+                                            Margin="0,0,0,12"/>
+
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0"
+                                        Content="Conectar ao Drive"
+                                        Style="{StaticResource DevToolsPrimaryButton}"
+                                        Click="ConnectDrive_Click"/>
+                                <Button Grid.Column="2"
+                                        Content="Desconectar"
+                                        Style="{StaticResource DevToolsSecondaryButton}"
+                                        Click="DisconnectDrive_Click"/>
+                                <TextBlock Grid.Column="4"
+                                           x:Name="DriveConnectionStatusText"
+                                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                                           FontSize="12" VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <Button Content="Ver guia de configuracao do Google Cloud"
+                                    Style="{StaticResource DevToolsSecondaryButton}"
+                                    HorizontalAlignment="Left"
+                                    Margin="0,0,0,12"
+                                    Click="ShowSetupGuide_Click"/>
+
                         </StackPanel>
-                    </Border>
-                </Grid>
+
+                    </StackPanel>
+                </ScrollViewer>
 
             </Grid>
 
-            <!-- ═══ MODO CONFIGURAÇÃO ═══ -->
-            <ScrollViewer x:Name="ConfigurationPanel" Visibility="Collapsed"
-                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Margin="0,4,0,0">
-
-                    <StackPanel Margin="0,0,0,12" Visibility="Collapsed">
-                        <TextBlock Text="Nome *" Style="{StaticResource DevToolsInputLabel}"/>
-                        <TextBox x:Name="NameInput" Style="{StaticResource DevToolsTextInput}"/>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,0,0,12" Visibility="Collapsed">
-                        <TextBlock Text="Descricao" Style="{StaticResource DevToolsInputLabel}"/>
-                        <TextBox x:Name="DescriptionInput" Style="{StaticResource DevToolsTextInput}"/>
-                    </StackPanel>
-
-                    <c:PathSelector x:Name="LocalRootPathSelector"
-                                    Title="Pasta local das notas *"
-                                    IsFolderPicker="True"
-                                    Margin="0,0,0,12"/>
-
-                    <CheckBox x:Name="IsDefaultCheck"
-                              Content="Marcar como configuração padrão"
-                              Style="{StaticResource DevToolsCheckBox}"
-                              Margin="0,0,0,16" Visibility="Collapsed"/>
-
-                    <!-- Google Drive -->
-                    <Border BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                            BorderThickness="1" CornerRadius="4"
-                            Padding="10,8" Margin="0,0,0,12">
-                        <StackPanel>
-                            <TextBlock Text="Google Drive"
-                                       FontWeight="SemiBold" FontSize="12"
-                                       Foreground="{DynamicResource DevToolsTextPrimary}"
-                                       Margin="0,0,0,8"/>
-
-                            <CheckBox x:Name="GoogleDriveEnabledCheck"
-                                      Content="Sincronizar notas com o Google Drive"
-                                      Style="{StaticResource DevToolsCheckBox}"
-                                      Margin="0,0,0,12"
-                                      Checked="GoogleDriveEnabledCheck_Changed"
-                                      Unchecked="GoogleDriveEnabledCheck_Changed"/>
-
-                            <StackPanel x:Name="GoogleDriveFieldsPanel" Visibility="Collapsed">
-
-                                <c:PathSelector x:Name="CredentialsPathSelector"
-                                                Title="Caminho do credentials.json *"
-                                                IsFolderPicker="False"
-                                                Margin="0,0,0,12"/>
-
-                                <StackPanel Margin="0,0,0,12">
-                                    <TextBlock Text="ID da pasta no Google Drive *" Style="{StaticResource DevToolsInputLabel}"/>
-                                    <TextBox x:Name="FolderIdInput" Style="{StaticResource DevToolsTextInput}"
-                                             ToolTip="Copie o ID da URL: drive.google.com/drive/folders/[ID_AQUI]"/>
-                                </StackPanel>
-
-                                <c:PathSelector x:Name="OAuthTokenCachePathSelector"
-                                                Title="Pasta para armazenar o token OAuth2 *"
-                                                IsFolderPicker="True"
-                                                Margin="0,0,0,12"/>
-
-                                <Grid Margin="0,0,0,8">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="8"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Button Grid.Column="0" Content="Conectar ao Drive"
-                                            Style="{StaticResource DevToolsPrimaryButton}"
-                                            Click="ConnectDrive_Click"/>
-                                    <Button Grid.Column="2" Content="Desconectar"
-                                            Style="{StaticResource DevToolsSecondaryButton}"
-                                            Click="DisconnectDrive_Click"/>
-                                    <TextBlock Grid.Column="4" x:Name="DriveConnectionStatusText"
-                                               Foreground="{DynamicResource DevToolsTextSecondary}"
-                                               FontSize="12" VerticalAlignment="Center"/>
-                                </Grid>
-
-                                <Button Content="Ver guia de configuração do Google Cloud"
-                                        Style="{StaticResource DevToolsSecondaryButton}"
-                                        HorizontalAlignment="Left"
-                                        Click="ShowSetupGuide_Click"/>
-
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-
-                </StackPanel>
-            </ScrollViewer>
-
+            <!-- ==================== STATUS ==================== -->
+            <TextBlock x:Name="ExecutionStatusText"
+                       Grid.Row="3"
+                       Margin="0,10,0,0"
+                       Foreground="{DynamicResource DevToolsTextSecondary}"/>
         </Grid>
-
-        <!-- STATUS -->
-        <TextBlock x:Name="ExecutionStatusText" Grid.Row="4"
-                   Margin="0,10,0,0"
-                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
     </Grid>
 </UserControl>
-
-
-

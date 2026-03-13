@@ -3,7 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:DevTools.Host.Wpf.Components">
 
-    <Grid Margin="0,4,0,0">
+    <Grid x:Name="WorkspaceRoot" Margin="0">
+        <Grid HorizontalAlignment="Stretch"
+              VerticalAlignment="Top"
+              Margin="0,4,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -157,5 +160,6 @@
         <TextBlock x:Name="ExecutionStatusText" Grid.Row="3"
                    Margin="0,10,0,0"
                    Foreground="{DynamicResource DevToolsTextSecondary}"/>
+    </Grid>
     </Grid>
 </UserControl>

@@ -424,7 +424,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
 
         Actions.NewText = inConfiguration ? "Novo" : "Configurar";
         Actions.SaveText = inConfiguration ? "Salvar" : "Executar";
-        Actions.CancelText = _isExecuting ? "Cancelar Execucao" : "Cancelar";
+        Actions.CancelText = _isExecuting ? "Cancelar Execucao" : (inConfiguration ? "Ir para execucao" : "Cancelar");
 
         Actions.ShowNew = !_isExecuting;
         Actions.ShowSave = !_isExecuting;

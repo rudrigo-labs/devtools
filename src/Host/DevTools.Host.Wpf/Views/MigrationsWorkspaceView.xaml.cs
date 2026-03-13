@@ -46,6 +46,30 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         await ReloadEntitiesAsync().ConfigureAwait(true);
     }
 
+    public void ActivateExecutionMode()
+    {
+        if (_isExecuting)
+            return;
+
+        if (_currentEntity is null)
+            CreateNewEntity();
+
+        SetMode(MigrationsWorkspaceMode.Execution, "Modo execucao ativado.");
+    }
+
+    public void ActivateConfigurationMode()
+    {
+        if (_isExecuting)
+            return;
+
+        if (_currentEntity is null)
+            CreateNewEntity();
+        else
+            BindEntityToForm(_currentEntity);
+
+        SetMode(MigrationsWorkspaceMode.Configuration, "Modo configuracao ativado.");
+    }
+
     // ── Navegação de modo ─────────────────────────────────────────────────────
 
     private void SwitchToExecution_Click(object sender, RoutedEventArgs e) => SetMode(MigrationsWorkspaceMode.Execution, "Modo execução ativado.");
@@ -55,8 +79,6 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
     {
         if (_isExecuting) return;
         _currentMode = mode;
-        ExecutionPanel.Visibility = mode == MigrationsWorkspaceMode.Execution ? Visibility.Visible : Visibility.Collapsed;
-        ConfigurationPanel.Visibility = mode == MigrationsWorkspaceMode.Configuration ? Visibility.Visible : Visibility.Collapsed;
         ExecutionStatusText.Text = status;
         ApplyModeState();
     }
@@ -361,6 +383,9 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
     {
         var inConfiguration = _currentMode == MigrationsWorkspaceMode.Configuration;
         var hasPersistedConfiguration = _currentEntity is not null && !string.IsNullOrWhiteSpace(_currentEntity.Id);
+
+        ConfigurationModeHint.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+        ConfigurationMetadataSection.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
 
         WorkspaceTitleText.Text = inConfiguration ? "Migrations - Configuracao" : "Migrations";
         WorkspaceSubtitleText.Text = inConfiguration

@@ -3,83 +3,249 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:DevTools.Host.Wpf.Components">
 
-    <Grid Margin="0,4,0,0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Grid x:Name="WorkspaceRoot" Margin="0">
+        <Grid HorizontalAlignment="Stretch"
+              VerticalAlignment="Top"
+              Margin="0,4,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- HEADER -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,12">
-            <TextBlock Text="SSH Tunnel"
-                       FontSize="18" FontWeight="SemiBold"
-                       Foreground="{DynamicResource DevToolsTextPrimary}"/>
-            <TextBlock Text="Cria e gerencia túneis SSH para redirecionamento de portas, com configurações nomeadas."
-                       Foreground="{DynamicResource DevToolsTextSecondary}"
-                       FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap"/>
-            <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,10,0,0"/>
-        </StackPanel>
+            <!-- ==================== TOOL HEADER ==================== -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                <TextBlock x:Name="WorkspaceTitleText"
+                           Text="SSH Tunnel"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource DevToolsTextPrimary}"/>
+                <TextBlock x:Name="WorkspaceSubtitleText"
+                           Text="Cria e gerencia tuneis SSH para redirecionamento de portas, com configuracoes nomeadas."
+                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                           FontSize="12"
+                           Margin="0,4,0,0"
+                           TextWrapping="Wrap"/>
+                <Border Height="1"
+                        Background="{DynamicResource DevToolsBrushBorder}"
+                        Margin="0,10,0,0"/>
+            </StackPanel>
 
-        <!-- ACTION BAR -->
-        <c:ActionBarControl Grid.Row="1" x:Name="Actions"
-                            ShowNew="True" ShowSave="True" ShowDelete="True" ShowCancel="True"
-                            ShowHelp="True"
-                            HelpText="Execution: iniciar/parar tunel com a configuracao selecionada. Configuracao: preencher host, usuario e mapeamento local/remoto."
-                            ActionNew="ActionNew_Click"
-                            ActionSave="ActionSave_Click"
-                            ActionDelete="ActionDelete_Click"
-                            ActionCancel="ActionCancel_Click"/>
+            <!-- ==================== ACTION BAR ==================== -->
+            <c:ActionBarControl Grid.Row="1"
+                                x:Name="Actions"
+                                ShowNew="True"
+                                ShowSave="True"
+                                ShowDelete="True"
+                                ShowCancel="True"
+                                ShowHelp="True"
+                                HelpText="Use Configurar para salvar host, usuario e mapeamento. Use Iniciar para abrir o tunel SSH."
+                                ActionNew="ActionNew_Click"
+                                ActionSave="ActionSave_Click"
+                                ActionDelete="ActionDelete_Click"
+                                ActionCancel="ActionCancel_Click"/>
 
-        <!-- SELETOR DE CONFIGURAÇÃO + MODO -->
-        <Grid Grid.Row="2" Margin="0,0,0,12">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <ComboBox x:Name="ConfigurationsCombo"
-                      Grid.Column="0"
-                      Style="{StaticResource DevToolsSelectInput}"
-                      DisplayMemberPath="Label"
-                      SelectionChanged="ConfigurationsCombo_SelectionChanged"/>
-            <Button Grid.Column="2" Content="Execução"
-                    Style="{StaticResource DevToolsSecondaryButton}"
-                    Click="SwitchToExecution_Click"/>
-            <Button Grid.Column="4" Content="Configuração"
-                    Style="{StaticResource DevToolsSecondaryButton}"
-                    Click="SwitchToConfiguration_Click"/>
-        </Grid>
+            <!-- ==================== TOOL BODY ==================== -->
+            <ScrollViewer Grid.Row="2"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Margin="0,0,0,0">
 
-        <!-- BODY -->
-        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Margin="0,0,0,0">
+                    <!-- Seletor de configuração (condicional) -->
+                    <StackPanel x:Name="ConfigurationsLabel"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="Configurações salvas"
+                                   Style="{StaticResource DevToolsCardTitle}"/>
+                        <Border Margin="8,0,0,0"
+                                VerticalAlignment="Center"
+                                Width="16" Height="16"
+                                CornerRadius="8"
+                                BorderThickness="1"
+                                BorderBrush="{DynamicResource DevToolsTextSecondary}"
+                                ToolTipService.InitialShowDelay="200"
+                                ToolTipService.ShowDuration="30000">
+                            <Border.ToolTip>
+                                <ToolTip Placement="Right" MaxWidth="360">
+                                    <TextBlock TextWrapping="Wrap"
+                                               Text="Escolha uma configuração salva ou selecione 'Configurar manualmente' para preencher os campos sem usar configuração salva."/>
+                                </ToolTip>
+                            </Border.ToolTip>
+                            <TextBlock Text="?"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                        </Border>
+                    </StackPanel>
+                    <ComboBox x:Name="ConfigurationsCombo"
+                              Margin="0,8,0,16"
+                              Style="{StaticResource DevToolsSelectInput}"
+                              SelectionChanged="ConfigurationsCombo_SelectionChanged"
+                              DisplayMemberPath="Label"/>
 
-                <!-- MODO EXECUÇÃO -->
-                <StackPanel x:Name="ExecutionPanel">
-
-                    <Border BorderThickness="1" CornerRadius="4"
+                    <Border x:Name="ConfigurationModeHint"
+                            Visibility="Collapsed"
+                            BorderThickness="1"
+                            CornerRadius="4"
                             BorderBrush="{DynamicResource DevToolsBrushBorder}"
                             Background="{DynamicResource DevToolsSurface}"
-                            Padding="10,8" Margin="0,0,0,12">
-                        <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
-                            Como usar: selecione uma configuracao e clique em Iniciar tunel.
-                            O mapeamento local:porta -> remoto:porta aparece no resumo.
-                        </TextBlock>
+                            Padding="10,8"
+                            Margin="0,0,0,12">
+                        <TextBlock Text="Modo configuracao: preencha os campos abaixo para salvar uma configuracao reutilizavel."
+                                   Foreground="{DynamicResource DevToolsTextSecondary}"
+                                   TextWrapping="Wrap"/>
                     </Border>
 
-                    <!-- Badge de status -->
+                    <!-- ===== Campos de configuracao (modo Configuracao) ===== -->
+                    <Grid x:Name="ConfigurationMetadataSection"
+                          Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Nome"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="NameInput"
+                                     Style="{StaticResource DevToolsTextInput}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Descricao"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="DescriptionInput"
+                                     Style="{StaticResource DevToolsTextInput}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- ===== Conexão SSH ===== -->
+                    <TextBlock Text="Conexão SSH"
+                               Style="{StaticResource DevToolsCardTitle}"
+                               Margin="0,4,0,10"/>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="80"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Host SSH (Bastion) *"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="SshHostInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     ToolTip="Ex: servidor.empresa.com"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Porta SSH"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="SshPortInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     Text="22"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="Usuario SSH *"
+                                   Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="SshUserInput"
+                                 Style="{StaticResource DevToolsTextInput}"/>
+                    </StackPanel>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="StrictHostKeyChecking"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <ComboBox x:Name="StrictHostKeyCheckingCombo"
+                                      Style="{StaticResource DevToolsSelectInput}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Timeout de conexao (s)"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="ConnectTimeoutInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     ToolTip="Deixe vazio para padrao."/>
+                        </StackPanel>
+                    </Grid>
+
+                    <c:PathSelector x:Name="IdentityFileSelector"
+                                    Title="Arquivo de Identidade (Chave Privada)"
+                                    IsFolderPicker="False"
+                                    Margin="0,0,0,12"/>
+
+                    <!-- ===== Mapeamento do Tunel ===== -->
+                    <TextBlock Text="Mapeamento do Tunel"
+                               Style="{StaticResource DevToolsCardTitle}"
+                               Margin="0,4,0,10"/>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Bind local"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="LocalBindHostInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     Text="127.0.0.1"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Porta local"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="LocalPortInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     Text="14331"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Host remoto"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="RemoteHostInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     Text="127.0.0.1"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Porta remota"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="RemotePortInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     Text="1433"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <CheckBox x:Name="IsDefaultCheck"
+                              Content="Marcar como configuracao padrao"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              Margin="0,0,0,12"/>
+
+                    <!-- ===== Status do tunel ===== -->
+                    <TextBlock Text="Status do Tunel"
+                               Style="{StaticResource DevToolsCardTitle}"
+                               Margin="0,4,0,10"/>
+
                     <Border Background="{DynamicResource DevToolsSurface}"
                             BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                            BorderThickness="1" CornerRadius="6"
-                            Padding="12,8" Margin="0,0,0,12">
+                            BorderThickness="1" CornerRadius="4"
+                            Padding="10,8" Margin="0,0,0,12">
                         <DockPanel LastChildFill="False">
                             <TextBlock DockPanel.Dock="Left"
-                                       Text="Status do túnel"
+                                       Text="Estado atual"
                                        Foreground="{DynamicResource DevToolsTextSecondary}"
                                        FontSize="12" VerticalAlignment="Center"/>
                             <Border x:Name="SshStatusBadge"
@@ -93,8 +259,8 @@
                         </DockPanel>
                     </Border>
 
-                    <!-- Resumo da configuração ativa -->
-                    <Border x:Name="ConfigSummaryPanel" Visibility="Collapsed"
+                    <Border x:Name="ConfigSummaryPanel"
+                            Visibility="Collapsed"
                             BorderThickness="1" CornerRadius="4"
                             BorderBrush="{DynamicResource DevToolsBrushBorder}"
                             Padding="10,8" Margin="0,0,0,12">
@@ -104,145 +270,26 @@
                                    TextWrapping="Wrap"/>
                     </Border>
 
-                    <!-- Botões de ação -->
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                        <Button x:Name="StartButton" Content="Iniciar túnel"
+                        <Button x:Name="StartButton"
+                                Content="Iniciar tunel"
                                 Style="{StaticResource DevToolsPrimaryButton}"
                                 Margin="0,0,8,0"
                                 Click="Start_Click"/>
-                        <Button x:Name="StopButton" Content="Parar túnel"
+                        <Button x:Name="StopButton"
+                                Content="Parar tunel"
                                 Style="{StaticResource DevToolsSecondaryButton}"
                                 Click="Stop_Click"/>
                     </StackPanel>
 
                 </StackPanel>
+            </ScrollViewer>
 
-                <!-- MODO CONFIGURAÇÃO -->
-                <StackPanel x:Name="ConfigurationPanel" Visibility="Collapsed">
-
-                    <Border BorderThickness="1" CornerRadius="4"
-                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                            Background="{DynamicResource DevToolsSurface}"
-                            Padding="10,8" Margin="0,0,0,12">
-                        <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
-                            Modo configuracao: salve os dados do SSH e o destino do tunel para reutilizar depois.
-                        </TextBlock>
-                    </Border>
-
-                    <StackPanel Margin="0,0,0,12">
-                        <TextBlock Text="Nome da configuração *" Style="{StaticResource DevToolsInputLabel}"/>
-                        <TextBox x:Name="NameInput" Style="{StaticResource DevToolsTextInput}"/>
-                    </StackPanel>
-
-                    <!-- TabControl espelhando o legado -->
-                    <TabControl Margin="0,0,0,12"
-                                Background="{DynamicResource DevToolsWindowBackground}"
-                                BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                                BorderThickness="1">
-
-                        <TabItem Header="Conexão SSH">
-                            <StackPanel Margin="12">
-
-                                <Grid Margin="0,0,0,12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition Width="80"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="Host SSH (Bastion) *" Style="{StaticResource DevToolsInputLabel}"/>
-                                        <TextBox x:Name="SshHostInput" Style="{StaticResource DevToolsTextInput}"
-                                                 ToolTip="Ex: servidor.empresa.com"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Porta SSH" Style="{StaticResource DevToolsInputLabel}"/>
-                                        <TextBox x:Name="SshPortInput" Style="{StaticResource DevToolsTextInput}" Text="22"/>
-                                    </StackPanel>
-                                </Grid>
-
-                                <StackPanel Margin="0,0,0,12">
-                                    <TextBlock Text="Usuário SSH *" Style="{StaticResource DevToolsInputLabel}"/>
-                                    <TextBox x:Name="SshUserInput" Style="{StaticResource DevToolsTextInput}"/>
-                                </StackPanel>
-
-                                <Grid Margin="0,0,0,12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="StrictHostKeyChecking" Style="{StaticResource DevToolsInputLabel}"/>
-                                        <ComboBox x:Name="StrictHostKeyCheckingCombo" Style="{StaticResource DevToolsSelectInput}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Timeout de conexão (s)" Style="{StaticResource DevToolsInputLabel}"/>
-                                        <TextBox x:Name="ConnectTimeoutInput" Style="{StaticResource DevToolsTextInput}"
-                                                 ToolTip="Deixe vazio para padrão."/>
-                                    </StackPanel>
-                                </Grid>
-
-                                <c:PathSelector x:Name="IdentityFileSelector"
-                                                Title="Arquivo de Identidade (Chave Privada)"
-                                                IsFolderPicker="False"
-                                                Margin="0,0,0,0"/>
-
-                            </StackPanel>
-                        </TabItem>
-
-                        <TabItem Header="Mapeamento do Túnel">
-                            <Grid Margin="12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="16"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Local (Sua Máquina)"
-                                               FontWeight="SemiBold" FontSize="12"
-                                               Foreground="{DynamicResource DevToolsTextPrimary}"
-                                               Margin="0,0,0,12"/>
-                                    <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="Bind local" Style="{StaticResource DevToolsInputLabel}"/>
-                                        <TextBox x:Name="LocalBindHostInput" Style="{StaticResource DevToolsTextInput}" Text="127.0.0.1"/>
-                                    </StackPanel>
-                                    <StackPanel>
-                                        <TextBlock Text="Porta local" Style="{StaticResource DevToolsInputLabel}"/>
-                                        <TextBox x:Name="LocalPortInput" Style="{StaticResource DevToolsTextInput}" Text="14331"/>
-                                    </StackPanel>
-                                </StackPanel>
-
-                                <StackPanel Grid.Column="2">
-                                    <TextBlock Text="Remoto (Destino)"
-                                               FontWeight="SemiBold" FontSize="12"
-                                               Foreground="{DynamicResource DevToolsTextPrimary}"
-                                               Margin="0,0,0,12"/>
-                                    <StackPanel Margin="0,0,0,12">
-                                        <TextBlock Text="Host remoto" Style="{StaticResource DevToolsInputLabel}"/>
-                                        <TextBox x:Name="RemoteHostInput" Style="{StaticResource DevToolsTextInput}" Text="127.0.0.1"/>
-                                    </StackPanel>
-                                    <StackPanel>
-                                        <TextBlock Text="Porta remota" Style="{StaticResource DevToolsInputLabel}"/>
-                                        <TextBox x:Name="RemotePortInput" Style="{StaticResource DevToolsTextInput}" Text="1433"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Grid>
-                        </TabItem>
-
-                    </TabControl>
-
-                    <CheckBox x:Name="IsDefaultCheck" Content="Marcar como configuração padrão"
-                              Style="{StaticResource DevToolsCheckBox}" Margin="0,0,0,12"/>
-
-                </StackPanel>
-
-            </StackPanel>
-        </ScrollViewer>
-
-        <!-- STATUS -->
-        <TextBlock x:Name="ExecutionStatusText" Grid.Row="4"
-                   Margin="0,10,0,0"
-                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
+            <!-- ==================== STATUS ==================== -->
+            <TextBlock x:Name="ExecutionStatusText"
+                       Grid.Row="3"
+                       Margin="0,10,0,0"
+                       Foreground="{DynamicResource DevToolsTextSecondary}"/>
+        </Grid>
     </Grid>
 </UserControl>

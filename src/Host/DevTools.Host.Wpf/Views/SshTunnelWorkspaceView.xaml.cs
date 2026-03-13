@@ -53,8 +53,6 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
     {
         if (_isExecuting) return;
         _currentMode = mode;
-        ExecutionPanel.Visibility = mode == SshTunnelWorkspaceMode.Execution ? Visibility.Visible : Visibility.Collapsed;
-        ConfigurationPanel.Visibility = mode == SshTunnelWorkspaceMode.Configuration ? Visibility.Visible : Visibility.Collapsed;
         ExecutionStatusText.Text = status;
         ApplyModeState();
     }
@@ -81,7 +79,13 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
 
         _suppressSelectionChanged = false;
 
-        if (_entities.Count == 0) { SetSelectedOption(null); CreateNewEntity(); return; }
+        if (_entities.Count == 0)
+        {
+            SetSelectedOption(null);
+            CreateNewEntity();
+            ApplyModeState();
+            return;
+        }
 
         var toSelect = _entities.FirstOrDefault(x => x.Id == selectedId)
             ?? _entities.FirstOrDefault(x => x.IsDefault)
@@ -89,6 +93,7 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
 
         SetSelectedOption(toSelect);
         BindEntityToForm(toSelect);
+        ApplyModeState();
     }
 
     private void SetSelectedOption(SshTunnelEntity? entity)
@@ -109,6 +114,7 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
         BindEntityToForm(_currentEntity);
         RefreshConfigSummary();
         ExecutionStatusText.Text = $"Configuração \"{_currentEntity.Name}\" carregada.";
+        ApplyModeState();
     }
 
     // ── CRUD ─────────────────────────────────────────────────────────────────
@@ -116,8 +122,18 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
     private void ActionNew_Click(object sender, RoutedEventArgs e)
     {
         if (_isExecuting) return;
+
+        if (_currentMode == SshTunnelWorkspaceMode.Execution)
+        {
+            if (_currentEntity is not null)
+                BindEntityToForm(_currentEntity);
+
+            SetMode(SshTunnelWorkspaceMode.Configuration, "Modo configuracao ativado.");
+            return;
+        }
+
         CreateNewEntity();
-        SetMode(SshTunnelWorkspaceMode.Configuration, "Nova configuração.");
+        SetMode(SshTunnelWorkspaceMode.Configuration, "Nova configuracao.");
     }
 
     private async void ActionSave_Click(object sender, RoutedEventArgs e)
@@ -150,11 +166,15 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
 
         ValidationUiService.ClearInline(ExecutionStatusText);
         await ReloadEntitiesAsync().ConfigureAwait(true);
-        ExecutionStatusText.Text = "Configuração salva.";
+        ExecutionStatusText.Text = "Configuracao salva.";
+        SetMode(SshTunnelWorkspaceMode.Execution, "Modo execucao ativado.");
     }
 
     private async void ActionDelete_Click(object sender, RoutedEventArgs e)
     {
+        if (_currentMode != SshTunnelWorkspaceMode.Configuration)
+            return;
+
         if (_isExecuting || _currentEntity is null || string.IsNullOrWhiteSpace(_currentEntity.Id)) return;
 
         var confirm = Components.DevToolsMessageBox.Confirm(
@@ -164,12 +184,25 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
         await _facade.DeleteAsync(_currentEntity.Id).ConfigureAwait(true);
         _currentEntity = null;
         await ReloadEntitiesAsync().ConfigureAwait(true);
-        ExecutionStatusText.Text = "Configuração excluída.";
+        ExecutionStatusText.Text = "Configuracao excluida.";
     }
 
     private void ActionCancel_Click(object sender, RoutedEventArgs e)
     {
-        if (_isExecuting) { _executionCts?.Cancel(); ExecutionStatusText.Text = "Cancelando..."; }
+        if (_isExecuting)
+        {
+            _executionCts?.Cancel();
+            ExecutionStatusText.Text = "Cancelando...";
+            return;
+        }
+
+        if (_currentMode == SshTunnelWorkspaceMode.Configuration)
+        {
+            if (_currentEntity is not null)
+                BindEntityToForm(_currentEntity);
+
+            SetMode(SshTunnelWorkspaceMode.Execution, "Modo execucao ativado.");
+        }
     }
 
     // ── Execução (Start / Stop) ───────────────────────────────────────────────
@@ -313,15 +346,36 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
         BindEntityToForm(_currentEntity);
         SetSelectedOption(null);
         RefreshConfigSummary();
+        ApplyModeState();
     }
 
     private void ApplyModeState()
     {
-        Actions.CanSave   = !_isExecuting && _currentMode == SshTunnelWorkspaceMode.Configuration;
-        Actions.CanCancel = _isExecuting;
-        Actions.ShowCancel = _isExecuting;
-        Actions.CancelText = "Cancelar";
+        var inConfiguration = _currentMode == SshTunnelWorkspaceMode.Configuration;
+        var hasPersistedConfiguration = _currentEntity is not null && !string.IsNullOrWhiteSpace(_currentEntity.Id);
+
+        ConfigurationModeHint.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+        ConfigurationMetadataSection.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+
+        WorkspaceTitleText.Text = inConfiguration ? "SSH Tunnel - Configuracao" : "SSH Tunnel";
+        WorkspaceSubtitleText.Text = inConfiguration
+            ? "Salve os parametros de conexao e mapeamento para reutilizar."
+            : "Cria e gerencia tuneis SSH para redirecionamento de portas.";
+
+        Actions.NewText = inConfiguration ? "Novo" : "Configurar";
         Actions.SaveText = "Salvar";
+        Actions.DeleteText = "Excluir";
+        Actions.CancelText = _isExecuting ? "Cancelar" : "Voltar";
+
+        Actions.ShowSave = inConfiguration;
+        Actions.ShowDelete = inConfiguration;
+        Actions.ShowCancel = _isExecuting || inConfiguration;
+
+        Actions.CanNew = !_isExecuting;
+        Actions.CanSave = inConfiguration && !_isExecuting;
+        Actions.CanDelete = inConfiguration && hasPersistedConfiguration && !_isExecuting;
+        Actions.CanCancel = _isExecuting || inConfiguration;
+
         StartButton.IsEnabled = !_isExecuting && !_facade.IsRunning;
         StopButton.IsEnabled  = !_isExecuting && _facade.IsRunning;
     }

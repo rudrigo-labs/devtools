@@ -416,3 +416,33 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# ============================================================
+# Kit Ignore - DevTools (arquivos que nao devem ir para o Git)
+# ============================================================
+
+# Cache local do dotnet cli (usado em ambiente local/sandbox)
+.dotnet/
+
+# Logs locais de build e diagnostico
+build-*.log
+msbuild-*.log
+*.tmp.log
+
+# Banco local SQLite e arquivos auxiliares
+devtools.db
+devtools.db-*
+*.db-shm
+*.db-wal
+
+# Arquivos locais de sistema operacional
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDEs adicionais
+.idea/
+
+# Configuracoes locais da aplicacao (nao versionar)
+**/appsettings.Local.json
+**/appsettings.*.local.json

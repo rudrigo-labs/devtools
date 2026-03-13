@@ -20,7 +20,7 @@
                            FontSize="18"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource DevToolsTextPrimary}"/>
-                <TextBlock Text="Minera código reutilizável em projetos .NET. Identifica utilitários, helpers e extension methods por relevância."
+                <TextBlock Text="Minera codigo reutilizavel em projetos .NET. Identifica utilitarios, helpers e extension methods por relevancia."
                            Foreground="{DynamicResource DevToolsTextSecondary}"
                            FontSize="12"
                            Margin="0,4,0,0"
@@ -38,7 +38,7 @@
                                 ShowDelete="True"
                                 ShowCancel="True"
                                 ShowHelp="True"
-                                HelpText="Execution: execute com os caminhos e filtros preenchidos. Configuracao: salve nome e descricao para reutilizar."
+                                HelpText="Use Configurar para salvar caminhos e filtros. Use Executar para minerar o projeto."
                                 ActionNew="ActionNew_Click"
                                 ActionSave="ActionSave_Click"
                                 ActionDelete="ActionDelete_Click"
@@ -67,7 +67,7 @@
                             <Border.ToolTip>
                                 <ToolTip Placement="Right" MaxWidth="360">
                                     <TextBlock TextWrapping="Wrap"
-                                               Text="Escolha uma configuração salva ou selecione 'Configurar manualmente' para preencher os campos e executar sem usar configuração salva."/>
+                                               Text="Escolha uma configuração salva ou selecione 'Configurar manualmente' para preencher os campos sem usar configuração salva."/>
                                 </ToolTip>
                             </Border.ToolTip>
                             <TextBlock Text="?"
@@ -81,7 +81,42 @@
                               Margin="0,8,0,16"
                               Style="{StaticResource DevToolsSelectInput}"
                               SelectionChanged="ConfigurationsCombo_SelectionChanged"
-                              DisplayMemberPath="Name"/>
+                              DisplayMemberPath="Label"/>
+
+                    <Border x:Name="ConfigurationModeHint"
+                            Visibility="Collapsed"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                            Background="{DynamicResource DevToolsSurface}"
+                            Padding="10,8"
+                            Margin="0,0,0,12">
+                        <TextBlock Text="Modo configuracao: preencha os campos abaixo para salvar uma configuracao reutilizavel."
+                                   Foreground="{DynamicResource DevToolsTextSecondary}"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+
+                    <!-- ===== Campos de configuracao (modo Configuracao) ===== -->
+                    <Grid x:Name="ConfigurationMetadataSection"
+                          Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Nome"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="NameInput"
+                                     Style="{StaticResource DevToolsTextInput}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Descricao"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="DescriptionInput"
+                                     Style="{StaticResource DevToolsTextInput}"/>
+                        </StackPanel>
+                    </Grid>
 
                     <!-- ===== Caminhos ===== -->
                     <c:PathSelector x:Name="RootPathSelector"
@@ -122,7 +157,7 @@
                     </StackPanel>
 
                     <!-- ===== Execução ===== -->
-                    <TextBlock Text="Execução"
+                    <TextBlock Text="Execucao"
                                Style="{StaticResource DevToolsCardTitle}"
                                Margin="0,4,0,10"/>
 
@@ -132,7 +167,6 @@
                             <ColumnDefinition Width="16"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Score mínimo"
                                        Style="{StaticResource DevToolsInputLabel}"/>
@@ -140,38 +174,12 @@
                                      Style="{StaticResource DevToolsTextInput}"
                                      ToolTip="Arquivos com score abaixo deste valor são descartados. Padrão: 0 (inclui todos)."/>
                         </StackPanel>
-
-                        <StackPanel Grid.Column="2"
-                                    VerticalAlignment="Bottom">
+                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
                             <CheckBox x:Name="CopyFilesCheck"
                                       Content="Copiar arquivos para pasta de destino"
                                       Style="{StaticResource DevToolsCheckBox}"
                                       IsChecked="True"
                                       ToolTip="Quando marcado, copia os arquivos selecionados para a pasta de destino preservando a estrutura de diretórios. Quando desmarcado, apenas gera o relatório (dry run)."/>
-                        </StackPanel>
-                    </Grid>
-
-                    <!-- ===== Campos de configuração (modo Configuração) ===== -->
-                    <Grid x:Name="ConfigurationMetadataSection"
-                          Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Nome"
-                                       Style="{StaticResource DevToolsInputLabel}"/>
-                            <TextBox x:Name="NameInput"
-                                     Style="{StaticResource DevToolsTextInput}"/>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="Descrição"
-                                       Style="{StaticResource DevToolsInputLabel}"/>
-                            <TextBox x:Name="DescriptionInput"
-                                     Style="{StaticResource DevToolsTextInput}"/>
                         </StackPanel>
                     </Grid>
 
