@@ -40,7 +40,7 @@
                                 ShowDelete="True"
                                 ShowCancel="False"
                                 ShowHelp="True"
-                                HelpText="Use Configurar para salvar auth token e executavel. Use Iniciar para expor uma porta local."
+                                HelpText="No modo Configurar, salve auth token e padroes. No modo Execucao, informe protocolo/porta e clique em Iniciar tunel."
                                 ActionNew="ActionNew_Click"
                                 ActionSave="ActionSave_Click"
                                 ActionDelete="ActionDelete_Click"
@@ -98,6 +98,19 @@
                                    TextWrapping="Wrap"/>
                     </Border>
 
+                    <Border BorderThickness="1"
+                            CornerRadius="4"
+                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                            Background="{DynamicResource DevToolsSurface}"
+                            Padding="10,8"
+                            Margin="0,0,0,12">
+                        <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}"
+                                   TextWrapping="Wrap">
+                            Como usar: configure o AuthToken uma vez. Em execucao, escolha protocolo e porta local da aplicacao.
+                            Clique em Iniciar tunel para gerar URL publica. Use Listar tuneis para atualizar a lista.
+                        </TextBlock>
+                    </Border>
+
                     <!-- ===== Campos de configuracao (modo Configuracao) ===== -->
                     <Grid x:Name="ConfigurationMetadataSection"
                           Margin="0,0,0,12">
@@ -126,7 +139,7 @@
                                Margin="0,4,0,10"/>
 
                     <StackPanel Margin="0,0,0,12">
-                        <TextBlock Text="AuthToken"
+                        <TextBlock Text="Auth token do ngrok *"
                                    Style="{StaticResource DevToolsInputLabel}"/>
                         <TextBox x:Name="AuthTokenInput"
                                  Style="{StaticResource DevToolsTextInput}"
@@ -139,14 +152,15 @@
                                     Margin="0,0,0,12"/>
 
                     <StackPanel Margin="0,0,0,12">
-                        <TextBlock Text="Argumentos adicionais"
+                        <TextBlock Text="Argumentos adicionais (opcional)"
                                    Style="{StaticResource DevToolsInputLabel}"/>
                         <TextBox x:Name="AdditionalArgsInput"
-                                 Style="{StaticResource DevToolsTextInput}"/>
+                                 Style="{StaticResource DevToolsTextInput}"
+                                 ToolTip="Exemplo: --log stdout --log-format json"/>
                     </StackPanel>
 
                     <StackPanel Margin="0,0,0,12">
-                        <TextBlock Text="URL da API ngrok"
+                        <TextBlock Text="URL da API local do ngrok"
                                    Style="{StaticResource DevToolsInputLabel}"/>
                         <TextBox x:Name="BaseUrlInput"
                                  Style="{StaticResource DevToolsTextInput}"

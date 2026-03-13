@@ -44,6 +44,30 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
         await ReloadEntitiesAsync().ConfigureAwait(true);
     }
 
+    public void ActivateExecutionMode()
+    {
+        if (_isExecuting)
+            return;
+
+        if (_currentEntity is null)
+            CreateNewEntity();
+
+        SetMode(SshTunnelWorkspaceMode.Execution, "Modo execucao ativado.");
+    }
+
+    public void ActivateConfigurationMode()
+    {
+        if (_isExecuting)
+            return;
+
+        if (_currentEntity is null)
+            CreateNewEntity();
+        else
+            BindEntityToForm(_currentEntity);
+
+        SetMode(SshTunnelWorkspaceMode.Configuration, "Modo configuracao ativado.");
+    }
+
     // ── Navegação de modo ─────────────────────────────────────────────────────
 
     private void SwitchToExecution_Click(object sender, RoutedEventArgs e) => SetMode(SshTunnelWorkspaceMode.Execution, "Modo execução ativado.");
@@ -370,6 +394,7 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
         Actions.ShowSave = inConfiguration;
         Actions.ShowDelete = inConfiguration;
         Actions.ShowCancel = _isExecuting || inConfiguration;
+        Actions.Visibility = (inConfiguration || _isExecuting) ? Visibility.Visible : Visibility.Collapsed;
 
         Actions.CanNew = !_isExecuting;
         Actions.CanSave = inConfiguration && !_isExecuting;

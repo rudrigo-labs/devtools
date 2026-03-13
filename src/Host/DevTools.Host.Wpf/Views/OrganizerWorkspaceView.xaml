@@ -30,7 +30,7 @@
                             ShowNew="False" ShowSave="True" ShowDelete="False" ShowCancel="True"
                             SaveText="Executar"
                             ShowHelp="True"
-                            HelpText="Pasta de entrada contem os arquivos. Pasta de saida define onde organizar. Score minimo controla a classificacao."
+                            HelpText="Defina pasta de entrada e, opcionalmente, pasta de saida. Ajuste score minimo e clique em Executar. Desmarque aplicar para simulacao."
                             ActionSave="ActionExecute_Click"
                             ActionCancel="ActionCancel_Click"/>
 

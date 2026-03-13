@@ -133,7 +133,10 @@ public partial class SearchTextWorkspaceView : System.Windows.Controls.UserContr
 
     private void ApplyModeState()
     {
-        Actions.CanSave = !_isExecuting;
+        Actions.Visibility = _isExecuting ? Visibility.Visible : Visibility.Collapsed;
+        Actions.ShowSave = false;
+        Actions.CanSave = false;
+        Actions.ShowHelp = false;
         Actions.CanCancel = _isExecuting;
         Actions.ShowCancel = _isExecuting;
         Actions.CancelText = "Cancelar";

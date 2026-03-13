@@ -1,6 +1,5 @@
 using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 
@@ -9,22 +8,21 @@ namespace DevTools.Host.Wpf.Views;
 public partial class MainWindow : Window
 {
     private const uint MonitorDefaultToNearest = 0x00000002;
+    private const string FerramentasTag = "Ferramentas";
+    private const string ConfiguracoesTag = "Configuracoes";
+
     private enum WorkspaceIntent { Default, Configuration, Execution }
 
-    // Mapa de tool tag -> UserControl factory. Adicionar novas tools aqui.
     private readonly Dictionary<string, Func<System.Windows.Controls.UserControl>> _toolRegistry;
-    private static readonly HashSet<string> ConfigurationFirstTools = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "Snapshot",
-        "Migrations",
-        "Utf8Convert",
-        "Notes"
-    };
     private string _activeToolTag = string.Empty;
     private WorkspaceIntent _activeIntent = WorkspaceIntent.Default;
+    private string _activeSidebarTag = FerramentasTag;
+    private bool _isWorkAreaMaximized;
+    private Rect _restoreBounds;
 
     public MainWindow(
         HomeLauncherView homeLauncherView,
+        ConfigurationLauncherView configurationLauncherView,
         SnapshotWorkspaceView snapshotWorkspaceView,
         RenameWorkspaceView renameWorkspaceView,
         HarvestWorkspaceView harvestWorkspaceView,
@@ -41,53 +39,53 @@ public partial class MainWindow : Window
 
         _toolRegistry = new Dictionary<string, Func<System.Windows.Controls.UserControl>>(StringComparer.OrdinalIgnoreCase)
         {
-            ["Home"]        = () => homeLauncherView,
-            ["Snapshot"]    = () => snapshotWorkspaceView,
-            ["Rename"]      = () => renameWorkspaceView,
-            ["Harvest"]     = () => harvestWorkspaceView,
-            ["ImageSplit"]  = () => imageSplitWorkspaceView,
-            ["SearchText"]  = () => searchTextWorkspaceView,
-            ["Organizer"]   = () => organizerWorkspaceView,
+            [FerramentasTag] = () => homeLauncherView,
+            [ConfiguracoesTag] = () => configurationLauncherView,
+            ["Snapshot"] = () => snapshotWorkspaceView,
+            ["Rename"] = () => renameWorkspaceView,
+            ["Harvest"] = () => harvestWorkspaceView,
+            ["ImageSplit"] = () => imageSplitWorkspaceView,
+            ["SearchText"] = () => searchTextWorkspaceView,
+            ["Organizer"] = () => organizerWorkspaceView,
             ["Utf8Convert"] = () => utf8ConvertWorkspaceView,
-            ["Migrations"]  = () => migrationsWorkspaceView,
-            ["SshTunnel"]   = () => sshTunnelWorkspaceView,
-            ["Ngrok"]       = () => ngrokWorkspaceView,
-            ["Notes"]       = () => notesWorkspaceView,
+            ["Migrations"] = () => migrationsWorkspaceView,
+            ["SshTunnel"] = () => sshTunnelWorkspaceView,
+            ["Ngrok"] = () => ngrokWorkspaceView,
+            ["Notes"] = () => notesWorkspaceView
         };
 
         homeLauncherView.OpenToolRequested += toolTag =>
-            ActivateTool(toolTag, WorkspaceIntent.Configuration);
+            ActivateTool(toolTag, WorkspaceIntent.Execution, FerramentasTag);
+
+        configurationLauncherView.OpenToolRequested += toolTag =>
+            ActivateTool(toolTag, WorkspaceIntent.Configuration, ConfiguracoesTag);
 
         Loaded += (_, _) =>
         {
-            WindowState = WindowState.Maximized;
-            ActivateTool("Home");
+            _restoreBounds = new Rect(Left, Top, Width, Height);
+            MaximizeToWorkArea();
+            ActivateTool(FerramentasTag, WorkspaceIntent.Default, FerramentasTag);
         };
     }
-
-    // -------------------------------------------------------------------------
-    // Navegação
-    // -------------------------------------------------------------------------
 
     private void NavButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not System.Windows.Controls.Button btn || btn.Tag is not string tag)
             return;
 
-        if (string.Equals(tag, "Home", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(tag, FerramentasTag, StringComparison.OrdinalIgnoreCase))
         {
-            ActivateTool("Home");
+            ActivateTool(FerramentasTag, WorkspaceIntent.Default, FerramentasTag);
             return;
         }
 
-        var intent = ConfigurationFirstTools.Contains(tag)
-            ? WorkspaceIntent.Configuration
-            : WorkspaceIntent.Default;
-
-        ActivateTool(tag, intent);
+        if (string.Equals(tag, ConfiguracoesTag, StringComparison.OrdinalIgnoreCase))
+        {
+            ActivateTool(ConfiguracoesTag, WorkspaceIntent.Default, ConfiguracoesTag);
+        }
     }
 
-    private void ActivateTool(string tag, WorkspaceIntent intent = WorkspaceIntent.Default)
+    private void ActivateTool(string tag, WorkspaceIntent intent = WorkspaceIntent.Default, string? sidebarTag = null)
     {
         if (string.Equals(_activeToolTag, tag, StringComparison.OrdinalIgnoreCase) && _activeIntent == intent)
             return;
@@ -96,7 +94,20 @@ public partial class MainWindow : Window
             return;
 
         var workspace = factory();
+        ApplyWorkspaceIntent(workspace, intent);
 
+        _activeToolTag = tag;
+        _activeIntent = intent;
+        if (!string.IsNullOrWhiteSpace(sidebarTag))
+            _activeSidebarTag = sidebarTag;
+
+        WorkspaceHost.Content = workspace;
+        UpdateHeaderAndStatus(tag, intent);
+        UpdateNavStyles();
+    }
+
+    private static void ApplyWorkspaceIntent(System.Windows.Controls.UserControl workspace, WorkspaceIntent intent)
+    {
         switch (workspace)
         {
             case SnapshotWorkspaceView snapshot:
@@ -107,35 +118,46 @@ public partial class MainWindow : Window
                 if (intent == WorkspaceIntent.Configuration) migrations.ActivateConfigurationMode();
                 else if (intent == WorkspaceIntent.Execution) migrations.ActivateExecutionMode();
                 break;
+            case SshTunnelWorkspaceView sshTunnel:
+                if (intent == WorkspaceIntent.Configuration) sshTunnel.ActivateConfigurationMode();
+                else if (intent == WorkspaceIntent.Execution) sshTunnel.ActivateExecutionMode();
+                break;
+            case NgrokWorkspaceView ngrok:
+                if (intent == WorkspaceIntent.Configuration) ngrok.ActivateConfigurationMode();
+                else if (intent == WorkspaceIntent.Execution) ngrok.ActivateExecutionMode();
+                break;
             case NotesWorkspaceView notes:
                 if (intent == WorkspaceIntent.Configuration) notes.ActivateConfigurationMode();
                 else if (intent == WorkspaceIntent.Execution) notes.ActivateExecutionMode();
                 break;
         }
+    }
 
-        _activeToolTag = tag;
-        _activeIntent = intent;
-        WorkspaceHost.Content = workspace;
-
-        if (string.Equals(tag, "Home", StringComparison.OrdinalIgnoreCase))
+    private void UpdateHeaderAndStatus(string tag, WorkspaceIntent intent)
+    {
+        if (string.Equals(tag, FerramentasTag, StringComparison.OrdinalIgnoreCase))
         {
-            ActiveToolLabel.Text = "Home";
-            MainStatusText.Text = "Selecione uma ferramenta para começar.";
-        }
-        else
-        {
-            var suffix = intent switch
-            {
-                WorkspaceIntent.Configuration => "Configuration",
-                WorkspaceIntent.Execution => "Execution",
-                _ => string.Empty
-            };
-
-            ActiveToolLabel.Text = string.IsNullOrWhiteSpace(suffix) ? tag : $"{tag} {suffix}";
-            MainStatusText.Text = $"{ActiveToolLabel.Text} ativo.";
+            ActiveToolLabel.Text = "Ferramentas";
+            MainStatusText.Text = "Selecione uma ferramenta para executar.";
+            return;
         }
 
-        UpdateNavStyles();
+        if (string.Equals(tag, ConfiguracoesTag, StringComparison.OrdinalIgnoreCase))
+        {
+            ActiveToolLabel.Text = "Configuracoes";
+            MainStatusText.Text = "Selecione uma ferramenta para editar configuracoes.";
+            return;
+        }
+
+        var suffix = intent switch
+        {
+            WorkspaceIntent.Configuration => "Configuration",
+            WorkspaceIntent.Execution => "Execution",
+            _ => string.Empty
+        };
+
+        ActiveToolLabel.Text = string.IsNullOrWhiteSpace(suffix) ? tag : $"{tag} {suffix}";
+        MainStatusText.Text = $"{ActiveToolLabel.Text} ativo.";
     }
 
     private void UpdateNavStyles()
@@ -143,47 +165,23 @@ public partial class MainWindow : Window
         var activeStyle = TryFindResource("SidebarNavButtonActiveStyle") as Style;
         var normalStyle = TryFindResource("SidebarNavButtonStyle") as Style;
 
-        // Percorrer botões de navegação na sidebar e aplicar estilo conforme ativo.
-        foreach (var btn in FindNavButtons())
-        {
-            var isActive = string.Equals(btn.Tag as string, _activeToolTag, StringComparison.OrdinalIgnoreCase);
-            btn.Style = isActive ? activeStyle : normalStyle;
-        }
-    }
+        var isFerramentas = string.Equals(_activeSidebarTag, FerramentasTag, StringComparison.OrdinalIgnoreCase);
+        var isConfiguracoes = string.Equals(_activeSidebarTag, ConfiguracoesTag, StringComparison.OrdinalIgnoreCase);
 
-    private IEnumerable<System.Windows.Controls.Button> FindNavButtons()
-    {
-        // Localiza todos os botões de navegação que possuem Tag de string.
-        return FindVisualChildren<System.Windows.Controls.Button>(this)
-            .Where(b => b.Tag is string tag && _toolRegistry.ContainsKey(tag));
+        NavFerramentas.Style = isFerramentas ? activeStyle : normalStyle;
+        NavConfiguracoes.Style = isConfiguracoes ? activeStyle : normalStyle;
     }
-
-    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
-    {
-        if (parent is null) yield break;
-        var count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
-        for (int i = 0; i < count; i++)
-        {
-            var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
-            if (child is T t) yield return t;
-            foreach (var descendant in FindVisualChildren<T>(child))
-                yield return descendant;
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Shell — drag, minimize, close
-    // -------------------------------------------------------------------------
 
     private void WindowDragArea_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton != MouseButton.Left) return;
-        if (WindowState == WindowState.Maximized)
+        if (_isWorkAreaMaximized)
         {
-            WindowState = WindowState.Normal;
+            RestoreFromWorkArea();
             Left = e.GetPosition(this).X - (Width / 2);
             Top = 0;
         }
+
         try { DragMove(); } catch { }
     }
 
@@ -192,9 +190,14 @@ public partial class MainWindow : Window
 
     private void MaximizeButton_Click(object sender, RoutedEventArgs e)
     {
-        WindowState = WindowState == WindowState.Maximized
-            ? WindowState.Normal
-            : WindowState.Maximized;
+        if (_isWorkAreaMaximized)
+        {
+            RestoreFromWorkArea();
+            return;
+        }
+
+        _restoreBounds = new Rect(Left, Top, Width, Height);
+        MaximizeToWorkArea();
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -217,23 +220,12 @@ public partial class MainWindow : Window
 
         if (WindowState == WindowState.Maximized)
         {
-            RootBorder.Margin = new Thickness(0);
-            RootBorder.CornerRadius = new CornerRadius(0);
-            MaximizeButton.Content = "\uE923"; // ícone restaurar
-        }
-        else
-        {
-            RootBorder.Margin = new Thickness(10);
-            RootBorder.CornerRadius = new CornerRadius(8);
-            MaximizeButton.Content = "\uE922"; // ícone maximizar
+            _restoreBounds = new Rect(RestoreBounds.Left, RestoreBounds.Top, RestoreBounds.Width, RestoreBounds.Height);
+            MaximizeToWorkArea();
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Bounds do monitor corrente
-    // -------------------------------------------------------------------------
-
-    private void ApplyWorkAreaBounds()
+    private void MaximizeToWorkArea()
     {
         var workArea = ResolveCurrentWorkArea();
         WindowState = WindowState.Normal;
@@ -241,8 +233,23 @@ public partial class MainWindow : Window
         Top = workArea.Top;
         Width = workArea.Width;
         Height = workArea.Height;
-        MaxWidth = workArea.Width;
-        MaxHeight = workArea.Height;
+        _isWorkAreaMaximized = true;
+        RootBorder.Margin = new Thickness(0);
+        RootBorder.CornerRadius = new CornerRadius(0);
+        MaximizeButton.Content = "\uE923";
+    }
+
+    private void RestoreFromWorkArea()
+    {
+        WindowState = WindowState.Normal;
+        Left = _restoreBounds.Left;
+        Top = _restoreBounds.Top;
+        Width = _restoreBounds.Width;
+        Height = _restoreBounds.Height;
+        _isWorkAreaMaximized = false;
+        RootBorder.Margin = new Thickness(10);
+        RootBorder.CornerRadius = new CornerRadius(8);
+        MaximizeButton.Content = "\uE922";
     }
 
     private Rect ResolveCurrentWorkArea()
@@ -271,7 +278,13 @@ public partial class MainWindow : Window
     private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInfo monitorInfo);
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct RectNative { public int Left, Top, Right, Bottom; }
+    private struct RectNative
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     private struct MonitorInfo
