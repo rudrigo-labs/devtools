@@ -40,7 +40,7 @@
                                 ShowDelete="True"
                                 ShowCancel="True"
                                 ShowHelp="True"
-                                HelpText="Use Configurar para salvar host, usuario e mapeamento. Use Iniciar para abrir o tunel SSH."
+                                HelpText="No modo Configurar, salve conexao SSH e mapeamento. No modo Execucao, use Iniciar tunel para abrir e Parar tunel para encerrar."
                                 ActionNew="ActionNew_Click"
                                 ActionSave="ActionSave_Click"
                                 ActionDelete="ActionDelete_Click"
@@ -96,6 +96,20 @@
                         <TextBlock Text="Modo configuracao: preencha os campos abaixo para salvar uma configuracao reutilizavel."
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    TextWrapping="Wrap"/>
+                    </Border>
+
+                    <Border BorderThickness="1"
+                            CornerRadius="4"
+                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                            Background="{DynamicResource DevToolsSurface}"
+                            Padding="10,8"
+                            Margin="0,0,0,12">
+                        <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}"
+                                   TextWrapping="Wrap">
+                            Como usar: informe host/usuario/chave SSH e o mapeamento local-remoto.
+                            Exemplo comum: localhost:14331 para 127.0.0.1:1433 no servidor remoto.
+                            Clique em Iniciar tunel para abrir o encaminhamento.
+                        </TextBlock>
                     </Border>
 
                     <!-- ===== Campos de configuracao (modo Configuracao) ===== -->
@@ -164,7 +178,8 @@
                             <TextBlock Text="StrictHostKeyChecking"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <ComboBox x:Name="StrictHostKeyCheckingCombo"
-                                      Style="{StaticResource DevToolsSelectInput}"/>
+                                      Style="{StaticResource DevToolsSelectInput}"
+                                      ToolTip="yes exige host conhecido; no ignora validacao; accept-new aceita e registra na primeira conexao."/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Timeout de conexao (s)"
@@ -196,14 +211,16 @@
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="LocalBindHostInput"
                                      Style="{StaticResource DevToolsTextInput}"
-                                     Text="127.0.0.1"/>
+                                     Text="127.0.0.1"
+                                     ToolTip="Host local que recebera a conexao tunelada (geralmente 127.0.0.1)."/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Porta local"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="LocalPortInput"
                                      Style="{StaticResource DevToolsTextInput}"
-                                     Text="14331"/>
+                                     Text="14331"
+                                     ToolTip="Porta local para acessar o servico remoto atraves do tunel."/>
                         </StackPanel>
                     </Grid>
 
@@ -218,14 +235,16 @@
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="RemoteHostInput"
                                      Style="{StaticResource DevToolsTextInput}"
-                                     Text="127.0.0.1"/>
+                                     Text="127.0.0.1"
+                                     ToolTip="Host visto a partir do servidor SSH (exemplo: 127.0.0.1)."/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Porta remota"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="RemotePortInput"
                                      Style="{StaticResource DevToolsTextInput}"
-                                     Text="1433"/>
+                                     Text="1433"
+                                     ToolTip="Porta do servico remoto (exemplo: banco SQL em 1433)."/>
                         </StackPanel>
                     </Grid>
 

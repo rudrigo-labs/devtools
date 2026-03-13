@@ -143,7 +143,7 @@
                             <TextBlock Text="DevTools"
                                        Style="{StaticResource DevToolsSectionTitle}"/>
                         </StackPanel>
-                        <TextBlock Text="TOOLS"
+                        <TextBlock Text="MENU"
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    FontSize="11"
                                    Margin="0,6,0,0"/>
@@ -157,77 +157,23 @@
 
                     <!-- Itens de navegação -->
                     <StackPanel DockPanel.Dock="Top">
-                        <Button x:Name="NavHome"
-                                Content="Home"
-                                Tag="Home"
+                        <Button x:Name="NavFerramentas"
+                                Content="Ferramentas"
+                                Tag="Ferramentas"
                                 Style="{StaticResource SidebarNavButtonActiveStyle}"
                                 Click="NavButton_Click"/>
-                        <Button x:Name="NavSnapshot"
-                                Content="Snapshot"
-                                Tag="Snapshot"
+                        <Button x:Name="NavConfiguracoes"
+                                Content="Configuracoes"
+                                Tag="Configuracoes"
                                 Style="{StaticResource SidebarNavButtonStyle}"
                                 Click="NavButton_Click"/>
-                        <Button x:Name="NavRename"
-                                Content="Rename"
-                                Tag="Rename"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavHarvest"
-                                Content="Harvest"
-                                Tag="Harvest"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavImageSplit"
-                                Content="Image Split"
-                                Tag="ImageSplit"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavSearchText"
-                                Content="Search Text"
-                                Tag="SearchText"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavOrganizer"
-                                Content="Organizer"
-                                Tag="Organizer"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavUtf8Convert"
-                                Content="UTF-8 Convert"
-                                Tag="Utf8Convert"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavMigrations"
-                                Content="Migrations"
-                                Tag="Migrations"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavSshTunnel"
-                                Content="SSH Tunnel"
-                                Tag="SshTunnel"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavNgrok"
-                                Content="Ngrok"
-                                Tag="Ngrok"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavNotes"
-                                Content="Notes"
-                                Tag="Notes"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                    </StackPanel>
-
-                    <!-- Encerrar (fixado na base da sidebar) -->
-                    <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,8">
-                        <Border Height="1"
-                                Background="{DynamicResource DevToolsBrushBorder}"
-                                Margin="0,0,0,8"/>
                         <Button Content="Encerrar"
                                 Style="{StaticResource SidebarNavButtonExitStyle}"
                                 Click="ExitButton_Click"/>
                     </StackPanel>
+
+                    <!-- EspaÃ§ador -->
+                    <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,8"/>
                 </DockPanel>
             </Border>
 
@@ -239,7 +185,7 @@
                 <Border BorderBrush="{DynamicResource DevToolsBrushBorder}"
                         BorderThickness="0,0,0,1"/>
                 <TextBlock x:Name="ActiveToolLabel"
-                           Text="Home"
+                           Text="Ferramentas"
                            Foreground="{DynamicResource DevToolsTextSecondary}"
                            VerticalAlignment="Center"
                            Margin="16,0,0,0"/>

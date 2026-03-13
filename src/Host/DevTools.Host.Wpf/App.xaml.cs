@@ -142,6 +142,7 @@ public partial class App : System.Windows.Application
 
         // Host WPF
         services.AddSingleton<HomeLauncherView>();
+        services.AddSingleton<ConfigurationLauncherView>();
         services.AddSingleton<RenameWorkspaceView>();
         services.AddSingleton<SnapshotWorkspaceView>();
         services.AddSingleton<HarvestWorkspaceView>();

@@ -21,19 +21,15 @@ namespace DevTools.Host.Wpf.Views;
 
 public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
 {
-    private const string NoConfigurationLabel = "Configurar manualmente";
-
     private enum NotesWorkspaceMode { Execution, Configuration }
 
     private readonly ObservableCollection<NotesEntity>          _entities             = new();
-    private readonly ObservableCollection<NotesSelectionOption> _configurationOptions = new();
     private readonly INotesFacade _facade;
 
     private NotesEntity?       _currentEntity;
     private NoteListItem?      _currentNote;
     private NotesWorkspaceMode _currentMode = NotesWorkspaceMode.Execution;
     private bool _initialized;
-    private bool _suppressSelectionChanged;
     private bool _isBusy;
 
     private static readonly ObservableCollection<NotesSelectionOption> ExtensionOptions = new()
@@ -47,7 +43,6 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         _facade = facade;
         InitializeComponent();
 
-        ConfigurationsCombo.ItemsSource  = _configurationOptions;
         ExtensionCombo.ItemsSource       = ExtensionOptions;
         ExtensionCombo.DisplayMemberPath = "Label";
         ExtensionCombo.SelectedIndex     = 0;
@@ -116,21 +111,14 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         var selectedId = _currentEntity?.Id;
         var list = await _facade.LoadConfigurationsAsync();
 
-        _suppressSelectionChanged = true;
         _entities.Clear();
-        _configurationOptions.Clear();
-        _configurationOptions.Add(new NotesSelectionOption(NoConfigurationLabel, string.Empty));
-
         foreach (var item in list)
         {
             _entities.Add(item);
-            _configurationOptions.Add(new NotesSelectionOption(item.Name, item.Id));
         }
-        _suppressSelectionChanged = false;
 
         if (_entities.Count == 0)
         {
-            SetSelectedConfiguration(null);
             CreateNewEntity();
             await ReloadNotesListAsync().ConfigureAwait(true);
             return;
@@ -140,40 +128,8 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
             ?? _entities.FirstOrDefault(x => x.IsDefault)
             ?? _entities.First();
 
-        SetSelectedConfiguration(toSelect);
         BindEntityToForm(toSelect);
         await ReloadNotesListAsync().ConfigureAwait(true);
-    }
-
-    private void SetSelectedConfiguration(NotesEntity? entity)
-    {
-        _suppressSelectionChanged = true;
-        ConfigurationsCombo.SelectedItem = entity is null
-            ? _configurationOptions.FirstOrDefault()
-            : _configurationOptions.FirstOrDefault(o => o.Value == entity.Id);
-        _suppressSelectionChanged = false;
-    }
-
-    private async void ConfigurationsCombo_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-    {
-        if (_suppressSelectionChanged || _isBusy) return;
-        if (ConfigurationsCombo.SelectedItem is not NotesSelectionOption opt) return;
-
-        if (string.IsNullOrWhiteSpace(opt.Value))
-        {
-            CreateNewEntity();
-            await ReloadNotesListAsync().ConfigureAwait(true);
-            return;
-        }
-
-        _currentEntity = _entities.FirstOrDefault(x => x.Id == opt.Value);
-        if (_currentEntity is not null)
-        {
-            BindEntityToForm(_currentEntity);
-            NotesStoragePathHint.Text = _currentEntity.LocalRootPath;
-            NotesStoragePathHint.ToolTip = _currentEntity.LocalRootPath;
-            await ReloadNotesListAsync().ConfigureAwait(true);
-        }
     }
 
     // ── Lista de notas ────────────────────────────────────────────────────────
@@ -442,9 +398,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
 
     private void ActionNew_Click(object sender, RoutedEventArgs e)
     {
-        if (_isBusy) return;
-        CreateNewEntity();
-        SetMode(NotesWorkspaceMode.Configuration);
+        // Singleton configuration: no "new configuration" action.
     }
 
     private async void ActionSave_Click(object sender, RoutedEventArgs e)
@@ -484,19 +438,8 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
 
     private async void ActionDelete_Click(object sender, RoutedEventArgs e)
     {
-        if (_currentMode != NotesWorkspaceMode.Configuration)
-            return;
-
-        if (_isBusy || _currentEntity is null || string.IsNullOrWhiteSpace(_currentEntity.Id)) return;
-
-        var confirm = Components.DevToolsMessageBox.Confirm(
-            Window.GetWindow(this), $"Excluir configuração \"{_currentEntity.Name}\"?", "Excluir");
-        if (confirm != Components.DevToolsMessageBoxResult.Yes) return;
-
-        await _facade.DeleteConfigurationAsync(_currentEntity.Id).ConfigureAwait(true);
-        _currentEntity = null;
-        await ReloadEntitiesAsync().ConfigureAwait(true);
-        ExecutionStatusText.Text = "Configuração excluída.";
+        // Singleton configuration: delete is disabled.
+        await Task.CompletedTask;
     }
 
     private void ActionCancel_Click(object sender, RoutedEventArgs e)
@@ -654,7 +597,6 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
             DefaultExtension = ".md"
         };
         BindEntityToForm(_currentEntity);
-        SetSelectedConfiguration(null);
     }
 
     // ── Estado geral ──────────────────────────────────────────────────────────
@@ -663,11 +605,10 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
     {
         var inConfiguration = _currentMode == NotesWorkspaceMode.Configuration;
         var inEditor = _currentMode == NotesWorkspaceMode.Execution && EditGrid.Visibility == Visibility.Visible;
-        var hasPersistedConfiguration = _currentEntity is not null && !string.IsNullOrWhiteSpace(_currentEntity.Id);
 
-        Actions.ShowNew = inConfiguration;
+        Actions.ShowNew = false;
         Actions.ShowSave = inConfiguration || inEditor;
-        Actions.ShowDelete = inConfiguration;
+        Actions.ShowDelete = false;
         Actions.ShowCancel = inConfiguration || inEditor;
         Actions.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
 
@@ -676,9 +617,9 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         Actions.DeleteText = "Excluir";
         Actions.CancelText = inConfiguration ? "Cancelar" : "Voltar";
 
-        Actions.CanNew = inConfiguration && !_isBusy;
+        Actions.CanNew = false;
         Actions.CanSave = !_isBusy && (inConfiguration || inEditor);
-        Actions.CanDelete = inConfiguration && hasPersistedConfiguration && !_isBusy;
+        Actions.CanDelete = false;
         Actions.CanCancel = !_isBusy && (inConfiguration || inEditor);
     }
 

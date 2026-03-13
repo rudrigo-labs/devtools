@@ -40,6 +40,24 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         await ReloadEntitiesAsync().ConfigureAwait(true);
     }
 
+    public void ActivateExecutionMode()
+    {
+        if (_currentEntity is null)
+            CreateNewEntity();
+
+        SetMode(NgrokWorkspaceMode.Execution, "Modo execucao ativado.");
+    }
+
+    public void ActivateConfigurationMode()
+    {
+        if (_currentEntity is null)
+            CreateNewEntity();
+        else
+            BindEntityToForm(_currentEntity);
+
+        SetMode(NgrokWorkspaceMode.Configuration, "Modo configuracao ativado.");
+    }
+
     // ── Navegação de modo ─────────────────────────────────────────────────────
 
     private void SwitchToExecution_Click(object sender, RoutedEventArgs e) => SetMode(NgrokWorkspaceMode.Execution, "Modo execução ativado.");
@@ -362,6 +380,7 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         Actions.ShowSave = inConfiguration;
         Actions.ShowDelete = inConfiguration;
         Actions.ShowCancel = inConfiguration;
+        Actions.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
 
         Actions.CanNew = true;
         Actions.CanSave = inConfiguration;
