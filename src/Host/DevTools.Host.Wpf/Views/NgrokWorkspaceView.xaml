@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:DevTools.Host.Wpf.Components">
 
-    <Grid Margin="0,8,0,0">
+    <Grid Margin="0,4,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -14,10 +14,12 @@
 
         <!-- HEADER -->
         <StackPanel Grid.Row="0" Margin="0,0,0,12">
-            <TextBlock Text="Ngrok"
+            <TextBlock x:Name="WorkspaceTitleText"
+                       Text="Ngrok"
                        FontSize="18" FontWeight="SemiBold"
                        Foreground="{DynamicResource DevToolsTextPrimary}"/>
-            <TextBlock Text="Gerencia túneis HTTP/HTTPS via ngrok. Inicia, lista, encerra e monitora processos ngrok."
+            <TextBlock x:Name="WorkspaceSubtitleText"
+                       Text="Gerencia túneis HTTP/HTTPS via ngrok. Inicia, lista, encerra e monitora processos ngrok."
                        Foreground="{DynamicResource DevToolsTextSecondary}"
                        FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap"/>
             <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,10,0,0"/>
@@ -26,9 +28,12 @@
         <!-- ACTION BAR -->
         <c:ActionBarControl Grid.Row="1" x:Name="Actions"
                             ShowNew="True" ShowSave="True" ShowDelete="True" ShowCancel="False"
+                            ShowHelp="True"
+                            HelpText="Execution: inicie tunel HTTP local e copie a URL publica. Configuracao: salve auth token e caminho do executavel."
                             ActionNew="ActionNew_Click"
                             ActionSave="ActionSave_Click"
-                            ActionDelete="ActionDelete_Click"/>
+                            ActionDelete="ActionDelete_Click"
+                            ActionCancel="ActionCancel_Click"/>
 
         <!-- SELETOR DE CONFIGURAÇÃO + MODO -->
         <Grid Grid.Row="2" Margin="0,0,0,12">
@@ -58,14 +63,24 @@
             <!-- MODO EXECUÇÃO: dois painéis lado a lado (espelho do legado) -->
             <Grid x:Name="ExecutionPanel">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="320"/>
+                    <ColumnDefinition Width="360"/>
                     <ColumnDefinition Width="16"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Painel esquerdo: config + ações -->
                 <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="0,4,0,0">
+                    <StackPanel Margin="0,0,0,0">
+
+                        <Border BorderThickness="1" CornerRadius="4"
+                                BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                Background="{DynamicResource DevToolsSurface}"
+                                Padding="10,8" Margin="0,0,0,12">
+                            <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
+                                Como usar: informe a porta local da sua app e clique em Iniciar.
+                                Depois use Copiar URL no painel da direita para compartilhar o endpoint publico.
+                            </TextBlock>
+                        </Border>
 
                         <!-- Iniciar túnel -->
                         <Border Background="{DynamicResource DevToolsSurface}"
@@ -108,7 +123,7 @@
                                     <Button Grid.Column="0" Content="Iniciar"
                                             Style="{StaticResource DevToolsPrimaryButton}"
                                             Click="StartHttp_Click"/>
-                                    <Button Grid.Column="2" Content="Parar"
+                                    <Button Grid.Column="2" Content="Encerrar tudo"
                                             Style="{StaticResource DevToolsSecondaryButton}"
                                             Click="KillAll_Click"/>
                                 </Grid>
@@ -122,7 +137,7 @@
                                 <ColumnDefinition Width="8"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="Atualizar"
+                            <Button Grid.Column="0" Content="Listar tuneis"
                                     Style="{StaticResource DevToolsSecondaryButton}"
                                     Click="ListTunnels_Click"/>
                             <Button Grid.Column="2" Content="Status"
@@ -140,8 +155,8 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <Grid Grid.Row="0" Margin="0,4,0,12">
-                        <TextBlock Text="Túneis Ativos"
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <TextBlock Text="Tuneis Ativos"
                                    FontSize="13" FontWeight="SemiBold"
                                    Foreground="{DynamicResource DevToolsTextPrimary}"
                                    VerticalAlignment="Center"/>
@@ -200,7 +215,16 @@
             <!-- MODO CONFIGURAÇÃO -->
             <ScrollViewer x:Name="ConfigurationPanel" Visibility="Collapsed"
                           VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Margin="0,4,0,0">
+                <StackPanel Margin="0,0,0,0">
+
+                    <Border BorderThickness="1" CornerRadius="4"
+                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                            Background="{DynamicResource DevToolsSurface}"
+                            Padding="10,8" Margin="0,0,0,12">
+                        <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
+                            Modo configuracao: salve token, executavel e URL da API para facilitar o uso diario.
+                        </TextBlock>
+                    </Border>
 
                     <StackPanel Margin="0,0,0,12">
                         <TextBlock Text="Nome da configuração *" Style="{StaticResource DevToolsInputLabel}"/>

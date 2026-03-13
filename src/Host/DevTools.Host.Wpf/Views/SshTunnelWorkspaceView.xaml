@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:DevTools.Host.Wpf.Components">
 
-    <Grid Margin="0,8,0,0">
+    <Grid Margin="0,4,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -26,6 +26,8 @@
         <!-- ACTION BAR -->
         <c:ActionBarControl Grid.Row="1" x:Name="Actions"
                             ShowNew="True" ShowSave="True" ShowDelete="True" ShowCancel="True"
+                            ShowHelp="True"
+                            HelpText="Execution: iniciar/parar tunel com a configuracao selecionada. Configuracao: preencher host, usuario e mapeamento local/remoto."
                             ActionNew="ActionNew_Click"
                             ActionSave="ActionSave_Click"
                             ActionDelete="ActionDelete_Click"
@@ -55,10 +57,20 @@
 
         <!-- BODY -->
         <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Margin="0,4,0,0">
+            <StackPanel Margin="0,0,0,0">
 
                 <!-- MODO EXECUÇÃO -->
                 <StackPanel x:Name="ExecutionPanel">
+
+                    <Border BorderThickness="1" CornerRadius="4"
+                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                            Background="{DynamicResource DevToolsSurface}"
+                            Padding="10,8" Margin="0,0,0,12">
+                        <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
+                            Como usar: selecione uma configuracao e clique em Iniciar tunel.
+                            O mapeamento local:porta -> remoto:porta aparece no resumo.
+                        </TextBlock>
+                    </Border>
 
                     <!-- Badge de status -->
                     <Border Background="{DynamicResource DevToolsSurface}"
@@ -107,6 +119,15 @@
 
                 <!-- MODO CONFIGURAÇÃO -->
                 <StackPanel x:Name="ConfigurationPanel" Visibility="Collapsed">
+
+                    <Border BorderThickness="1" CornerRadius="4"
+                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                            Background="{DynamicResource DevToolsSurface}"
+                            Padding="10,8" Margin="0,0,0,12">
+                        <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
+                            Modo configuracao: salve os dados do SSH e o destino do tunel para reutilizar depois.
+                        </TextBlock>
+                    </Border>
 
                     <StackPanel Margin="0,0,0,12">
                         <TextBlock Text="Nome da configuração *" Style="{StaticResource DevToolsInputLabel}"/>

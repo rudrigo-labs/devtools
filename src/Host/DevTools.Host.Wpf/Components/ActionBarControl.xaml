@@ -10,7 +10,17 @@
 
     <StackPanel Orientation="Horizontal"
                 HorizontalAlignment="Right"
-                Margin="0,0,0,10">
+                Margin="0,0,0,6">
+
+        <Button Style="{StaticResource ActionBarCancelButton}"
+                IsEnabled="{Binding CanHelp, ElementName=Root}"
+                ToolTip="{Binding HelpText, ElementName=Root}"
+                Visibility="{Binding ShowHelp, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="HelpCircleOutline" Width="16" Height="16" Margin="0,0,6,0"/>
+                <TextBlock Text="{Binding HelpTextLabel, ElementName=Root}"/>
+            </StackPanel>
+        </Button>
 
         <Button Style="{StaticResource ActionBarNewButton}"
                 Click="ActionNew_Click"

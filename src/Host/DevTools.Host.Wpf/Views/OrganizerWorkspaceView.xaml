@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:DevTools.Host.Wpf.Components">
 
-    <Grid Margin="0,8,0,0">
+    <Grid Margin="0,4,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -26,12 +26,25 @@
         <c:ActionBarControl Grid.Row="1" x:Name="Actions"
                             ShowNew="False" ShowSave="True" ShowDelete="False" ShowCancel="True"
                             SaveText="Executar"
+                            ShowHelp="True"
+                            HelpText="Pasta de entrada contem os arquivos. Pasta de saida define onde organizar. Score minimo controla a classificacao."
                             ActionSave="ActionExecute_Click"
                             ActionCancel="ActionCancel_Click"/>
 
         <!-- BODY -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Margin="0,4,0,0">
+            <StackPanel Margin="0,0,0,0">
+
+                <Border BorderThickness="1" CornerRadius="4"
+                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                        Background="{DynamicResource DevToolsSurface}"
+                        Padding="10,8" Margin="0,0,0,12">
+                    <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
+                        Como usar: escolha a pasta de entrada. Se quiser, escolha uma pasta de saida.
+                        Score minimo define a confianca da classificacao. Mover arquivos aplica de verdade;
+                        desmarcado faz simulacao.
+                    </TextBlock>
+                </Border>
 
                 <c:PathSelector x:Name="InboxPathSelector" Title="Pasta de entrada *" IsFolderPicker="True" Margin="0,0,0,12"/>
                 <c:PathSelector x:Name="OutputPathSelector" Title="Pasta de saída (opcional — padrão: mesma da entrada)" IsFolderPicker="True" Margin="0,0,0,12"/>
@@ -53,6 +66,12 @@
                               VerticalAlignment="Bottom"
                               ToolTip="Quando desmarcado, apenas simula a organização sem mover nenhum arquivo."/>
                 </Grid>
+
+                <Button Content="Organizar Agora"
+                        Style="{StaticResource DevToolsPrimaryButton}"
+                        HorizontalAlignment="Left"
+                        Margin="0,0,0,12"
+                        Click="ActionExecute_Click"/>
 
                 <!-- Resumo dos resultados -->
                 <Border x:Name="ResultPanel" Visibility="Collapsed"

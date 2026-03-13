@@ -6,7 +6,7 @@
     <Grid x:Name="WorkspaceRoot" Margin="0">
         <Grid HorizontalAlignment="Stretch"
               VerticalAlignment="Top"
-              Margin="0,8,0,0">
+              Margin="0,4,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -37,6 +37,8 @@
                                 ShowSave="True"
                                 ShowDelete="False"
                                 ShowCancel="True"
+                                ShowHelp="True"
+                                HelpText="Informe texto antigo e novo, escolha o modo e execute. Use simulacao para revisar antes de aplicar."
                                 ActionSave="ActionSave_Click"
                                 ActionCancel="ActionCancel_Click"/>
 
@@ -44,12 +46,7 @@
             <ScrollViewer Grid.Row="2"
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Margin="0,4,0,0">
-
-                    <!-- ===== Substituição ===== -->
-                    <TextBlock Text="Substituição"
-                               Style="{StaticResource DevToolsCardTitle}"
-                               Margin="0,0,0,10"/>
+                <StackPanel Margin="0,0,0,0">
 
                     <Grid Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>

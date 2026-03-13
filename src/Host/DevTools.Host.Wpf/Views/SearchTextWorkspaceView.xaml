@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:DevTools.Host.Wpf.Components">
 
-    <Grid Margin="0,8,0,0">
+    <Grid Margin="0,4,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -26,12 +26,25 @@
         <c:ActionBarControl Grid.Row="1" x:Name="Actions"
                             ShowNew="False" ShowSave="True" ShowDelete="False" ShowCancel="True"
                             SaveText="Buscar"
+                            ShowHelp="True"
+                            HelpText="Preencha pasta e padrao. Ative Regex apenas se souber expressoes regulares. Use globs para filtrar arquivos."
                             ActionSave="ActionExecute_Click"
                             ActionCancel="ActionCancel_Click"/>
 
         <!-- BODY -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Margin="0,4,0,0">
+            <StackPanel Margin="0,0,0,0">
+
+                <Border BorderThickness="1" CornerRadius="4"
+                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                        Background="{DynamicResource DevToolsSurface}"
+                        Padding="10,8" Margin="0,0,0,12">
+                    <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
+                        Como usar: informe a pasta raiz e o texto a procurar. Regex aceita padroes avancados.
+                        Case sensitive diferencia maiusculas/minusculas. Palavra inteira evita partes de palavra.
+                        Globs sao filtros como **/*.cs e **/bin/**.
+                    </TextBlock>
+                </Border>
 
                 <c:PathSelector x:Name="RootPathSelector" Title="Pasta raiz *" IsFolderPicker="True" Margin="0,0,0,12"/>
 
@@ -56,6 +69,10 @@
                     <CheckBox x:Name="WholeWordCheck" Grid.Column="4"
                               Content="Palavra inteira" Style="{StaticResource DevToolsCheckBox}"/>
                 </Grid>
+
+                <TextBlock Text="Globs: um padrao por linha. Inclusao: **/*.cs  |  Exclusao: **/obj/**"
+                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                           FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap"/>
 
                 <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
@@ -97,6 +114,12 @@
 
                 <CheckBox x:Name="SkipBinaryCheck" Content="Ignorar arquivos binários"
                           Style="{StaticResource DevToolsCheckBox}" IsChecked="True" Margin="0,0,0,12"/>
+
+                <Button Content="Buscar Agora"
+                        Style="{StaticResource DevToolsPrimaryButton}"
+                        HorizontalAlignment="Left"
+                        Margin="0,0,0,12"
+                        Click="ActionExecute_Click"/>
 
                 <!-- Resultados -->
                 <TextBlock x:Name="ResultSummaryText"

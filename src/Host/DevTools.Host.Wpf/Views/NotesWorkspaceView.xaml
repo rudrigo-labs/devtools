@@ -31,7 +31,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="0,8,0,0">
+    <Grid Margin="0,4,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -49,36 +49,44 @@
                        Foreground="{DynamicResource DevToolsTextSecondary}"
                        FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap"/>
             <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,10,0,0"/>
-        </StackPanel>
-
-        <!-- ACTION BAR -->
+        </StackPanel>        <!-- ACTION BAR (desativada para Notes; a configuracao usa barra propria) -->
         <c:ActionBarControl Grid.Row="1" x:Name="Actions"
+                            Visibility="Collapsed"
                             ShowNew="True" ShowSave="True" ShowDelete="True" ShowCancel="True"
+                            ShowHelp="True"
+                            HelpText="Use a lista para abrir notas. Na configuracao, ajuste pasta local e integracao com Google Drive."
                             ActionNew="ActionNew_Click"
                             ActionSave="ActionSave_Click"
                             ActionDelete="ActionDelete_Click"
                             ActionCancel="ActionCancel_Click"/>
 
-        <!-- SELETOR DE CONFIGURAÇÃO + MODO -->
-        <Grid Grid.Row="2" Margin="0,0,0,12">
+        <!-- SELETOR DE CONFIGURAÇÃO + MODO -->        <!-- Barra de configuracao -->        <!-- Barra de configuracao unica -->
+        <Grid x:Name="ConfigurationModeBar" Grid.Row="2" Margin="0,0,0,12" Visibility="Collapsed">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       Text="Configuracao do Notes"
+                       VerticalAlignment="Center"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource DevToolsTextPrimary}"/>
             <ComboBox x:Name="ConfigurationsCombo"
-                      Grid.Column="0"
+                      Grid.Column="1"
+                      Visibility="Collapsed"
                       Style="{StaticResource DevToolsSelectInput}"
                       DisplayMemberPath="Label"
                       SelectionChanged="ConfigurationsCombo_SelectionChanged"/>
-            <Button Grid.Column="2" Content="Notas"
+            <Button Grid.Column="3" Content="Salvar"
+                    Style="{StaticResource DevToolsPrimaryButton}"
+                    Click="ActionSave_Click"/>
+            <Button Grid.Column="5" Content="Voltar para notas"
                     Style="{StaticResource DevToolsSecondaryButton}"
                     Click="SwitchToExecution_Click"/>
-            <Button Grid.Column="4" Content="Configuração"
-                    Style="{StaticResource DevToolsSecondaryButton}"
-                    Click="SwitchToConfiguration_Click"/>
         </Grid>
 
         <!-- BODY -->
@@ -108,6 +116,7 @@
                              Foreground="{DynamicResource DevToolsTextPrimary}"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             KeyDown="NotesList_KeyDown"
                              MouseDoubleClick="NotesList_MouseDoubleClick">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -147,6 +156,7 @@
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="Background" Value="Transparent"/>
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <EventSetter Event="MouseDoubleClick" Handler="NotesListItem_MouseDoubleClick"/>
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="ListBoxItem">
@@ -177,6 +187,9 @@
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <Button Style="{StaticResource AppBarButtonStyle}" ToolTip="Nova nota" Click="AddButton_Click">
                                 <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
+                            </Button>
+                            <Button Style="{StaticResource AppBarButtonStyle}" ToolTip="Configuracoes (Google Drive)" Click="SwitchToConfiguration_Click" Margin="8,0">
+                                <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
                             </Button>
                             <Button Style="{StaticResource AppBarButtonStyle}" ToolTip="Exportar backup (ZIP)" Click="ExportButton_Click" Margin="8,0">
                                 <TextBlock Text="&#xE78C;" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
@@ -232,7 +245,10 @@
                              FontFamily="Consolas" FontSize="13"
                              AcceptsReturn="True" AcceptsTab="True"
                              TextWrapping="Wrap"
+                             HorizontalContentAlignment="Left"
+                             TextAlignment="Left"
                              VerticalContentAlignment="Top"
+                             Padding="12,10"
                              VerticalScrollBarVisibility="Auto"/>
 
                     <!-- AppBar do editor -->
@@ -262,13 +278,13 @@
                           VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Margin="0,4,0,0">
 
-                    <StackPanel Margin="0,0,0,12">
+                    <StackPanel Margin="0,0,0,12" Visibility="Collapsed">
                         <TextBlock Text="Nome *" Style="{StaticResource DevToolsInputLabel}"/>
                         <TextBox x:Name="NameInput" Style="{StaticResource DevToolsTextInput}"/>
                     </StackPanel>
 
-                    <StackPanel Margin="0,0,0,12">
-                        <TextBlock Text="Descrição" Style="{StaticResource DevToolsInputLabel}"/>
+                    <StackPanel Margin="0,0,0,12" Visibility="Collapsed">
+                        <TextBlock Text="Descricao" Style="{StaticResource DevToolsInputLabel}"/>
                         <TextBox x:Name="DescriptionInput" Style="{StaticResource DevToolsTextInput}"/>
                     </StackPanel>
 
@@ -280,7 +296,7 @@
                     <CheckBox x:Name="IsDefaultCheck"
                               Content="Marcar como configuração padrão"
                               Style="{StaticResource DevToolsCheckBox}"
-                              Margin="0,0,0,16"/>
+                              Margin="0,0,0,16" Visibility="Collapsed"/>
 
                     <!-- Google Drive -->
                     <Border BorderBrush="{DynamicResource DevToolsBrushBorder}"
@@ -356,3 +372,6 @@
                    Foreground="{DynamicResource DevToolsTextSecondary}"/>
     </Grid>
 </UserControl>
+
+
+

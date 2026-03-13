@@ -176,8 +176,47 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
 
     private void NotesList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
+        if (IsFromActionButton(e.OriginalSource))
+            return;
+
+        OpenSelectedNote();
+    }
+
+    private void NotesListItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (IsFromActionButton(e.OriginalSource))
+            return;
+
+        OpenSelectedNote();
+    }
+
+    private void NotesList_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter)
+            return;
+
+        e.Handled = true;
+        OpenSelectedNote();
+    }
+
+    private void OpenSelectedNote()
+    {
         if (NotesList.SelectedItem is NoteListItem item)
             _ = OpenNoteAsync(item);
+    }
+
+    private static bool IsFromActionButton(object? originalSource)
+    {
+        var current = originalSource as DependencyObject;
+        while (current is not null)
+        {
+            if (current is System.Windows.Controls.Button)
+                return true;
+
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return false;
     }
 
     private async Task OpenNoteAsync(NoteListItem item)
@@ -202,6 +241,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         DriveStatusBanner.Visibility = Visibility.Collapsed;
         ExecutionStatusText.Text     = string.Empty;
         ShowEditView();
+        PositionEditorAtTopLeft();
     }
 
     // ── AppBar lista ──────────────────────────────────────────────────────────
@@ -216,6 +256,8 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         ExecutionStatusText.Text      = string.Empty;
         ShowEditView();
         NoteTitleInput.Focus();
+        NoteContentInput.CaretIndex = 0;
+        NoteContentInput.ScrollToHome();
     }
 
     private async void ExportButton_Click(object sender, RoutedEventArgs e)
@@ -395,17 +437,21 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
 
         if (_currentMode == NotesWorkspaceMode.Execution)
         {
+            if (EditGrid.Visibility != Visibility.Visible)
+            {
+                ExecutionStatusText.Text = "Abra ou crie uma nota para salvar.";
+                return;
+            }
+
             await SaveNoteAsync().ConfigureAwait(true);
             return;
         }
 
         ReadFormIntoEntity();
-
-        if (!ValidationUiService.ValidateRequiredFields(out var err,
-            ValidationUiService.RequiredControl("Nome", NameInput, NameInput.Text)))
+        if (_currentEntity is null)
         {
-            ExecutionStatusText.Text = err;
-            return;
+            CreateNewEntity();
+            ReadFormIntoEntity();
         }
 
         var validation = await _facade.SaveConfigurationAsync(_currentEntity!).ConfigureAwait(true);
@@ -422,6 +468,9 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
 
     private async void ActionDelete_Click(object sender, RoutedEventArgs e)
     {
+        if (_currentMode != NotesWorkspaceMode.Configuration)
+            return;
+
         if (_isBusy || _currentEntity is null || string.IsNullOrWhiteSpace(_currentEntity.Id)) return;
 
         var confirm = Components.DevToolsMessageBox.Confirm(
@@ -436,6 +485,21 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
 
     private void ActionCancel_Click(object sender, RoutedEventArgs e)
     {
+        if (_isBusy)
+            return;
+
+        if (_currentMode == NotesWorkspaceMode.Execution)
+        {
+            if (EditGrid.Visibility == Visibility.Visible)
+            {
+                _ = ReloadNotesListAsync();
+                return;
+            }
+
+            ExecutionStatusText.Text = string.Empty;
+            return;
+        }
+
         if (_currentEntity is not null) BindEntityToForm(_currentEntity);
         ExecutionStatusText.Text = string.Empty;
     }
@@ -514,12 +578,14 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         ListGrid.Visibility = Visibility.Visible;
         EditGrid.Visibility = Visibility.Collapsed;
         _currentNote = null;
+        ApplyModeState();
     }
 
     private void ShowEditView()
     {
         ListGrid.Visibility = Visibility.Collapsed;
         EditGrid.Visibility = Visibility.Visible;
+        ApplyModeState();
     }
 
     // ── Drive banner ──────────────────────────────────────────────────────────
@@ -552,10 +618,10 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
     private void ReadFormIntoEntity()
     {
         if (_currentEntity is null) return;
-        _currentEntity.Name                       = NameInput.Text.Trim();
-        _currentEntity.Description                = DescriptionInput.Text.Trim();
+        _currentEntity.Name                       = "Notes";
+        _currentEntity.Description                = "Configuracao unica do Notes";
         _currentEntity.LocalRootPath              = LocalRootPathSelector.SelectedPath?.Trim() ?? string.Empty;
-        _currentEntity.IsDefault                  = IsDefaultCheck.IsChecked ?? false;
+        _currentEntity.IsDefault                  = true;
         _currentEntity.GoogleDriveEnabled         = GoogleDriveEnabledCheck.IsChecked ?? false;
         _currentEntity.GoogleDriveCredentialsPath = CredentialsPathSelector.SelectedPath?.Trim() ?? string.Empty;
         _currentEntity.GoogleDriveFolderId        = FolderIdInput.Text.Trim();
@@ -564,7 +630,13 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
 
     private void CreateNewEntity()
     {
-        _currentEntity = new NotesEntity { DefaultExtension = ".md" };
+        _currentEntity = new NotesEntity
+        {
+            Name = "Notes",
+            Description = "Configuracao unica do Notes",
+            IsDefault = true,
+            DefaultExtension = ".md"
+        };
         BindEntityToForm(_currentEntity);
         SetSelectedConfiguration(null);
     }
@@ -573,9 +645,31 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
 
     private void ApplyModeState()
     {
-        Actions.CanSave    = !_isBusy;
-        Actions.CanCancel  = _isBusy;
-        Actions.ShowCancel = _isBusy;
-        Actions.SaveText   = _currentMode == NotesWorkspaceMode.Execution ? "Salvar nota" : "Salvar";
+        var inConfiguration = _currentMode == NotesWorkspaceMode.Configuration;
+        var inEditor = _currentMode == NotesWorkspaceMode.Execution && EditGrid.Visibility == Visibility.Visible;
+        var hasPersistedConfiguration = _currentEntity is not null && !string.IsNullOrWhiteSpace(_currentEntity.Id);
+
+        Actions.ShowNew = inConfiguration;
+        Actions.ShowSave = inConfiguration || inEditor;
+        Actions.ShowDelete = inConfiguration;
+        Actions.ShowCancel = inConfiguration || inEditor;
+        Actions.Visibility = Visibility.Collapsed;
+        ConfigurationModeBar.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+
+        Actions.NewText = "Novo";
+        Actions.SaveText = inConfiguration ? "Salvar" : "Salvar nota";
+        Actions.DeleteText = "Excluir";
+        Actions.CancelText = inConfiguration ? "Cancelar" : "Voltar";
+
+        Actions.CanNew = inConfiguration && !_isBusy;
+        Actions.CanSave = !_isBusy && (inConfiguration || inEditor);
+        Actions.CanDelete = inConfiguration && hasPersistedConfiguration && !_isBusy;
+        Actions.CanCancel = !_isBusy && (inConfiguration || inEditor);
+    }
+
+    private void PositionEditorAtTopLeft()
+    {
+        NoteContentInput.CaretIndex = 0;
+        NoteContentInput.ScrollToHome();
     }
 }

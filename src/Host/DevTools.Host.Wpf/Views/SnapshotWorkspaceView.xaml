@@ -6,7 +6,7 @@
     <Grid x:Name="WorkspaceRoot" Margin="0">
         <Grid HorizontalAlignment="Stretch"
               VerticalAlignment="Top"
-              Margin="0,8,0,0">
+              Margin="0,4,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -16,11 +16,13 @@
 
             <!-- ==================== TOOL HEADER ==================== -->
             <StackPanel Grid.Row="0" Margin="0,0,0,12">
-                <TextBlock Text="Snapshot"
+                <TextBlock x:Name="WorkspaceTitleText"
+                           Text="Snapshot"
                            FontSize="18"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource DevToolsTextPrimary}"/>
-                <TextBlock Text="Gera um snapshot textual completo do projeto para uso com assistentes de IA."
+                <TextBlock x:Name="WorkspaceSubtitleText"
+                           Text="Gera um snapshot textual completo do projeto para uso com assistentes de IA."
                            Foreground="{DynamicResource DevToolsTextSecondary}"
                            FontSize="12"
                            Margin="0,4,0,0"
@@ -37,6 +39,8 @@
                                 ShowSave="True"
                                 ShowDelete="True"
                                 ShowCancel="True"
+                                ShowHelp="True"
+                                HelpText="Use Configurar para salvar um perfil. Use Executar para gerar os arquivos do snapshot."
                                 ActionNew="ActionNew_Click"
                                 ActionSave="ActionSave_Click"
                                 ActionDelete="ActionDelete_Click"
@@ -46,7 +50,7 @@
             <ScrollViewer Grid.Row="2"
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Margin="0,4,0,0">
+                <StackPanel Margin="0,0,0,0">
 
                     <!-- Seletor de configuração (condicional) -->
                     <StackPanel x:Name="ConfigurationsLabel"
@@ -80,6 +84,43 @@
                               Style="{StaticResource DevToolsSelectInput}"
                               SelectionChanged="ConfigurationsCombo_SelectionChanged"
                               DisplayMemberPath="Name"/>
+
+                    <Border x:Name="ConfigurationModeHint"
+                            Visibility="Collapsed"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                            Background="{DynamicResource DevToolsSurface}"
+                            Padding="10,8"
+                            Margin="0,0,0,12">
+                        <TextBlock Text="Modo configuracao: defina nome e descricao da configuracao antes de salvar."
+                                   Foreground="{DynamicResource DevToolsTextSecondary}"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+
+                    <!-- ===== Campos de configuracao (modo Configuracao) ===== -->
+                    <Grid x:Name="ConfigurationMetadataSection"
+                          Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Nome"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="NameInput"
+                                     Style="{StaticResource DevToolsTextInput}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Descricao"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="DescriptionInput"
+                                     Style="{StaticResource DevToolsTextInput}"/>
+                        </StackPanel>
+                    </Grid>
 
                     <!-- ===== Caminhos ===== -->
                     <c:PathSelector x:Name="RootPathSelector"
@@ -131,30 +172,6 @@
                               IsChecked="True"
                               Margin="0,0,0,12"
                               ToolTip="Antes de executar, verifica se existe um arquivo .csproj, .sln ou .slnx na pasta raiz. Desmarque para executar em qualquer diretório."/>
-
-                    <!-- ===== Campos de configuração (modo Configuração) ===== -->
-                    <Grid x:Name="ConfigurationMetadataSection"
-                          Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Nome"
-                                       Style="{StaticResource DevToolsInputLabel}"/>
-                            <TextBox x:Name="NameInput"
-                                     Style="{StaticResource DevToolsTextInput}"/>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="Descrição"
-                                       Style="{StaticResource DevToolsInputLabel}"/>
-                            <TextBox x:Name="DescriptionInput"
-                                     Style="{StaticResource DevToolsTextInput}"/>
-                        </StackPanel>
-                    </Grid>
 
                     <!-- ===== Formatos de saída ===== -->
                     <TextBlock Text="Formatos de saída"

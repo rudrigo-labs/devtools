@@ -415,6 +415,12 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         ConfigurationsLabel.Visibility = hasConfigurations ? Visibility.Visible : Visibility.Collapsed;
         ConfigurationsCombo.Visibility = hasConfigurations ? Visibility.Visible : Visibility.Collapsed;
         ConfigurationMetadataSection.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+        ConfigurationModeHint.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+
+        WorkspaceTitleText.Text = inConfiguration ? "Snapshot - Configuracao" : "Snapshot";
+        WorkspaceSubtitleText.Text = inConfiguration
+            ? "Defina os campos de configuracao abaixo e salve para reutilizar."
+            : "Gera um snapshot textual completo do projeto para uso com assistentes de IA.";
 
         Actions.NewText = inConfiguration ? "Novo" : "Configurar";
         Actions.SaveText = inConfiguration ? "Salvar" : "Executar";

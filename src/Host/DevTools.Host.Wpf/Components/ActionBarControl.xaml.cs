@@ -93,6 +93,34 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
             typeof(ActionBarControl),
             new PropertyMetadata(true));
 
+    public static readonly DependencyProperty ShowHelpProperty =
+        DependencyProperty.Register(
+            nameof(ShowHelp),
+            typeof(bool),
+            typeof(ActionBarControl),
+            new PropertyMetadata(false));
+
+    public static readonly DependencyProperty CanHelpProperty =
+        DependencyProperty.Register(
+            nameof(CanHelp),
+            typeof(bool),
+            typeof(ActionBarControl),
+            new PropertyMetadata(true));
+
+    public static readonly DependencyProperty HelpTextProperty =
+        DependencyProperty.Register(
+            nameof(HelpText),
+            typeof(string),
+            typeof(ActionBarControl),
+            new PropertyMetadata(string.Empty));
+
+    public static readonly DependencyProperty HelpTextLabelProperty =
+        DependencyProperty.Register(
+            nameof(HelpTextLabel),
+            typeof(string),
+            typeof(ActionBarControl),
+            new PropertyMetadata("Ajuda"));
+
     public bool ShowNew
     {
         get => (bool)GetValue(ShowNewProperty);
@@ -163,6 +191,30 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
     {
         get => (bool)GetValue(CanCancelProperty);
         set => SetValue(CanCancelProperty, value);
+    }
+
+    public bool ShowHelp
+    {
+        get => (bool)GetValue(ShowHelpProperty);
+        set => SetValue(ShowHelpProperty, value);
+    }
+
+    public bool CanHelp
+    {
+        get => (bool)GetValue(CanHelpProperty);
+        set => SetValue(CanHelpProperty, value);
+    }
+
+    public string HelpText
+    {
+        get => (string)GetValue(HelpTextProperty);
+        set => SetValue(HelpTextProperty, value);
+    }
+
+    public string HelpTextLabel
+    {
+        get => (string)GetValue(HelpTextLabelProperty);
+        set => SetValue(HelpTextLabelProperty, value);
     }
 
     public event RoutedEventHandler? ActionNew;

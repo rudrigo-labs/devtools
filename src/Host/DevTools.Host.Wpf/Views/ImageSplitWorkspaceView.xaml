@@ -6,7 +6,7 @@
     <Grid x:Name="WorkspaceRoot" Margin="0">
         <Grid HorizontalAlignment="Stretch"
               VerticalAlignment="Top"
-              Margin="0,8,0,0">
+              Margin="0,4,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -38,6 +38,8 @@
                                 ShowDelete="False"
                                 ShowCancel="True"
                                 SaveText="Executar"
+                                ShowHelp="True"
+                                HelpText="Selecione a imagem, pasta de saida e ajustes de deteccao. Use Executar para recortar os componentes automaticamente."
                                 ActionSave="ActionExecute_Click"
                                 ActionCancel="ActionCancel_Click"/>
 
@@ -45,7 +47,7 @@
             <ScrollViewer Grid.Row="2"
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
-                <StackPanel Margin="0,4,0,0">
+                <StackPanel Margin="0,0,0,0">
 
                     <!-- ===== Arquivo de entrada ===== -->
                     <c:PathSelector x:Name="InputPathSelector"
