@@ -1,0 +1,101 @@
+<UserControl x:Class="DevTools.Host.Wpf.Views.OrganizerWorkspaceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:DevTools.Host.Wpf.Components">
+
+    <Grid Margin="0,8,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- HEADER -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="Organizer"
+                       FontSize="18" FontWeight="SemiBold"
+                       Foreground="{DynamicResource DevToolsTextPrimary}"/>
+            <TextBlock Text="Organiza documentos (PDF, Word, TXT) em categorias por palavras-chave. Detecta duplicatas por nome ou hash."
+                       Foreground="{DynamicResource DevToolsTextSecondary}"
+                       FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap"/>
+            <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,10,0,0"/>
+        </StackPanel>
+
+        <!-- ACTION BAR -->
+        <c:ActionBarControl Grid.Row="1" x:Name="Actions"
+                            ShowNew="False" ShowSave="True" ShowDelete="False" ShowCancel="True"
+                            SaveText="Executar"
+                            ActionSave="ActionExecute_Click"
+                            ActionCancel="ActionCancel_Click"/>
+
+        <!-- BODY -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="0,4,0,0">
+
+                <c:PathSelector x:Name="InboxPathSelector" Title="Pasta de entrada *" IsFolderPicker="True" Margin="0,0,0,12"/>
+                <c:PathSelector x:Name="OutputPathSelector" Title="Pasta de saída (opcional — padrão: mesma da entrada)" IsFolderPicker="True" Margin="0,0,0,12"/>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Score mínimo para classificação" Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="MinScoreInput" Style="{StaticResource DevToolsTextInput}" Text="3"
+                                 ToolTip="Pontuação mínima de palavras-chave para mover o arquivo para uma categoria."/>
+                    </StackPanel>
+                    <CheckBox x:Name="ApplyCheck" Grid.Column="2"
+                              Content="Mover arquivos (aplicar)"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              VerticalAlignment="Bottom"
+                              ToolTip="Quando desmarcado, apenas simula a organização sem mover nenhum arquivo."/>
+                </Grid>
+
+                <!-- Resumo dos resultados -->
+                <Border x:Name="ResultPanel" Visibility="Collapsed"
+                        BorderThickness="1" CornerRadius="4"
+                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                        Padding="10,8" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock x:Name="ResultSummaryText"
+                                   Foreground="{DynamicResource DevToolsTextPrimary}"
+                                   FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                        <ListBox x:Name="ResultsList"
+                                 MaxHeight="240"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,2,0,2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding Category}"
+                                                   FontWeight="SemiBold" FontSize="11"
+                                                   Foreground="{DynamicResource DevToolsTextPrimary}"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Source}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource DevToolsTextSecondary}"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- STATUS -->
+        <TextBlock x:Name="ExecutionStatusText" Grid.Row="3"
+                   Margin="0,10,0,0"
+                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
+    </Grid>
+</UserControl>

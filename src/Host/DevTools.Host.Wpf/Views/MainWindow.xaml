@@ -172,6 +172,46 @@
                                 Tag="Harvest"
                                 Style="{StaticResource SidebarNavButtonStyle}"
                                 Click="NavButton_Click"/>
+                        <Button x:Name="NavImageSplit"
+                                Content="Image Split"
+                                Tag="ImageSplit"
+                                Style="{StaticResource SidebarNavButtonStyle}"
+                                Click="NavButton_Click"/>
+                        <Button x:Name="NavSearchText"
+                                Content="Search Text"
+                                Tag="SearchText"
+                                Style="{StaticResource SidebarNavButtonStyle}"
+                                Click="NavButton_Click"/>
+                        <Button x:Name="NavOrganizer"
+                                Content="Organizer"
+                                Tag="Organizer"
+                                Style="{StaticResource SidebarNavButtonStyle}"
+                                Click="NavButton_Click"/>
+                        <Button x:Name="NavUtf8Convert"
+                                Content="UTF-8 Convert"
+                                Tag="Utf8Convert"
+                                Style="{StaticResource SidebarNavButtonStyle}"
+                                Click="NavButton_Click"/>
+                        <Button x:Name="NavMigrations"
+                                Content="Migrations"
+                                Tag="Migrations"
+                                Style="{StaticResource SidebarNavButtonStyle}"
+                                Click="NavButton_Click"/>
+                        <Button x:Name="NavSshTunnel"
+                                Content="SSH Tunnel"
+                                Tag="SshTunnel"
+                                Style="{StaticResource SidebarNavButtonStyle}"
+                                Click="NavButton_Click"/>
+                        <Button x:Name="NavNgrok"
+                                Content="Ngrok"
+                                Tag="Ngrok"
+                                Style="{StaticResource SidebarNavButtonStyle}"
+                                Click="NavButton_Click"/>
+                        <Button x:Name="NavNotes"
+                                Content="Notes"
+                                Tag="Notes"
+                                Style="{StaticResource SidebarNavButtonStyle}"
+                                Click="NavButton_Click"/>
                     </StackPanel>
 
                     <!-- Encerrar (fixado na base da sidebar) -->

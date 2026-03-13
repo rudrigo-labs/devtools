@@ -1,16 +1,34 @@
+using DevTools.Core.Abstractions;
 using DevTools.Core.Models;
+using DevTools.Core.Utilities;
 using DevTools.Harvest.Engine;
 using DevTools.Harvest.Repositories;
 using DevTools.Harvest.Services;
 using DevTools.Host.Wpf.Configuration;
 using DevTools.Host.Wpf.Facades;
 using DevTools.Host.Wpf.Views;
+using DevTools.Image.Engine;
 using DevTools.Infrastructure.Persistence;
 using DevTools.Infrastructure.Persistence.Repositories;
+using DevTools.Migrations.Engine;
+using DevTools.Migrations.Repositories;
+using DevTools.Migrations.Services;
+using DevTools.Ngrok.Engine;
+using DevTools.Ngrok.Repositories;
+using DevTools.Ngrok.Services;
+using DevTools.Organizer.Engine;
 using DevTools.Rename.Engine;
+using DevTools.SearchText.Engine;
 using DevTools.Snapshot.Engine;
 using DevTools.Snapshot.Repositories;
 using DevTools.Snapshot.Services;
+using DevTools.SSHTunnel.Engine;
+using DevTools.SSHTunnel.Repositories;
+using DevTools.SSHTunnel.Services;
+using DevTools.Utf8Convert.Engine;
+using DevTools.Notes.Providers;
+using DevTools.Notes.Repositories;
+using DevTools.Notes.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DevTools.Host.Wpf;
@@ -69,6 +87,9 @@ public partial class App : System.Windows.Application
             sp.GetRequiredService<SqliteDbContextOptionsFactory>().Create());
         services.AddSingleton<SqliteBootstrapper>();
 
+        // Utilitários de processo
+        services.AddSingleton<IProcessRunner, SystemProcessRunner>();
+
         // Snapshot
         services.AddSingleton<ISnapshotEntityRepository, SnapshotEntityRepository>();
         services.AddSingleton<SnapshotEntityService>();
@@ -85,10 +106,57 @@ public partial class App : System.Windows.Application
         services.AddSingleton<HarvestEngine>();
         services.AddSingleton<IHarvestFacade, HarvestFacade>();
 
+        // ImageSplit
+        services.AddSingleton<ImageSplitEngine>();
+        services.AddSingleton<IImageSplitFacade, ImageSplitFacade>();
+
+        // SearchText
+        services.AddSingleton<SearchTextEngine>();
+        services.AddSingleton<ISearchTextFacade, SearchTextFacade>();
+
+        // Organizer
+        services.AddSingleton<OrganizerEngine>();
+        services.AddSingleton<IOrganizerFacade, OrganizerFacade>();
+
+        // Utf8Convert
+        services.AddSingleton<Utf8ConvertEngine>();
+        services.AddSingleton<IUtf8ConvertFacade, Utf8ConvertFacade>();
+
+        // Migrations
+        services.AddSingleton<IMigrationsEntityRepository, MigrationsEntityRepository>();
+        services.AddSingleton<MigrationsEntityService>();
+        services.AddSingleton<MigrationsEngine>();
+        services.AddSingleton<IMigrationsFacade, MigrationsFacade>();
+
+        // SSHTunnel
+        services.AddSingleton<ISshTunnelEntityRepository, SshTunnelEntityRepository>();
+        services.AddSingleton<SshTunnelEntityService>();
+        services.AddSingleton<SshTunnelEngine>();
+        services.AddSingleton<ISshTunnelFacade, SshTunnelFacade>();
+
+        // Ngrok
+        services.AddSingleton<INgrokEntityRepository, NgrokEntityRepository>();
+        services.AddSingleton<NgrokEntityService>();
+        services.AddSingleton<NgrokEngine>();
+        services.AddSingleton<INgrokFacade, NgrokFacade>();
+
         // Host WPF
         services.AddSingleton<RenameWorkspaceView>();
         services.AddSingleton<SnapshotWorkspaceView>();
         services.AddSingleton<HarvestWorkspaceView>();
+        services.AddSingleton<ImageSplitWorkspaceView>();
+        services.AddSingleton<SearchTextWorkspaceView>();
+        services.AddSingleton<OrganizerWorkspaceView>();
+        services.AddSingleton<Utf8ConvertWorkspaceView>();
+        services.AddSingleton<MigrationsWorkspaceView>();
+        services.AddSingleton<SshTunnelWorkspaceView>();
+        services.AddSingleton<NgrokWorkspaceView>();
+        // Notes
+        services.AddSingleton<INotesEntityRepository, NotesEntityRepository>();
+        services.AddSingleton<NotesEntityService>();
+        services.AddSingleton<GoogleDriveAuthService>();
+        services.AddSingleton<INotesFacade, NotesFacade>();
+        services.AddSingleton<NotesWorkspaceView>();
         services.AddSingleton<MainWindow>();
     }
 }

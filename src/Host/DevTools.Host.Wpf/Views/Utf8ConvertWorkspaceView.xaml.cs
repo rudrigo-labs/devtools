@@ -1,0 +1,132 @@
+using System.Windows;
+using DevTools.Host.Wpf.Facades;
+using DevTools.Host.Wpf.Services;
+using DevTools.Utf8Convert.Models;
+
+namespace DevTools.Host.Wpf.Views;
+
+public partial class Utf8ConvertWorkspaceView : System.Windows.Controls.UserControl
+{
+    private readonly IUtf8ConvertFacade _facade;
+    private CancellationTokenSource? _executionCts;
+    private bool _isExecuting;
+
+    public Utf8ConvertWorkspaceView(IUtf8ConvertFacade facade)
+    {
+        _facade = facade;
+        InitializeComponent();
+        ApplyModeState();
+    }
+
+    private async void ActionExecute_Click(object sender, RoutedEventArgs e)
+    {
+        await ExecuteAsync().ConfigureAwait(true);
+    }
+
+    private void ActionCancel_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isExecuting)
+        {
+            _executionCts?.Cancel();
+            ExecutionStatusText.Text = "Cancelando...";
+        }
+    }
+
+    private async Task ExecuteAsync()
+    {
+        if (_isExecuting) return;
+
+        ValidationUiService.SetPathSelectorInvalid(RootPathSelector, false);
+
+        if (!ValidationUiService.ValidateRequiredFields(
+            out var errorMessage,
+            ValidationUiService.RequiredPath("Pasta raiz", RootPathSelector, RootPathSelector.SelectedPath)))
+        {
+            ValidationUiService.ShowInline(ExecutionStatusText, errorMessage);
+            return;
+        }
+
+        var request = BuildRequest();
+        var dryRun = request.DryRun;
+
+        _executionCts?.Dispose();
+        _executionCts = new CancellationTokenSource();
+        _isExecuting = true;
+        ResultPanel.Visibility = Visibility.Collapsed;
+        ApplyModeState();
+        ExecutionStatusText.Text = dryRun ? "Simulando..." : "Convertendo arquivos...";
+
+        try
+        {
+            var result = await _facade.ExecuteAsync(request, _executionCts.Token).ConfigureAwait(true);
+
+            ValidationUiService.ClearInline(ExecutionStatusText);
+
+            var data = result.Value;
+            if (data is not null)
+            {
+                var s = data.Summary;
+                ResultSummaryText.Text =
+                    $"Escaneados: {s.FilesScanned} | " +
+                    $"Convertidos: {s.Converted} | " +
+                    $"Já UTF-8: {s.AlreadyUtf8} | " +
+                    $"Binários: {s.SkippedBinary} | " +
+                    $"Excluídos: {s.SkippedExcluded} | " +
+                    $"Erros: {s.Errors}";
+                ResultPanel.Visibility = Visibility.Visible;
+            }
+
+            if (!result.IsSuccess)
+            {
+                ValidationUiService.ShowInline(ExecutionStatusText,
+                    string.Join(" | ", result.Errors.Select(x => x.Message)));
+                return;
+            }
+
+            var mode = dryRun ? "Simulação concluída" : "Conversão concluída";
+            ExecutionStatusText.Text = $"{mode}. {data?.Summary.Converted ?? 0} arquivo(s) convertido(s).";
+        }
+        catch (OperationCanceledException)
+        {
+            ValidationUiService.ClearInline(ExecutionStatusText);
+            ExecutionStatusText.Text = "Operação cancelada.";
+        }
+        finally
+        {
+            _isExecuting = false;
+            _executionCts?.Dispose();
+            _executionCts = null;
+            ApplyModeState();
+        }
+    }
+
+    private Utf8ConvertRequest BuildRequest() => new()
+    {
+        RootPath     = RootPathSelector.SelectedPath?.Trim() ?? string.Empty,
+        Recursive    = RecursiveCheck.IsChecked ?? true,
+        OutputBom    = OutputBomCheck.IsChecked ?? true,
+        CreateBackup = CreateBackupCheck.IsChecked ?? true,
+        DryRun       = DryRunCheck.IsChecked ?? false,
+        IncludeGlobs = ParseLines(IncludeGlobsInput.Text),
+        ExcludeGlobs = ParseLines(ExcludeGlobsInput.Text)
+    };
+
+    private static IReadOnlyList<string>? ParseLines(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return null;
+        var lines = text
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            .Select(l => l.Trim())
+            .Where(l => !string.IsNullOrWhiteSpace(l))
+            .ToList();
+        return lines.Count > 0 ? lines : null;
+    }
+
+    private void ApplyModeState()
+    {
+        Actions.CanSave = !_isExecuting;
+        Actions.CanCancel = _isExecuting;
+        Actions.ShowCancel = _isExecuting;
+        Actions.CancelText = "Cancelar";
+    }
+}

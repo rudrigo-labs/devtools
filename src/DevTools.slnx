@@ -12,5 +12,13 @@
     <Project Path="Tools/DevTools.Snapshot/DevTools.Snapshot.csproj" />
     <Project Path="Tools/DevTools.Rename/DevTools.Rename.csproj" />
     <Project Path="Tools/DevTools.Harvest/DevTools.Harvest.csproj" />
+    <Project Path="Tools/DevTools.Image/DevTools.Image.csproj" />
+    <Project Path="Tools/DevTools.SearchText/DevTools.SearchText.csproj" />
+    <Project Path="Tools/DevTools.Organizer/DevTools.Organizer.csproj" />
+    <Project Path="Tools/DevTools.Utf8Convert/DevTools.Utf8Convert.csproj" />
+    <Project Path="Tools/DevTools.Migrations/DevTools.Migrations.csproj" />
+    <Project Path="Tools/DevTools.SSHTunnel/DevTools.SSHTunnel.csproj" />
+    <Project Path="Tools/DevTools.Ngrok/DevTools.Ngrok.csproj" />
+    <Project Path="Tools/DevTools.Notes/DevTools.Notes.csproj" />
   </Folder>
 </Solution>

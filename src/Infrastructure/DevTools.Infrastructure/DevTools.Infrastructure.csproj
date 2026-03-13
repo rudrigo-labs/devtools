@@ -18,6 +18,10 @@
     <ProjectReference Include="..\..\Core\DevTools.Core\DevTools.Core.csproj" />
     <ProjectReference Include="..\..\Tools\DevTools.Snapshot\DevTools.Snapshot.csproj" />
     <ProjectReference Include="..\..\Tools\DevTools.Harvest\DevTools.Harvest.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.Migrations\DevTools.Migrations.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.SSHTunnel\DevTools.SSHTunnel.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.Ngrok\DevTools.Ngrok.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.Notes\DevTools.Notes.csproj" />
   </ItemGroup>
 
 </Project>

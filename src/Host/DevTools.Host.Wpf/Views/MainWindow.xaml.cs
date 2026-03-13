@@ -17,15 +17,31 @@ public partial class MainWindow : Window
     public MainWindow(
         SnapshotWorkspaceView snapshotWorkspaceView,
         RenameWorkspaceView renameWorkspaceView,
-        HarvestWorkspaceView harvestWorkspaceView)
+        HarvestWorkspaceView harvestWorkspaceView,
+        ImageSplitWorkspaceView imageSplitWorkspaceView,
+        SearchTextWorkspaceView searchTextWorkspaceView,
+        OrganizerWorkspaceView organizerWorkspaceView,
+        Utf8ConvertWorkspaceView utf8ConvertWorkspaceView,
+        MigrationsWorkspaceView migrationsWorkspaceView,
+        SshTunnelWorkspaceView sshTunnelWorkspaceView,
+        NgrokWorkspaceView ngrokWorkspaceView,
+        NotesWorkspaceView notesWorkspaceView)
     {
         InitializeComponent();
 
         _toolRegistry = new Dictionary<string, Func<System.Windows.Controls.UserControl>>(StringComparer.OrdinalIgnoreCase)
         {
-            ["Snapshot"] = () => snapshotWorkspaceView,
-            ["Rename"]   = () => renameWorkspaceView,
-            ["Harvest"]  = () => harvestWorkspaceView,
+            ["Snapshot"]    = () => snapshotWorkspaceView,
+            ["Rename"]      = () => renameWorkspaceView,
+            ["Harvest"]     = () => harvestWorkspaceView,
+            ["ImageSplit"]  = () => imageSplitWorkspaceView,
+            ["SearchText"]  = () => searchTextWorkspaceView,
+            ["Organizer"]   = () => organizerWorkspaceView,
+            ["Utf8Convert"] = () => utf8ConvertWorkspaceView,
+            ["Migrations"]  = () => migrationsWorkspaceView,
+            ["SshTunnel"]   = () => sshTunnelWorkspaceView,
+            ["Ngrok"]       = () => ngrokWorkspaceView,
+            ["Notes"]       = () => notesWorkspaceView,
         };
 
         Loaded += (_, _) =>
