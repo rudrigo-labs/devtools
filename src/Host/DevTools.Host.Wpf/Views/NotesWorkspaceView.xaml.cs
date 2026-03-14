@@ -21,6 +21,8 @@ namespace DevTools.Host.Wpf.Views;
 
 public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
 {
+    private const string ToolHistorySlug = "notes";
+    private const string ToolDisplayName = "Notes";
     private enum NotesWorkspaceMode { Execution, Configuration }
 
     private readonly ObservableCollection<NotesEntity>          _entities             = new();
@@ -393,6 +395,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
             var driveOk = result.Value?.DriveSkipped == false;
             ExecutionStatusText.Text = driveOk ? "Salvo e sincronizado com o Drive." : "Salvo.";
             ShowDriveBanner(result.Value?.DriveSkipped, result.Value?.DriveSkipReason);
+            await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Salvar nota").ConfigureAwait(true);
         }
         finally { _isBusy = false; ApplyModeState(); }
     }
@@ -446,6 +449,8 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
             return;
         }
 
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Salvar configuração do Notes").ConfigureAwait(true);
+
         ExecutionStatusText.Text = string.Empty;
         await ReloadEntitiesAsync().ConfigureAwait(true);
         ExecutionStatusText.Text = "Configuração salva.";
@@ -495,6 +500,9 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         if (Window.GetWindow(this) is MainWindow mainWindow)
             mainWindow.OpenFerramentasHome();
     }
+
+    private async void HistoryButton_Click(object sender, RoutedEventArgs e)
+        => await ToolHistoryViewHelper.ShowAndApplyAsync(WorkspaceRoot, ToolHistorySlug, ToolDisplayName, ExecutionStatusText).ConfigureAwait(true);
 
     // ── Google Drive ──────────────────────────────────────────────────────────
 

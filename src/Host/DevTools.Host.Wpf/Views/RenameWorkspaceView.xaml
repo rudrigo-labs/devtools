@@ -32,7 +32,7 @@
 
             <!-- ==================== ACTION BAR ==================== -->
             <c:ActionBarControl Grid.Row="1"
-                                x:Name="Actions"
+                                x:Name="Actions" ShowHistory="True" ActionHistory="HistoryButton_Click"
                                 ShowNew="False"
                                 ShowSave="True"
                                 ShowDelete="False"

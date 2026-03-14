@@ -8,6 +8,8 @@ namespace DevTools.Host.Wpf.Views;
 
 public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
 {
+    private const string ToolHistorySlug = "ngrok";
+    private const string ToolDisplayName = "Ngrok";
     private const string NoConfigurationOptionLabel = "Configurar manualmente";
 
     private enum NgrokWorkspaceMode { Execution, Configuration }
@@ -237,6 +239,9 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
             mainWindow.OpenFerramentasHome();
     }
 
+    private async void HistoryButton_Click(object sender, RoutedEventArgs e)
+        => await ToolHistoryViewHelper.ShowAndApplyAsync(WorkspaceRoot, ToolHistorySlug, ToolDisplayName, ExecutionStatusText).ConfigureAwait(true);
+
     private async void ListTunnels_Click(object sender, RoutedEventArgs e)
         => await RunActionAsync(new NgrokRequest { Action = NgrokAction.ListTunnels, BaseUrl = GetBaseUrl() });
 
@@ -277,6 +282,7 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
 
     private async Task RunActionAsync(NgrokRequest request)
     {
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, $"Executar ngrok ({request.Action})").ConfigureAwait(true);
         ExecutionStatusText.Text = "Executando...";
         
 

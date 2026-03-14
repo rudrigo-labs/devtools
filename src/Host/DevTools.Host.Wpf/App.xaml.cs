@@ -6,6 +6,7 @@ using DevTools.Harvest.Repositories;
 using DevTools.Harvest.Services;
 using DevTools.Host.Wpf.Configuration;
 using DevTools.Host.Wpf.Facades;
+using DevTools.Host.Wpf.Services;
 using DevTools.Host.Wpf.Views;
 using DevTools.Image.Engine;
 using DevTools.Infrastructure.Persistence;
@@ -36,6 +37,15 @@ namespace DevTools.Host.Wpf;
 public partial class App : System.Windows.Application
 {
     private ServiceProvider? _serviceProvider;
+
+    public static T GetRequiredService<T>() where T : notnull
+    {
+        var app = Current as App;
+        if (app?._serviceProvider is null)
+            throw new InvalidOperationException("Service provider não inicializado.");
+
+        return app._serviceProvider.GetRequiredService<T>();
+    }
 
     protected override void OnStartup(System.Windows.StartupEventArgs e)
     {
@@ -86,6 +96,8 @@ public partial class App : System.Windows.Application
         services.AddSingleton(sp =>
             sp.GetRequiredService<SqliteDbContextOptionsFactory>().Create());
         services.AddSingleton<SqliteBootstrapper>();
+        services.AddSingleton<IToolUsageHistoryRepository, ToolUsageHistoryRepository>();
+        services.AddSingleton<ToolUsageHistoryUiService>();
 
         // Utilitários de processo
         services.AddSingleton<IProcessRunner, SystemProcessRunner>();

@@ -26,7 +26,7 @@
         </StackPanel>
 
         <!-- ACTION BAR -->
-        <c:ActionBarControl Grid.Row="1" x:Name="Actions"
+        <c:ActionBarControl Grid.Row="1" x:Name="Actions" ShowHistory="True" ActionHistory="HistoryButton_Click"
                             ShowNew="False" ShowSave="True" ShowDelete="False" ShowCancel="False"
                             ShowBack="True"
                             SaveText="Executar"
@@ -51,7 +51,7 @@
                 </Border>
 
                 <c:PathSelector x:Name="InboxPathSelector" Title="Pasta de entrada *" IsFolderPicker="True" Margin="0,0,0,12"/>
-                <c:PathSelector x:Name="OutputPathSelector" Title="Pasta de saída (opcional — padrão: mesma da entrada)" IsFolderPicker="True" Margin="0,0,0,12"/>
+                <c:PathSelector x:Name="OutputPathSelector" Title="Pasta de saída (opcional - padrão: mesma da entrada)" IsFolderPicker="True" Margin="0,0,0,12"/>
 
                 <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>

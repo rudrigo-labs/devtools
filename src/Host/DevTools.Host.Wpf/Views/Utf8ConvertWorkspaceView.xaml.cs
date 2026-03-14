@@ -7,6 +7,8 @@ namespace DevTools.Host.Wpf.Views;
 
 public partial class Utf8ConvertWorkspaceView : System.Windows.Controls.UserControl
 {
+    private const string ToolHistorySlug = "utf8_convert";
+    private const string ToolDisplayName = "UTF-8 Convert";
     private readonly IUtf8ConvertFacade _facade;
     private CancellationTokenSource? _executionCts;
     private bool _isExecuting;
@@ -22,6 +24,9 @@ public partial class Utf8ConvertWorkspaceView : System.Windows.Controls.UserCont
     {
         await ExecuteAsync().ConfigureAwait(true);
     }
+
+    private async void HistoryButton_Click(object sender, RoutedEventArgs e)
+        => await ToolHistoryViewHelper.ShowAndApplyAsync(WorkspaceRoot, ToolHistorySlug, ToolDisplayName, ExecutionStatusText).ConfigureAwait(true);
 
     private void ActionBack_Click(object sender, RoutedEventArgs e)
     {
@@ -52,6 +57,7 @@ public partial class Utf8ConvertWorkspaceView : System.Windows.Controls.UserCont
 
         var request = BuildRequest();
         var dryRun = request.DryRun;
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar conversão UTF-8").ConfigureAwait(true);
 
         _executionCts?.Dispose();
         _executionCts = new CancellationTokenSource();

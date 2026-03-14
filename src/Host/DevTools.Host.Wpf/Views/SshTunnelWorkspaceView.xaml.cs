@@ -9,6 +9,8 @@ namespace DevTools.Host.Wpf.Views;
 
 public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserControl
 {
+    private const string ToolHistorySlug = "ssh_tunnel";
+    private const string ToolDisplayName = "SSH Tunnel";
     private const string NoConfigurationOptionLabel = "Configurar manualmente";
 
     private enum SshTunnelWorkspaceMode { Execution, Configuration }
@@ -263,6 +265,9 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
             mainWindow.OpenFerramentasHome();
     }
 
+    private async void HistoryButton_Click(object sender, RoutedEventArgs e)
+        => await ToolHistoryViewHelper.ShowAndApplyAsync(WorkspaceRoot, ToolHistorySlug, ToolDisplayName, ExecutionStatusText).ConfigureAwait(true);
+
     // â”€â”€ ExecuÃ§Ã£o (Start / Stop) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private async void Start_Click(object sender, RoutedEventArgs e) => await TunnelActionAsync(SshTunnelAction.Start);
@@ -280,6 +285,7 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
 
         var config = _currentEntity is not null ? TunnelConfiguration.FromEntity(_currentEntity) : null;
         var request = new SshTunnelRequest { Action = action, Configuration = config };
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, $"Executar SSH ({action})").ConfigureAwait(true);
 
         _executionCts?.Dispose();
         _executionCts = new CancellationTokenSource();

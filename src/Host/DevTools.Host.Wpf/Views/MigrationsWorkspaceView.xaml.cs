@@ -8,6 +8,8 @@ namespace DevTools.Host.Wpf.Views;
 
 public partial class MigrationsWorkspaceView : System.Windows.Controls.UserControl
 {
+    private const string ToolHistorySlug = "migrations";
+    private const string ToolDisplayName = "Migrations";
     private const string NoConfigurationOptionLabel = "Configurar manualmente";
 
     private enum MigrationsWorkspaceMode { Execution, Configuration }
@@ -270,6 +272,9 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
             mainWindow.OpenFerramentasHome();
     }
 
+    private async void HistoryButton_Click(object sender, RoutedEventArgs e)
+        => await ToolHistoryViewHelper.ShowAndApplyAsync(WorkspaceRoot, ToolHistorySlug, ToolDisplayName, ExecutionStatusText).ConfigureAwait(true);
+
     // â”€â”€ ExecuÃ§Ã£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private async Task ExecuteAsync()
@@ -301,6 +306,8 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
             MigrationName = migrationName,
             DryRun        = DryRunCheck.IsChecked ?? false
         };
+
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, $"Executar migration ({action})").ConfigureAwait(true);
 
         _executionCts?.Dispose();
         _executionCts = new CancellationTokenSource();
