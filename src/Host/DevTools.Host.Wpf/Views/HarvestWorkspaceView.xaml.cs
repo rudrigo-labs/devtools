@@ -9,6 +9,8 @@ namespace DevTools.Host.Wpf.Views;
 
 public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
 {
+    private const string ToolHistorySlug = "harvest";
+    private const string ToolDisplayName = "Harvest";
     private const string NoConfigurationOptionLabel = "Configurar manualmente";
 
     private enum HarvestWorkspaceMode
@@ -240,6 +242,9 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
             mainWindow.OpenFerramentasHome();
     }
 
+    private async void HistoryButton_Click(object sender, RoutedEventArgs e)
+        => await ToolHistoryViewHelper.ShowAndApplyAsync(WorkspaceRoot, ToolHistorySlug, ToolDisplayName, ExecutionStatusText).ConfigureAwait(true);
+
     // ── Execução ─────────────────────────────────────────────────────────────
 
     private async Task ExecuteCurrentAsync()
@@ -274,6 +279,8 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
             LargeFilePenalty = entity.LargeFilePenalty,
             Categories = entity.Categories
         };
+
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar harvest").ConfigureAwait(true);
 
         _executionCts?.Dispose();
         _executionCts = new CancellationTokenSource();

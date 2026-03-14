@@ -13,6 +13,16 @@
                 Margin="0,0,0,6">
 
         <Button Style="{StaticResource ActionBarCancelButton}"
+                Click="ActionHistory_Click"
+                IsEnabled="{Binding CanHistory, ElementName=Root}"
+                Visibility="{Binding ShowHistory, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="History" Width="16" Height="16" Margin="0,0,6,0"/>
+                <TextBlock Text="{Binding HistoryText, ElementName=Root}"/>
+            </StackPanel>
+        </Button>
+
+        <Button Style="{StaticResource ActionBarCancelButton}"
                 Click="ActionHelp_Click"
                 IsEnabled="{Binding CanHelp, ElementName=Root}"
                 ToolTip="{Binding HelpText, ElementName=Root}"

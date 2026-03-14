@@ -7,6 +7,8 @@ namespace DevTools.Host.Wpf.Views;
 
 public partial class OrganizerWorkspaceView : System.Windows.Controls.UserControl
 {
+    private const string ToolHistorySlug = "organizer";
+    private const string ToolDisplayName = "Organizer";
     private readonly IOrganizerFacade _facade;
     private CancellationTokenSource? _executionCts;
     private bool _isExecuting;
@@ -22,6 +24,9 @@ public partial class OrganizerWorkspaceView : System.Windows.Controls.UserContro
     {
         await ExecuteAsync().ConfigureAwait(true);
     }
+
+    private async void HistoryButton_Click(object sender, RoutedEventArgs e)
+        => await ToolHistoryViewHelper.ShowAndApplyAsync(WorkspaceRoot, ToolHistorySlug, ToolDisplayName, ExecutionStatusText).ConfigureAwait(true);
 
     private void ActionBack_Click(object sender, RoutedEventArgs e)
     {
@@ -52,6 +57,7 @@ public partial class OrganizerWorkspaceView : System.Windows.Controls.UserContro
 
         var request = BuildRequest();
         var apply = request.Apply;
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar organização").ConfigureAwait(true);
 
         _executionCts?.Dispose();
         _executionCts = new CancellationTokenSource();

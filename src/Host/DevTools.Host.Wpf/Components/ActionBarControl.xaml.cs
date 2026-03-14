@@ -51,6 +51,13 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
             typeof(ActionBarControl),
             new PropertyMetadata(false));
 
+    public static readonly DependencyProperty ShowHistoryProperty =
+        DependencyProperty.Register(
+            nameof(ShowHistory),
+            typeof(bool),
+            typeof(ActionBarControl),
+            new PropertyMetadata(false));
+
     public static readonly DependencyProperty NewTextProperty =
         DependencyProperty.Register(
             nameof(NewText),
@@ -93,6 +100,13 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
             typeof(ActionBarControl),
             new PropertyMetadata("Voltar"));
 
+    public static readonly DependencyProperty HistoryTextProperty =
+        DependencyProperty.Register(
+            nameof(HistoryText),
+            typeof(string),
+            typeof(ActionBarControl),
+            new PropertyMetadata("Histórico"));
+
     public static readonly DependencyProperty CanNewProperty =
         DependencyProperty.Register(
             nameof(CanNew),
@@ -131,6 +145,13 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
     public static readonly DependencyProperty CanBackProperty =
         DependencyProperty.Register(
             nameof(CanBack),
+            typeof(bool),
+            typeof(ActionBarControl),
+            new PropertyMetadata(true));
+
+    public static readonly DependencyProperty CanHistoryProperty =
+        DependencyProperty.Register(
+            nameof(CanHistory),
             typeof(bool),
             typeof(ActionBarControl),
             new PropertyMetadata(true));
@@ -213,6 +234,12 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
         set => SetValue(ShowBackProperty, value);
     }
 
+    public bool ShowHistory
+    {
+        get => (bool)GetValue(ShowHistoryProperty);
+        set => SetValue(ShowHistoryProperty, value);
+    }
+
     public string NewText
     {
         get => (string)GetValue(NewTextProperty);
@@ -247,6 +274,12 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
     {
         get => (string)GetValue(BackTextProperty);
         set => SetValue(BackTextProperty, value);
+    }
+
+    public string HistoryText
+    {
+        get => (string)GetValue(HistoryTextProperty);
+        set => SetValue(HistoryTextProperty, value);
     }
 
     public bool CanNew
@@ -285,6 +318,12 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
         set => SetValue(CanBackProperty, value);
     }
 
+    public bool CanHistory
+    {
+        get => (bool)GetValue(CanHistoryProperty);
+        set => SetValue(CanHistoryProperty, value);
+    }
+
     public bool ShowHelp
     {
         get => (bool)GetValue(ShowHelpProperty);
@@ -321,6 +360,7 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
         set => SetValue(BackIconKindProperty, value);
     }
 
+    public event RoutedEventHandler? ActionHistory;
     public event RoutedEventHandler? ActionHelp;
     public event RoutedEventHandler? ActionNew;
     public event RoutedEventHandler? ActionSave;
@@ -328,6 +368,9 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
     public event RoutedEventHandler? ActionCancel;
     public event RoutedEventHandler? ActionGoToTool;
     public event RoutedEventHandler? ActionBack;
+
+    private void ActionHistory_Click(object sender, RoutedEventArgs e)
+        => ActionHistory?.Invoke(this, e);
 
     private void ActionHelp_Click(object sender, RoutedEventArgs e)
         => ActionHelp?.Invoke(this, e);

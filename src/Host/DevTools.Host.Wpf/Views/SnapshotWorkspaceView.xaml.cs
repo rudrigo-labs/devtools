@@ -10,6 +10,8 @@ namespace DevTools.Host.Wpf.Views;
 
 public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
 {
+    private const string ToolHistorySlug = "snapshot";
+    private const string ToolDisplayName = "Snapshot";
     private const string NoConfigurationOptionLabel = "Configurar manualmente";
 
     private enum SnapshotWorkspaceMode
@@ -255,6 +257,9 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         ActionCancel_Click(sender, e);
     }
 
+    private async void HistoryButton_Click(object sender, RoutedEventArgs e)
+        => await ToolHistoryViewHelper.ShowAndApplyAsync(WorkspaceRoot, ToolHistorySlug, ToolDisplayName, ExecutionStatusText).ConfigureAwait(true);
+
     private async Task ExecuteCurrentAsync()
     {
         if (_isExecuting)
@@ -286,6 +291,8 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
             IncludedExtensions = entity.IncludedExtensions,
             MaxFileSizeKb = entity.MaxFileSizeKb
         };
+
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar snapshot").ConfigureAwait(true);
 
         _executionCts?.Dispose();
         _executionCts = new CancellationTokenSource();

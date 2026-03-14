@@ -8,6 +8,8 @@ namespace DevTools.Host.Wpf.Views;
 
 public partial class RenameWorkspaceView : System.Windows.Controls.UserControl
 {
+    private const string ToolHistorySlug = "rename";
+    private const string ToolDisplayName = "Rename";
     private readonly IRenameFacade _facade;
     private CancellationTokenSource? _executionCts;
     private bool _isExecuting;
@@ -33,6 +35,9 @@ public partial class RenameWorkspaceView : System.Windows.Controls.UserControl
 
     private async void ActionSave_Click(object sender, RoutedEventArgs e)
         => await ExecuteAsync().ConfigureAwait(true);
+
+    private async void HistoryButton_Click(object sender, RoutedEventArgs e)
+        => await ToolHistoryViewHelper.ShowAndApplyAsync(WorkspaceRoot, ToolHistorySlug, ToolDisplayName, ExecutionStatusText).ConfigureAwait(true);
 
     private void ActionBack_Click(object sender, RoutedEventArgs e)
     {
@@ -68,6 +73,8 @@ public partial class RenameWorkspaceView : System.Windows.Controls.UserControl
                 "Nenhum projeto .NET encontrado na pasta raiz (.csproj, .sln ou .slnx).");
             return;
         }
+
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar renomeação").ConfigureAwait(true);
 
         _executionCts?.Dispose();
         _executionCts = new CancellationTokenSource();
