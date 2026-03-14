@@ -37,6 +37,20 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
             typeof(ActionBarControl),
             new PropertyMetadata(true));
 
+    public static readonly DependencyProperty ShowGoToToolProperty =
+        DependencyProperty.Register(
+            nameof(ShowGoToTool),
+            typeof(bool),
+            typeof(ActionBarControl),
+            new PropertyMetadata(false));
+
+    public static readonly DependencyProperty ShowBackProperty =
+        DependencyProperty.Register(
+            nameof(ShowBack),
+            typeof(bool),
+            typeof(ActionBarControl),
+            new PropertyMetadata(false));
+
     public static readonly DependencyProperty NewTextProperty =
         DependencyProperty.Register(
             nameof(NewText),
@@ -65,6 +79,20 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
             typeof(ActionBarControl),
             new PropertyMetadata("Cancelar"));
 
+    public static readonly DependencyProperty GoToToolTextProperty =
+        DependencyProperty.Register(
+            nameof(GoToToolText),
+            typeof(string),
+            typeof(ActionBarControl),
+            new PropertyMetadata("Ir para ferramenta"));
+
+    public static readonly DependencyProperty BackTextProperty =
+        DependencyProperty.Register(
+            nameof(BackText),
+            typeof(string),
+            typeof(ActionBarControl),
+            new PropertyMetadata("Voltar"));
+
     public static readonly DependencyProperty CanNewProperty =
         DependencyProperty.Register(
             nameof(CanNew),
@@ -89,6 +117,20 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
     public static readonly DependencyProperty CanCancelProperty =
         DependencyProperty.Register(
             nameof(CanCancel),
+            typeof(bool),
+            typeof(ActionBarControl),
+            new PropertyMetadata(true));
+
+    public static readonly DependencyProperty CanGoToToolProperty =
+        DependencyProperty.Register(
+            nameof(CanGoToTool),
+            typeof(bool),
+            typeof(ActionBarControl),
+            new PropertyMetadata(true));
+
+    public static readonly DependencyProperty CanBackProperty =
+        DependencyProperty.Register(
+            nameof(CanBack),
             typeof(bool),
             typeof(ActionBarControl),
             new PropertyMetadata(true));
@@ -121,6 +163,20 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
             typeof(ActionBarControl),
             new PropertyMetadata("Ajuda"));
 
+    public static readonly DependencyProperty SaveIconKindProperty =
+        DependencyProperty.Register(
+            nameof(SaveIconKind),
+            typeof(string),
+            typeof(ActionBarControl),
+            new PropertyMetadata("ContentSave"));
+
+    public static readonly DependencyProperty BackIconKindProperty =
+        DependencyProperty.Register(
+            nameof(BackIconKind),
+            typeof(string),
+            typeof(ActionBarControl),
+            new PropertyMetadata("ArrowLeft"));
+
     public bool ShowNew
     {
         get => (bool)GetValue(ShowNewProperty);
@@ -143,6 +199,18 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
     {
         get => (bool)GetValue(ShowCancelProperty);
         set => SetValue(ShowCancelProperty, value);
+    }
+
+    public bool ShowGoToTool
+    {
+        get => (bool)GetValue(ShowGoToToolProperty);
+        set => SetValue(ShowGoToToolProperty, value);
+    }
+
+    public bool ShowBack
+    {
+        get => (bool)GetValue(ShowBackProperty);
+        set => SetValue(ShowBackProperty, value);
     }
 
     public string NewText
@@ -169,6 +237,18 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
         set => SetValue(CancelTextProperty, value);
     }
 
+    public string GoToToolText
+    {
+        get => (string)GetValue(GoToToolTextProperty);
+        set => SetValue(GoToToolTextProperty, value);
+    }
+
+    public string BackText
+    {
+        get => (string)GetValue(BackTextProperty);
+        set => SetValue(BackTextProperty, value);
+    }
+
     public bool CanNew
     {
         get => (bool)GetValue(CanNewProperty);
@@ -191,6 +271,18 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
     {
         get => (bool)GetValue(CanCancelProperty);
         set => SetValue(CanCancelProperty, value);
+    }
+
+    public bool CanGoToTool
+    {
+        get => (bool)GetValue(CanGoToToolProperty);
+        set => SetValue(CanGoToToolProperty, value);
+    }
+
+    public bool CanBack
+    {
+        get => (bool)GetValue(CanBackProperty);
+        set => SetValue(CanBackProperty, value);
     }
 
     public bool ShowHelp
@@ -217,10 +309,28 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
         set => SetValue(HelpTextLabelProperty, value);
     }
 
+    public string SaveIconKind
+    {
+        get => (string)GetValue(SaveIconKindProperty);
+        set => SetValue(SaveIconKindProperty, value);
+    }
+
+    public string BackIconKind
+    {
+        get => (string)GetValue(BackIconKindProperty);
+        set => SetValue(BackIconKindProperty, value);
+    }
+
+    public event RoutedEventHandler? ActionHelp;
     public event RoutedEventHandler? ActionNew;
     public event RoutedEventHandler? ActionSave;
     public event RoutedEventHandler? ActionDelete;
     public event RoutedEventHandler? ActionCancel;
+    public event RoutedEventHandler? ActionGoToTool;
+    public event RoutedEventHandler? ActionBack;
+
+    private void ActionHelp_Click(object sender, RoutedEventArgs e)
+        => ActionHelp?.Invoke(this, e);
 
     private void ActionNew_Click(object sender, RoutedEventArgs e)
         => ActionNew?.Invoke(this, e);
@@ -233,6 +343,12 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
 
     private void ActionCancel_Click(object sender, RoutedEventArgs e)
         => ActionCancel?.Invoke(this, e);
+
+    private void ActionGoToTool_Click(object sender, RoutedEventArgs e)
+        => ActionGoToTool?.Invoke(this, e);
+
+    private void ActionBack_Click(object sender, RoutedEventArgs e)
+        => ActionBack?.Invoke(this, e);
 }
 
 

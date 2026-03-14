@@ -31,6 +31,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
     private NotesWorkspaceMode _currentMode = NotesWorkspaceMode.Execution;
     private bool _initialized;
     private bool _isBusy;
+    private bool _isConfigurationDraft;
 
     private static readonly ObservableCollection<NotesSelectionOption> ExtensionOptions = new()
     {
@@ -63,6 +64,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         if (_currentEntity is null)
             CreateNewEntity();
 
+        _isConfigurationDraft = false;
         SetMode(NotesWorkspaceMode.Execution);
     }
 
@@ -72,6 +74,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
             CreateNewEntity();
 
         SetMode(NotesWorkspaceMode.Configuration);
+        ResetConfigurationState();
     }
 
     // ── Atalho Ctrl+S ────────────────────────────────────────────────────────
@@ -398,7 +401,13 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
 
     private void ActionNew_Click(object sender, RoutedEventArgs e)
     {
-        // Singleton configuration: no "new configuration" action.
+        if (_isBusy || _currentMode != NotesWorkspaceMode.Configuration)
+            return;
+
+        _isConfigurationDraft = true;
+        CreateNewEntity();
+        ExecutionStatusText.Text = "Nova configuração iniciada.";
+        ApplyModeState();
     }
 
     private async void ActionSave_Click(object sender, RoutedEventArgs e)
@@ -414,6 +423,12 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
             }
 
             await SaveNoteAsync().ConfigureAwait(true);
+            return;
+        }
+
+        if (!_isConfigurationDraft)
+        {
+            ExecutionStatusText.Text = "Clique em Novo para iniciar a configuração.";
             return;
         }
 
@@ -434,6 +449,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         ExecutionStatusText.Text = string.Empty;
         await ReloadEntitiesAsync().ConfigureAwait(true);
         ExecutionStatusText.Text = "Configuração salva.";
+        ResetConfigurationState();
     }
 
     private async void ActionDelete_Click(object sender, RoutedEventArgs e)
@@ -455,12 +471,29 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
                 return;
             }
 
-            ExecutionStatusText.Text = string.Empty;
+            ActionBack_Click(sender, e);
             return;
         }
 
-        if (_currentEntity is not null) BindEntityToForm(_currentEntity);
-        ExecutionStatusText.Text = string.Empty;
+        ResetConfigurationState();
+        ExecutionStatusText.Text = "Configuração cancelada.";
+    }
+
+    private void ActionGoToTool_Click(object sender, RoutedEventArgs e)
+    {
+        if (Window.GetWindow(this) is MainWindow mainWindow)
+        {
+            mainWindow.OpenToolExecution("Notes");
+            return;
+        }
+
+        SetMode(NotesWorkspaceMode.Execution);
+    }
+
+    private void ActionBack_Click(object sender, RoutedEventArgs e)
+    {
+        if (Window.GetWindow(this) is MainWindow mainWindow)
+            mainWindow.OpenFerramentasHome();
     }
 
     // ── Google Drive ──────────────────────────────────────────────────────────
@@ -599,6 +632,13 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         BindEntityToForm(_currentEntity);
     }
 
+    private void ResetConfigurationState()
+    {
+        _isConfigurationDraft = false;
+        CreateNewEntity();
+        ApplyModeState();
+    }
+
     // ── Estado geral ──────────────────────────────────────────────────────────
 
     private void ApplyModeState()
@@ -606,21 +646,31 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         var inConfiguration = _currentMode == NotesWorkspaceMode.Configuration;
         var inEditor = _currentMode == NotesWorkspaceMode.Execution && EditGrid.Visibility == Visibility.Visible;
 
-        Actions.ShowNew = false;
+        Actions.ShowHelp = true;
+        Actions.ShowNew = inConfiguration;
         Actions.ShowSave = inConfiguration || inEditor;
         Actions.ShowDelete = false;
-        Actions.ShowCancel = inConfiguration || inEditor;
+        Actions.ShowCancel = inConfiguration;
+        Actions.ShowGoToTool = inConfiguration;
+        Actions.ShowBack = _currentMode == NotesWorkspaceMode.Execution;
         Actions.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
 
         Actions.NewText = "Novo";
         Actions.SaveText = inConfiguration ? "Salvar" : "Salvar nota";
+        Actions.SaveIconKind = inConfiguration ? "ContentSave" : "Play";
         Actions.DeleteText = "Excluir";
-        Actions.CancelText = inConfiguration ? "Cancelar" : "Voltar";
+        Actions.CancelText = "Cancelar";
+        Actions.GoToToolText = "Ir para ferramenta";
+        Actions.BackText = "Voltar";
+        Actions.BackIconKind = "ArrowLeft";
 
-        Actions.CanNew = false;
-        Actions.CanSave = !_isBusy && (inConfiguration || inEditor);
+        Actions.CanHelp = true;
+        Actions.CanNew = !_isBusy && inConfiguration;
+        Actions.CanSave = !_isBusy && (inConfiguration ? _isConfigurationDraft : inEditor);
         Actions.CanDelete = false;
-        Actions.CanCancel = !_isBusy && (inConfiguration || inEditor);
+        Actions.CanCancel = !_isBusy && inConfiguration && _isConfigurationDraft;
+        Actions.CanGoToTool = !_isBusy && inConfiguration;
+        Actions.CanBack = !_isBusy && _currentMode == NotesWorkspaceMode.Execution;
     }
 
     private void PositionEditorAtTopLeft()

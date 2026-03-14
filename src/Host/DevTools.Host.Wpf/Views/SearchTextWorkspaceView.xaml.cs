@@ -23,13 +23,17 @@ public partial class SearchTextWorkspaceView : System.Windows.Controls.UserContr
         await ExecuteAsync().ConfigureAwait(true);
     }
 
-    private void ActionCancel_Click(object sender, RoutedEventArgs e)
+    private void ActionBack_Click(object sender, RoutedEventArgs e)
     {
         if (_isExecuting)
         {
             _executionCts?.Cancel();
             ExecutionStatusText.Text = "Cancelando...";
+            return;
         }
+
+        if (Window.GetWindow(this) is MainWindow mainWindow)
+            mainWindow.OpenFerramentasHome();
     }
 
     private async Task ExecuteAsync()
@@ -133,12 +137,18 @@ public partial class SearchTextWorkspaceView : System.Windows.Controls.UserContr
 
     private void ApplyModeState()
     {
-        Actions.Visibility = _isExecuting ? Visibility.Visible : Visibility.Collapsed;
-        Actions.ShowSave = false;
-        Actions.CanSave = false;
-        Actions.ShowHelp = false;
-        Actions.CanCancel = _isExecuting;
-        Actions.ShowCancel = _isExecuting;
-        Actions.CancelText = "Cancelar";
+        Actions.Visibility = Visibility.Visible;
+        Actions.ShowHelp = true;
+        Actions.ShowNew = false;
+        Actions.ShowDelete = false;
+        Actions.ShowCancel = false;
+        Actions.ShowSave = true;
+        Actions.SaveText = "Buscar";
+        Actions.SaveIconKind = "Play";
+        Actions.CanSave = !_isExecuting;
+        Actions.ShowBack = true;
+        Actions.BackText = _isExecuting ? "Cancelar" : "Voltar";
+        Actions.BackIconKind = _isExecuting ? "CloseCircleOutline" : "ArrowLeft";
+        Actions.CanBack = true;
     }
 }

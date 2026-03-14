@@ -27,12 +27,13 @@
 
         <!-- ACTION BAR -->
         <c:ActionBarControl Grid.Row="1" x:Name="Actions"
-                            ShowNew="False" ShowSave="True" ShowDelete="False" ShowCancel="True"
+                            ShowNew="False" ShowSave="True" ShowDelete="False" ShowCancel="False"
+                            ShowBack="True"
                             SaveText="Executar"
                             ShowHelp="True"
                             HelpText="Defina pasta de entrada e, opcionalmente, pasta de saida. Ajuste score minimo e clique em Executar. Desmarque aplicar para simulacao."
                             ActionSave="ActionExecute_Click"
-                            ActionCancel="ActionCancel_Click"/>
+                            ActionBack="ActionBack_Click"/>
 
         <!-- BODY -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
