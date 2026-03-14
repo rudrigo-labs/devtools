@@ -36,12 +36,13 @@
                                 ShowNew="False"
                                 ShowSave="True"
                                 ShowDelete="False"
-                                ShowCancel="True"
+                                ShowCancel="False"
+                                ShowBack="True"
                                 SaveText="Executar"
                                 ShowHelp="True"
                                 HelpText="Selecione a imagem, pasta de saida e ajustes de deteccao. Use Executar para recortar os componentes automaticamente."
                                 ActionSave="ActionExecute_Click"
-                                ActionCancel="ActionCancel_Click"/>
+                                ActionBack="ActionBack_Click"/>
 
             <!-- ==================== TOOL BODY ==================== -->
             <ScrollViewer Grid.Row="2"

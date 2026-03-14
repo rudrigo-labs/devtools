@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using DevTools.Host.Wpf.Facades;
 using DevTools.Host.Wpf.Services;
 using DevTools.Image.Models;
@@ -23,13 +23,17 @@ public partial class ImageSplitWorkspaceView : System.Windows.Controls.UserContr
         await ExecuteAsync().ConfigureAwait(true);
     }
 
-    private void ActionCancel_Click(object sender, RoutedEventArgs e)
+    private void ActionBack_Click(object sender, RoutedEventArgs e)
     {
         if (_isExecuting)
         {
             _executionCts?.Cancel();
             ExecutionStatusText.Text = "Cancelando execução...";
+            return;
         }
+
+        if (Window.GetWindow(this) is MainWindow mainWindow)
+            mainWindow.OpenFerramentasHome();
     }
 
     private async Task ExecuteAsync()
@@ -42,7 +46,7 @@ public partial class ImageSplitWorkspaceView : System.Windows.Controls.UserContr
         if (!ValidationUiService.ValidateRequiredFields(
             out var errorMessage,
             ValidationUiService.RequiredPath("Arquivo de imagem", InputPathSelector, InputPathSelector.SelectedPath),
-            ValidationUiService.RequiredPath("Pasta de saída", OutputDirectorySelector, OutputDirectorySelector.SelectedPath)))
+            ValidationUiService.RequiredPath("Pasta de saÃ­da", OutputDirectorySelector, OutputDirectorySelector.SelectedPath)))
         {
             ValidationUiService.ShowInline(ExecutionStatusText, errorMessage);
             return;
@@ -76,12 +80,12 @@ public partial class ImageSplitWorkspaceView : System.Windows.Controls.UserContr
                 return;
             }
 
-            ExecutionStatusText.Text = $"Concluído. {data.Outputs.Count} arquivo(s) gerado(s) em {data.OutputDirectory}";
+            ExecutionStatusText.Text = $"ConcluÃ­do. {data.Outputs.Count} arquivo(s) gerado(s) em {data.OutputDirectory}";
         }
         catch (OperationCanceledException)
         {
             ValidationUiService.ClearInline(ExecutionStatusText);
-            ExecutionStatusText.Text = "Execução cancelada.";
+            ExecutionStatusText.Text = "ExecuÃ§Ã£o cancelada.";
         }
         finally
         {
@@ -114,10 +118,18 @@ public partial class ImageSplitWorkspaceView : System.Windows.Controls.UserContr
 
     private void ApplyModeState()
     {
+        Actions.ShowHelp = true;
+        Actions.ShowNew = false;
+        Actions.ShowDelete = false;
+        Actions.ShowCancel = false;
+        Actions.ShowSave = true;
+        Actions.SaveText = "Executar";
+        Actions.SaveIconKind = "Play";
         Actions.CanSave = !_isExecuting;
-        Actions.CanCancel = _isExecuting;
-        Actions.ShowCancel = _isExecuting;
-        Actions.CancelText = "Cancelar Execução";
+        Actions.ShowBack = true;
+        Actions.BackText = _isExecuting ? "Cancelar" : "Voltar";
+        Actions.BackIconKind = _isExecuting ? "CloseCircleOutline" : "ArrowLeft";
+        Actions.CanBack = true;
     }
 
     private void ClearInlineValidationStates()
@@ -126,3 +138,4 @@ public partial class ImageSplitWorkspaceView : System.Windows.Controls.UserContr
         ValidationUiService.SetPathSelectorInvalid(OutputDirectorySelector, false);
     }
 }
+

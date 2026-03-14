@@ -34,7 +34,7 @@ public partial class RenameWorkspaceView : System.Windows.Controls.UserControl
     private async void ActionSave_Click(object sender, RoutedEventArgs e)
         => await ExecuteAsync().ConfigureAwait(true);
 
-    private void ActionCancel_Click(object sender, RoutedEventArgs e)
+    private void ActionBack_Click(object sender, RoutedEventArgs e)
     {
         if (_isExecuting)
         {
@@ -43,14 +43,8 @@ public partial class RenameWorkspaceView : System.Windows.Controls.UserControl
             return;
         }
 
-        OldTextInput.Text = string.Empty;
-        NewTextInput.Text = string.Empty;
-        RootPathSelector.SelectedPath = string.Empty;
-        ModeGeneralRadio.IsChecked = true;
-        DryRunCheck.IsChecked = false;
-        ApplyDefaults();
-        ValidationUiService.ClearInline(ExecutionStatusText);
-        ApplyModeState();
+        if (Window.GetWindow(this) is MainWindow mainWindow)
+            mainWindow.OpenFerramentasHome();
     }
 
     // -------------------------------------------------------------------------
@@ -156,12 +150,20 @@ public partial class RenameWorkspaceView : System.Windows.Controls.UserControl
 
     private void ApplyModeState()
     {
-        Actions.SaveText   = _isExecuting ? "Executando..." : "Executar";
-        Actions.CancelText = _isExecuting ? "Cancelar" : "Limpar";
-        Actions.ShowSave   = !_isExecuting;
-        Actions.CanSave    = !_isExecuting;
-        Actions.ShowCancel = true;
-        Actions.CanCancel  = true;
+        Actions.ShowHelp = true;
+        Actions.NewText = "Novo";
+        Actions.ShowNew = false;
+        Actions.ShowDelete = false;
+        Actions.ShowCancel = false;
+        Actions.ShowSave = true;
+        Actions.SaveText = "Executar";
+        Actions.SaveIconKind = "Play";
+        Actions.CanSave = !_isExecuting;
+
+        Actions.ShowBack = true;
+        Actions.BackText = _isExecuting ? "Cancelar" : "Voltar";
+        Actions.BackIconKind = _isExecuting ? "CloseCircleOutline" : "ArrowLeft";
+        Actions.CanBack = true;
     }
 
     private void ClearValidationStates()

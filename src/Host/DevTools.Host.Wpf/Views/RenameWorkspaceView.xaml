@@ -36,11 +36,12 @@
                                 ShowNew="False"
                                 ShowSave="True"
                                 ShowDelete="False"
-                                ShowCancel="True"
+                                ShowCancel="False"
+                                ShowBack="True"
                                 ShowHelp="True"
                                 HelpText="Informe texto antigo e novo, escolha o modo e execute. Use simulacao para revisar antes de aplicar."
                                 ActionSave="ActionSave_Click"
-                                ActionCancel="ActionCancel_Click"/>
+                                ActionBack="ActionBack_Click"/>
 
             <!-- ==================== TOOL BODY ==================== -->
             <ScrollViewer Grid.Row="2"

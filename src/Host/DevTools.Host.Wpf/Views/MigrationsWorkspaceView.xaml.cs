@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
 using DevTools.Host.Wpf.Facades;
 using DevTools.Host.Wpf.Services;
@@ -21,6 +21,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
     private bool _isExecuting;
     private bool _initialized;
     private bool _suppressSelectionChanged;
+    private bool _isConfigurationDraft;
 
     public MigrationsWorkspaceView(IMigrationsFacade facade)
     {
@@ -54,6 +55,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         if (_currentEntity is null)
             CreateNewEntity();
 
+        _isConfigurationDraft = false;
         SetMode(MigrationsWorkspaceMode.Execution, "Modo execucao ativado.");
     }
 
@@ -62,18 +64,14 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         if (_isExecuting)
             return;
 
-        if (_currentEntity is null)
-            CreateNewEntity();
-        else
-            BindEntityToForm(_currentEntity);
-
         SetMode(MigrationsWorkspaceMode.Configuration, "Modo configuracao ativado.");
+        ResetConfigurationState();
     }
 
-    // ── Navegação de modo ─────────────────────────────────────────────────────
+    // â”€â”€ NavegaÃ§Ã£o de modo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    private void SwitchToExecution_Click(object sender, RoutedEventArgs e) => SetMode(MigrationsWorkspaceMode.Execution, "Modo execução ativado.");
-    private void SwitchToConfiguration_Click(object sender, RoutedEventArgs e) => SetMode(MigrationsWorkspaceMode.Configuration, "Modo configuração ativado.");
+    private void SwitchToExecution_Click(object sender, RoutedEventArgs e) => SetMode(MigrationsWorkspaceMode.Execution, "Modo execuÃ§Ã£o ativado.");
+    private void SwitchToConfiguration_Click(object sender, RoutedEventArgs e) => SetMode(MigrationsWorkspaceMode.Configuration, "Modo configuraÃ§Ã£o ativado.");
 
     private void SetMode(MigrationsWorkspaceMode mode, string status)
     {
@@ -83,7 +81,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         ApplyModeState();
     }
 
-    // ── Carregamento de entidades ─────────────────────────────────────────────
+    // â”€â”€ Carregamento de entidades â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private async Task ReloadEntitiesAsync()
     {
@@ -135,15 +133,23 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         if (_suppressSelectionChanged || _isExecuting) return;
         if (ConfigurationsCombo.SelectedItem is not MigrationsSelectionOption opt) return;
 
-        if (opt.Entity is null) { CreateNewEntity(); return; }
+        if (opt.Entity is null)
+        {
+            CreateNewEntity();
+            _isConfigurationDraft = false;
+            ApplyModeState();
+            return;
+        }
 
         _currentEntity = opt.Entity;
         BindEntityToForm(_currentEntity);
         ExecutionStatusText.Text = $"Configuração \"{_currentEntity.Name}\" carregada.";
+        if (_currentMode == MigrationsWorkspaceMode.Configuration)
+            _isConfigurationDraft = true;
         ApplyModeState();
     }
 
-    // ── CRUD ─────────────────────────────────────────────────────────────────
+    // â”€â”€ CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private void ActionNew_Click(object sender, RoutedEventArgs e)
     {
@@ -151,13 +157,12 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
 
         if (_currentMode == MigrationsWorkspaceMode.Execution)
         {
-            if (_currentEntity is not null)
-                BindEntityToForm(_currentEntity);
-
             SetMode(MigrationsWorkspaceMode.Configuration, "Modo configuracao ativado.");
+            ResetConfigurationState();
             return;
         }
 
+        _isConfigurationDraft = true;
         CreateNewEntity();
         SetMode(MigrationsWorkspaceMode.Configuration, "Nova configuracao.");
     }
@@ -169,6 +174,12 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         if (_currentMode == MigrationsWorkspaceMode.Execution)
         {
             await ExecuteAsync().ConfigureAwait(true);
+            return;
+        }
+
+        if (!_isConfigurationDraft)
+        {
+            ValidationUiService.ShowInline(ExecutionStatusText, "Clique em Novo para iniciar uma configuração.");
             return;
         }
 
@@ -200,7 +211,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         ValidationUiService.ClearInline(ExecutionStatusText);
         await ReloadEntitiesAsync().ConfigureAwait(true);
         ExecutionStatusText.Text = "Configuracao salva.";
-        SetMode(MigrationsWorkspaceMode.Execution, "Modo execucao ativado.");
+        ResetConfigurationState();
     }
 
     private async void ActionDelete_Click(object sender, RoutedEventArgs e)
@@ -212,7 +223,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
 
         var confirm = Components.DevToolsMessageBox.Confirm(
             Window.GetWindow(this),
-            $"Excluir configuração \"{_currentEntity.Name}\"?",
+            $"Excluir configuraÃ§Ã£o \"{_currentEntity.Name}\"?",
             "Excluir");
 
         if (confirm != Components.DevToolsMessageBoxResult.Yes) return;
@@ -220,10 +231,33 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         await _facade.DeleteAsync(_currentEntity.Id).ConfigureAwait(true);
         _currentEntity = null;
         await ReloadEntitiesAsync().ConfigureAwait(true);
-        ExecutionStatusText.Text = "Configuração excluída.";
+        ExecutionStatusText.Text = "ConfiguraÃ§Ã£o excluÃ­da.";
     }
 
     private void ActionCancel_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentMode == MigrationsWorkspaceMode.Configuration)
+        {
+            ResetConfigurationState();
+            ExecutionStatusText.Text = "Configuração cancelada.";
+            return;
+        }
+
+        ActionBack_Click(sender, e);
+    }
+
+    private void ActionGoToTool_Click(object sender, RoutedEventArgs e)
+    {
+        if (Window.GetWindow(this) is MainWindow mainWindow)
+        {
+            mainWindow.OpenToolExecution("Migrations");
+            return;
+        }
+
+        SetMode(MigrationsWorkspaceMode.Execution, "Modo execucao ativado.");
+    }
+
+    private void ActionBack_Click(object sender, RoutedEventArgs e)
     {
         if (_isExecuting)
         {
@@ -232,16 +266,11 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
             return;
         }
 
-        if (_currentMode == MigrationsWorkspaceMode.Configuration)
-        {
-            if (_currentEntity is not null)
-                BindEntityToForm(_currentEntity);
-
-            SetMode(MigrationsWorkspaceMode.Execution, "Modo execucao ativado.");
-        }
+        if (Window.GetWindow(this) is MainWindow mainWindow)
+            mainWindow.OpenFerramentasHome();
     }
 
-    // ── Execução ─────────────────────────────────────────────────────────────
+    // â”€â”€ ExecuÃ§Ã£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private async Task ExecuteAsync()
     {
@@ -249,7 +278,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
 
         if (_currentEntity is null || string.IsNullOrWhiteSpace(_currentEntity.RootPath))
         {
-            ValidationUiService.ShowInline(ExecutionStatusText, "Selecione ou configure uma configuração antes de executar.");
+            ValidationUiService.ShowInline(ExecutionStatusText, "Selecione ou configure uma configuraÃ§Ã£o antes de executar.");
             return;
         }
 
@@ -260,7 +289,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         if (action == MigrationsAction.AddMigration && string.IsNullOrWhiteSpace(migrationName))
         {
             ValidationUiService.SetControlInvalid(MigrationNameInput, true);
-            ValidationUiService.ShowInline(ExecutionStatusText, "Nome da migration é obrigatório para AddMigration.");
+            ValidationUiService.ShowInline(ExecutionStatusText, "Nome da migration Ã© obrigatÃ³rio para AddMigration.");
             return;
         }
 
@@ -299,13 +328,13 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
             ShowResult(result.Value!);
 
             ExecutionStatusText.Text = request.DryRun
-                ? "Dry run — comando gerado."
-                : $"Concluído. Exit code: {result.Value!.ExitCode}";
+                ? "Dry run â€” comando gerado."
+                : $"ConcluÃ­do. Exit code: {result.Value!.ExitCode}";
         }
         catch (OperationCanceledException)
         {
             ValidationUiService.ClearInline(ExecutionStatusText);
-            ExecutionStatusText.Text = "Execução cancelada.";
+            ExecutionStatusText.Text = "ExecuÃ§Ã£o cancelada.";
         }
         finally
         {
@@ -326,7 +355,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         ResultPanel.Visibility = Visibility.Visible;
     }
 
-    // ── Binding ───────────────────────────────────────────────────────────────
+    // â”€â”€ Binding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private void BindEntityToForm(MigrationsEntity entity)
     {
@@ -369,6 +398,14 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         ApplyModeState();
     }
 
+    private void ResetConfigurationState()
+    {
+        _isConfigurationDraft = false;
+        CreateNewEntity();
+        ValidationUiService.ClearInline(ExecutionStatusText);
+        ApplyModeState();
+    }
+
     private void ActionCombo_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         => UpdateMigrationNameVisibility();
 
@@ -382,7 +419,8 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
     private void ApplyModeState()
     {
         var inConfiguration = _currentMode == MigrationsWorkspaceMode.Configuration;
-        var hasPersistedConfiguration = _currentEntity is not null && !string.IsNullOrWhiteSpace(_currentEntity.Id);
+        var inExecution = _currentMode == MigrationsWorkspaceMode.Execution;
+        var hasSelected = _currentEntity is not null;
 
         ConfigurationModeHint.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
         ConfigurationMetadataSection.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
@@ -392,18 +430,29 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
             ? "Salve os parametros de migration para reaproveitar em outros ciclos."
             : "Executa dotnet ef migrations add e database update com configuracoes nomeadas por provedor.";
 
-        Actions.NewText = inConfiguration ? "Novo" : "Configurar";
+        Actions.NewText = "Novo";
         Actions.SaveText = inConfiguration ? "Salvar" : "Executar";
-        Actions.DeleteText = "Excluir";
-        Actions.CancelText = _isExecuting ? "Cancelar" : "Voltar";
+        Actions.SaveIconKind = inConfiguration ? "ContentSave" : "Play";
+        Actions.CancelText = "Cancelar";
+        Actions.GoToToolText = "Ir para ferramenta";
+        Actions.BackText = _isExecuting ? "Cancelar" : "Voltar";
+        Actions.BackIconKind = _isExecuting ? "CloseCircleOutline" : "ArrowLeft";
 
-        Actions.ShowSave = true;
-        Actions.ShowDelete = inConfiguration;
-        Actions.ShowCancel = _isExecuting || inConfiguration;
+        Actions.ShowHelp = true;
+        Actions.ShowNew = inConfiguration;
+        Actions.ShowSave = inConfiguration || inExecution;
+        Actions.ShowDelete = false;
+        Actions.ShowCancel = inConfiguration;
+        Actions.ShowGoToTool = inConfiguration;
+        Actions.ShowBack = inExecution;
 
-        Actions.CanNew = !_isExecuting;
-        Actions.CanSave = !_isExecuting;
-        Actions.CanDelete = inConfiguration && hasPersistedConfiguration && !_isExecuting;
-        Actions.CanCancel = _isExecuting || inConfiguration;
+        Actions.CanHelp = true;
+        Actions.CanNew = inConfiguration && !_isExecuting;
+        Actions.CanSave = !_isExecuting && (inExecution ? hasSelected : _isConfigurationDraft);
+        Actions.CanDelete = false;
+        Actions.CanCancel = inConfiguration && !_isExecuting && _isConfigurationDraft;
+        Actions.CanGoToTool = inConfiguration && !_isExecuting;
+        Actions.CanBack = inExecution;
     }
 }
+

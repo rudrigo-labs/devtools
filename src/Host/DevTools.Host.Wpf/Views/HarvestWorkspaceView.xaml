@@ -42,7 +42,9 @@
                                 ActionNew="ActionNew_Click"
                                 ActionSave="ActionSave_Click"
                                 ActionDelete="ActionDelete_Click"
-                                ActionCancel="ActionCancel_Click"/>
+                                ActionCancel="ActionCancel_Click"
+                                ActionGoToTool="ActionGoToTool_Click"
+                                ActionBack="ActionBack_Click"/>
 
             <!-- ==================== TOOL BODY ==================== -->
             <ScrollViewer Grid.Row="2"

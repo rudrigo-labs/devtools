@@ -106,6 +106,12 @@ public partial class MainWindow : Window
         UpdateNavStyles();
     }
 
+    public void OpenFerramentasHome()
+        => ActivateTool(FerramentasTag, WorkspaceIntent.Default, FerramentasTag);
+
+    public void OpenToolExecution(string toolTag)
+        => ActivateTool(toolTag, WorkspaceIntent.Execution, FerramentasTag);
+
     private static void ApplyWorkspaceIntent(System.Windows.Controls.UserControl workspace, WorkspaceIntent intent)
     {
         switch (workspace)

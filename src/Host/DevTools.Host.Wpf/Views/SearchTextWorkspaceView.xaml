@@ -27,12 +27,13 @@
 
         <!-- ACTION BAR -->
         <c:ActionBarControl Grid.Row="1" x:Name="Actions"
-                            ShowNew="False" ShowSave="True" ShowDelete="False" ShowCancel="True"
+                            ShowNew="False" ShowSave="True" ShowDelete="False" ShowCancel="False"
+                            ShowBack="True"
                             SaveText="Buscar"
                             ShowHelp="True"
                             HelpText="Defina pasta raiz e padrao. Use Regex para expressoes avancadas. Use globs para incluir/excluir arquivos. Clique em Buscar."
                             ActionSave="ActionExecute_Click"
-                            ActionCancel="ActionCancel_Click"/>
+                            ActionBack="ActionBack_Click"/>
 
         <!-- BODY -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">

@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
 using DevTools.Host.Wpf.Facades;
 using DevTools.Host.Wpf.Services;
@@ -19,6 +19,7 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
     private NgrokWorkspaceMode _currentMode = NgrokWorkspaceMode.Execution;
     private bool _initialized;
     private bool _suppressSelectionChanged;
+    private bool _isConfigurationDraft;
 
     public NgrokWorkspaceView(INgrokFacade facade)
     {
@@ -45,23 +46,20 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         if (_currentEntity is null)
             CreateNewEntity();
 
+        _isConfigurationDraft = false;
         SetMode(NgrokWorkspaceMode.Execution, "Modo execucao ativado.");
     }
 
     public void ActivateConfigurationMode()
     {
-        if (_currentEntity is null)
-            CreateNewEntity();
-        else
-            BindEntityToForm(_currentEntity);
-
         SetMode(NgrokWorkspaceMode.Configuration, "Modo configuracao ativado.");
+        ResetConfigurationState();
     }
 
-    // ── Navegação de modo ─────────────────────────────────────────────────────
+    // â”€â”€ NavegaÃ§Ã£o de modo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    private void SwitchToExecution_Click(object sender, RoutedEventArgs e) => SetMode(NgrokWorkspaceMode.Execution, "Modo execução ativado.");
-    private void SwitchToConfiguration_Click(object sender, RoutedEventArgs e) => SetMode(NgrokWorkspaceMode.Configuration, "Modo configuração ativado.");
+    private void SwitchToExecution_Click(object sender, RoutedEventArgs e) => SetMode(NgrokWorkspaceMode.Execution, "Modo execuÃ§Ã£o ativado.");
+    private void SwitchToConfiguration_Click(object sender, RoutedEventArgs e) => SetMode(NgrokWorkspaceMode.Configuration, "Modo configuraÃ§Ã£o ativado.");
 
     private void SetMode(NgrokWorkspaceMode mode, string status)
     {
@@ -70,7 +68,7 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         ApplyModeState();
     }
 
-    // ── Entidades ─────────────────────────────────────────────────────────────
+    // â”€â”€ Entidades â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private async Task ReloadEntitiesAsync()
     {
@@ -122,33 +120,51 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
     {
         if (_suppressSelectionChanged) return;
         if (ConfigurationsCombo.SelectedItem is not NgrokSelectionOption opt) return;
-        if (opt.Entity is null) { CreateNewEntity(); return; }
+        if (opt.Entity is null)
+        {
+            CreateNewEntity();
+            _isConfigurationDraft = false;
+            ApplyModeState();
+            return;
+        }
+
         _currentEntity = opt.Entity;
         BindEntityToForm(_currentEntity);
         ExecutionStatusText.Text = $"Configuração \"{_currentEntity.Name}\" carregada.";
+        if (_currentMode == NgrokWorkspaceMode.Configuration)
+            _isConfigurationDraft = true;
         ApplyModeState();
     }
 
-    // ── CRUD ─────────────────────────────────────────────────────────────────
+    // â”€â”€ CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private void ActionNew_Click(object sender, RoutedEventArgs e)
     {
         if (_currentMode == NgrokWorkspaceMode.Execution)
         {
-            if (_currentEntity is null)
-                CreateNewEntity();
-
             SetMode(NgrokWorkspaceMode.Configuration, "Modo configuracao ativado.");
+            ResetConfigurationState();
             return;
         }
 
+        _isConfigurationDraft = true;
         CreateNewEntity();
         SetMode(NgrokWorkspaceMode.Configuration, "Nova configuracao.");
     }
 
     private async void ActionSave_Click(object sender, RoutedEventArgs e)
     {
-        if (_currentMode == NgrokWorkspaceMode.Execution) return;
+        if (_currentMode == NgrokWorkspaceMode.Execution)
+        {
+            await StartHttpFromActionBarAsync().ConfigureAwait(true);
+            return;
+        }
+
+        if (!_isConfigurationDraft)
+        {
+            ValidationUiService.ShowInline(ExecutionStatusText, "Clique em Novo para iniciar uma configuração.");
+            return;
+        }
 
         ReadFormIntoEntity();
 
@@ -170,7 +186,7 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         ValidationUiService.ClearInline(ExecutionStatusText);
         await ReloadEntitiesAsync().ConfigureAwait(true);
         ExecutionStatusText.Text = "Configuracao salva.";
-        SetMode(NgrokWorkspaceMode.Execution, "Modo execucao ativado.");
+        ResetConfigurationState();
     }
 
     private async void ActionDelete_Click(object sender, RoutedEventArgs e)
@@ -190,17 +206,35 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         ExecutionStatusText.Text = "Configuracao excluida.";
     }
 
-    // ── Ações de execução ─────────────────────────────────────────────────────
+    // â”€â”€ AÃ§Ãµes de execuÃ§Ã£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private void ActionCancel_Click(object sender, RoutedEventArgs e)
     {
         if (_currentMode != NgrokWorkspaceMode.Configuration)
+        {
+            ActionBack_Click(sender, e);
             return;
+        }
 
-        if (_currentEntity is not null)
-            BindEntityToForm(_currentEntity);
+        ResetConfigurationState();
+        ExecutionStatusText.Text = "Configuração cancelada.";
+    }
+
+    private void ActionGoToTool_Click(object sender, RoutedEventArgs e)
+    {
+        if (Window.GetWindow(this) is MainWindow mainWindow)
+        {
+            mainWindow.OpenToolExecution("Ngrok");
+            return;
+        }
 
         SetMode(NgrokWorkspaceMode.Execution, "Modo execucao ativado.");
+    }
+
+    private void ActionBack_Click(object sender, RoutedEventArgs e)
+    {
+        if (Window.GetWindow(this) is MainWindow mainWindow)
+            mainWindow.OpenFerramentasHome();
     }
 
     private async void ListTunnels_Click(object sender, RoutedEventArgs e)
@@ -218,6 +252,9 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
     }
 
     private async void StartHttp_Click(object sender, RoutedEventArgs e)
+        => await StartHttpFromActionBarAsync().ConfigureAwait(true);
+
+    private async Task StartHttpFromActionBarAsync()
     {
         ValidationUiService.SetControlInvalid(StartPortInput, false);
         if (!int.TryParse(StartPortInput.Text.Trim(), out var port) || port <= 0)
@@ -235,7 +272,7 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
             Action = NgrokAction.StartHttp,
             BaseUrl = GetBaseUrl(),
             StartOptions = new NgrokStartOptions(protocol, port, execPath)
-        });
+        }).ConfigureAwait(true);
     }
 
     private async Task RunActionAsync(NgrokRequest request)
@@ -267,7 +304,7 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
                     TunnelListHeader.Text = tunnels.Count == 0 ? "Tuneis ativos" : $"Tuneis ativos ({tunnels.Count})";
                     EmptyStateText.Visibility = tunnels.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
-                    ExecutionStatusText.Text = $"Listados {tunnels.Count} túnel(is).";
+                    ExecutionStatusText.Text = $"Listados {tunnels.Count} tÃºnel(is).";
                     break;
 
                 case NgrokAction.StartHttp:
@@ -282,16 +319,16 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
 
                 case NgrokAction.Status:
                     ExecutionStatusText.Text = (data.HasAny ?? false)
-                        ? "Ngrok está em execução."
-                        : "Nenhum processo ngrok em execução.";
+                        ? "Ngrok estÃ¡ em execuÃ§Ã£o."
+                        : "Nenhum processo ngrok em execuÃ§Ã£o.";
                     break;
 
                 case NgrokAction.CloseTunnel:
-                    ExecutionStatusText.Text = (data.Closed ?? false) ? "Túnel fechado." : "Túnel não encontrado.";
+                    ExecutionStatusText.Text = (data.Closed ?? false) ? "TÃºnel fechado." : "TÃºnel nÃ£o encontrado.";
                     break;
 
                 default:
-                    ExecutionStatusText.Text = "Operação concluída.";
+                    ExecutionStatusText.Text = "OperaÃ§Ã£o concluÃ­da.";
                     break;
             }
         }
@@ -313,7 +350,7 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         try
         {
             System.Windows.Clipboard.SetText(url);
-            ExecutionStatusText.Text = "URL copiada para a área de transferência.";
+            ExecutionStatusText.Text = "URL copiada para a Ã¡rea de transferÃªncia.";
         }
         catch (Exception ex)
         {
@@ -321,7 +358,7 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         }
     }
 
-    // ── Binding ───────────────────────────────────────────────────────────────
+    // â”€â”€ Binding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private string GetBaseUrl() =>
         _currentEntity?.BaseUrl?.Trim() is { Length: > 0 } url
@@ -358,10 +395,19 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         ApplyModeState();
     }
 
+    private void ResetConfigurationState()
+    {
+        _isConfigurationDraft = false;
+        CreateNewEntity();
+        ValidationUiService.ClearInline(ExecutionStatusText);
+        ApplyModeState();
+    }
+
     private void ApplyModeState()
     {
         var inConfiguration = _currentMode == NgrokWorkspaceMode.Configuration;
-        var hasPersistedConfiguration = _currentEntity is not null && !string.IsNullOrWhiteSpace(_currentEntity.Id);
+        var inExecution = _currentMode == NgrokWorkspaceMode.Execution;
+        var hasSelected = _currentEntity is not null;
 
         ConfigurationModeHint.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
         ConfigurationMetadataSection.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
@@ -371,21 +417,31 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
             ? "Salve uma configuracao com token e caminhos para reutilizar."
             : "Gerencia tuneis HTTP/HTTPS via ngrok. Inicie, liste e copie URLs publicas.";
 
-        Actions.NewText = inConfiguration ? "Novo" : "Configurar";
-        Actions.SaveText = "Salvar";
-        Actions.DeleteText = "Excluir";
-        Actions.CancelText = "Voltar";
+        Actions.NewText = "Novo";
+        Actions.SaveText = inConfiguration ? "Salvar" : "Executar";
+        Actions.SaveIconKind = inConfiguration ? "ContentSave" : "Play";
+        Actions.CancelText = "Cancelar";
+        Actions.GoToToolText = "Ir para ferramenta";
+        Actions.BackText = "Voltar";
+        Actions.BackIconKind = "ArrowLeft";
 
-        Actions.ShowNew = true;
-        Actions.ShowSave = inConfiguration;
-        Actions.ShowDelete = inConfiguration;
+        Actions.ShowHelp = true;
+        Actions.ShowNew = inConfiguration;
+        Actions.ShowSave = inConfiguration || inExecution;
+        Actions.ShowDelete = false;
         Actions.ShowCancel = inConfiguration;
-        Actions.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+        Actions.ShowGoToTool = inConfiguration;
+        Actions.ShowBack = inExecution;
+        Actions.Visibility = Visibility.Visible;
 
-        Actions.CanNew = true;
-        Actions.CanSave = inConfiguration;
-        Actions.CanDelete = inConfiguration && hasPersistedConfiguration;
-        Actions.CanCancel = inConfiguration;
+        Actions.CanHelp = true;
+        Actions.CanNew = inConfiguration;
+        Actions.CanSave = inExecution ? hasSelected : _isConfigurationDraft;
+        Actions.CanDelete = false;
+        Actions.CanCancel = inConfiguration && _isConfigurationDraft;
+        Actions.CanGoToTool = inConfiguration;
+        Actions.CanBack = inExecution;
     }
 }
+
 
