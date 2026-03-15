@@ -164,7 +164,7 @@
 
                     <!-- Itens de navegação -->
                     <StackPanel DockPanel.Dock="Top">
-                        <c:SectionExpander IsExpanded="True">
+                        <c:SectionExpander x:Name="FerramentasSection" IsExpanded="True">
                             <c:SectionExpander.Header>
                                 <TextBlock Text="FERRAMENTAS"
                                            FontSize="11"
@@ -172,26 +172,27 @@
                                            Foreground="{DynamicResource DevToolsTextSecondary}"/>
                             </c:SectionExpander.Header>
                             <StackPanel>
-                                <Button x:Name="NavFerramentas"
-                                        Content="Home Ferramentas"
-                                        Tag="Ferramentas"
-                                        Style="{StaticResource SidebarNavButtonActiveStyle}"
-                                        Click="NavButton_Click"/>
-                                <Button Content="Snapshot" Tag="Exec:Snapshot" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
-                                <Button Content="Rename" Tag="Exec:Rename" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
-                                <Button Content="Harvest" Tag="Exec:Harvest" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
-                                <Button Content="Image Split" Tag="Exec:ImageSplit" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
-                                <Button Content="Search Text" Tag="Exec:SearchText" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
-                                <Button Content="Organizer" Tag="Exec:Organizer" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
-                                <Button Content="UTF8 Convert" Tag="Exec:Utf8Convert" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
-                                <Button Content="Migrations" Tag="Exec:Migrations" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
-                                <Button Content="SSH Tunnel" Tag="Exec:SshTunnel" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
-                                <Button Content="Ngrok" Tag="Exec:Ngrok" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
-                                <Button Content="Notes" Tag="Exec:Notes" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavFerramentas"
+                                                  Content="Home Ferramentas"
+                                                  IconGlyph="&#xE7C3;"
+                                                  ToolTip="Abre o painel principal de execucao das ferramentas."
+                                                  Tag="Ferramentas"
+                                                  Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecSnapshot" IsSubItem="True" Content="Snapshot" IconGlyph="&#xE7C3;" ToolTip="Gera snapshot do projeto." Tag="Exec:Snapshot" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecRename" IsSubItem="True" Content="Rename" IconGlyph="&#xE8AC;" ToolTip="Renomeia identificadores em lote." Tag="Exec:Rename" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecHarvest" IsSubItem="True" Content="Harvest" IconGlyph="&#xE9D2;" ToolTip="Extrai componentes reutilizaveis do codigo." Tag="Exec:Harvest" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecImageSplit" IsSubItem="True" Content="Image Split" IconGlyph="&#xE91B;" ToolTip="Recorta componentes de imagem automaticamente." Tag="Exec:ImageSplit" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecSearchText" IsSubItem="True" Content="Search Text" IconGlyph="&#xE721;" ToolTip="Busca texto em arquivos com filtros e regex." Tag="Exec:SearchText" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecOrganizer" IsSubItem="True" Content="Organizer" IconGlyph="&#xE8A1;" ToolTip="Organiza arquivos por categorias." Tag="Exec:Organizer" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecUtf8Convert" IsSubItem="True" Content="UTF8 Convert" IconGlyph="&#xE8D2;" ToolTip="Converte arquivos para UTF-8." Tag="Exec:Utf8Convert" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecMigrations" IsSubItem="True" Content="Migrations" IconGlyph="&#xE895;" ToolTip="Executa comandos de migration." Tag="Exec:Migrations" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecSshTunnel" IsSubItem="True" Content="SSH Tunnel" IconGlyph="&#xE7E8;" ToolTip="Inicia e gerencia tuneis SSH." Tag="Exec:SshTunnel" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecNgrok" IsSubItem="True" Content="Ngrok" IconGlyph="&#xE8A5;" ToolTip="Inicia tuneis Ngrok." Tag="Exec:Ngrok" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecNotes" IsSubItem="True" Content="Notes" IconGlyph="&#xE70B;" ToolTip="Abre o editor de notas." Tag="Exec:Notes" Click="NavButton_Click"/>
                             </StackPanel>
                         </c:SectionExpander>
 
-                        <c:SectionExpander IsExpanded="True">
+                        <c:SectionExpander x:Name="ConfiguracoesSection" IsExpanded="True">
                             <c:SectionExpander.Header>
                                 <TextBlock Text="CONFIGURACOES"
                                            FontSize="11"
@@ -199,21 +200,23 @@
                                            Foreground="{DynamicResource DevToolsTextSecondary}"/>
                             </c:SectionExpander.Header>
                             <StackPanel>
-                                <Button x:Name="NavConfiguracoes"
-                                        Content="Home Configuracoes"
-                                        Tag="Configuracoes"
-                                        Style="{StaticResource SidebarNavButtonStyle}"
-                                        Click="NavButton_Click"/>
-                                <Button Content="Migrations" Tag="Cfg:Migrations" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
-                                <Button Content="SSH Tunnel" Tag="Cfg:SshTunnel" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
-                                <Button Content="Ngrok" Tag="Cfg:Ngrok" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
-                                <Button Content="Notes" Tag="Cfg:Notes" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavConfiguracoes"
+                                                  Content="Home Configuracoes"
+                                                  IconGlyph="&#xE895;"
+                                                  ToolTip="Abre o painel de configuracoes persistentes."
+                                                  Tag="Configuracoes"
+                                                  Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgMigrations" IsSubItem="True" Content="Migrations" IconGlyph="&#xE895;" ToolTip="Configura projetos de migrations." Tag="Cfg:Migrations" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgSshTunnel" IsSubItem="True" Content="SSH Tunnel" IconGlyph="&#xE7E8;" ToolTip="Configura conexoes e tuneis SSH." Tag="Cfg:SshTunnel" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgNgrok" IsSubItem="True" Content="Ngrok" IconGlyph="&#xE8A5;" ToolTip="Configura token e parametros do Ngrok." Tag="Cfg:Ngrok" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgNotes" IsSubItem="True" Content="Notes" IconGlyph="&#xE70B;" ToolTip="Configura pasta padrao e Google Drive do Notes." Tag="Cfg:Notes" Click="NavButton_Click"/>
                             </StackPanel>
                         </c:SectionExpander>
 
-                        <Button Content="Encerrar"
-                                Style="{StaticResource SidebarNavButtonExitStyle}"
-                                Click="ExitButton_Click"/>
+                        <c:SidebarNavItem Content="Encerrar"
+                                          IconGlyph="&#xE8BB;"
+                                          ToolTip="Encerra o DevTools."
+                                          Click="ExitButton_Click"/>
                     </StackPanel>
 
                     <!-- EspaÃ§ador -->
