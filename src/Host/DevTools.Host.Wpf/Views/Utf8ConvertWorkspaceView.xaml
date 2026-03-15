@@ -31,24 +31,12 @@
                                 ShowBack="True"
                                 SaveText="Executar"
                                 ShowHelp="True"
-                                HelpText="Defina pasta raiz e filtros por glob. Use Simulação antes de executar para validar impacto. Depois clique em Executar."
                                 ActionSave="ActionExecute_Click"
                                 ActionBack="ActionBack_Click"/>
 
             <!-- BODY -->
             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Margin="0,0,0,0">
-
-                    <Border BorderThickness="1" CornerRadius="4"
-                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                            Background="{DynamicResource DevToolsSurface}"
-                            Padding="10,8" Margin="0,0,0,12">
-                        <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
-                            Como usar: selecione a pasta raiz e, se quiser, filtre com globs.
-                            Recursive inclui subpastas. Incluir BOM define o formato final UTF-8.
-                            Dry Run mostra o que seria convertido sem alterar arquivo.
-                        </TextBlock>
-                    </Border>
 
                     <c:PathSelector x:Name="RootPathSelector" Title="Pasta raiz *" IsFolderPicker="True" Margin="0,0,0,12"/>
 
@@ -126,3 +114,4 @@
         </Grid>
     </Grid>
 </UserControl>
+

@@ -31,24 +31,12 @@
                             ShowBack="True"
                             SaveText="Executar"
                             ShowHelp="True"
-                            HelpText="Defina pasta de entrada e, opcionalmente, pasta de saída. Ajuste score mínimo e clique em Executar. Desmarque aplicar para simulação."
                             ActionSave="ActionExecute_Click"
                             ActionBack="ActionBack_Click"/>
 
         <!-- BODY -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="0,0,0,0">
-
-                <Border BorderThickness="1" CornerRadius="4"
-                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                        Background="{DynamicResource DevToolsSurface}"
-                        Padding="10,8" Margin="0,0,0,12">
-                    <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
-                        Como usar: escolha a pasta de entrada. Se quiser, escolha uma pasta de saída.
-                        Score mínimo define a confiança da classificação. Mover arquivos aplica de verdade;
-                        desmarcado faz simulação.
-                    </TextBlock>
-                </Border>
 
                 <c:PathSelector x:Name="InboxPathSelector" Title="Pasta de entrada *" IsFolderPicker="True" Margin="0,0,0,12"/>
                 <c:PathSelector x:Name="OutputPathSelector" Title="Pasta de saída (opcional - padrão: mesma da entrada)" IsFolderPicker="True" Margin="0,0,0,12"/>
@@ -123,3 +111,4 @@
     </Grid>
     </Grid>
 </UserControl>
+
