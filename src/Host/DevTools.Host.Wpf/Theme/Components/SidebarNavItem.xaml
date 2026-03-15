@@ -1,0 +1,78 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="clr-namespace:DevTools.Host.Wpf.Components">
+
+    <Style TargetType="{x:Type c:SidebarNavItem}">
+        <Setter Property="Height" Value="36"/>
+        <Setter Property="Padding" Value="12,0,12,0"/>
+        <Setter Property="Margin" Value="0,2,0,0"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource DevToolsTextSecondary}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="ToolTipService.InitialShowDelay" Value="200"/>
+        <Setter Property="ToolTipService.ShowDuration" Value="30000"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type c:SidebarNavItem}">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="6"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Border x:Name="ActiveStripe"
+                                    Width="3"
+                                    HorizontalAlignment="Left"
+                                    Background="Transparent"
+                                    CornerRadius="2,0,0,2"/>
+
+                            <Grid Margin="{TemplateBinding Padding}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding IconGlyph, RelativeSource={RelativeSource TemplatedParent}}"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="14"
+                                           VerticalAlignment="Center"
+                                           Foreground="{TemplateBinding Foreground}"/>
+
+                                <ContentPresenter Grid.Column="1"
+                                                  VerticalAlignment="Center"
+                                                  Margin="8,0,0,0"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSubItem" Value="True">
+                            <Setter Property="Height" Value="32"/>
+                            <Setter Property="Padding" Value="28,0,12,0"/>
+                            <Setter Property="FontSize" Value="12"/>
+                        </Trigger>
+
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="#0CFFFFFF"/>
+                            <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
+                        </Trigger>
+
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="#18FFFFFF"/>
+                        </Trigger>
+
+                        <Trigger Property="IsActive" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="#14FFFFFF"/>
+                            <Setter TargetName="ActiveStripe" Property="Background" Value="{DynamicResource DevToolsBrushBorder}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

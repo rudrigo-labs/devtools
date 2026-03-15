@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using DevTools.Host.Wpf.Components;
 
 namespace DevTools.Host.Wpf.Views;
 
@@ -16,7 +17,6 @@ public partial class MainWindow : Window
     private readonly Dictionary<string, Func<System.Windows.Controls.UserControl>> _toolRegistry;
     private string _activeToolTag = string.Empty;
     private WorkspaceIntent _activeIntent = WorkspaceIntent.Default;
-    private string _activeSidebarTag = FerramentasTag;
     private bool _isWorkAreaMaximized;
     private Rect _restoreBounds;
 
@@ -55,16 +55,16 @@ public partial class MainWindow : Window
         };
 
         homeLauncherView.OpenToolRequested += toolTag =>
-            ActivateTool(toolTag, WorkspaceIntent.Execution, FerramentasTag);
+            ActivateTool(toolTag, WorkspaceIntent.Execution);
 
         configurationLauncherView.OpenToolRequested += toolTag =>
-            ActivateTool(toolTag, WorkspaceIntent.Configuration, ConfiguracoesTag);
+            ActivateTool(toolTag, WorkspaceIntent.Configuration);
 
         Loaded += (_, _) =>
         {
             _restoreBounds = new Rect(Left, Top, Width, Height);
             MaximizeToWorkArea();
-            ActivateTool(FerramentasTag, WorkspaceIntent.Default, FerramentasTag);
+            ActivateTool(FerramentasTag, WorkspaceIntent.Default);
         };
     }
 
@@ -73,19 +73,33 @@ public partial class MainWindow : Window
         if (sender is not System.Windows.Controls.Button btn || btn.Tag is not string tag)
             return;
 
+        if (tag.StartsWith("Exec:", StringComparison.OrdinalIgnoreCase))
+        {
+            var toolTag = tag["Exec:".Length..];
+            ActivateTool(toolTag, WorkspaceIntent.Execution);
+            return;
+        }
+
+        if (tag.StartsWith("Cfg:", StringComparison.OrdinalIgnoreCase))
+        {
+            var toolTag = tag["Cfg:".Length..];
+            ActivateTool(toolTag, WorkspaceIntent.Configuration);
+            return;
+        }
+
         if (string.Equals(tag, FerramentasTag, StringComparison.OrdinalIgnoreCase))
         {
-            ActivateTool(FerramentasTag, WorkspaceIntent.Default, FerramentasTag);
+            ActivateTool(FerramentasTag, WorkspaceIntent.Default);
             return;
         }
 
         if (string.Equals(tag, ConfiguracoesTag, StringComparison.OrdinalIgnoreCase))
         {
-            ActivateTool(ConfiguracoesTag, WorkspaceIntent.Default, ConfiguracoesTag);
+            ActivateTool(ConfiguracoesTag, WorkspaceIntent.Default);
         }
     }
 
-    private void ActivateTool(string tag, WorkspaceIntent intent = WorkspaceIntent.Default, string? sidebarTag = null)
+    private void ActivateTool(string tag, WorkspaceIntent intent = WorkspaceIntent.Default)
     {
         if (string.Equals(_activeToolTag, tag, StringComparison.OrdinalIgnoreCase) && _activeIntent == intent)
             return;
@@ -98,8 +112,6 @@ public partial class MainWindow : Window
 
         _activeToolTag = tag;
         _activeIntent = intent;
-        if (!string.IsNullOrWhiteSpace(sidebarTag))
-            _activeSidebarTag = sidebarTag;
 
         WorkspaceHost.Content = workspace;
         UpdateHeaderAndStatus(tag, intent);
@@ -107,10 +119,10 @@ public partial class MainWindow : Window
     }
 
     public void OpenFerramentasHome()
-        => ActivateTool(FerramentasTag, WorkspaceIntent.Default, FerramentasTag);
+        => ActivateTool(FerramentasTag, WorkspaceIntent.Default);
 
     public void OpenToolExecution(string toolTag)
-        => ActivateTool(toolTag, WorkspaceIntent.Execution, FerramentasTag);
+        => ActivateTool(toolTag, WorkspaceIntent.Execution);
 
     private static void ApplyWorkspaceIntent(System.Windows.Controls.UserControl workspace, WorkspaceIntent intent)
     {
@@ -168,14 +180,48 @@ public partial class MainWindow : Window
 
     private void UpdateNavStyles()
     {
-        var activeStyle = TryFindResource("SidebarNavButtonActiveStyle") as Style;
-        var normalStyle = TryFindResource("SidebarNavButtonStyle") as Style;
+        var inFerramentasContext =
+            string.Equals(_activeToolTag, FerramentasTag, StringComparison.OrdinalIgnoreCase)
+            || _activeIntent == WorkspaceIntent.Execution;
 
-        var isFerramentas = string.Equals(_activeSidebarTag, FerramentasTag, StringComparison.OrdinalIgnoreCase);
-        var isConfiguracoes = string.Equals(_activeSidebarTag, ConfiguracoesTag, StringComparison.OrdinalIgnoreCase);
+        var inConfiguracoesContext =
+            string.Equals(_activeToolTag, ConfiguracoesTag, StringComparison.OrdinalIgnoreCase)
+            || _activeIntent == WorkspaceIntent.Configuration;
 
-        NavFerramentas.Style = isFerramentas ? activeStyle : normalStyle;
-        NavConfiguracoes.Style = isConfiguracoes ? activeStyle : normalStyle;
+        SetNavActive(NavFerramentas, inFerramentasContext);
+        SetNavActive(NavConfiguracoes, inConfiguracoesContext);
+
+        SetNavActive(NavExecSnapshot, IsToolActive("Snapshot", WorkspaceIntent.Execution));
+        SetNavActive(NavExecRename, IsToolActive("Rename", WorkspaceIntent.Execution));
+        SetNavActive(NavExecHarvest, IsToolActive("Harvest", WorkspaceIntent.Execution));
+        SetNavActive(NavExecImageSplit, IsToolActive("ImageSplit", WorkspaceIntent.Execution));
+        SetNavActive(NavExecSearchText, IsToolActive("SearchText", WorkspaceIntent.Execution));
+        SetNavActive(NavExecOrganizer, IsToolActive("Organizer", WorkspaceIntent.Execution));
+        SetNavActive(NavExecUtf8Convert, IsToolActive("Utf8Convert", WorkspaceIntent.Execution));
+        SetNavActive(NavExecMigrations, IsToolActive("Migrations", WorkspaceIntent.Execution));
+        SetNavActive(NavExecSshTunnel, IsToolActive("SshTunnel", WorkspaceIntent.Execution));
+        SetNavActive(NavExecNgrok, IsToolActive("Ngrok", WorkspaceIntent.Execution));
+        SetNavActive(NavExecNotes, IsToolActive("Notes", WorkspaceIntent.Execution));
+
+        SetNavActive(NavCfgMigrations, IsToolActive("Migrations", WorkspaceIntent.Configuration));
+        SetNavActive(NavCfgSshTunnel, IsToolActive("SshTunnel", WorkspaceIntent.Configuration));
+        SetNavActive(NavCfgNgrok, IsToolActive("Ngrok", WorkspaceIntent.Configuration));
+        SetNavActive(NavCfgNotes, IsToolActive("Notes", WorkspaceIntent.Configuration));
+
+        if (inConfiguracoesContext)
+            ConfiguracoesSection.IsExpanded = true;
+        else
+            FerramentasSection.IsExpanded = true;
+    }
+
+    private bool IsToolActive(string toolTag, WorkspaceIntent intent)
+        => _activeIntent == intent
+           && string.Equals(_activeToolTag, toolTag, StringComparison.OrdinalIgnoreCase);
+
+    private static void SetNavActive(SidebarNavItem? item, bool isActive)
+    {
+        if (item is not null)
+            item.IsActive = isActive;
     }
 
     private void WindowDragArea_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

@@ -23,9 +23,10 @@
         <!-- Components -->
         <ResourceDictionary Source="pack://application:,,,/DevTools.Host.Wpf;component/Theme/Components/ToolFrame.xaml"/>
         <ResourceDictionary Source="pack://application:,,,/DevTools.Host.Wpf;component/Theme/Components/ActionBar.xaml"/>
-
+        <ResourceDictionary Source="pack://application:,,,/DevTools.Host.Wpf;component/Theme/Components/SectionExpander.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/DevTools.Host.Wpf;component/Theme/Components/SidebarNavItem.xaml"/>
+        
         <!-- Assets & Resources -->
         <ResourceDictionary Source="pack://application:,,,/DevTools.Host.Wpf;component/Theme/Icons.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
-
