@@ -128,21 +128,30 @@ devtools/
 11. Notes
 - Editor de notas com persistencia local e opcao de Google Drive.
 
-## 8. Navegacao e UX atual
+## 8. Navegação e UX atual
 
-Fluxo padrao atual:
-1. App inicia em `Home`.
-2. Home funciona como launcher de ferramentas.
-3. Sidebar continua disponivel para navegacao direta.
-4. Ferramentas com fluxo configuracao-primeiro abrem em modo de configuracao.
+Fluxo padrão atual:
+1. App inicia em `Ferramentas` (launcher de execução).
+2. O launcher de execução abre as ferramentas em `Execution`.
+3. O launcher de configuração abre ferramentas configuráveis em `Configuration`.
+4. A sidebar permanece disponível para navegação direta (`Exec:<Tool>` e `Cfg:<Tool>`).
 
-Fluxo configuracao-primeiro:
+Ferramentas com fluxo de configuração:
 - Snapshot
+- Harvest
+- Organizer
 - Migrations
-- Utf8Convert
+- SshTunnel
+- Ngrok
 - Notes
 
-Documentacao desta parte:
+Ferramentas com fluxo de execução direta:
+- Rename
+- ImageSplit
+- SearchText
+- Utf8Convert
+
+Documentação desta parte:
 - `docs/devtools-navegacao-ux.md`
 
 ## 9. Persistencia (SQLite)
