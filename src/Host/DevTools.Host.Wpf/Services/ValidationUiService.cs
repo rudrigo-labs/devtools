@@ -10,7 +10,7 @@ namespace DevTools.Host.Wpf.Services;
 /// </summary>
 public static class ValidationUiService
 {
-    private const string RequiredFieldsPrefix = "Os campos abaixo nao podem ficar em branco:\n- ";
+    private const string RequiredFieldsPrefix = "Os campos abaixo não podem ficar em branco:\n- ";
 
     public static void ShowInline(DevToolsToolFrame frame, string message)
     {
@@ -41,7 +41,7 @@ public static class ValidationUiService
     private static string Format(string message)
     {
         if (string.IsNullOrWhiteSpace(message))
-            return "Validacao invalida.";
+            return "Validação invalida.";
 
         var singleLine = message
             .Replace("\r", " ")
@@ -50,17 +50,17 @@ public static class ValidationUiService
             .Trim();
 
         singleLine = singleLine.Replace(
-            "Os campos abaixo nao podem ficar em branco:",
-            "Campos obrigatorios:");
+            "Os campos abaixo não podem ficar em branco:",
+            "Campos obrigatórios:");
 
-        return $"Validacao: {singleLine}";
+        return $"Validação: {singleLine}";
     }
 
     private static bool IsValidationStatus(string? statusText)
     {
         if (string.IsNullOrWhiteSpace(statusText)) return false;
-        return statusText.StartsWith("Validacao:", StringComparison.OrdinalIgnoreCase)
-            || statusText.StartsWith("Campos obrigatorios:", StringComparison.OrdinalIgnoreCase);
+        return statusText.StartsWith("Validação:", StringComparison.OrdinalIgnoreCase)
+            || statusText.StartsWith("Campos obrigatórios:", StringComparison.OrdinalIgnoreCase);
     }
 
     public static void SetControlInvalid(System.Windows.Controls.Control? control, bool invalid)

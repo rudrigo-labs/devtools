@@ -31,7 +31,7 @@
                                 ShowBack="True"
                                 SaveText="Executar"
                                 ShowHelp="True"
-                                HelpText="Defina pasta raiz e filtros por glob. Use Simulacao antes de executar para validar impacto. Depois clique em Executar."
+                                HelpText="Defina pasta raiz e filtros por glob. Use Simulação antes de executar para validar impacto. Depois clique em Executar."
                                 ActionSave="ActionExecute_Click"
                                 ActionBack="ActionBack_Click"/>
 
@@ -95,7 +95,7 @@
                     </Grid>
 
                     <CheckBox x:Name="DryRunCheck"
-                              Content="Simulacao (nao modifica arquivos)"
+                              Content="Simulação (não modifica arquivos)"
                               Style="{StaticResource DevToolsCheckBox}"
                               Margin="0,0,0,12"
                               ToolTip="Mostra o que seria convertido, sem alterar arquivos."/>

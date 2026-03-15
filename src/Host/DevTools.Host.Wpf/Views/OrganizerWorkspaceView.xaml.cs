@@ -57,14 +57,14 @@ public partial class OrganizerWorkspaceView : System.Windows.Controls.UserContro
 
         var request = BuildRequest();
         var apply = request.Apply;
-        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar organizaÃ§Ã£o").ConfigureAwait(true);
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar organização").ConfigureAwait(true);
 
         _executionCts?.Dispose();
         _executionCts = new CancellationTokenSource();
         _isExecuting = true;
         ResultPanel.Visibility = Visibility.Collapsed;
         ApplyModeState();
-        ExecutionStatusText.Text = apply ? "Organizando arquivos..." : "Simulando organizaÃ§Ã£o...";
+        ExecutionStatusText.Text = apply ? "Organizando arquivos..." : "Simulando organização...";
 
         try
         {
@@ -82,7 +82,7 @@ public partial class OrganizerWorkspaceView : System.Windows.Controls.UserContro
             var s = data.Stats;
 
             ResultSummaryText.Text =
-                $"Total: {s.TotalFiles} | ElegÃ­veis: {s.EligibleFiles} | " +
+                $"Total: {s.TotalFiles} | Elegíveis: {s.EligibleFiles} | " +
                 $"Movidos: {s.WouldMove} | Duplicatas: {s.Duplicates} | " +
                 $"Ignorados: {s.Ignored} | Erros: {s.Errors}";
 
@@ -92,13 +92,13 @@ public partial class OrganizerWorkspaceView : System.Windows.Controls.UserContro
 
             ResultPanel.Visibility = Visibility.Visible;
 
-            var mode = apply ? "Executado" : "SimulaÃ§Ã£o";
-            ExecutionStatusText.Text = $"{mode} concluÃ­do. {s.WouldMove} arquivo(s) classificado(s).";
+            var mode = apply ? "Executado" : "Simulação";
+            ExecutionStatusText.Text = $"{mode} concluído. {s.WouldMove} arquivo(s) classificado(s).";
         }
         catch (OperationCanceledException)
         {
             ValidationUiService.ClearInline(ExecutionStatusText);
-            ExecutionStatusText.Text = "OperaÃ§Ã£o cancelada.";
+            ExecutionStatusText.Text = "Operação cancelada.";
         }
         finally
         {

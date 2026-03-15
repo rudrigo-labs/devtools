@@ -53,7 +53,7 @@ public partial class RenameWorkspaceView : System.Windows.Controls.UserControl
     }
 
     // -------------------------------------------------------------------------
-    // ExecuÃ§Ã£o
+    // Execução
     // -------------------------------------------------------------------------
 
     private async Task ExecuteAsync()
@@ -74,7 +74,7 @@ public partial class RenameWorkspaceView : System.Windows.Controls.UserControl
             return;
         }
 
-        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar renomeaÃ§Ã£o").ConfigureAwait(true);
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar renomeação").ConfigureAwait(true);
 
         _executionCts?.Dispose();
         _executionCts = new CancellationTokenSource();
@@ -97,13 +97,13 @@ public partial class RenameWorkspaceView : System.Windows.Controls.UserControl
             var s = result.Value!.Summary;
 
             ExecutionStatusText.Text = request.DryRun
-                ? $"Simulacao concluida â€” arquivos: {s.FilesScanned} | alteracoes previstas: {s.FilesUpdated + s.FilesRenamed} | diretorios: {s.DirectoriesRenamed}"
-                : $"Concluido â€” arquivos alterados: {s.FilesUpdated} | renomeados: {s.FilesRenamed} | diretorios: {s.DirectoriesRenamed} | erros: {s.Errors}";
+                ? $"Simulação concluída  -  arquivos: {s.FilesScanned} | alterações previstas: {s.FilesUpdated + s.FilesRenamed} | diretórios: {s.DirectoriesRenamed}"
+                : $"Concluído  -  arquivos alterados: {s.FilesUpdated} | renomeados: {s.FilesRenamed} | diretórios: {s.DirectoriesRenamed} | erros: {s.Errors}";
         }
         catch (OperationCanceledException)
         {
             ValidationUiService.ClearInline(ExecutionStatusText);
-            ExecutionStatusText.Text = "Execucao cancelada.";
+            ExecutionStatusText.Text = "Execução cancelada.";
         }
         finally
         {

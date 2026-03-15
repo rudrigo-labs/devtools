@@ -107,11 +107,11 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="0,0,0,18">
-            <TextBlock Text="Configuracoes"
+            <TextBlock Text="Configurações"
                        FontSize="22"
                        FontWeight="SemiBold"
                        Foreground="{DynamicResource DevToolsTextPrimary}"/>
-            <TextBlock Text="Escolha um card para editar configuracoes persistentes das ferramentas."
+            <TextBlock Text="Escolha um card para editar configurações persistentes das ferramentas."
                        Foreground="{DynamicResource DevToolsTextSecondary}"
                        FontSize="12"
                        Margin="0,6,0,0"
@@ -132,7 +132,7 @@
                             <TextBlock Text="&#xE895;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#DAFFE9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Migrations" Style="{StaticResource ConfigCardTitleStyle}"/>
-                        <TextBlock Text="Perfis de migracao, contexto e parametros de banco." Style="{StaticResource ConfigCardDescriptionStyle}"/>
+                        <TextBlock Text="Perfis de migração, contexto e parâmetros de banco." Style="{StaticResource ConfigCardDescriptionStyle}"/>
                     </StackPanel>
                 </Button>
 
@@ -142,7 +142,7 @@
                             <TextBlock Text="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#DAFFE9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="SSH Tunnel" Style="{StaticResource ConfigCardTitleStyle}"/>
-                        <TextBlock Text="Conexoes SSH nomeadas para acesso remoto rapido." Style="{StaticResource ConfigCardDescriptionStyle}"/>
+                        <TextBlock Text="Conexões SSH nomeadas para acesso remoto rápido." Style="{StaticResource ConfigCardDescriptionStyle}"/>
                     </StackPanel>
                 </Button>
 
@@ -152,7 +152,7 @@
                             <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#DAFFE9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Ngrok" Style="{StaticResource ConfigCardTitleStyle}"/>
-                        <TextBlock Text="Token, executavel e presets de tunel publico." Style="{StaticResource ConfigCardDescriptionStyle}"/>
+                        <TextBlock Text="Token, executável e presets de túnel público." Style="{StaticResource ConfigCardDescriptionStyle}"/>
                     </StackPanel>
                 </Button>
 
@@ -162,7 +162,7 @@
                             <TextBlock Text="&#xE70B;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#DAFFE9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Notes" Style="{StaticResource ConfigCardTitleStyle}"/>
-                        <TextBlock Text="Configuracao unica da pasta de notas e Google Drive." Style="{StaticResource ConfigCardDescriptionStyle}"/>
+                        <TextBlock Text="Configuração única da pasta de notas e Google Drive." Style="{StaticResource ConfigCardDescriptionStyle}"/>
                     </StackPanel>
                 </Button>
             </WrapPanel>

@@ -12,123 +12,123 @@ public static class ToolHelpCatalog
     private static readonly Dictionary<string, ToolHelpContent> Items = new(StringComparer.OrdinalIgnoreCase)
     {
         ["snapshot:execution"] = new(
-            "Snapshot - Execucao",
-            "Gerar um resumo textual do projeto para analise.",
-            "Selecione pasta raiz e pasta de saida. Ajuste filtros e clique em Executar.",
-            "Raiz: C:\\repo\\app | Saida: C:\\out | Extensoes: .cs,.md",
-            "Use os filtros para reduzir ruido e gerar um arquivo mais util."),
+            "Snapshot - Execução",
+            "Gerar um resumo textual do projeto para análise.",
+            "Selecione pasta raiz e pasta de saída. Ajuste filtros e clique em Executar.",
+            "Raiz: C:\\repo\\app | Saída: C:\\out | Extensões: .cs,.md",
+            "Use os filtros para reduzir ruído e gerar um arquivo mais útil."),
 
         ["snapshot:configuration"] = new(
-            "Snapshot - Configuracao",
-            "Salvar um perfil de snapshot reutilizavel.",
-            "Preencha nome/descricao e os campos do perfil, depois clique em Salvar.",
-            "Perfil: \"Snapshot API\" com filtros de bin/obj e extensoes .cs,.json",
-            "Use configuracoes nomeadas para evitar retrabalho."),
+            "Snapshot - Configuração",
+            "Salvar um perfil de snapshot reutilizável.",
+            "Preencha nome/descrição e os campos do perfil, depois clique em Salvar.",
+            "Perfil: \"Snapshot API\" com filtros de bin/obj e extensões .cs,.json",
+            "Use configurações nomeadas para evitar retrabalho."),
 
         ["rename:execution"] = new(
-            "Rename - Execucao",
+            "Rename - Execução",
             "Renomear termos em lote no projeto.",
             "Informe texto antigo/novo, escolha modo e clique em Executar.",
-            "Antigo: OldCompany | Novo: NewCompany | Simulacao: ligado",
-            "Execute em simulacao antes de aplicar alteracoes reais."),
+            "Antigo: OldCompany | Novo: NewCompany | Simulação: ligado",
+            "Execute em simulação antes de aplicar alterações reais."),
 
         ["harvest:execution"] = new(
-            "Harvest - Execucao",
-            "Minerar codigo reutilizavel de um projeto.",
-            "Selecione origem/destino, ajuste score minimo e clique em Executar.",
-            "Origem: C:\\repo | Destino: C:\\harvest | Score minimo: 5",
+            "Harvest - Execução",
+            "Minerar código reutilizável de um projeto.",
+            "Selecione origem/destino, ajuste score mínimo e clique em Executar.",
+            "Origem: C:\\repo | Destino: C:\\harvest | Score mínimo: 5",
             "Comece com score baixo e refine depois."),
 
         ["harvest:configuration"] = new(
-            "Harvest - Configuracao",
-            "Salvar parametros padrao de mineracao.",
-            "Crie uma configuracao com caminhos e filtros e clique em Salvar.",
+            "Harvest - Configuração",
+            "Salvar parâmetros padrão de mineração.",
+            "Crie uma configuração com caminhos e filtros e clique em Salvar.",
             "Perfil: \"Harvest Backend\" com filtros de extensao e pastas ignoradas",
             "Perfis diferentes ajudam por tipo de projeto."),
 
         ["imagesplit:execution"] = new(
-            "Image Split - Execucao",
+            "Image Split - Execução",
             "Recortar componentes detectados em uma imagem.",
-            "Selecione arquivo, pasta de saida e parametros de deteccao. Execute.",
-            "Input: sprite.png | Alpha: 10 | Minimo: 3x3",
-            "Ajuste alpha/minimo para evitar cortes indevidos."),
+            "Selecione arquivo, pasta de saída e parâmetros de detecção. Execute.",
+            "Input: sprite.png | Alpha: 10 | Mínimo: 3x3",
+            "Ajuste alpha/mínimo para evitar cortes indevidos."),
 
         ["searchtext:execution"] = new(
-            "Search Text - Execucao",
+            "Search Text - Execução",
             "Buscar texto em arquivos com filtros.",
-            "Defina raiz, padrao e opcoes (regex, case, globs). Clique em Buscar.",
-            "Padrao: \"IService\" | Include: **/*.cs | Regex: desligado",
-            "Use regex apenas quando necessario."),
+            "Defina raiz, padrão e opções (regex, case, globs). Clique em Buscar.",
+            "Padrão: \"IService\" | Include: **/*.cs | Regex: desligado",
+            "Use regex apenas quando necessário."),
 
         ["organizer:execution"] = new(
-            "Organizer - Execucao",
+            "Organizer - Execução",
             "Organizar arquivos por categorias.",
-            "Informe pasta de entrada, score minimo e clique em Executar.",
-            "Entrada: C:\\docs | Score: 3 | Aplicar: desmarcado (simulacao)",
-            "Rode primeiro em simulacao para validar a classificacao."),
+            "Informe pasta de entrada, score mínimo e clique em Executar.",
+            "Entrada: C:\\docs | Score: 3 | Aplicar: desmarcado (simulação)",
+            "Rode primeiro em simulação para validar a classificação."),
 
         ["utf8convert:execution"] = new(
-            "UTF8 Convert - Execucao",
+            "UTF8 Convert - Execução",
             "Converter arquivos para UTF-8 em lote.",
-            "Escolha raiz, globs e opcoes (BOM/backup/simulacao). Execute.",
-            "Raiz: C:\\repo | Include: **/*.cs | Simulacao: ligado",
-            "Mantenha backup ligado em conversoes iniciais."),
+            "Escolha raiz, globs e opções (BOM/backup/simulação). Execute.",
+            "Raiz: C:\\repo | Include: **/*.cs | Simulação: ligado",
+            "Mantenha backup ligado em conversões iniciais."),
 
         ["migrations:execution"] = new(
-            "Migrations - Execucao",
+            "Migrations - Execução",
             "Executar comandos dotnet ef.",
-            "Selecione a configuracao e execute a acao desejada.",
-            "Acao: AddMigration | Nome: AddUsers | Provider: Sqlite",
+            "Selecione a configuração e execute a ação desejada.",
+            "Ação: AddMigration | Nome: AddUsers | Provider: Sqlite",
             "Confira projeto startup e DbContext antes de executar."),
 
         ["migrations:configuration"] = new(
-            "Migrations - Configuracao",
-            "Salvar parametros de migration por ambiente/projeto.",
+            "Migrations - Configuração",
+            "Salvar parâmetros de migration por ambiente/projeto.",
             "Preencha caminhos, DbContext e provider. Depois clique em Salvar.",
             "Perfil: \"API-Sqlite\" com startup e projeto de migrations",
             "Use um perfil por contexto/provedor."),
 
         ["sshtunnel:execution"] = new(
-            "SSH Tunnel - Execucao",
-            "Iniciar/parar tunel SSH com parametros salvos.",
-            "Selecione configuracao e clique em Executar para iniciar/parar.",
+            "SSH Tunnel - Execução",
+            "Iniciar/parar túnel SSH com parâmetros salvos.",
+            "Selecione configuração e clique em Executar para iniciar/parar.",
             "Host: ssh.server.com | Local: 5433 -> Remote: 5432",
             "Valide porta local livre antes de iniciar."),
 
         ["sshtunnel:configuration"] = new(
-            "SSH Tunnel - Configuracao",
-            "Salvar conexao SSH e mapeamento de portas.",
-            "Preencha host/usuario/chave e portas. Clique em Salvar.",
+            "SSH Tunnel - Configuração",
+            "Salvar conexão SSH e mapeamento de portas.",
+            "Preencha host/usuário/chave e portas. Clique em Salvar.",
             "Perfil: \"DB-Prod\" | Host 22 | 127.0.0.1:5433 -> 127.0.0.1:5432",
-            "Mantenha nomes claros para evitar conexoes erradas."),
+            "Mantenha nomes claros para evitar conexões erradas."),
 
         ["ngrok:execution"] = new(
-            "Ngrok - Execucao",
-            "Abrir tunel publico para servico local.",
-            "Selecione configuracao, informe protocolo/porta e execute.",
-            "Protocolo: http | Porta: 5000 | Acao: iniciar tunel",
-            "Confirme token/regiao configurados antes de iniciar."),
+            "Ngrok - Execução",
+            "Abrir túnel público para serviço local.",
+            "Selecione configuração, informe protocolo/porta e execute.",
+            "Protocolo: http | Porta: 5000 | Ação: iniciar túnel",
+            "Confirme token/região configurados antes de iniciar."),
 
         ["ngrok:configuration"] = new(
-            "Ngrok - Configuracao",
-            "Salvar token e parametros padrao do ngrok.",
-            "Preencha auth token, regiao e opcoes padrao. Clique em Salvar.",
-            "Perfil: \"Dev Local\" | Regiao: sa | Token configurado",
-            "Evite expor portas sensiveis sem controle."),
+            "Ngrok - Configuração",
+            "Salvar token e parâmetros padrão do ngrok.",
+            "Preencha auth token, região e opções padrão. Clique em Salvar.",
+            "Perfil: \"Dev Local\" | Região: sa | Token configurado",
+            "Evite expor portas sensíveis sem controle."),
 
         ["notes:execution"] = new(
-            "Notes - Execucao",
+            "Notes - Execução",
             "Criar, editar e salvar notas.",
             "Abra/edite a nota e clique em Salvar nota.",
-            "Titulo: Reuniao | Formato: .md | Conteudo com checklist",
-            "Use titulos curtos e padrao para facilitar busca."),
+            "Título: Reuniao | Formato: .md | Conteúdo com checklist",
+            "Use títulos curtos e padrão para facilitar busca."),
 
         ["notes:configuration"] = new(
-            "Notes - Configuracao",
-            "Definir pasta padrao e integracao Google Drive.",
+            "Notes - Configuração",
+            "Definir pasta padrão e integração Google Drive.",
             "Configure pasta local e credenciais, depois clique em Salvar.",
             "Pasta: C:\\Notas | Google Drive: Client ID/Secret preenchidos",
-            "Guarde credenciais com cuidado e revise permissao da pasta.")
+            "Guarde credenciais com cuidado e revise permissão da pasta.")
     };
 
     public static bool TryGet(string? key, out ToolHelpContent content)

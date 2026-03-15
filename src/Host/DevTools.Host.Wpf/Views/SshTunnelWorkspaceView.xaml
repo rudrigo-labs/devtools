@@ -22,7 +22,7 @@
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource DevToolsTextPrimary}"/>
                 <TextBlock x:Name="WorkspaceSubtitleText"
-                           Text="Cria e gerencia tuneis SSH para redirecionamento de portas, com configuracoes nomeadas."
+                           Text="Cria e gerencia túneis SSH para redirecionamento de portas, com configurações nomeadas."
                            Foreground="{DynamicResource DevToolsTextSecondary}"
                            FontSize="12"
                            Margin="0,4,0,0"
@@ -40,7 +40,7 @@
                                 ShowDelete="True"
                                 ShowCancel="True"
                                 ShowHelp="True"
-                                HelpText="No modo Configurar, salve conexao SSH e mapeamento. No modo Execucao, use Iniciar tunel para abrir e Parar tunel para encerrar."
+                                HelpText="No modo Configurar, salve conexão SSH e mapeamento. No modo Execução, use Iniciar túnel para abrir e Parar túnel para encerrar."
                                 ActionNew="ActionNew_Click"
                                 ActionSave="ActionSave_Click"
                                 ActionDelete="ActionDelete_Click"
@@ -95,7 +95,7 @@
                             Background="{DynamicResource DevToolsSurface}"
                             Padding="10,8"
                             Margin="0,0,0,12">
-                        <TextBlock Text="Modo configuracao: preencha os campos abaixo para salvar uma configuracao reutilizavel."
+                        <TextBlock Text="Modo configuração: preencha os campos abaixo para salvar uma configuração reutilizável."
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    TextWrapping="Wrap"/>
                     </Border>
@@ -108,13 +108,13 @@
                             Margin="0,0,0,12">
                         <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}"
                                    TextWrapping="Wrap">
-                            Como usar: informe host/usuario/chave SSH e o mapeamento local-remoto.
+                            Como usar: informe host/usuário/chave SSH e o mapeamento local-remoto.
                             Exemplo comum: localhost:14331 para 127.0.0.1:1433 no servidor remoto.
-                            Clique em Iniciar tunel para abrir o encaminhamento.
+                            Clique em Iniciar túnel para abrir o encaminhamento.
                         </TextBlock>
                     </Border>
 
-                    <!-- ===== Campos de configuracao (modo Configuracao) ===== -->
+                    <!-- ===== Campos de configuração (modo Configuração) ===== -->
                     <Grid x:Name="ConfigurationMetadataSection"
                           Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
@@ -129,7 +129,7 @@
                                      Style="{StaticResource DevToolsTextInput}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Descricao"
+                            <TextBlock Text="Descrição"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="DescriptionInput"
                                      Style="{StaticResource DevToolsTextInput}"/>
@@ -164,7 +164,7 @@
                     </Grid>
 
                     <StackPanel Margin="0,0,0,12">
-                        <TextBlock Text="Usuario SSH *"
+                        <TextBlock Text="Usuário SSH *"
                                    Style="{StaticResource DevToolsInputLabel}"/>
                         <TextBox x:Name="SshUserInput"
                                  Style="{StaticResource DevToolsTextInput}"/>
@@ -181,14 +181,14 @@
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <ComboBox x:Name="StrictHostKeyCheckingCombo"
                                       Style="{StaticResource DevToolsSelectInput}"
-                                      ToolTip="yes exige host conhecido; no ignora validacao; accept-new aceita e registra na primeira conexao."/>
+                                      ToolTip="yes exige host conhecido; no ignora validação; accept-new aceita e registra na primeira conexão."/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Timeout de conexao (s)"
+                            <TextBlock Text="Timeout de conexão (s)"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="ConnectTimeoutInput"
                                      Style="{StaticResource DevToolsTextInput}"
-                                     ToolTip="Deixe vazio para padrao."/>
+                                     ToolTip="Deixe vazio para padrão."/>
                         </StackPanel>
                     </Grid>
 
@@ -197,8 +197,8 @@
                                     IsFolderPicker="False"
                                     Margin="0,0,0,12"/>
 
-                    <!-- ===== Mapeamento do Tunel ===== -->
-                    <TextBlock Text="Mapeamento do Tunel"
+                    <!-- ===== Mapeamento do Túnel ===== -->
+                    <TextBlock Text="Mapeamento do Túnel"
                                Style="{StaticResource DevToolsCardTitle}"
                                Margin="0,4,0,10"/>
 
@@ -214,7 +214,7 @@
                             <TextBox x:Name="LocalBindHostInput"
                                      Style="{StaticResource DevToolsTextInput}"
                                      Text="127.0.0.1"
-                                     ToolTip="Host local que recebera a conexao tunelada (geralmente 127.0.0.1)."/>
+                                     ToolTip="Host local que recebera a conexão tunelada (geralmente 127.0.0.1)."/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Porta local"
@@ -222,7 +222,7 @@
                             <TextBox x:Name="LocalPortInput"
                                      Style="{StaticResource DevToolsTextInput}"
                                      Text="14331"
-                                     ToolTip="Porta local para acessar o servico remoto atraves do tunel."/>
+                                     ToolTip="Porta local para acessar o serviço remoto através do túnel."/>
                         </StackPanel>
                     </Grid>
 
@@ -246,17 +246,17 @@
                             <TextBox x:Name="RemotePortInput"
                                      Style="{StaticResource DevToolsTextInput}"
                                      Text="1433"
-                                     ToolTip="Porta do servico remoto (exemplo: banco SQL em 1433)."/>
+                                     ToolTip="Porta do serviço remoto (exemplo: banco SQL em 1433)."/>
                         </StackPanel>
                     </Grid>
 
                     <CheckBox x:Name="IsDefaultCheck"
-                              Content="Marcar como configuracao padrao"
+                              Content="Marcar como configuração padrão"
                               Style="{StaticResource DevToolsCheckBox}"
                               Margin="0,0,0,12"/>
 
-                    <!-- ===== Status do tunel ===== -->
-                    <TextBlock Text="Status do Tunel"
+                    <!-- ===== Status do túnel ===== -->
+                    <TextBlock Text="Status do Túnel"
                                Style="{StaticResource DevToolsCardTitle}"
                                Margin="0,4,0,10"/>
 
@@ -293,12 +293,12 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                         <Button x:Name="StartButton"
-                                Content="Iniciar tunel"
+                                Content="Iniciar túnel"
                                 Style="{StaticResource DevToolsPrimaryButton}"
                                 Margin="0,0,8,0"
                                 Click="Start_Click"/>
                         <Button x:Name="StopButton"
-                                Content="Parar tunel"
+                                Content="Parar túnel"
                                 Style="{StaticResource DevToolsSecondaryButton}"
                                 Click="Stop_Click"/>
                     </StackPanel>

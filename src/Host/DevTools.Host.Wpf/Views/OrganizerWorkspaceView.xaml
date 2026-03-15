@@ -31,7 +31,7 @@
                             ShowBack="True"
                             SaveText="Executar"
                             ShowHelp="True"
-                            HelpText="Defina pasta de entrada e, opcionalmente, pasta de saida. Ajuste score minimo e clique em Executar. Desmarque aplicar para simulacao."
+                            HelpText="Defina pasta de entrada e, opcionalmente, pasta de saída. Ajuste score mínimo e clique em Executar. Desmarque aplicar para simulação."
                             ActionSave="ActionExecute_Click"
                             ActionBack="ActionBack_Click"/>
 
@@ -44,9 +44,9 @@
                         Background="{DynamicResource DevToolsSurface}"
                         Padding="10,8" Margin="0,0,0,12">
                     <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
-                        Como usar: escolha a pasta de entrada. Se quiser, escolha uma pasta de saida.
-                        Score minimo define a confianca da classificacao. Mover arquivos aplica de verdade;
-                        desmarcado faz simulacao.
+                        Como usar: escolha a pasta de entrada. Se quiser, escolha uma pasta de saída.
+                        Score mínimo define a confiança da classificação. Mover arquivos aplica de verdade;
+                        desmarcado faz simulação.
                     </TextBlock>
                 </Border>
 

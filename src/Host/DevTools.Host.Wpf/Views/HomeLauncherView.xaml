@@ -122,7 +122,7 @@
                        FontSize="22"
                        FontWeight="SemiBold"
                        Foreground="{DynamicResource DevToolsTextPrimary}"/>
-            <TextBlock Text="Clique em um card para abrir a ferramenta em modo de execucao."
+            <TextBlock Text="Clique em um card para abrir a ferramenta em modo de execução."
                        Foreground="{DynamicResource DevToolsTextSecondary}"
                        FontSize="12"
                        Margin="0,6,0,0"
@@ -143,7 +143,7 @@
                             <TextBlock Text="&#xE7C3;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#D5ECFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Snapshot" Style="{StaticResource CardTitleStyle}"/>
-                        <TextBlock Text="Gera um panorama do projeto para revisao rapida." Style="{StaticResource CardDescriptionStyle}"/>
+                        <TextBlock Text="Gera um panorama do projeto para revisão rápida." Style="{StaticResource CardDescriptionStyle}"/>
                     </StackPanel>
                 </Button>
 
@@ -173,7 +173,7 @@
                             <TextBlock Text="&#xE91B;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#D5ECFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Image Split" Style="{StaticResource CardTitleStyle}"/>
-                        <TextBlock Text="Recorta imagens em blocos seguindo regras de deteccao." Style="{StaticResource CardDescriptionStyle}"/>
+                        <TextBlock Text="Recorta imagens em blocos seguindo regras de detecção." Style="{StaticResource CardDescriptionStyle}"/>
                     </StackPanel>
                 </Button>
 
@@ -213,7 +213,7 @@
                             <TextBlock Text="&#xE895;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#D5ECFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Migrations" Style="{StaticResource CardTitleStyle}"/>
-                        <TextBlock Text="Executa e acompanha migracoes de banco de dados." Style="{StaticResource CardDescriptionStyle}"/>
+                        <TextBlock Text="Executa e acompanha migrações de banco de dados." Style="{StaticResource CardDescriptionStyle}"/>
                     </StackPanel>
                 </Button>
 
@@ -223,7 +223,7 @@
                             <TextBlock Text="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#D5ECFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="SSH Tunnel" Style="{StaticResource CardTitleStyle}"/>
-                        <TextBlock Text="Abre tuneis SSH para conectar servicos remotos." Style="{StaticResource CardDescriptionStyle}"/>
+                        <TextBlock Text="Abre túneis SSH para conectar servicos remotos." Style="{StaticResource CardDescriptionStyle}"/>
                     </StackPanel>
                 </Button>
 
@@ -243,7 +243,7 @@
                             <TextBlock Text="&#xE70B;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#D5ECFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Notes" Style="{StaticResource CardTitleStyle}"/>
-                        <TextBlock Text="Cria e edita notas com suporte a sincronizacao." Style="{StaticResource CardDescriptionStyle}"/>
+                        <TextBlock Text="Cria e edita notas com suporte a sincronização." Style="{StaticResource CardDescriptionStyle}"/>
                     </StackPanel>
                 </Button>
             </WrapPanel>
