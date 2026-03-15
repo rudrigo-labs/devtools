@@ -73,6 +73,20 @@ public partial class MainWindow : Window
         if (sender is not System.Windows.Controls.Button btn || btn.Tag is not string tag)
             return;
 
+        if (tag.StartsWith("Exec:", StringComparison.OrdinalIgnoreCase))
+        {
+            var toolTag = tag["Exec:".Length..];
+            ActivateTool(toolTag, WorkspaceIntent.Execution, FerramentasTag);
+            return;
+        }
+
+        if (tag.StartsWith("Cfg:", StringComparison.OrdinalIgnoreCase))
+        {
+            var toolTag = tag["Cfg:".Length..];
+            ActivateTool(toolTag, WorkspaceIntent.Configuration, ConfiguracoesTag);
+            return;
+        }
+
         if (string.Equals(tag, FerramentasTag, StringComparison.OrdinalIgnoreCase))
         {
             ActivateTool(FerramentasTag, WorkspaceIntent.Default, FerramentasTag);

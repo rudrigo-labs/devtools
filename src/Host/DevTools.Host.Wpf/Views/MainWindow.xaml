@@ -1,6 +1,7 @@
 <Window x:Class="DevTools.Host.Wpf.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:DevTools.Host.Wpf.Components"
         Title="DevTools"
         Width="1320"
         Height="820"
@@ -75,6 +76,12 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <Style x:Key="SidebarSubNavButtonStyle" TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="30,0,0,0"/>
+            <Setter Property="FontSize" Value="12"/>
         </Style>
 
         <!-- Botão de navegação lateral ATIVO -->
@@ -157,16 +164,53 @@
 
                     <!-- Itens de navegação -->
                     <StackPanel DockPanel.Dock="Top">
-                        <Button x:Name="NavFerramentas"
-                                Content="Ferramentas"
-                                Tag="Ferramentas"
-                                Style="{StaticResource SidebarNavButtonActiveStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavConfiguracoes"
-                                Content="Configuracoes"
-                                Tag="Configuracoes"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
+                        <c:SectionExpander IsExpanded="True">
+                            <c:SectionExpander.Header>
+                                <TextBlock Text="FERRAMENTAS"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                            </c:SectionExpander.Header>
+                            <StackPanel>
+                                <Button x:Name="NavFerramentas"
+                                        Content="Home Ferramentas"
+                                        Tag="Ferramentas"
+                                        Style="{StaticResource SidebarNavButtonActiveStyle}"
+                                        Click="NavButton_Click"/>
+                                <Button Content="Snapshot" Tag="Exec:Snapshot" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <Button Content="Rename" Tag="Exec:Rename" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <Button Content="Harvest" Tag="Exec:Harvest" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <Button Content="Image Split" Tag="Exec:ImageSplit" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <Button Content="Search Text" Tag="Exec:SearchText" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <Button Content="Organizer" Tag="Exec:Organizer" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <Button Content="UTF8 Convert" Tag="Exec:Utf8Convert" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <Button Content="Migrations" Tag="Exec:Migrations" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <Button Content="SSH Tunnel" Tag="Exec:SshTunnel" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <Button Content="Ngrok" Tag="Exec:Ngrok" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <Button Content="Notes" Tag="Exec:Notes" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                            </StackPanel>
+                        </c:SectionExpander>
+
+                        <c:SectionExpander IsExpanded="True">
+                            <c:SectionExpander.Header>
+                                <TextBlock Text="CONFIGURACOES"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                            </c:SectionExpander.Header>
+                            <StackPanel>
+                                <Button x:Name="NavConfiguracoes"
+                                        Content="Home Configuracoes"
+                                        Tag="Configuracoes"
+                                        Style="{StaticResource SidebarNavButtonStyle}"
+                                        Click="NavButton_Click"/>
+                                <Button Content="Migrations" Tag="Cfg:Migrations" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <Button Content="SSH Tunnel" Tag="Cfg:SshTunnel" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <Button Content="Ngrok" Tag="Cfg:Ngrok" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                                <Button Content="Notes" Tag="Cfg:Notes" Style="{StaticResource SidebarSubNavButtonStyle}" Click="NavButton_Click"/>
+                            </StackPanel>
+                        </c:SectionExpander>
+
                         <Button Content="Encerrar"
                                 Style="{StaticResource SidebarNavButtonExitStyle}"
                                 Click="ExitButton_Click"/>
