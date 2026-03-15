@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using DevTools.Host.Wpf.Facades;
 using DevTools.Host.Wpf.Services;
 using DevTools.Image.Models;
@@ -125,6 +125,7 @@ public partial class ImageSplitWorkspaceView : System.Windows.Controls.UserContr
     private void ApplyModeState()
     {
         Actions.ShowHelp = true;
+        Actions.HelpContextKey = "imagesplit:execution";
         Actions.ShowNew = false;
         Actions.ShowDelete = false;
         Actions.ShowCancel = false;

@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Windows;
 using DevTools.Host.Wpf.Facades;
 using DevTools.Host.Wpf.Services;
@@ -432,6 +432,7 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         Actions.BackIconKind = "ArrowLeft";
 
         Actions.ShowHelp = true;
+        Actions.HelpContextKey = inConfiguration ? "ngrok:configuration" : "ngrok:execution";
         Actions.ShowNew = inConfiguration;
         Actions.ShowSave = inConfiguration || inExecution;
         Actions.ShowDelete = false;

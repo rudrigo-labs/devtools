@@ -53,7 +53,7 @@ public partial class RenameWorkspaceView : System.Windows.Controls.UserControl
     }
 
     // -------------------------------------------------------------------------
-    // Execução
+    // ExecuÃ§Ã£o
     // -------------------------------------------------------------------------
 
     private async Task ExecuteAsync()
@@ -74,7 +74,7 @@ public partial class RenameWorkspaceView : System.Windows.Controls.UserControl
             return;
         }
 
-        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar renomeação").ConfigureAwait(true);
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar renomeaÃ§Ã£o").ConfigureAwait(true);
 
         _executionCts?.Dispose();
         _executionCts = new CancellationTokenSource();
@@ -97,8 +97,8 @@ public partial class RenameWorkspaceView : System.Windows.Controls.UserControl
             var s = result.Value!.Summary;
 
             ExecutionStatusText.Text = request.DryRun
-                ? $"Simulacao concluida — arquivos: {s.FilesScanned} | alteracoes previstas: {s.FilesUpdated + s.FilesRenamed} | diretorios: {s.DirectoriesRenamed}"
-                : $"Concluido — arquivos alterados: {s.FilesUpdated} | renomeados: {s.FilesRenamed} | diretorios: {s.DirectoriesRenamed} | erros: {s.Errors}";
+                ? $"Simulacao concluida â€” arquivos: {s.FilesScanned} | alteracoes previstas: {s.FilesUpdated + s.FilesRenamed} | diretorios: {s.DirectoriesRenamed}"
+                : $"Concluido â€” arquivos alterados: {s.FilesUpdated} | renomeados: {s.FilesRenamed} | diretorios: {s.DirectoriesRenamed} | erros: {s.Errors}";
         }
         catch (OperationCanceledException)
         {
@@ -158,6 +158,7 @@ public partial class RenameWorkspaceView : System.Windows.Controls.UserControl
     private void ApplyModeState()
     {
         Actions.ShowHelp = true;
+        Actions.HelpContextKey = "rename:execution";
         Actions.NewText = "Novo";
         Actions.ShowNew = false;
         Actions.ShowDelete = false;

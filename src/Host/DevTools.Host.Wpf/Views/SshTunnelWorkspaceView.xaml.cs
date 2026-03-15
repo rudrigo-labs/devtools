@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Media;
 using DevTools.Host.Wpf.Facades;
@@ -444,6 +444,7 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
         Actions.BackIconKind = _isExecuting ? "CloseCircleOutline" : "ArrowLeft";
 
         Actions.ShowHelp = true;
+        Actions.HelpContextKey = inConfiguration ? "sshtunnel:configuration" : "sshtunnel:execution";
         Actions.ShowNew = inConfiguration;
         Actions.ShowSave = inConfiguration || inExecution;
         Actions.ShowDelete = false;

@@ -334,7 +334,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         _currentEntity = new SnapshotEntity
         {
             Name = $"Snapshot {nextIndex}",
-            Description = "Nova configuração",
+            Description = "Nova configuraÃ§Ã£o",
             IsActive = true,
             GenerateText = true,
             IgnoredDirectories = SnapshotDefaults.DefaultIgnoredDirectories,
@@ -459,6 +459,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         Actions.BackIconKind = _isExecuting ? "CloseCircleOutline" : "ArrowLeft";
 
         Actions.ShowHelp = true;
+        Actions.HelpContextKey = inConfiguration ? "snapshot:configuration" : "snapshot:execution";
         Actions.ShowNew = inConfiguration;
         Actions.ShowSave = inConfiguration || inExecution;
         Actions.ShowDelete = false;
