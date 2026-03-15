@@ -126,6 +126,36 @@
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
             <WrapPanel Orientation="Horizontal" Margin="16,10,10,10">
+                <Button Style="{StaticResource ConfigCardButtonStyle}" Tag="Snapshot" Click="OpenTool_Click">
+                    <StackPanel>
+                        <Border Style="{StaticResource ConfigCardIconBadgeStyle}">
+                            <TextBlock Text="&#xE7C3;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#DAFFE9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Snapshot" Style="{StaticResource ConfigCardTitleStyle}"/>
+                        <TextBlock Text="Perfis de snapshot com caminhos, filtros e formatos de saída." Style="{StaticResource ConfigCardDescriptionStyle}"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Style="{StaticResource ConfigCardButtonStyle}" Tag="Harvest" Click="OpenTool_Click">
+                    <StackPanel>
+                        <Border Style="{StaticResource ConfigCardIconBadgeStyle}">
+                            <TextBlock Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#DAFFE9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Harvest" Style="{StaticResource ConfigCardTitleStyle}"/>
+                        <TextBlock Text="Perfis de mineração com origem, destino e regras de extração." Style="{StaticResource ConfigCardDescriptionStyle}"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Style="{StaticResource ConfigCardButtonStyle}" Tag="Organizer" Click="OpenTool_Click">
+                    <StackPanel>
+                        <Border Style="{StaticResource ConfigCardIconBadgeStyle}">
+                            <TextBlock Text="&#xE8A1;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#DAFFE9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Organizer" Style="{StaticResource ConfigCardTitleStyle}"/>
+                        <TextBlock Text="Perfis de organização com categorias, pesos e deduplicação." Style="{StaticResource ConfigCardDescriptionStyle}"/>
+                    </StackPanel>
+                </Button>
+
                 <Button Style="{StaticResource ConfigCardButtonStyle}" Tag="Migrations" Click="OpenTool_Click">
                     <StackPanel>
                         <Border Style="{StaticResource ConfigCardIconBadgeStyle}">

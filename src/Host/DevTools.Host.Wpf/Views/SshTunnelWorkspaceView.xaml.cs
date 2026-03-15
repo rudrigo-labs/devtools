@@ -406,7 +406,10 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
 
     private void CreateNewEntity()
     {
-        _currentEntity = new SshTunnelEntity();
+        _currentEntity = new SshTunnelEntity
+        {
+            Name = "SSH Tunnel 1"
+        };
         BindEntityToForm(_currentEntity);
         SetSelectedOption(null);
         RefreshConfigSummary();
@@ -416,7 +419,10 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
     private void ResetConfigurationState()
     {
         _isConfigurationDraft = false;
-        CreateNewEntity();
+        _currentEntity = new SshTunnelEntity();
+        SetSelectedOption(null);
+        BindEntityToForm(_currentEntity);
+        RefreshConfigSummary();
         ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
     }
@@ -427,7 +433,7 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
         var inExecution = _currentMode == SshTunnelWorkspaceMode.Execution;
         var hasSelected = _currentEntity is not null;
 
-        ConfigurationModeHint.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+        ConfigurationModeHint.Visibility = Visibility.Collapsed;
         ConfigurationMetadataSection.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
 
         WorkspaceTitleText.Text = inConfiguration ? "SSH Tunnel - Configuração" : "SSH Tunnel";
@@ -444,20 +450,21 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
         Actions.BackIconKind = _isExecuting ? "CloseCircleOutline" : "ArrowLeft";
 
         Actions.ShowHelp = true;
+        Actions.ShowHistory = inExecution;
         Actions.HelpContextKey = inConfiguration ? "sshtunnel:configuration" : "sshtunnel:execution";
         Actions.ShowNew = inConfiguration;
         Actions.ShowSave = inConfiguration || inExecution;
         Actions.ShowDelete = false;
         Actions.ShowCancel = inConfiguration;
-        Actions.ShowGoToTool = inConfiguration;
+        Actions.ShowGoToTool = false;
         Actions.ShowBack = inExecution;
 
         Actions.CanHelp = true;
-        Actions.CanNew = inConfiguration && !_isExecuting;
+        Actions.CanNew = inConfiguration && !_isExecuting && !_isConfigurationDraft;
         Actions.CanSave = !_isExecuting && (inExecution ? hasSelected : _isConfigurationDraft);
         Actions.CanDelete = false;
         Actions.CanCancel = inConfiguration && !_isExecuting && _isConfigurationDraft;
-        Actions.CanGoToTool = inConfiguration && !_isExecuting;
+        Actions.CanGoToTool = false;
         Actions.CanBack = inExecution;
         Actions.Visibility = Visibility.Visible;
 

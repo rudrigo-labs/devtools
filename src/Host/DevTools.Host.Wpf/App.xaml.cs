@@ -18,6 +18,8 @@ using DevTools.Ngrok.Engine;
 using DevTools.Ngrok.Repositories;
 using DevTools.Ngrok.Services;
 using DevTools.Organizer.Engine;
+using DevTools.Organizer.Repositories;
+using DevTools.Organizer.Services;
 using DevTools.Rename.Engine;
 using DevTools.SearchText.Engine;
 using DevTools.Snapshot.Engine;
@@ -127,6 +129,8 @@ public partial class App : System.Windows.Application
         services.AddSingleton<ISearchTextFacade, SearchTextFacade>();
 
         // Organizer
+        services.AddSingleton<IOrganizerEntityRepository, OrganizerEntityRepository>();
+        services.AddSingleton<OrganizerEntityService>();
         services.AddSingleton<OrganizerEngine>();
         services.AddSingleton<IOrganizerFacade, OrganizerFacade>();
 

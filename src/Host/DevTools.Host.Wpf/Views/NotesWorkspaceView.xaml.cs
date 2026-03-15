@@ -655,12 +655,13 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         var inEditor = _currentMode == NotesWorkspaceMode.Execution && EditGrid.Visibility == Visibility.Visible;
 
         Actions.ShowHelp = true;
+        Actions.ShowHistory = !inConfiguration;
         Actions.HelpContextKey = inConfiguration ? "notes:configuration" : "notes:execution";
         Actions.ShowNew = inConfiguration;
         Actions.ShowSave = inConfiguration || inEditor;
         Actions.ShowDelete = false;
         Actions.ShowCancel = inConfiguration;
-        Actions.ShowGoToTool = inConfiguration;
+        Actions.ShowGoToTool = false;
         Actions.ShowBack = _currentMode == NotesWorkspaceMode.Execution;
         Actions.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
 
@@ -674,11 +675,11 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         Actions.BackIconKind = "ArrowLeft";
 
         Actions.CanHelp = true;
-        Actions.CanNew = !_isBusy && inConfiguration;
+        Actions.CanNew = !_isBusy && inConfiguration && !_isConfigurationDraft;
         Actions.CanSave = !_isBusy && (inConfiguration ? _isConfigurationDraft : inEditor);
         Actions.CanDelete = false;
         Actions.CanCancel = !_isBusy && inConfiguration && _isConfigurationDraft;
-        Actions.CanGoToTool = !_isBusy && inConfiguration;
+        Actions.CanGoToTool = false;
         Actions.CanBack = !_isBusy && _currentMode == NotesWorkspaceMode.Execution;
     }
 

@@ -18,6 +18,15 @@ public sealed class OrganizerRequestValidator : IValidator<OrganizerRequest>
         if (instance.MinScore < 0)
             errors.Add(new ValidationError("minScore", "MinScore não pode ser negativo."));
 
+        if (instance.DeduplicateFirstLines < 0)
+            errors.Add(new ValidationError("deduplicateFirstLines", "DeduplicateFirstLines não pode ser negativo."));
+
+        if (instance.AllowedExtensions is null || instance.AllowedExtensions.Length == 0)
+            errors.Add(new ValidationError("allowedExtensions", "Informe ao menos uma extensão permitida."));
+
+        if (instance.Categories is null || instance.Categories.Count == 0)
+            errors.Add(new ValidationError("categories", "Informe ao menos uma categoria."));
+
         return errors.Count == 0 ? ValidationResult.Success : ValidationResult.Fail(errors);
     }
 }

@@ -395,7 +395,10 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
 
     private void CreateNewEntity()
     {
-        _currentEntity = new NgrokEntity();
+        _currentEntity = new NgrokEntity
+        {
+            Name = "Ngrok 1"
+        };
         BindEntityToForm(_currentEntity);
         SetSelectedOption(null);
         ApplyModeState();
@@ -404,7 +407,9 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
     private void ResetConfigurationState()
     {
         _isConfigurationDraft = false;
-        CreateNewEntity();
+        _currentEntity = new NgrokEntity();
+        SetSelectedOption(null);
+        BindEntityToForm(_currentEntity);
         ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
     }
@@ -415,7 +420,7 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         var inExecution = _currentMode == NgrokWorkspaceMode.Execution;
         var hasSelected = _currentEntity is not null;
 
-        ConfigurationModeHint.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+        ConfigurationModeHint.Visibility = Visibility.Collapsed;
         ConfigurationMetadataSection.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
 
         WorkspaceTitleText.Text = inConfiguration ? "Ngrok - Configuração" : "Ngrok";
@@ -432,21 +437,22 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         Actions.BackIconKind = "ArrowLeft";
 
         Actions.ShowHelp = true;
+        Actions.ShowHistory = inExecution;
         Actions.HelpContextKey = inConfiguration ? "ngrok:configuration" : "ngrok:execution";
         Actions.ShowNew = inConfiguration;
         Actions.ShowSave = inConfiguration || inExecution;
         Actions.ShowDelete = false;
         Actions.ShowCancel = inConfiguration;
-        Actions.ShowGoToTool = inConfiguration;
+        Actions.ShowGoToTool = false;
         Actions.ShowBack = inExecution;
         Actions.Visibility = Visibility.Visible;
 
         Actions.CanHelp = true;
-        Actions.CanNew = inConfiguration;
+        Actions.CanNew = inConfiguration && !_isConfigurationDraft;
         Actions.CanSave = inExecution ? hasSelected : _isConfigurationDraft;
         Actions.CanDelete = false;
         Actions.CanCancel = inConfiguration && _isConfigurationDraft;
-        Actions.CanGoToTool = inConfiguration;
+        Actions.CanGoToTool = false;
         Actions.CanBack = inExecution;
     }
 }
