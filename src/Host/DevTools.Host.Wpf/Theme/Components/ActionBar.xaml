@@ -7,6 +7,7 @@
         <Setter Property="Height" Value="32"/>
         <Setter Property="Margin" Value="5"/>
         <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Background" Value="{DynamicResource DevToolsSurface}"/>
         <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource DevToolsBrushBorder}"/>
@@ -27,6 +28,10 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource ControlHighlightBrush}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource DevToolsAccent}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Opacity" Value="0.9"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="border" Property="Opacity" Value="0.6"/>
