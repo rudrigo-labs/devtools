@@ -47,14 +47,14 @@ public sealed class OrganizerEngine : IDevToolEngine<OrganizerRequest, Organizer
             ? inbox
             : Path.GetFullPath(request.OutputPath);
 
+        var config = BuildEffectiveConfig(request);
+        var minScore = request.MinScore > 0 ? request.MinScore : 3;
+
         Directory.CreateDirectory(output);
-        var duplicatesDir = Path.Combine(output, "Duplicates");
-        var othersDir = Path.Combine(output, "Outros");
+        var duplicatesDir = Path.Combine(output, config.DuplicatesFolderName);
+        var othersDir = Path.Combine(output, config.OthersFolderName);
         Directory.CreateDirectory(duplicatesDir);
         Directory.CreateDirectory(othersDir);
-
-        var config = new OrganizerConfig();
-        var minScore = request.MinScore > 0 ? request.MinScore : 3;
 
         var allowed = new HashSet<string>(
             config.AllowedExtensions.Select(e => e.ToLowerInvariant()),
@@ -169,6 +169,33 @@ public sealed class OrganizerEngine : IDevToolEngine<OrganizerRequest, Organizer
 
         var result = new OrganizerResult(inbox, output, stats, plan);
         return Task.FromResult(RunResult<OrganizerResult>.Success(result));
+    }
+
+    private static OrganizerConfig BuildEffectiveConfig(OrganizerRequest request)
+    {
+        var defaults = new OrganizerConfig();
+        var allowedExtensions = request.AllowedExtensions is { Length: > 0 }
+            ? request.AllowedExtensions
+            : defaults.AllowedExtensions;
+        var categories = request.Categories is { Count: > 0 }
+            ? request.Categories
+            : defaults.Categories;
+
+        return new OrganizerConfig
+        {
+            AllowedExtensions = allowedExtensions,
+            FileNameWeight = request.FileNameWeight > 0 ? request.FileNameWeight : defaults.FileNameWeight,
+            DeduplicateByHash = request.DeduplicateByHash,
+            DeduplicateByName = request.DeduplicateByName,
+            DeduplicateFirstLines = request.DeduplicateFirstLines,
+            DuplicatesFolderName = string.IsNullOrWhiteSpace(request.DuplicatesFolderName)
+                ? defaults.DuplicatesFolderName
+                : request.DuplicatesFolderName.Trim(),
+            OthersFolderName = string.IsNullOrWhiteSpace(request.OthersFolderName)
+                ? defaults.OthersFolderName
+                : request.OthersFolderName.Trim(),
+            Categories = categories
+        };
     }
 
     private static (OrganizerCategory? cat, int score, string reason) Classify(

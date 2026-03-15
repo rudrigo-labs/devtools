@@ -320,11 +320,10 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
 
     private void CreateNewEntity()
     {
-        var nextIndex = _entities.Count + 1;
         _currentEntity = new HarvestEntity
         {
-            Name = $"Harvest {nextIndex}",
-            Description = "Nova configuração",
+            Name = "Harvest 1",
+            Description = string.Empty,
             IsActive = true,
             CopyFiles = true,
             IgnoredDirectories = HarvestDefaults.DefaultIgnoredDirectories,
@@ -427,6 +426,7 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
         ConfigurationsLabel.Visibility = hasConfigurations ? Visibility.Visible : Visibility.Collapsed;
         ConfigurationsCombo.Visibility = hasConfigurations ? Visibility.Visible : Visibility.Collapsed;
         ConfigurationMetadataSection.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+        ConfigurationModeHint.Visibility = Visibility.Collapsed;
 
         Actions.NewText = "Novo";
         Actions.SaveText = inConfiguration ? "Salvar" : "Executar";
@@ -437,20 +437,21 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
         Actions.BackIconKind = _isExecuting ? "CloseCircleOutline" : "ArrowLeft";
 
         Actions.ShowHelp = true;
+        Actions.ShowHistory = inExecution;
         Actions.HelpContextKey = inConfiguration ? "harvest:configuration" : "harvest:execution";
         Actions.ShowNew = inConfiguration;
         Actions.ShowSave = inConfiguration || inExecution;
         Actions.ShowDelete = false;
         Actions.ShowCancel = inConfiguration;
-        Actions.ShowGoToTool = inConfiguration;
+        Actions.ShowGoToTool = false;
         Actions.ShowBack = inExecution;
 
         Actions.CanHelp = true;
-        Actions.CanNew = inConfiguration && !_isExecuting;
+        Actions.CanNew = inConfiguration && !_isExecuting && !_isConfigurationDraft;
         Actions.CanSave = !_isExecuting && (inExecution ? hasSelected : _isConfigurationDraft);
         Actions.CanDelete = false;
         Actions.CanCancel = inConfiguration && !_isExecuting && _isConfigurationDraft;
-        Actions.CanGoToTool = inConfiguration && !_isExecuting;
+        Actions.CanGoToTool = false;
         Actions.CanBack = inExecution;
     }
 
@@ -548,7 +549,9 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
     private void ResetConfigurationState()
     {
         _isConfigurationDraft = false;
-        CreateNewEntity();
+        _currentEntity = CreateUnboundExecutionEntity();
+        SetSelectedConfigurationOption(GetNoConfigurationOption());
+        BindEntityToForm(_currentEntity);
         ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
     }
@@ -584,3 +587,4 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
         public HarvestEntity? Entity { get; }
     }
 }
+

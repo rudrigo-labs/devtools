@@ -206,6 +206,9 @@
                                                   ToolTip="Abre o painel de configurações persistentes."
                                                   Tag="Configurações"
                                                   Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgSnapshot" IsSubItem="True" Content="Snapshot" IconGlyph="&#xE7C3;" ToolTip="Configura perfis de snapshot." Tag="Cfg:Snapshot" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgHarvest" IsSubItem="True" Content="Harvest" IconGlyph="&#xE9D2;" ToolTip="Configura perfis de mineração de código." Tag="Cfg:Harvest" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgOrganizer" IsSubItem="True" Content="Organizer" IconGlyph="&#xE8A1;" ToolTip="Configura categorias e regras do Organizer." Tag="Cfg:Organizer" Click="NavButton_Click"/>
                                 <c:SidebarNavItem x:Name="NavCfgMigrations" IsSubItem="True" Content="Migrations" IconGlyph="&#xE895;" ToolTip="Configura projetos de migrations." Tag="Cfg:Migrations" Click="NavButton_Click"/>
                                 <c:SidebarNavItem x:Name="NavCfgSshTunnel" IsSubItem="True" Content="SSH Tunnel" IconGlyph="&#xE7E8;" ToolTip="Configura conexões e túneis SSH." Tag="Cfg:SshTunnel" Click="NavButton_Click"/>
                                 <c:SidebarNavItem x:Name="NavCfgNgrok" IsSubItem="True" Content="Ngrok" IconGlyph="&#xE8A5;" ToolTip="Configura token e parâmetros do Ngrok." Tag="Cfg:Ngrok" Click="NavButton_Click"/>

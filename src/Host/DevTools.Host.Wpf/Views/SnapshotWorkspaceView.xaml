@@ -95,7 +95,7 @@
                             Background="{DynamicResource DevToolsSurface}"
                             Padding="10,8"
                             Margin="0,0,0,12">
-                        <TextBlock Text="Modo configuração: defina nome e descrição da configuração antes de salvar."
+                        <TextBlock Text=""
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    TextWrapping="Wrap"/>
                     </Border>

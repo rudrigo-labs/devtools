@@ -132,6 +132,14 @@ public partial class MainWindow : Window
                 if (intent == WorkspaceIntent.Configuration) snapshot.ActivateConfigurationMode();
                 else if (intent == WorkspaceIntent.Execution) snapshot.ActivateExecutionMode();
                 break;
+            case HarvestWorkspaceView harvest:
+                if (intent == WorkspaceIntent.Configuration) harvest.ActivateConfigurationMode();
+                else if (intent == WorkspaceIntent.Execution) harvest.ActivateExecutionMode();
+                break;
+            case OrganizerWorkspaceView organizer:
+                if (intent == WorkspaceIntent.Configuration) organizer.ActivateConfigurationMode();
+                else if (intent == WorkspaceIntent.Execution) organizer.ActivateExecutionMode();
+                break;
             case MigrationsWorkspaceView migrations:
                 if (intent == WorkspaceIntent.Configuration) migrations.ActivateConfigurationMode();
                 else if (intent == WorkspaceIntent.Execution) migrations.ActivateExecutionMode();
@@ -203,6 +211,9 @@ public partial class MainWindow : Window
         SetNavActive(NavExecNgrok, IsToolActive("Ngrok", WorkspaceIntent.Execution));
         SetNavActive(NavExecNotes, IsToolActive("Notes", WorkspaceIntent.Execution));
 
+        SetNavActive(NavCfgSnapshot, IsToolActive("Snapshot", WorkspaceIntent.Configuration));
+        SetNavActive(NavCfgHarvest, IsToolActive("Harvest", WorkspaceIntent.Configuration));
+        SetNavActive(NavCfgOrganizer, IsToolActive("Organizer", WorkspaceIntent.Configuration));
         SetNavActive(NavCfgMigrations, IsToolActive("Migrations", WorkspaceIntent.Configuration));
         SetNavActive(NavCfgSshTunnel, IsToolActive("SshTunnel", WorkspaceIntent.Configuration));
         SetNavActive(NavCfgNgrok, IsToolActive("Ngrok", WorkspaceIntent.Configuration));

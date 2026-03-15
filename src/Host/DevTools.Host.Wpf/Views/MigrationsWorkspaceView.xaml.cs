@@ -399,7 +399,10 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
 
     private void CreateNewEntity()
     {
-        _currentEntity = new MigrationsEntity();
+        _currentEntity = new MigrationsEntity
+        {
+            Name = "Migrations 1"
+        };
         BindEntityToForm(_currentEntity);
         SetSelectedOption(null);
         ApplyModeState();
@@ -408,7 +411,9 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
     private void ResetConfigurationState()
     {
         _isConfigurationDraft = false;
-        CreateNewEntity();
+        _currentEntity = new MigrationsEntity();
+        SetSelectedOption(null);
+        BindEntityToForm(_currentEntity);
         ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
     }
@@ -429,7 +434,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         var inExecution = _currentMode == MigrationsWorkspaceMode.Execution;
         var hasSelected = _currentEntity is not null;
 
-        ConfigurationModeHint.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+        ConfigurationModeHint.Visibility = Visibility.Collapsed;
         ConfigurationMetadataSection.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
 
         WorkspaceTitleText.Text = inConfiguration ? "Migrations - Configuração" : "Migrations";
@@ -446,20 +451,21 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         Actions.BackIconKind = _isExecuting ? "CloseCircleOutline" : "ArrowLeft";
 
         Actions.ShowHelp = true;
+        Actions.ShowHistory = inExecution;
         Actions.HelpContextKey = inConfiguration ? "migrations:configuration" : "migrations:execution";
         Actions.ShowNew = inConfiguration;
         Actions.ShowSave = inConfiguration || inExecution;
         Actions.ShowDelete = false;
         Actions.ShowCancel = inConfiguration;
-        Actions.ShowGoToTool = inConfiguration;
+        Actions.ShowGoToTool = false;
         Actions.ShowBack = inExecution;
 
         Actions.CanHelp = true;
-        Actions.CanNew = inConfiguration && !_isExecuting;
+        Actions.CanNew = inConfiguration && !_isExecuting && !_isConfigurationDraft;
         Actions.CanSave = !_isExecuting && (inExecution ? hasSelected : _isConfigurationDraft);
         Actions.CanDelete = false;
         Actions.CanCancel = inConfiguration && !_isExecuting && _isConfigurationDraft;
-        Actions.CanGoToTool = inConfiguration && !_isExecuting;
+        Actions.CanGoToTool = false;
         Actions.CanBack = inExecution;
     }
 }
