@@ -31,7 +31,7 @@
                             ShowBack="True"
                             SaveText="Buscar"
                             ShowHelp="True"
-                            HelpText="Defina pasta raiz e padrao. Use Regex para expressoes avancadas. Use globs para incluir/excluir arquivos. Clique em Buscar."
+                            HelpText="Defina pasta raiz e padrão. Use Regex para expressoes avancadas. Use globs para incluir/excluir arquivos. Clique em Buscar."
                             ActionSave="ActionExecute_Click"
                             ActionBack="ActionBack_Click"/>
 
@@ -44,16 +44,16 @@
                         Background="{DynamicResource DevToolsSurface}"
                         Padding="10,8" Margin="0,0,0,12">
                     <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
-                        Como usar: informe a pasta raiz e o texto a procurar. Regex aceita padroes avancados.
+                        Como usar: informe a pasta raiz e o texto a procurar. Regex aceita padrões avancados.
                         Case sensitive diferencia maiusculas/minusculas. Palavra inteira evita partes de palavra.
-                        Globs sao filtros como **/*.cs e **/bin/**.
+                        Globs são filtros como **/*.cs e **/bin/**.
                     </TextBlock>
                 </Border>
 
                 <c:PathSelector x:Name="RootPathSelector" Title="Pasta raiz *" IsFolderPicker="True" Margin="0,0,0,12"/>
 
                 <StackPanel Margin="0,0,0,12">
-                    <TextBlock Text="Padrao de busca *" Style="{StaticResource DevToolsInputLabel}"/>
+                    <TextBlock Text="Padrão de busca *" Style="{StaticResource DevToolsInputLabel}"/>
                     <TextBox x:Name="PatternInput" Style="{StaticResource DevToolsTextInput}"
                              ToolTip="Texto simples ou regex para procurar dentro dos arquivos."/>
                 </StackPanel>
@@ -69,7 +69,7 @@
                     <CheckBox x:Name="UseRegexCheck" Grid.Column="0"
                               Content="Usar Regex"
                               Style="{StaticResource DevToolsCheckBox}"
-                              ToolTip="Ative para usar expressoes regulares no padrao de busca."/>
+                              ToolTip="Ative para usar expressoes regulares no padrão de busca."/>
                     <CheckBox x:Name="CaseSensitiveCheck" Grid.Column="2"
                               Content="Case sensitive"
                               Style="{StaticResource DevToolsCheckBox}"
@@ -80,7 +80,7 @@
                               ToolTip="Evita encontrar partes de palavras maiores."/>
                 </Grid>
 
-                <TextBlock Text="Globs: um padrao por linha. Inclusao: **/*.cs  |  Exclusao: **/obj/**"
+                <TextBlock Text="Globs: um padrão por linha. Inclusao: **/*.cs  |  Exclusao: **/obj/**"
                            Foreground="{DynamicResource DevToolsTextSecondary}"
                            FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap"/>
 
@@ -122,9 +122,9 @@
                     </StackPanel>
                 </Grid>
 
-                <CheckBox x:Name="SkipBinaryCheck" Content="Ignorar arquivos binarios"
+                <CheckBox x:Name="SkipBinaryCheck" Content="Ignorar arquivos binários"
                           Style="{StaticResource DevToolsCheckBox}" IsChecked="True" Margin="0,0,0,12"
-                          ToolTip="Recomendado para buscas de texto em codigo e documentos."/>
+                          ToolTip="Recomendado para buscas de texto em código e documentos."/>
 
                 <Button Content="Buscar Agora"
                         Style="{StaticResource DevToolsPrimaryButton}"

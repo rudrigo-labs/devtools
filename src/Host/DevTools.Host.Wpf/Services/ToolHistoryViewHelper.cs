@@ -15,7 +15,7 @@ public static class ToolHistoryViewHelper
         }
         catch
         {
-            // Historico nao deve bloquear a ferramenta.
+            // Histórico não deve bloquear a ferramenta.
         }
     }
 
@@ -32,8 +32,8 @@ public static class ToolHistoryViewHelper
         {
             DevToolsMessageBox.Info(
                 Window.GetWindow(root),
-                "Nao ha historico para esta ferramenta.",
-                "Historico");
+                "Não ha histórico para esta ferramenta.",
+                "Histórico");
             return;
         }
 
@@ -47,6 +47,6 @@ public static class ToolHistoryViewHelper
 
         var applied = service.TryApply(root, dialog.SelectedEntry);
         if (statusText is not null)
-            statusText.Text = applied ? "Historico aplicado." : "Nao foi possivel aplicar este registro.";
+            statusText.Text = applied ? "Histórico aplicado." : "Não foi possivel aplicar este registro.";
     }
 }

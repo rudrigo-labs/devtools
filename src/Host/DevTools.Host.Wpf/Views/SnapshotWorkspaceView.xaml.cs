@@ -59,7 +59,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
 
         BindEntityToForm(_currentEntity);
         _isConfigurationDraft = false;
-        SetMode(SnapshotWorkspaceMode.Execution, "Modo execucao ativado.");
+        SetMode(SnapshotWorkspaceMode.Execution, "Modo execução ativado.");
     }
 
     public void ActivateConfigurationMode()
@@ -67,7 +67,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         if (_isExecuting)
             return;
 
-        SetMode(SnapshotWorkspaceMode.Configuration, "Modo configuracao ativado.");
+        SetMode(SnapshotWorkspaceMode.Configuration, "Modo configuração ativado.");
         ResetConfigurationState();
     }
 
@@ -144,7 +144,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
 
         if (!_isConfigurationDraft)
         {
-            ValidationUiService.ShowInline(ExecutionStatusText, "Clique em Novo para iniciar uma configuracao.");
+            ValidationUiService.ShowInline(ExecutionStatusText, "Clique em Novo para iniciar uma configuração.");
             return;
         }
 
@@ -164,7 +164,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         ValidationUiService.ClearInline(ExecutionStatusText);
         _currentEntity = entity;
         await ReloadEntitiesAsync().ConfigureAwait(true);
-        ExecutionStatusText.Text = $"Configuracao '{entity.Name}' salva.";
+        ExecutionStatusText.Text = $"Configuração '{entity.Name}' salva.";
         ResetConfigurationState();
     }
 
@@ -185,7 +185,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         await _facade.DeleteAsync(_currentEntity.Id);
         ValidationUiService.ClearInline(ExecutionStatusText);
         await ReloadEntitiesAsync().ConfigureAwait(true);
-        ExecutionStatusText.Text = "Configuracao removida.";
+        ExecutionStatusText.Text = "Configuração removida.";
         SetMode(SnapshotWorkspaceMode.Execution);
     }
 
@@ -196,7 +196,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
 
         if (_currentMode == SnapshotWorkspaceMode.Execution)
         {
-            SetMode(SnapshotWorkspaceMode.Configuration, "Modo configuracao ativado.");
+            SetMode(SnapshotWorkspaceMode.Configuration, "Modo configuração ativado.");
             ResetConfigurationState();
             return;
         }
@@ -204,7 +204,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         _isConfigurationDraft = true;
         CreateNewEntity();
         ValidationUiService.ClearInline(ExecutionStatusText);
-        ExecutionStatusText.Text = "Nova configuracao criada (nao salva).";
+        ExecutionStatusText.Text = "Nova configuração criada (não salva).";
         ApplyModeState();
     }
 
@@ -214,7 +214,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         {
             ResetConfigurationState();
             ValidationUiService.ClearInline(ExecutionStatusText);
-            ExecutionStatusText.Text = "Configuracao cancelada.";
+            ExecutionStatusText.Text = "Configuração cancelada.";
             return;
         }
 
@@ -229,7 +229,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
             return;
         }
 
-        SetMode(SnapshotWorkspaceMode.Execution, "Modo execucao ativado.");
+        SetMode(SnapshotWorkspaceMode.Execution, "Modo execução ativado.");
     }
 
     private void ActionBack_Click(object sender, RoutedEventArgs e)
@@ -237,7 +237,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         if (_isExecuting)
         {
             _executionCts?.Cancel();
-            ExecutionStatusText.Text = "Cancelando execucao...";
+            ExecutionStatusText.Text = "Cancelando execução...";
             return;
         }
 
@@ -306,7 +306,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
             if (!result.IsSuccess)
             {
                 ValidationUiService.ShowInline(ExecutionStatusText, string.Join(" | ", result.Errors.Select(x => x.Message)));
-                ExecutionStatusText.Text = "Falha na execucao do snapshot.";
+                ExecutionStatusText.Text = "Falha na execução do snapshot.";
                 return;
             }
 
@@ -317,7 +317,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         catch (OperationCanceledException)
         {
             ValidationUiService.ClearInline(ExecutionStatusText);
-            ExecutionStatusText.Text = "Execucao cancelada.";
+            ExecutionStatusText.Text = "Execução cancelada.";
         }
         finally
         {
@@ -334,7 +334,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         _currentEntity = new SnapshotEntity
         {
             Name = $"Snapshot {nextIndex}",
-            Description = "Nova configuraÃ§Ã£o",
+            Description = "Nova configuração",
             IsActive = true,
             GenerateText = true,
             IgnoredDirectories = SnapshotDefaults.DefaultIgnoredDirectories,
@@ -376,8 +376,8 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
             !ValidationUiService.ValidateRequiredFields(
                 out errorMessage,
                 ValidationUiService.RequiredPath("Pasta do projeto", RootPathSelector, RootPathSelector.SelectedPath),
-                ValidationUiService.RequiredPath("Pasta de saida", OutputBasePathSelector, OutputBasePathSelector.SelectedPath),
-                ValidationUiService.RequiredControl("Diretorios ignorados", IgnoredDirectoriesInput, IgnoredDirectoriesInput.Text)))
+                ValidationUiService.RequiredPath("Pasta de saída", OutputBasePathSelector, OutputBasePathSelector.SelectedPath),
+                ValidationUiService.RequiredControl("Diretórios ignorados", IgnoredDirectoriesInput, IgnoredDirectoriesInput.Text)))
         {
             return false;
         }
@@ -386,10 +386,10 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
             !ValidationUiService.ValidateRequiredFields(
                 out errorMessage,
                 ValidationUiService.RequiredControl("Nome", NameInput, NameInput.Text),
-                ValidationUiService.RequiredControl("Descricao", DescriptionInput, DescriptionInput.Text),
+                ValidationUiService.RequiredControl("Descrição", DescriptionInput, DescriptionInput.Text),
                 ValidationUiService.RequiredPath("Pasta do projeto", RootPathSelector, RootPathSelector.SelectedPath),
-                ValidationUiService.RequiredPath("Pasta de saida", OutputBasePathSelector, OutputBasePathSelector.SelectedPath),
-                ValidationUiService.RequiredControl("Diretorios ignorados", IgnoredDirectoriesInput, IgnoredDirectoriesInput.Text)))
+                ValidationUiService.RequiredPath("Pasta de saída", OutputBasePathSelector, OutputBasePathSelector.SelectedPath),
+                ValidationUiService.RequiredControl("Diretórios ignorados", IgnoredDirectoriesInput, IgnoredDirectoriesInput.Text)))
         {
             return false;
         }
@@ -445,9 +445,9 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         ConfigurationMetadataSection.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
         ConfigurationModeHint.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
 
-        WorkspaceTitleText.Text = inConfiguration ? "Snapshot - Configuracao" : "Snapshot";
+        WorkspaceTitleText.Text = inConfiguration ? "Snapshot - Configuração" : "Snapshot";
         WorkspaceSubtitleText.Text = inConfiguration
-            ? "Defina os campos de configuracao abaixo e salve para reutilizar."
+            ? "Defina os campos de configuração abaixo e salve para reutilizar."
             : "Gera um snapshot textual completo do projeto para uso com assistentes de IA.";
 
         Actions.NewText = "Novo";
@@ -455,7 +455,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         Actions.SaveIconKind = inConfiguration ? "ContentSave" : "Play";
         Actions.CancelText = "Cancelar";
         Actions.GoToToolText = "Ir para ferramenta";
-        Actions.BackText = _isExecuting ? "Cancelar execucao" : "Voltar";
+        Actions.BackText = _isExecuting ? "Cancelar execução" : "Voltar";
         Actions.BackIconKind = _isExecuting ? "CloseCircleOutline" : "ArrowLeft";
 
         Actions.ShowHelp = true;
@@ -556,7 +556,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         SetOutputSelectionInvalid(!hasAnyOutput);
         if (!hasAnyOutput)
         {
-            errorMessage = "Selecione pelo menos um formato de saida.";
+            errorMessage = "Selecione pelo menos um formato de saída.";
             return false;
         }
 

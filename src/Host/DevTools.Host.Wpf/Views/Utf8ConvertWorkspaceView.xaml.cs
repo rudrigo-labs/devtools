@@ -57,7 +57,7 @@ public partial class Utf8ConvertWorkspaceView : System.Windows.Controls.UserCont
 
         var request = BuildRequest();
         var dryRun = request.DryRun;
-        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar conversÃ£o UTF-8").ConfigureAwait(true);
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar conversão UTF-8").ConfigureAwait(true);
 
         _executionCts?.Dispose();
         _executionCts = new CancellationTokenSource();
@@ -79,9 +79,9 @@ public partial class Utf8ConvertWorkspaceView : System.Windows.Controls.UserCont
                 ResultSummaryText.Text =
                     $"Escaneados: {s.FilesScanned} | " +
                     $"Convertidos: {s.Converted} | " +
-                    $"JÃ¡ UTF-8: {s.AlreadyUtf8} | " +
-                    $"BinÃ¡rios: {s.SkippedBinary} | " +
-                    $"ExcluÃ­dos: {s.SkippedExcluded} | " +
+                    $"Já UTF-8: {s.AlreadyUtf8} | " +
+                    $"Binários: {s.SkippedBinary} | " +
+                    $"Excluídos: {s.SkippedExcluded} | " +
                     $"Erros: {s.Errors}";
                 ResultPanel.Visibility = Visibility.Visible;
             }
@@ -93,13 +93,13 @@ public partial class Utf8ConvertWorkspaceView : System.Windows.Controls.UserCont
                 return;
             }
 
-            var mode = dryRun ? "SimulaÃ§Ã£o concluÃ­da" : "ConversÃ£o concluÃ­da";
+            var mode = dryRun ? "Simulação concluída" : "Conversão concluída";
             ExecutionStatusText.Text = $"{mode}. {data?.Summary.Converted ?? 0} arquivo(s) convertido(s).";
         }
         catch (OperationCanceledException)
         {
             ValidationUiService.ClearInline(ExecutionStatusText);
-            ExecutionStatusText.Text = "OperaÃ§Ã£o cancelada.";
+            ExecutionStatusText.Text = "Operação cancelada.";
         }
         finally
         {

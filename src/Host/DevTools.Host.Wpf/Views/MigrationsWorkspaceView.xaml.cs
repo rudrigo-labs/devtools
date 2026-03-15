@@ -58,7 +58,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
             CreateNewEntity();
 
         _isConfigurationDraft = false;
-        SetMode(MigrationsWorkspaceMode.Execution, "Modo execucao ativado.");
+        SetMode(MigrationsWorkspaceMode.Execution, "Modo execução ativado.");
     }
 
     public void ActivateConfigurationMode()
@@ -66,14 +66,14 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         if (_isExecuting)
             return;
 
-        SetMode(MigrationsWorkspaceMode.Configuration, "Modo configuracao ativado.");
+        SetMode(MigrationsWorkspaceMode.Configuration, "Modo configuração ativado.");
         ResetConfigurationState();
     }
 
-    // â”€â”€ NavegaÃ§Ã£o de modo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Navegação de modo -----------------------------------------------------
 
-    private void SwitchToExecution_Click(object sender, RoutedEventArgs e) => SetMode(MigrationsWorkspaceMode.Execution, "Modo execuÃ§Ã£o ativado.");
-    private void SwitchToConfiguration_Click(object sender, RoutedEventArgs e) => SetMode(MigrationsWorkspaceMode.Configuration, "Modo configuraÃ§Ã£o ativado.");
+    private void SwitchToExecution_Click(object sender, RoutedEventArgs e) => SetMode(MigrationsWorkspaceMode.Execution, "Modo execução ativado.");
+    private void SwitchToConfiguration_Click(object sender, RoutedEventArgs e) => SetMode(MigrationsWorkspaceMode.Configuration, "Modo configuração ativado.");
 
     private void SetMode(MigrationsWorkspaceMode mode, string status)
     {
@@ -83,7 +83,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         ApplyModeState();
     }
 
-    // â”€â”€ Carregamento de entidades â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Carregamento de entidades ---------------------------------------------
 
     private async Task ReloadEntitiesAsync()
     {
@@ -151,7 +151,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         ApplyModeState();
     }
 
-    // â”€â”€ CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- CRUD -----------------------------------------------------------------
 
     private void ActionNew_Click(object sender, RoutedEventArgs e)
     {
@@ -159,14 +159,14 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
 
         if (_currentMode == MigrationsWorkspaceMode.Execution)
         {
-            SetMode(MigrationsWorkspaceMode.Configuration, "Modo configuracao ativado.");
+            SetMode(MigrationsWorkspaceMode.Configuration, "Modo configuração ativado.");
             ResetConfigurationState();
             return;
         }
 
         _isConfigurationDraft = true;
         CreateNewEntity();
-        SetMode(MigrationsWorkspaceMode.Configuration, "Nova configuracao.");
+        SetMode(MigrationsWorkspaceMode.Configuration, "Nova configuração.");
     }
 
     private async void ActionSave_Click(object sender, RoutedEventArgs e)
@@ -212,7 +212,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
 
         ValidationUiService.ClearInline(ExecutionStatusText);
         await ReloadEntitiesAsync().ConfigureAwait(true);
-        ExecutionStatusText.Text = "Configuracao salva.";
+        ExecutionStatusText.Text = "Configuração salva.";
         ResetConfigurationState();
     }
 
@@ -225,7 +225,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
 
         var confirm = Components.DevToolsMessageBox.Confirm(
             Window.GetWindow(this),
-            $"Excluir configuraÃ§Ã£o \"{_currentEntity.Name}\"?",
+            $"Excluir configuração \"{_currentEntity.Name}\"?",
             "Excluir");
 
         if (confirm != Components.DevToolsMessageBoxResult.Yes) return;
@@ -233,7 +233,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         await _facade.DeleteAsync(_currentEntity.Id).ConfigureAwait(true);
         _currentEntity = null;
         await ReloadEntitiesAsync().ConfigureAwait(true);
-        ExecutionStatusText.Text = "ConfiguraÃ§Ã£o excluÃ­da.";
+        ExecutionStatusText.Text = "Configuração excluída.";
     }
 
     private void ActionCancel_Click(object sender, RoutedEventArgs e)
@@ -256,7 +256,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
             return;
         }
 
-        SetMode(MigrationsWorkspaceMode.Execution, "Modo execucao ativado.");
+        SetMode(MigrationsWorkspaceMode.Execution, "Modo execução ativado.");
     }
 
     private void ActionBack_Click(object sender, RoutedEventArgs e)
@@ -275,7 +275,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
     private async void HistoryButton_Click(object sender, RoutedEventArgs e)
         => await ToolHistoryViewHelper.ShowAndApplyAsync(WorkspaceRoot, ToolHistorySlug, ToolDisplayName, ExecutionStatusText).ConfigureAwait(true);
 
-    // â”€â”€ ExecuÃ§Ã£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Execução -------------------------------------------------------------
 
     private async Task ExecuteAsync()
     {
@@ -283,7 +283,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
 
         if (_currentEntity is null || string.IsNullOrWhiteSpace(_currentEntity.RootPath))
         {
-            ValidationUiService.ShowInline(ExecutionStatusText, "Selecione ou configure uma configuraÃ§Ã£o antes de executar.");
+            ValidationUiService.ShowInline(ExecutionStatusText, "Selecione ou configure uma configuração antes de executar.");
             return;
         }
 
@@ -294,7 +294,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         if (action == MigrationsAction.AddMigration && string.IsNullOrWhiteSpace(migrationName))
         {
             ValidationUiService.SetControlInvalid(MigrationNameInput, true);
-            ValidationUiService.ShowInline(ExecutionStatusText, "Nome da migration Ã© obrigatÃ³rio para AddMigration.");
+            ValidationUiService.ShowInline(ExecutionStatusText, "Nome da migration é obrigatório para AddMigration.");
             return;
         }
 
@@ -335,13 +335,13 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
             ShowResult(result.Value!);
 
             ExecutionStatusText.Text = request.DryRun
-                ? "Dry run â€” comando gerado."
-                : $"ConcluÃ­do. Exit code: {result.Value!.ExitCode}";
+                ? "Dry run  -  comando gerado."
+                : $"Concluído. Exit code: {result.Value!.ExitCode}";
         }
         catch (OperationCanceledException)
         {
             ValidationUiService.ClearInline(ExecutionStatusText);
-            ExecutionStatusText.Text = "ExecuÃ§Ã£o cancelada.";
+            ExecutionStatusText.Text = "Execução cancelada.";
         }
         finally
         {
@@ -362,7 +362,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         ResultPanel.Visibility = Visibility.Visible;
     }
 
-    // â”€â”€ Binding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Binding ---------------------------------------------------------------
 
     private void BindEntityToForm(MigrationsEntity entity)
     {
@@ -432,10 +432,10 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         ConfigurationModeHint.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
         ConfigurationMetadataSection.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
 
-        WorkspaceTitleText.Text = inConfiguration ? "Migrations - Configuracao" : "Migrations";
+        WorkspaceTitleText.Text = inConfiguration ? "Migrations - Configuração" : "Migrations";
         WorkspaceSubtitleText.Text = inConfiguration
-            ? "Salve os parametros de migration para reaproveitar em outros ciclos."
-            : "Executa dotnet ef migrations add e database update com configuracoes nomeadas por provedor.";
+            ? "Salve os parâmetros de migration para reaproveitar em outros ciclos."
+            : "Executa dotnet ef migrations add e database update com configurações nomeadas por provedor.";
 
         Actions.NewText = "Novo";
         Actions.SaveText = inConfiguration ? "Salvar" : "Executar";

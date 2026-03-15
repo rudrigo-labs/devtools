@@ -79,7 +79,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         ResetConfigurationState();
     }
 
-    // â”€â”€ Atalho Ctrl+S â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Atalho Ctrl+S --------------------------------------------------------
 
     protected override void OnPreviewKeyDown(KeyEventArgs e)
     {
@@ -92,7 +92,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         }
     }
 
-    // â”€â”€ NavegaÃ§Ã£o de modo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Navegação de modo -----------------------------------------------------
 
     private void SwitchToExecution_Click(object sender, RoutedEventArgs e) =>
         SetMode(NotesWorkspaceMode.Execution);
@@ -109,7 +109,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         ApplyModeState();
     }
 
-    // â”€â”€ ConfiguraÃ§Ãµes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Configurações ---------------------------------------------------------
 
     private async Task ReloadEntitiesAsync()
     {
@@ -137,7 +137,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         await ReloadNotesListAsync().ConfigureAwait(true);
     }
 
-    // â”€â”€ Lista de notas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Lista de notas --------------------------------------------------------
 
     private async Task ReloadNotesListAsync()
     {
@@ -221,7 +221,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         PositionEditorAtTopLeft();
     }
 
-    // â”€â”€ AppBar lista â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- AppBar lista ----------------------------------------------------------
 
     private void AddButton_Click(object sender, RoutedEventArgs e)
     {
@@ -294,7 +294,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         finally { _isBusy = false; ApplyModeState(); }
     }
 
-    // â”€â”€ Deletar nota da lista â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Deletar nota da lista -------------------------------------------------
 
     private async void DeleteItemButton_Click(object sender, RoutedEventArgs e)
     {
@@ -311,13 +311,13 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         var result  = await _facade.ExecuteAsync(request, _currentEntity).ConfigureAwait(true);
 
         ExecutionStatusText.Text = result.IsSuccess
-            ? "Nota excluÃ­da."
+            ? "Nota excluída."
             : string.Join(" | ", result.Errors.Select(x => x.Message));
 
         await ReloadNotesListAsync().ConfigureAwait(true);
     }
 
-    // â”€â”€ AppBar editor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- AppBar editor ---------------------------------------------------------
 
     private void BackButton_Click(object sender, RoutedEventArgs e) =>
         _ = ReloadNotesListAsync();
@@ -336,7 +336,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         var request = new NotesRequest { Action = NotesAction.DeleteItem, NoteKey = _currentNote.FileName };
         var result  = await _facade.ExecuteAsync(request, _currentEntity).ConfigureAwait(true);
 
-        ExecutionStatusText.Text = result.IsSuccess ? "Nota excluÃ­da." :
+        ExecutionStatusText.Text = result.IsSuccess ? "Nota excluída." :
             string.Join(" | ", result.Errors.Select(x => x.Message));
 
         await ReloadNotesListAsync().ConfigureAwait(true);
@@ -350,7 +350,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
 
         if (string.IsNullOrWhiteSpace(title))
         {
-            ExecutionStatusText.Text = "TÃ­tulo Ã© obrigatÃ³rio.";
+            ExecutionStatusText.Text = "Título é obrigatório.";
             return;
         }
 
@@ -400,7 +400,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         finally { _isBusy = false; ApplyModeState(); }
     }
 
-    // â”€â”€ Action Bar (configuraÃ§Ã£o) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Action Bar (configuração) ---------------------------------------------
 
     private void ActionNew_Click(object sender, RoutedEventArgs e)
     {
@@ -409,7 +409,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
 
         _isConfigurationDraft = true;
         CreateNewEntity();
-        ExecutionStatusText.Text = "Nova configuraÃ§Ã£o iniciada.";
+        ExecutionStatusText.Text = "Nova configuração iniciada.";
         ApplyModeState();
     }
 
@@ -431,7 +431,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
 
         if (!_isConfigurationDraft)
         {
-            ExecutionStatusText.Text = "Clique em Novo para iniciar a configuraÃ§Ã£o.";
+            ExecutionStatusText.Text = "Clique em Novo para iniciar a configuração.";
             return;
         }
 
@@ -449,11 +449,11 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
             return;
         }
 
-        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Salvar configuraÃ§Ã£o do Notes").ConfigureAwait(true);
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Salvar configuração do Notes").ConfigureAwait(true);
 
         ExecutionStatusText.Text = string.Empty;
         await ReloadEntitiesAsync().ConfigureAwait(true);
-        ExecutionStatusText.Text = "ConfiguraÃ§Ã£o salva.";
+        ExecutionStatusText.Text = "Configuração salva.";
         ResetConfigurationState();
     }
 
@@ -481,7 +481,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         }
 
         ResetConfigurationState();
-        ExecutionStatusText.Text = "ConfiguraÃ§Ã£o cancelada.";
+        ExecutionStatusText.Text = "Configuração cancelada.";
     }
 
     private void ActionGoToTool_Click(object sender, RoutedEventArgs e)
@@ -504,7 +504,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
     private async void HistoryButton_Click(object sender, RoutedEventArgs e)
         => await ToolHistoryViewHelper.ShowAndApplyAsync(WorkspaceRoot, ToolHistorySlug, ToolDisplayName, ExecutionStatusText).ConfigureAwait(true);
 
-    // â”€â”€ Google Drive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Google Drive ----------------------------------------------------------
 
     private void GoogleDriveEnabledCheck_Changed(object sender, RoutedEventArgs e) =>
         GoogleDriveFieldsPanel.Visibility = GoogleDriveEnabledCheck.IsChecked == true
@@ -524,7 +524,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         try
         {
             var result = await _facade.ConnectGoogleDriveAsync(_currentEntity!).ConfigureAwait(true);
-            DriveConnectionStatusText.Text = result.IsSuccess ? "âœ“ Conectado." :
+            DriveConnectionStatusText.Text = result.IsSuccess ? "✓ Conectado." :
                 $"Erro: {result.Errors.FirstOrDefault()?.Message}";
         }
         finally { _isBusy = false; ApplyModeState(); }
@@ -548,7 +548,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
     {
         var win = new Window
         {
-            Title = "Guia de ConfiguraÃ§Ã£o â€” Google Drive",
+            Title = "Guia de Configuração  -  Google Drive",
             Width = 680, Height = 600,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
             Owner = Window.GetWindow(this),
@@ -571,7 +571,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         win.ShowDialog();
     }
 
-    // â”€â”€ AlternÃ¢ncia ListGrid / EditGrid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Alternância ListGrid / EditGrid ---------------------------------------
 
     private void ShowListView()
     {
@@ -588,17 +588,17 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         ApplyModeState();
     }
 
-    // â”€â”€ Drive banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Drive banner ----------------------------------------------------------
 
     private void ShowDriveBanner(bool? skipped, string? reason)
     {
         if (skipped is null) { DriveStatusBanner.Visibility = Visibility.Collapsed; return; }
         DriveStatusBanner.Visibility = Visibility.Visible;
-        DriveStatusText.Text = skipped == false ? "âœ“ Nota sincronizada com o Google Drive." :
-            reason ?? "Drive nÃ£o sincronizado.";
+        DriveStatusText.Text = skipped == false ? "✓ Nota sincronizada com o Google Drive." :
+            reason ?? "Drive não sincronizado.";
     }
 
-    // â”€â”€ Binding de configuraÃ§Ã£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Binding de configuração -----------------------------------------------
 
     private void BindEntityToForm(NotesEntity entity)
     {
@@ -619,7 +619,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
     {
         if (_currentEntity is null) return;
         _currentEntity.Name                       = "Notes";
-        _currentEntity.Description                = "Configuracao unica do Notes";
+        _currentEntity.Description                = "Configuração única do Notes";
         _currentEntity.LocalRootPath              = LocalRootPathSelector.SelectedPath?.Trim() ?? string.Empty;
         _currentEntity.IsDefault                  = true;
         _currentEntity.GoogleDriveEnabled         = GoogleDriveEnabledCheck.IsChecked ?? false;
@@ -633,7 +633,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         _currentEntity = new NotesEntity
         {
             Name = "Notes",
-            Description = "Configuracao unica do Notes",
+            Description = "Configuração única do Notes",
             IsDefault = true,
             DefaultExtension = ".md"
         };
@@ -647,7 +647,7 @@ public partial class NotesWorkspaceView : System.Windows.Controls.UserControl
         ApplyModeState();
     }
 
-    // â”€â”€ Estado geral â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // -- Estado geral ----------------------------------------------------------
 
     private void ApplyModeState()
     {

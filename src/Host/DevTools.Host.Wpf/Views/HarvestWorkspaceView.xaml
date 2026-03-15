@@ -20,7 +20,7 @@
                            FontSize="18"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource DevToolsTextPrimary}"/>
-                <TextBlock Text="Minera codigo reutilizavel em projetos .NET. Identifica utilitarios, helpers e extension methods por relevancia."
+                <TextBlock Text="Minera código reutilizável em projetos .NET. Identifica utilitários, helpers e extension methods por relevância."
                            Foreground="{DynamicResource DevToolsTextSecondary}"
                            FontSize="12"
                            Margin="0,4,0,0"
@@ -93,12 +93,12 @@
                             Background="{DynamicResource DevToolsSurface}"
                             Padding="10,8"
                             Margin="0,0,0,12">
-                        <TextBlock Text="Modo configuracao: preencha os campos abaixo para salvar uma configuracao reutilizavel."
+                        <TextBlock Text="Modo configuração: preencha os campos abaixo para salvar uma configuração reutilizável."
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    TextWrapping="Wrap"/>
                     </Border>
 
-                    <!-- ===== Campos de configuracao (modo Configuracao) ===== -->
+                    <!-- ===== Campos de configuração (modo Configuração) ===== -->
                     <Grid x:Name="ConfigurationMetadataSection"
                           Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
@@ -113,7 +113,7 @@
                                      Style="{StaticResource DevToolsTextInput}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Descricao"
+                            <TextBlock Text="Descrição"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="DescriptionInput"
                                      Style="{StaticResource DevToolsTextInput}"/>
@@ -159,7 +159,7 @@
                     </StackPanel>
 
                     <!-- ===== Execução ===== -->
-                    <TextBlock Text="Execucao"
+                    <TextBlock Text="Execução"
                                Style="{StaticResource DevToolsCardTitle}"
                                Margin="0,4,0,10"/>
 

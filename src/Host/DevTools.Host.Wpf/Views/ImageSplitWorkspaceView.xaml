@@ -40,7 +40,7 @@
                                 ShowBack="True"
                                 SaveText="Executar"
                                 ShowHelp="True"
-                                HelpText="Selecione a imagem, pasta de saida e ajustes de deteccao. Use Executar para recortar os componentes automaticamente."
+                                HelpText="Selecione a imagem, pasta de saída e ajustes de detecção. Use Executar para recortar os componentes automaticamente."
                                 ActionSave="ActionExecute_Click"
                                 ActionBack="ActionBack_Click"/>
 
@@ -56,13 +56,13 @@
                                     IsFolderPicker="False"
                                     Margin="0,0,0,12"/>
 
-                    <!-- ===== Saida ===== -->
+                    <!-- ===== Saída ===== -->
                     <c:PathSelector x:Name="OutputDirectorySelector"
-                                    Title="Pasta de saida *"
+                                    Title="Pasta de saída *"
                                     IsFolderPicker="True"
                                     Margin="0,0,0,12"/>
 
-                    <!-- ===== Opcoes de nomenclatura ===== -->
+                    <!-- ===== Opções de nomenclatura ===== -->
                     <TextBlock Text="Nomenclatura dos arquivos gerados"
                                Style="{StaticResource DevToolsCardTitle}"
                                Margin="0,4,0,10"/>
@@ -79,15 +79,15 @@
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="OutputBaseNameInput"
                                      Style="{StaticResource DevToolsTextInput}"
-                                     ToolTip="Prefixo dos arquivos gerados. Padrao: nome do arquivo de entrada."/>
+                                     ToolTip="Prefixo dos arquivos gerados. Padrão: nome do arquivo de entrada."/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Extensao de saida"
+                            <TextBlock Text="Extensao de saída"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="OutputExtensionInput"
                                      Style="{StaticResource DevToolsTextInput}"
-                                     ToolTip="Ex: .png, .webp. Padrao: mesma extensao do arquivo de entrada."/>
+                                     ToolTip="Ex: .png, .webp. Padrão: mesma extensao do arquivo de entrada."/>
                         </StackPanel>
                     </Grid>
 
@@ -100,8 +100,8 @@
                                  ToolTip="O primeiro arquivo gerado recebera este indice no nome. Ex: sprite_1.png, sprite_2.png..."/>
                     </StackPanel>
 
-                    <!-- ===== Opcoes de deteccao ===== -->
-                    <TextBlock Text="Deteccao de componentes"
+                    <!-- ===== Opções de detecção ===== -->
+                    <TextBlock Text="Detecção de componentes"
                                Style="{StaticResource DevToolsCardTitle}"
                                Margin="0,4,0,10"/>
 
@@ -118,11 +118,11 @@
                             <TextBox x:Name="AlphaThresholdInput"
                                      Style="{StaticResource DevToolsTextInput}"
                                      Text="10"
-                                     ToolTip="Pixels com alpha abaixo deste valor sao tratados como fundo transparente. Padrao: 10."/>
+                                     ToolTip="Pixels com alpha abaixo deste valor são tratados como fundo transparente. Padrão: 10."/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Tamanho minimo (largura x altura px)"
+                            <TextBlock Text="Tamanho mínimo (largura x altura px)"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -149,12 +149,12 @@
                         </StackPanel>
                     </Grid>
 
-                    <!-- ===== Opcoes extras ===== -->
+                    <!-- ===== Opções extras ===== -->
                     <CheckBox x:Name="OverwriteCheck"
                               Content="Sobrescrever arquivos existentes"
                               Style="{StaticResource DevToolsCheckBox}"
                               Margin="0,0,0,12"
-                              ToolTip="Quando marcado, sobrescreve arquivos ja existentes na pasta de saida."/>
+                              ToolTip="Quando marcado, sobrescreve arquivos ja existentes na pasta de saída."/>
 
                 </StackPanel>
             </ScrollViewer>

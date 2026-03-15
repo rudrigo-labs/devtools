@@ -50,7 +50,7 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
         DependencyProperty.Register(nameof(BackText), typeof(string), typeof(ActionBarControl), new PropertyMetadata("Voltar"));
 
     public static readonly DependencyProperty HistoryTextProperty =
-        DependencyProperty.Register(nameof(HistoryText), typeof(string), typeof(ActionBarControl), new PropertyMetadata("Historico"));
+        DependencyProperty.Register(nameof(HistoryText), typeof(string), typeof(ActionBarControl), new PropertyMetadata("Histórico"));
 
     public static readonly DependencyProperty CanNewProperty =
         DependencyProperty.Register(nameof(CanNew), typeof(bool), typeof(ActionBarControl), new PropertyMetadata(true));
@@ -159,13 +159,13 @@ public partial class ActionBarControl : System.Windows.Controls.UserControl
             ToolHelpDialog.Show(owner, new ToolHelpContent(
                 "Ajuda",
                 HelpText,
-                "Siga os passos indicados na tela e use os botoes da barra de acoes.",
-                "Preencha os campos obrigatorios e execute a acao principal.",
-                "Se preferir, salve uma configuracao para reutilizar depois."));
+                "Siga os passos indicados na tela e use os botoes da barra de ações.",
+                "Preencha os campos obrigatórios e execute a ação principal.",
+                "Se preferir, salve uma configuração para reutilizar depois."));
             return;
         }
 
-        DevToolsMessageBox.Info(owner, "Nao ha conteudo de ajuda para esta tela.", "Ajuda");
+        DevToolsMessageBox.Info(owner, "Não ha conteúdo de ajuda para esta tela.", "Ajuda");
     }
 
     private void ActionNew_Click(object sender, RoutedEventArgs e)

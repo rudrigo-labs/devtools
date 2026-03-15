@@ -22,7 +22,7 @@
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource DevToolsTextPrimary}"/>
                 <TextBlock x:Name="WorkspaceSubtitleText"
-                           Text="Gerencia tuneis HTTP/HTTPS via ngrok. Inicia, lista, encerra e monitora processos ngrok."
+                           Text="Gerencia túneis HTTP/HTTPS via ngrok. Inicia, lista, encerra e monitora processos ngrok."
                            Foreground="{DynamicResource DevToolsTextSecondary}"
                            FontSize="12"
                            Margin="0,4,0,0"
@@ -40,7 +40,7 @@
                                 ShowDelete="True"
                                 ShowCancel="False"
                                 ShowHelp="True"
-                                HelpText="No modo Configurar, salve auth token e padroes. No modo Execucao, informe protocolo/porta e clique em Iniciar tunel."
+                                HelpText="No modo Configurar, salve auth token e padrões. No modo Execução, informe protocolo/porta e clique em Iniciar túnel."
                                 ActionNew="ActionNew_Click"
                                 ActionSave="ActionSave_Click"
                                 ActionDelete="ActionDelete_Click"
@@ -95,7 +95,7 @@
                             Background="{DynamicResource DevToolsSurface}"
                             Padding="10,8"
                             Margin="0,0,0,12">
-                        <TextBlock Text="Modo configuracao: preencha os campos abaixo para salvar uma configuracao reutilizavel."
+                        <TextBlock Text="Modo configuração: preencha os campos abaixo para salvar uma configuração reutilizável."
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    TextWrapping="Wrap"/>
                     </Border>
@@ -108,12 +108,12 @@
                             Margin="0,0,0,12">
                         <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}"
                                    TextWrapping="Wrap">
-                            Como usar: configure o AuthToken uma vez. Em execucao, escolha protocolo e porta local da aplicacao.
-                            Clique em Iniciar tunel para gerar URL publica. Use Listar tuneis para atualizar a lista.
+                            Como usar: configure o AuthToken uma vez. Em execução, escolha protocolo e porta local da aplicação.
+                            Clique em Iniciar túnel para gerar URL publica. Use Listar túneis para atualizar a lista.
                         </TextBlock>
                     </Border>
 
-                    <!-- ===== Campos de configuracao (modo Configuracao) ===== -->
+                    <!-- ===== Campos de configuração (modo Configuração) ===== -->
                     <Grid x:Name="ConfigurationMetadataSection"
                           Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
@@ -128,15 +128,15 @@
                                      Style="{StaticResource DevToolsTextInput}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Descricao"
+                            <TextBlock Text="Descrição"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="DescriptionInput"
                                      Style="{StaticResource DevToolsTextInput}"/>
                         </StackPanel>
                     </Grid>
 
-                    <!-- ===== Configuracao ===== -->
-                    <TextBlock Text="Configuracao"
+                    <!-- ===== Configuração ===== -->
+                    <TextBlock Text="Configuração"
                                Style="{StaticResource DevToolsCardTitle}"
                                Margin="0,4,0,10"/>
 
@@ -149,7 +149,7 @@
                     </StackPanel>
 
                     <c:PathSelector x:Name="ExecutablePathSelector"
-                                    Title="Executavel ngrok (opcional)"
+                                    Title="Executável ngrok (opcional)"
                                     IsFolderPicker="False"
                                     Margin="0,0,0,12"/>
 
@@ -167,16 +167,16 @@
                         <TextBox x:Name="BaseUrlInput"
                                  Style="{StaticResource DevToolsTextInput}"
                                  Text="http://127.0.0.1:4040/"
-                                 ToolTip="Endereco local da API ngrok. Padrao: http://127.0.0.1:4040/"/>
+                                 ToolTip="Endereco local da API ngrok. Padrão: http://127.0.0.1:4040/"/>
                     </StackPanel>
 
                     <CheckBox x:Name="IsDefaultCheck"
-                              Content="Marcar como configuracao padrao"
+                              Content="Marcar como configuração padrão"
                               Style="{StaticResource DevToolsCheckBox}"
                               Margin="0,0,0,12"/>
 
-                    <!-- ===== Execucao ===== -->
-                    <TextBlock Text="Execucao"
+                    <!-- ===== Execução ===== -->
+                    <TextBlock Text="Execução"
                                Style="{StaticResource DevToolsCardTitle}"
                                Margin="0,4,0,10"/>
 
@@ -202,14 +202,14 @@
                                      ToolTip="Ex: 5000"/>
                         </StackPanel>
                         <Button Grid.Column="4"
-                                Content="Iniciar tunel"
+                                Content="Iniciar túnel"
                                 Style="{StaticResource DevToolsPrimaryButton}"
                                 VerticalAlignment="Bottom"
                                 Click="StartHttp_Click"/>
                     </Grid>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                        <Button Content="Listar tuneis"
+                        <Button Content="Listar túneis"
                                 Style="{StaticResource DevToolsSecondaryButton}"
                                 Margin="0,0,8,0"
                                 Click="ListTunnels_Click"/>
@@ -222,7 +222,7 @@
                                 Click="KillAll_Click"/>
                     </StackPanel>
 
-                    <!-- ===== Tuneis ativos ===== -->
+                    <!-- ===== Túneis ativos ===== -->
                     <Border x:Name="TunnelListPanel"
                             Visibility="Collapsed"
                             BorderThickness="1" CornerRadius="4"
@@ -268,7 +268,7 @@
                                 </ListBox.ItemTemplate>
                             </ListBox>
                             <TextBlock x:Name="EmptyStateText"
-                                       Text="Nenhum tunel ativo no momento."
+                                       Text="Nenhum túnel ativo no momento."
                                        Foreground="{DynamicResource DevToolsTextSecondary}"
                                        Margin="0,8,0,0"
                                        Visibility="Collapsed"/>

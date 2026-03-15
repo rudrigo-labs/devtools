@@ -51,7 +51,7 @@ public partial class SearchTextWorkspaceView : System.Windows.Controls.UserContr
         if (!ValidationUiService.ValidateRequiredFields(
             out var errorMessage,
             ValidationUiService.RequiredPath("Pasta raiz", RootPathSelector, RootPathSelector.SelectedPath),
-            ValidationUiService.RequiredControl("PadrÃ£o de busca", PatternInput, PatternInput.Text)))
+            ValidationUiService.RequiredControl("Padrão de busca", PatternInput, PatternInput.Text)))
         {
             ValidationUiService.ShowInline(ExecutionStatusText, errorMessage);
             return;
@@ -84,8 +84,8 @@ public partial class SearchTextWorkspaceView : System.Windows.Controls.UserContr
 
             ResultSummaryText.Text =
                 $"Arquivos escaneados: {data.TotalFilesScanned} | " +
-                $"Com ocorrÃªncias: {data.TotalFilesWithMatches} | " +
-                $"Total de ocorrÃªncias: {data.TotalOccurrences}";
+                $"Com ocorrências: {data.TotalFilesWithMatches} | " +
+                $"Total de ocorrências: {data.TotalOccurrences}";
             ResultSummaryText.Visibility = Visibility.Visible;
 
             if (data.Files.Count > 0)
@@ -95,8 +95,8 @@ public partial class SearchTextWorkspaceView : System.Windows.Controls.UserContr
             }
 
             ExecutionStatusText.Text = data.TotalFilesWithMatches == 0
-                ? "Nenhuma ocorrÃªncia encontrada."
-                : $"ConcluÃ­do. {data.TotalFilesWithMatches} arquivo(s) com ocorrÃªncias.";
+                ? "Nenhuma ocorrência encontrada."
+                : $"Concluído. {data.TotalFilesWithMatches} arquivo(s) com ocorrências.";
         }
         catch (OperationCanceledException)
         {

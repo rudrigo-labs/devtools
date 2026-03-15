@@ -10,7 +10,7 @@ public partial class MainWindow : Window
 {
     private const uint MonitorDefaultToNearest = 0x00000002;
     private const string FerramentasTag = "Ferramentas";
-    private const string ConfiguracoesTag = "Configuracoes";
+    private const string ConfiguracoesTag = "Configurações";
 
     private enum WorkspaceIntent { Default, Configuration, Execution }
 
@@ -162,8 +162,8 @@ public partial class MainWindow : Window
 
         if (string.Equals(tag, ConfiguracoesTag, StringComparison.OrdinalIgnoreCase))
         {
-            ActiveToolLabel.Text = "Configuracoes";
-            MainStatusText.Text = "Selecione uma ferramenta para editar configuracoes.";
+            ActiveToolLabel.Text = "Configurações";
+            MainStatusText.Text = "Selecione uma ferramenta para editar configurações.";
             return;
         }
 

@@ -22,7 +22,7 @@
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource DevToolsTextPrimary}"/>
                 <TextBlock x:Name="WorkspaceSubtitleText"
-                           Text="Executa dotnet ef migrations add e database update com configuracoes nomeadas por provedor."
+                           Text="Executa dotnet ef migrations add e database update com configurações nomeadas por provedor."
                            Foreground="{DynamicResource DevToolsTextSecondary}"
                            FontSize="12"
                            Margin="0,4,0,0"
@@ -95,12 +95,12 @@
                             Background="{DynamicResource DevToolsSurface}"
                             Padding="10,8"
                             Margin="0,0,0,12">
-                        <TextBlock Text="Modo configuracao: preencha os campos abaixo para salvar uma configuracao reutilizavel."
+                        <TextBlock Text="Modo configuração: preencha os campos abaixo para salvar uma configuração reutilizável."
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    TextWrapping="Wrap"/>
                     </Border>
 
-                    <!-- ===== Campos de configuracao (modo Configuracao) ===== -->
+                    <!-- ===== Campos de configuração (modo Configuração) ===== -->
                     <Grid x:Name="ConfigurationMetadataSection"
                           Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
@@ -115,7 +115,7 @@
                                      Style="{StaticResource DevToolsTextInput}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Descricao"
+                            <TextBlock Text="Descrição"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="DescriptionInput"
                                      Style="{StaticResource DevToolsTextInput}"/>
@@ -143,7 +143,7 @@
                     </StackPanel>
 
                     <!-- ===== Projetos por provedor ===== -->
-                    <TextBlock Text="Projetos de migracao por provedor"
+                    <TextBlock Text="Projetos de migração por provedor"
                                Style="{StaticResource DevToolsCardTitle}"
                                Margin="0,4,0,10"/>
 
@@ -159,7 +159,7 @@
                         <TextBox x:Name="SqlServerProjectInput"
                                  Grid.Column="2"
                                  Style="{StaticResource DevToolsTextInput}"
-                                 ToolTip="Caminho do .csproj de migrations para SQL Server. Deixe vazio se nao usar."/>
+                                 ToolTip="Caminho do .csproj de migrations para SQL Server. Deixe vazio se não usar."/>
                     </Grid>
 
                     <Grid Margin="0,0,0,12">
@@ -174,11 +174,11 @@
                         <TextBox x:Name="SqliteProjectInput"
                                  Grid.Column="2"
                                  Style="{StaticResource DevToolsTextInput}"
-                                 ToolTip="Caminho do .csproj de migrations para SQLite. Deixe vazio se nao usar."/>
+                                 ToolTip="Caminho do .csproj de migrations para SQLite. Deixe vazio se não usar."/>
                     </Grid>
 
-                    <!-- ===== Execucao ===== -->
-                    <TextBlock Text="Execucao"
+                    <!-- ===== Execução ===== -->
+                    <TextBlock Text="Execução"
                                Style="{StaticResource DevToolsCardTitle}"
                                Margin="0,4,0,10"/>
 
@@ -189,7 +189,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Acao *"
+                            <TextBlock Text="Ação *"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <ComboBox x:Name="ActionCombo"
                                       Style="{StaticResource DevToolsSelectInput}"/>
@@ -219,7 +219,7 @@
                     </StackPanel>
 
                     <CheckBox x:Name="IsDefaultCheck"
-                              Content="Marcar como configuracao padrao"
+                              Content="Marcar como configuração padrão"
                               Style="{StaticResource DevToolsCheckBox}"
                               Margin="0,0,0,8"/>
 

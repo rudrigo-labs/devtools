@@ -4,7 +4,7 @@
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="OverridesDefaultStyle" Value="True"/>
 
-        <!-- PadrÃ£o visual igual ao TextBox -->
+        <!-- Padrão visual igual ao TextBox -->
         <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource DevToolsBrushBorder}"/>
@@ -61,7 +61,7 @@
                             </Grid>
                         </Border>
 
-                        <!-- Ãrea clicÃ¡vel -->
+                        <!-- Área clicável -->
                         <ToggleButton BorderThickness="0"
                                       IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                       Focusable="False">

@@ -8,14 +8,14 @@
         <Setter Property="BorderBrush" Value="{DynamicResource DevToolsBrushBorder}"/>
         <Setter Property="BorderThickness" Value="1"/>
 
-        <!-- conforto + padrÃ£o -->
+        <!-- conforto + padrão -->
         <Setter Property="FontSize" Value="{DynamicResource DevToolsFontSize.Input}"/>
         <Setter Property="MinHeight" Value="38"/>
         <Setter Property="Padding" Value="10,8"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="CaretBrush" Value="White"/>
 
-        <!-- se tiver scroll, jÃ¡ usa o estilo bonito -->
+        <!-- se tiver scroll, já usa o estilo bonito -->
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden"/>
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Hidden"/>
 

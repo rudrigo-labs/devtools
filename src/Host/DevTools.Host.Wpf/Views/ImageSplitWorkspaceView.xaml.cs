@@ -51,7 +51,7 @@ public partial class ImageSplitWorkspaceView : System.Windows.Controls.UserContr
         if (!ValidationUiService.ValidateRequiredFields(
             out var errorMessage,
             ValidationUiService.RequiredPath("Arquivo de imagem", InputPathSelector, InputPathSelector.SelectedPath),
-            ValidationUiService.RequiredPath("Pasta de saÃ­da", OutputDirectorySelector, OutputDirectorySelector.SelectedPath)))
+            ValidationUiService.RequiredPath("Pasta de saída", OutputDirectorySelector, OutputDirectorySelector.SelectedPath)))
         {
             ValidationUiService.ShowInline(ExecutionStatusText, errorMessage);
             return;
@@ -86,12 +86,12 @@ public partial class ImageSplitWorkspaceView : System.Windows.Controls.UserContr
                 return;
             }
 
-            ExecutionStatusText.Text = $"ConcluÃ­do. {data.Outputs.Count} arquivo(s) gerado(s) em {data.OutputDirectory}";
+            ExecutionStatusText.Text = $"Concluído. {data.Outputs.Count} arquivo(s) gerado(s) em {data.OutputDirectory}";
         }
         catch (OperationCanceledException)
         {
             ValidationUiService.ClearInline(ExecutionStatusText);
-            ExecutionStatusText.Text = "ExecuÃ§Ã£o cancelada.";
+            ExecutionStatusText.Text = "Execução cancelada.";
         }
         finally
         {
