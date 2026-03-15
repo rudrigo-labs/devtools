@@ -40,7 +40,6 @@
                                 ShowDelete="True"
                                 ShowCancel="True"
                                 ShowHelp="True"
-                                HelpText="No modo Configurar, salve conexão SSH e mapeamento. No modo Execução, use Iniciar túnel para abrir e Parar túnel para encerrar."
                                 ActionNew="ActionNew_Click"
                                 ActionSave="ActionSave_Click"
                                 ActionDelete="ActionDelete_Click"
@@ -98,20 +97,6 @@
                         <TextBlock Text="Modo configuração: preencha os campos abaixo para salvar uma configuração reutilizável."
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    TextWrapping="Wrap"/>
-                    </Border>
-
-                    <Border BorderThickness="1"
-                            CornerRadius="4"
-                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                            Background="{DynamicResource DevToolsSurface}"
-                            Padding="10,8"
-                            Margin="0,0,0,12">
-                        <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}"
-                                   TextWrapping="Wrap">
-                            Como usar: informe host/usuário/chave SSH e o mapeamento local-remoto.
-                            Exemplo comum: localhost:14331 para 127.0.0.1:1433 no servidor remoto.
-                            Clique em Iniciar túnel para abrir o encaminhamento.
-                        </TextBlock>
                     </Border>
 
                     <!-- ===== Campos de configuração (modo Configuração) ===== -->
@@ -314,3 +299,4 @@
         </Grid>
     </Grid>
 </UserControl>
+

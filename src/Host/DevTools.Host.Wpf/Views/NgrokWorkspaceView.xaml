@@ -40,7 +40,6 @@
                                 ShowDelete="True"
                                 ShowCancel="False"
                                 ShowHelp="True"
-                                HelpText="No modo Configurar, salve auth token e padrões. No modo Execução, informe protocolo/porta e clique em Iniciar túnel."
                                 ActionNew="ActionNew_Click"
                                 ActionSave="ActionSave_Click"
                                 ActionDelete="ActionDelete_Click"
@@ -98,19 +97,6 @@
                         <TextBlock Text="Modo configuração: preencha os campos abaixo para salvar uma configuração reutilizável."
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    TextWrapping="Wrap"/>
-                    </Border>
-
-                    <Border BorderThickness="1"
-                            CornerRadius="4"
-                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                            Background="{DynamicResource DevToolsSurface}"
-                            Padding="10,8"
-                            Margin="0,0,0,12">
-                        <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}"
-                                   TextWrapping="Wrap">
-                            Como usar: configure o AuthToken uma vez. Em execução, escolha protocolo e porta local da aplicação.
-                            Clique em Iniciar túnel para gerar URL publica. Use Listar túneis para atualizar a lista.
-                        </TextBlock>
                     </Border>
 
                     <!-- ===== Campos de configuração (modo Configuração) ===== -->
@@ -286,3 +272,4 @@
         </Grid>
     </Grid>
 </UserControl>
+

@@ -31,24 +31,12 @@
                             ShowBack="True"
                             SaveText="Buscar"
                             ShowHelp="True"
-                            HelpText="Defina pasta raiz e padrão. Use Regex para expressoes avancadas. Use globs para incluir/excluir arquivos. Clique em Buscar."
                             ActionSave="ActionExecute_Click"
                             ActionBack="ActionBack_Click"/>
 
         <!-- BODY -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="0,0,0,0">
-
-                <Border BorderThickness="1" CornerRadius="4"
-                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                        Background="{DynamicResource DevToolsSurface}"
-                        Padding="10,8" Margin="0,0,0,12">
-                    <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
-                        Como usar: informe a pasta raiz e o texto a procurar. Regex aceita padrões avancados.
-                        Case sensitive diferencia maiusculas/minusculas. Palavra inteira evita partes de palavra.
-                        Globs são filtros como **/*.cs e **/bin/**.
-                    </TextBlock>
-                </Border>
 
                 <c:PathSelector x:Name="RootPathSelector" Title="Pasta raiz *" IsFolderPicker="True" Margin="0,0,0,12"/>
 
@@ -171,3 +159,4 @@
     </Grid>
     </Grid>
 </UserControl>
+
