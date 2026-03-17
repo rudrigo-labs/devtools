@@ -67,18 +67,25 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
             return;
 
         SetMode(MigrationsWorkspaceMode.Configuration, "Modo configuração ativado.");
-        ResetConfigurationState();
+        if (_currentEntity is null)
+            CreateNewEntity();
+
+        _isConfigurationDraft = true;
+        ClearInlineValidationStates();
+        ValidationUiService.ClearInline(ExecutionStatusText);
+        ApplyModeState();
     }
 
     // -- Navegação de modo -----------------------------------------------------
 
     private void SwitchToExecution_Click(object sender, RoutedEventArgs e) => SetMode(MigrationsWorkspaceMode.Execution, "Modo execução ativado.");
-    private void SwitchToConfiguration_Click(object sender, RoutedEventArgs e) => SetMode(MigrationsWorkspaceMode.Configuration, "Modo configuração ativado.");
+    private void SwitchToConfiguration_Click(object sender, RoutedEventArgs e) => ActivateConfigurationMode();
 
     private void SetMode(MigrationsWorkspaceMode mode, string status)
     {
         if (_isExecuting) return;
         _currentMode = mode;
+        ValidationUiService.ClearInline(ExecutionStatusText);
         ExecutionStatusText.Text = status;
         ApplyModeState();
     }
@@ -414,6 +421,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         _currentEntity = new MigrationsEntity();
         SetSelectedOption(null);
         BindEntityToForm(_currentEntity);
+        ClearInlineValidationStates();
         ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
     }
@@ -428,6 +436,15 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
             : Visibility.Collapsed;
     }
 
+
+    private void ClearInlineValidationStates()
+    {
+        ValidationUiService.SetControlInvalid(NameInput, false);
+        ValidationUiService.SetPathSelectorInvalid(RootPathSelector, false);
+        ValidationUiService.SetPathSelectorInvalid(StartupProjectSelector, false);
+        ValidationUiService.SetControlInvalid(DbContextInput, false);
+        ValidationUiService.SetControlInvalid(MigrationNameInput, false);
+    }
     private void ApplyModeState()
     {
         var inConfiguration = _currentMode == MigrationsWorkspaceMode.Configuration;

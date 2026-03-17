@@ -11,6 +11,15 @@ public partial class MainWindow : Window
     private const uint MonitorDefaultToNearest = 0x00000002;
     private const string FerramentasTag = "Ferramentas";
     private const string ConfiguracoesTag = "Configurações";
+    private static readonly string[] ResetOnHomeToolTags =
+    [
+        "Snapshot",
+        "Harvest",
+        "Organizer",
+        "Migrations",
+        "SshTunnel",
+        "Ngrok"
+    ];
 
     private enum WorkspaceIntent { Default, Configuration, Execution }
 
@@ -104,6 +113,14 @@ public partial class MainWindow : Window
         if (string.Equals(_activeToolTag, tag, StringComparison.OrdinalIgnoreCase) && _activeIntent == intent)
             return;
 
+        var goingToFerramentas = string.Equals(tag, FerramentasTag, StringComparison.OrdinalIgnoreCase);
+        var leavingConfigurationContext =
+            _activeIntent == WorkspaceIntent.Configuration
+            || string.Equals(_activeToolTag, ConfiguracoesTag, StringComparison.OrdinalIgnoreCase);
+
+        if (goingToFerramentas && leavingConfigurationContext)
+            ResetConfigurationWorkspacesToInitialState();
+
         if (!_toolRegistry.TryGetValue(tag, out var factory))
             return;
 
@@ -116,6 +133,17 @@ public partial class MainWindow : Window
         WorkspaceHost.Content = workspace;
         UpdateHeaderAndStatus(tag, intent);
         UpdateNavStyles();
+    }
+
+    private void ResetConfigurationWorkspacesToInitialState()
+    {
+        foreach (var toolTag in ResetOnHomeToolTags)
+        {
+            if (!_toolRegistry.TryGetValue(toolTag, out var factory))
+                continue;
+
+            ApplyWorkspaceIntent(factory(), WorkspaceIntent.Execution);
+        }
     }
 
     public void OpenFerramentasHome()

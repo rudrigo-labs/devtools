@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using DevTools.Host.Wpf.Components;
 
 namespace DevTools.Host.Wpf.Services;
@@ -11,6 +12,7 @@ namespace DevTools.Host.Wpf.Services;
 public static class ValidationUiService
 {
     private const string RequiredFieldsPrefix = "Os campos abaixo não podem ficar em branco:\n- ";
+    private static readonly ConditionalWeakTable<System.Windows.Controls.Control, ValidationTooltipState> ValidationTooltipStates = new();
 
     public static void ShowInline(DevToolsToolFrame frame, string message)
     {
@@ -41,7 +43,7 @@ public static class ValidationUiService
     private static string Format(string message)
     {
         if (string.IsNullOrWhiteSpace(message))
-            return "Validação invalida.";
+            return "Validação inválida.";
 
         var singleLine = message
             .Replace("\r", " ")
@@ -63,7 +65,11 @@ public static class ValidationUiService
             || statusText.StartsWith("Campos obrigatórios:", StringComparison.OrdinalIgnoreCase);
     }
 
-    public static void SetControlInvalid(System.Windows.Controls.Control? control, bool invalid)
+    public static void SetControlInvalid(
+        System.Windows.Controls.Control? control,
+        bool invalid,
+        bool showAsterisk = true,
+        string? tooltipMessage = null)
     {
         if (control is null) return;
 
@@ -74,29 +80,47 @@ public static class ValidationUiService
                 control.BorderBrush = errorBrush;
 
             control.BorderThickness = new System.Windows.Thickness(1.5);
-            SetValidationAsterisk(control, true);
+            SetValidationAsterisk(control, showAsterisk);
+            SetValidationTooltip(control, tooltipMessage);
             return;
         }
 
         control.ClearValue(System.Windows.Controls.Control.BorderBrushProperty);
         control.ClearValue(System.Windows.Controls.Control.BorderThicknessProperty);
         SetValidationAsterisk(control, false);
+        ClearValidationTooltip(control);
     }
 
-    public static void SetPathSelectorInvalid(PathSelector? selector, bool invalid)
+    public static void SetPathSelectorInvalid(
+        PathSelector? selector,
+        bool invalid,
+        bool showAsterisk = true,
+        string? tooltipMessage = null)
     {
         if (selector is null) return;
         var textBox = selector.FindName("PathInput") as System.Windows.Controls.TextBox;
-        SetControlInvalid(textBox, invalid);
+        SetControlInvalid(textBox, invalid, showAsterisk, tooltipMessage);
     }
 
     public readonly record struct RequiredField(string Label, bool IsMissing, Action<bool> ApplyState);
 
-    public static RequiredField RequiredControl(string label, System.Windows.Controls.Control? control, string? value)
-        => new(label, string.IsNullOrWhiteSpace(value), invalid => SetControlInvalid(control, invalid));
+    public static RequiredField RequiredControl(
+        string label,
+        System.Windows.Controls.Control? control,
+        string? value,
+        bool showAsterisk = true)
+        => new(label,
+            string.IsNullOrWhiteSpace(value),
+            invalid => SetControlInvalid(control, invalid, showAsterisk, $"{label} é obrigatório."));
 
-    public static RequiredField RequiredPath(string label, PathSelector? selector, string? value)
-        => new(label, string.IsNullOrWhiteSpace(value), invalid => SetPathSelectorInvalid(selector, invalid));
+    public static RequiredField RequiredPath(
+        string label,
+        PathSelector? selector,
+        string? value,
+        bool showAsterisk = true)
+        => new(label,
+            string.IsNullOrWhiteSpace(value),
+            invalid => SetPathSelectorInvalid(selector, invalid, showAsterisk, $"{label} é obrigatório."));
 
     public static bool ValidateRequiredFields(out string errorMessage, params RequiredField[] fields)
     {
@@ -118,8 +142,55 @@ public static class ValidationUiService
         return true;
     }
 
+    private static void SetValidationTooltip(System.Windows.Controls.Control control, string? tooltipMessage)
+    {
+        if (string.IsNullOrWhiteSpace(tooltipMessage))
+            return;
+
+        if (HasTooltipContent(control.ToolTip))
+            return;
+
+        var state = ValidationTooltipStates.GetOrCreateValue(control);
+        if (!state.IsInjected)
+        {
+            state.PreviousTooltip = control.ToolTip;
+            state.IsInjected = true;
+        }
+
+        control.ToolTip = tooltipMessage;
+    }
+
+    private static void ClearValidationTooltip(System.Windows.Controls.Control control)
+    {
+        if (!ValidationTooltipStates.TryGetValue(control, out var state) || !state.IsInjected)
+            return;
+
+        control.ToolTip = state.PreviousTooltip;
+        ValidationTooltipStates.Remove(control);
+    }
+
+    private static bool HasTooltipContent(object? tooltip)
+    {
+        if (tooltip is null)
+            return false;
+
+        if (tooltip is string text)
+            return !string.IsNullOrWhiteSpace(text);
+
+        if (tooltip is System.Windows.Controls.ToolTip toolTip)
+        {
+            if (toolTip.Content is null)
+                return false;
+            if (toolTip.Content is string toolTipText)
+                return !string.IsNullOrWhiteSpace(toolTipText);
+            return true;
+        }
+
+        return true;
+    }
+
     // -------------------------------------------------------------------------
-    // Adorners — gerenciados por elemento individual via tag, sem dicionário estático.
+    // Adorners - gerenciados por elemento individual via tag, sem dicionário estático.
     // -------------------------------------------------------------------------
 
     private static void SetValidationAsterisk(System.Windows.UIElement element, bool show)
@@ -159,33 +230,41 @@ public static class ValidationUiService
 
     private sealed class ValidationAsteriskAdorner : System.Windows.Documents.Adorner
     {
+        private const double AsteriskFontSize = 20;
+        private const double RightPadding = 12;
         private readonly System.Windows.Controls.TextBlock _asterisk;
-        private readonly System.Windows.Media.VisualCollection _visuals;
+        private readonly System.Windows.Media.VisualCollection? _visuals;
 
         public ValidationAsteriskAdorner(System.Windows.UIElement adornedElement)
             : base(adornedElement)
         {
-            IsHitTestVisible = false;
             _visuals = new System.Windows.Media.VisualCollection(this);
             _asterisk = new System.Windows.Controls.TextBlock
             {
                 Text = "*",
-                FontSize = 16,
+                FontSize = AsteriskFontSize,
                 FontWeight = System.Windows.FontWeights.Bold,
                 Foreground = ResolveErrorBrush(),
                 IsHitTestVisible = false
             };
             _visuals.Add(_asterisk);
+            IsHitTestVisible = false;
         }
 
-        protected override int VisualChildrenCount => _visuals.Count;
+        protected override int VisualChildrenCount => _visuals?.Count ?? 0;
 
-        protected override System.Windows.Media.Visual GetVisualChild(int index) => _visuals[index];
+        protected override System.Windows.Media.Visual GetVisualChild(int index) =>
+            _visuals is not null
+                ? _visuals[index]
+                : throw new ArgumentOutOfRangeException(nameof(index));
 
         protected override System.Windows.Size ArrangeOverride(System.Windows.Size finalSize)
         {
-            var x = Math.Max(0, finalSize.Width - 10);
-            _asterisk.Arrange(new System.Windows.Rect(new System.Windows.Point(x, -8), new System.Windows.Size(12, 16)));
+            _asterisk.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
+            var size = _asterisk.DesiredSize;
+            var x = Math.Max(0, finalSize.Width - size.Width - RightPadding);
+            var y = Math.Max(0, (finalSize.Height - size.Height) / 2);
+            _asterisk.Arrange(new System.Windows.Rect(new System.Windows.Point(x, y), size));
             return finalSize;
         }
 
@@ -196,4 +275,12 @@ public static class ValidationUiService
             return System.Windows.Media.Brushes.Red;
         }
     }
+
+    private sealed class ValidationTooltipState
+    {
+        public object? PreviousTooltip { get; set; }
+        public bool IsInjected { get; set; }
+    }
 }
+
+

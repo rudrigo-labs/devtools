@@ -67,7 +67,14 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
             return;
 
         SetMode(HarvestWorkspaceMode.Configuration, "Modo configuração ativado.");
-        ResetConfigurationState();
+        if (_currentEntity is null)
+            _currentEntity = CreateUnboundExecutionEntity();
+
+        _isConfigurationDraft = true;
+        BindEntityToForm(_currentEntity);
+        ClearInlineValidationStates();
+        ValidationUiService.ClearInline(ExecutionStatusText);
+        ApplyModeState();
     }
 
     private async Task ReloadEntitiesAsync()
@@ -407,11 +414,11 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
     private void SetMode(HarvestWorkspaceMode mode, string? statusMessage = null)
     {
         _currentMode = mode;
+        ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
 
         if (!string.IsNullOrWhiteSpace(statusMessage))
         {
-            ValidationUiService.ClearInline(ExecutionStatusText);
             ExecutionStatusText.Text = statusMessage;
         }
     }
@@ -552,6 +559,7 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
         _currentEntity = CreateUnboundExecutionEntity();
         SetSelectedConfigurationOption(GetNoConfigurationOption());
         BindEntityToForm(_currentEntity);
+        ClearInlineValidationStates();
         ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
     }

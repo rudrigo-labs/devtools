@@ -68,7 +68,14 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
             return;
 
         SetMode(SnapshotWorkspaceMode.Configuration, "Modo configuração ativado.");
-        ResetConfigurationState();
+        if (_currentEntity is null)
+            _currentEntity = CreateUnboundExecutionEntity();
+
+        _isConfigurationDraft = true;
+        BindEntityToForm(_currentEntity);
+        ClearInlineValidationStates();
+        ValidationUiService.ClearInline(ExecutionStatusText);
+        ApplyModeState();
     }
 
     private async Task ReloadEntitiesAsync()
@@ -375,8 +382,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
             !ValidationUiService.ValidateRequiredFields(
                 out errorMessage,
                 ValidationUiService.RequiredPath("Pasta do projeto", RootPathSelector, RootPathSelector.SelectedPath),
-                ValidationUiService.RequiredPath("Pasta de saída", OutputBasePathSelector, OutputBasePathSelector.SelectedPath),
-                ValidationUiService.RequiredControl("Diretórios ignorados", IgnoredDirectoriesInput, IgnoredDirectoriesInput.Text)))
+                ValidationUiService.RequiredPath("Pasta de sa�da", OutputBasePathSelector, OutputBasePathSelector.SelectedPath)))
         {
             return false;
         }
@@ -385,10 +391,8 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
             !ValidationUiService.ValidateRequiredFields(
                 out errorMessage,
                 ValidationUiService.RequiredControl("Nome", NameInput, NameInput.Text),
-                ValidationUiService.RequiredControl("Descrição", DescriptionInput, DescriptionInput.Text),
                 ValidationUiService.RequiredPath("Pasta do projeto", RootPathSelector, RootPathSelector.SelectedPath),
-                ValidationUiService.RequiredPath("Pasta de saída", OutputBasePathSelector, OutputBasePathSelector.SelectedPath),
-                ValidationUiService.RequiredControl("Diretórios ignorados", IgnoredDirectoriesInput, IgnoredDirectoriesInput.Text)))
+                ValidationUiService.RequiredPath("Pasta de sa�da", OutputBasePathSelector, OutputBasePathSelector.SelectedPath)))
         {
             return false;
         }
@@ -423,11 +427,11 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
     private void SetMode(SnapshotWorkspaceMode mode, string? statusMessage = null)
     {
         _currentMode = mode;
+        ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
 
         if (!string.IsNullOrWhiteSpace(statusMessage))
         {
-            ValidationUiService.ClearInline(ExecutionStatusText);
             ExecutionStatusText.Text = statusMessage;
         }
     }
@@ -596,6 +600,7 @@ public partial class SnapshotWorkspaceView : System.Windows.Controls.UserControl
         _currentEntity = CreateUnboundExecutionEntity();
         SetSelectedConfigurationOption(GetNoConfigurationOption());
         BindEntityToForm(_currentEntity);
+        ClearInlineValidationStates();
         ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
     }
