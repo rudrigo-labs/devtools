@@ -65,18 +65,27 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
             return;
 
         SetMode(SshTunnelWorkspaceMode.Configuration, "Modo configuração ativado.");
-        ResetConfigurationState();
+        if (_currentEntity is null)
+            CreateNewEntity();
+
+        _isConfigurationDraft = true;
+        BindEntityToForm(_currentEntity!);
+        RefreshConfigSummary();
+        ClearInlineValidationStates();
+        ValidationUiService.ClearInline(ExecutionStatusText);
+        ApplyModeState();
     }
 
     // -- Navegação de modo -----------------------------------------------------
 
     private void SwitchToExecution_Click(object sender, RoutedEventArgs e) => SetMode(SshTunnelWorkspaceMode.Execution, "Modo execução ativado.");
-    private void SwitchToConfiguration_Click(object sender, RoutedEventArgs e) => SetMode(SshTunnelWorkspaceMode.Configuration, "Modo configuração ativado.");
+    private void SwitchToConfiguration_Click(object sender, RoutedEventArgs e) => ActivateConfigurationMode();
 
     private void SetMode(SshTunnelWorkspaceMode mode, string status)
     {
         if (_isExecuting) return;
         _currentMode = mode;
+        ValidationUiService.ClearInline(ExecutionStatusText);
         ExecutionStatusText.Text = status;
         ApplyModeState();
     }
@@ -422,11 +431,19 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
         _currentEntity = new SshTunnelEntity();
         SetSelectedOption(null);
         BindEntityToForm(_currentEntity);
+        ClearInlineValidationStates();
         RefreshConfigSummary();
         ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
     }
 
+
+    private void ClearInlineValidationStates()
+    {
+        ValidationUiService.SetControlInvalid(NameInput, false);
+        ValidationUiService.SetControlInvalid(SshHostInput, false);
+        ValidationUiService.SetControlInvalid(SshUserInput, false);
+    }
     private void ApplyModeState()
     {
         var inConfiguration = _currentMode == SshTunnelWorkspaceMode.Configuration;

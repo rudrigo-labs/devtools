@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\DevTools.Core\DevTools.Core.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.Snapshot\DevTools.Snapshot.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.Harvest\DevTools.Harvest.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.Organizer\DevTools.Organizer.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.Migrations\DevTools.Migrations.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.SSHTunnel\DevTools.SSHTunnel.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.Ngrok\DevTools.Ngrok.csproj" />
+  </ItemGroup>
+
+</Project>

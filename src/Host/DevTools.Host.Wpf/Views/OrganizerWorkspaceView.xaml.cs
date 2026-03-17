@@ -73,7 +73,14 @@ public partial class OrganizerWorkspaceView : System.Windows.Controls.UserContro
             return;
 
         SetMode(OrganizerWorkspaceMode.Configuration, "Modo configuração ativado.");
-        ResetConfigurationState();
+        if (_currentEntity is null)
+            _currentEntity = CreateUnboundExecutionEntity();
+
+        _isConfigurationDraft = true;
+        BindEntityToForm(_currentEntity);
+        ClearInlineValidationStates();
+        ValidationUiService.ClearInline(ExecutionStatusText);
+        ApplyModeState();
     }
 
     private async Task ReloadEntitiesAsync()
@@ -583,11 +590,11 @@ public partial class OrganizerWorkspaceView : System.Windows.Controls.UserContro
     private void SetMode(OrganizerWorkspaceMode mode, string? statusMessage = null)
     {
         _currentMode = mode;
+        ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
 
         if (!string.IsNullOrWhiteSpace(statusMessage))
         {
-            ValidationUiService.ClearInline(ExecutionStatusText);
             ExecutionStatusText.Text = statusMessage;
         }
     }
@@ -780,6 +787,7 @@ public partial class OrganizerWorkspaceView : System.Windows.Controls.UserContro
         _currentEntity = CreateUnboundExecutionEntity();
         SetSelectedConfigurationOption(GetNoConfigurationOption());
         BindEntityToForm(_currentEntity);
+        ClearInlineValidationStates();
         ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
     }

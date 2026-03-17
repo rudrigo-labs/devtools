@@ -55,17 +55,25 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
     public void ActivateConfigurationMode()
     {
         SetMode(NgrokWorkspaceMode.Configuration, "Modo configuração ativado.");
-        ResetConfigurationState();
+        if (_currentEntity is null)
+            CreateNewEntity();
+
+        _isConfigurationDraft = true;
+        BindEntityToForm(_currentEntity!);
+        ClearInlineValidationStates();
+        ValidationUiService.ClearInline(ExecutionStatusText);
+        ApplyModeState();
     }
 
     // -- Navegação de modo -----------------------------------------------------
 
     private void SwitchToExecution_Click(object sender, RoutedEventArgs e) => SetMode(NgrokWorkspaceMode.Execution, "Modo execução ativado.");
-    private void SwitchToConfiguration_Click(object sender, RoutedEventArgs e) => SetMode(NgrokWorkspaceMode.Configuration, "Modo configuração ativado.");
+    private void SwitchToConfiguration_Click(object sender, RoutedEventArgs e) => ActivateConfigurationMode();
 
     private void SetMode(NgrokWorkspaceMode mode, string status)
     {
         _currentMode = mode;
+        ValidationUiService.ClearInline(ExecutionStatusText);
         ExecutionStatusText.Text = status;
         ApplyModeState();
     }
@@ -410,10 +418,17 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
         _currentEntity = new NgrokEntity();
         SetSelectedOption(null);
         BindEntityToForm(_currentEntity);
+        ClearInlineValidationStates();
         ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
     }
 
+
+    private void ClearInlineValidationStates()
+    {
+        ValidationUiService.SetControlInvalid(NameInput, false);
+        ValidationUiService.SetControlInvalid(StartPortInput, false);
+    }
     private void ApplyModeState()
     {
         var inConfiguration = _currentMode == NgrokWorkspaceMode.Configuration;
