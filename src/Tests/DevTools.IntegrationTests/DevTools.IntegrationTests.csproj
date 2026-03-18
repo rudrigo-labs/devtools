@@ -26,6 +26,10 @@
     <ProjectReference Include="..\..\Tools\DevTools.Migrations\DevTools.Migrations.csproj" />
     <ProjectReference Include="..\..\Tools\DevTools.SSHTunnel\DevTools.SSHTunnel.csproj" />
     <ProjectReference Include="..\..\Tools\DevTools.Ngrok\DevTools.Ngrok.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.Rename\DevTools.Rename.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.SearchText\DevTools.SearchText.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.Utf8Convert\DevTools.Utf8Convert.csproj" />
+    <ProjectReference Include="..\..\Tools\DevTools.Image\DevTools.Image.csproj" />
   </ItemGroup>
 
 </Project>
