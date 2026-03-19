@@ -11,6 +11,7 @@ public partial class MainWindow : Window
     private const uint MonitorDefaultToNearest = 0x00000002;
     private const string FerramentasTag = "Ferramentas";
     private const string ConfiguracoesTag = "Configurações";
+    private const string GeneralSettingsTag = "GeneralSettings";
     private static readonly string[] ResetOnHomeToolTags =
     [
         "Snapshot",
@@ -32,6 +33,7 @@ public partial class MainWindow : Window
     public MainWindow(
         HomeLauncherView homeLauncherView,
         ConfigurationLauncherView configurationLauncherView,
+        GeneralSettingsView generalSettingsView,
         SnapshotWorkspaceView snapshotWorkspaceView,
         RenameWorkspaceView renameWorkspaceView,
         HarvestWorkspaceView harvestWorkspaceView,
@@ -50,6 +52,7 @@ public partial class MainWindow : Window
         {
             [FerramentasTag] = () => homeLauncherView,
             [ConfiguracoesTag] = () => configurationLauncherView,
+            [GeneralSettingsTag] = () => generalSettingsView,
             ["Snapshot"] = () => snapshotWorkspaceView,
             ["Rename"] = () => renameWorkspaceView,
             ["Harvest"] = () => harvestWorkspaceView,
@@ -202,6 +205,13 @@ public partial class MainWindow : Window
             MainStatusText.Text = "Selecione uma ferramenta para editar configurações.";
             return;
         }
+        if (string.Equals(tag, GeneralSettingsTag, StringComparison.OrdinalIgnoreCase))
+        {
+            ActiveToolLabel.Text = "Configurações Gerais";
+            MainStatusText.Text = "Edite parâmetros globais do aplicativo.";
+            return;
+        }
+
 
         var suffix = intent switch
         {
@@ -240,6 +250,7 @@ public partial class MainWindow : Window
         SetNavActive(NavExecNotes, IsToolActive("Notes", WorkspaceIntent.Execution));
 
         SetNavActive(NavCfgSnapshot, IsToolActive("Snapshot", WorkspaceIntent.Configuration));
+        SetNavActive(NavCfgGeneral, IsToolActive(GeneralSettingsTag, WorkspaceIntent.Configuration));
         SetNavActive(NavCfgHarvest, IsToolActive("Harvest", WorkspaceIntent.Configuration));
         SetNavActive(NavCfgOrganizer, IsToolActive("Organizer", WorkspaceIntent.Configuration));
         SetNavActive(NavCfgMigrations, IsToolActive("Migrations", WorkspaceIntent.Configuration));

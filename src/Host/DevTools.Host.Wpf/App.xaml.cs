@@ -91,6 +91,7 @@ public partial class App : System.Windows.Application
     {
         // Configuração estática da aplicação
         services.AddSingleton(appSettings);
+        services.AddSingleton<AppSettingsFileService>();
 
         // Infraestrutura — DbContextOptions resolvido uma única vez via factory.
         services.AddSingleton<SqlitePathProvider>();
@@ -159,6 +160,7 @@ public partial class App : System.Windows.Application
         // Host WPF
         services.AddSingleton<HomeLauncherView>();
         services.AddSingleton<ConfigurationLauncherView>();
+        services.AddSingleton<GeneralSettingsView>();
         services.AddSingleton<RenameWorkspaceView>();
         services.AddSingleton<SnapshotWorkspaceView>();
         services.AddSingleton<HarvestWorkspaceView>();

@@ -128,6 +128,16 @@
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
             <WrapPanel Orientation="Horizontal" Margin="16,10,10,10">
+                <Button Style="{StaticResource ConfigCardButtonStyle}" Tag="GeneralSettings" Click="OpenTool_Click">
+                    <StackPanel>
+                        <Border Style="{StaticResource ConfigCardIconBadgeStyle}">
+                            <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Geral" Style="{StaticResource ConfigCardTitleStyle}"/>
+                        <TextBlock Text="Parâmetros globais do aplicativo definidos no appsettings.json." Style="{StaticResource ConfigCardDescriptionStyle}"/>
+                    </StackPanel>
+                </Button>
+
                 <Button Style="{StaticResource ConfigCardButtonStyle}" Tag="Snapshot" Click="OpenTool_Click">
                     <StackPanel>
                         <Border Style="{StaticResource ConfigCardIconBadgeStyle}">

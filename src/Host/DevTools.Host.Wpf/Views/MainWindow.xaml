@@ -213,6 +213,7 @@
                                                   ToolTip="Abre o painel de configurações persistentes."
                                                   Tag="Configurações"
                                                   Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgGeneral" IsSubItem="True" Content="Geral" IconGlyph="&#xE713;" ToolTip="Configura parâmetros globais do aplicativo." Tag="Cfg:GeneralSettings" Click="NavButton_Click"/>
                                 <c:SidebarNavItem x:Name="NavCfgSnapshot" IsSubItem="True" Content="Snapshot" IconGlyph="&#xE7C3;" ToolTip="Configura perfis de snapshot." Tag="Cfg:Snapshot" Click="NavButton_Click"/>
                                 <c:SidebarNavItem x:Name="NavCfgHarvest" IsSubItem="True" Content="Harvest" IconGlyph="&#xE9D2;" ToolTip="Configura perfis de mineração de código." Tag="Cfg:Harvest" Click="NavButton_Click"/>
                                 <c:SidebarNavItem x:Name="NavCfgOrganizer" IsSubItem="True" Content="Organizer" IconGlyph="&#xE8A1;" ToolTip="Configura categorias e regras do Organizer." Tag="Cfg:Organizer" Click="NavButton_Click"/>
