@@ -34,7 +34,9 @@
 
             <!-- ==================== ACTION BAR ==================== -->
             <c:ActionBarControl Grid.Row="1"
-                                x:Name="Actions" ShowHistory="True" ActionHistory="HistoryButton_Click"
+                                x:Name="Actions"
+                                ShowHistory="True"
+                                ActionHistory="HistoryButton_Click"
                                 ShowNew="True"
                                 ShowSave="True"
                                 ShowDelete="True"
@@ -61,7 +63,8 @@
                                    Style="{StaticResource DevToolsCardTitle}"/>
                         <Border Margin="8,0,0,0"
                                 VerticalAlignment="Center"
-                                Width="16" Height="16"
+                                Width="16"
+                                Height="16"
                                 CornerRadius="8"
                                 BorderThickness="1"
                                 BorderBrush="{DynamicResource DevToolsTextSecondary}"
@@ -131,7 +134,7 @@
                                    Style="{StaticResource DevToolsInputLabel}"/>
                         <TextBox x:Name="AuthTokenInput"
                                  Style="{StaticResource DevToolsTextInput}"
-                                 ToolTip="Token de autenticacao do ngrok. Usado em: ngrok config add-authtoken"/>
+                                 ToolTip="Token de autenticação do ngrok. Usado em: ngrok config add-authtoken"/>
                     </StackPanel>
 
                     <c:PathSelector x:Name="ExecutablePathSelector"
@@ -153,7 +156,7 @@
                         <TextBox x:Name="BaseUrlInput"
                                  Style="{StaticResource DevToolsTextInput}"
                                  Text="http://127.0.0.1:4040/"
-                                 ToolTip="Endereco local da API ngrok. Padrão: http://127.0.0.1:4040/"/>
+                                 ToolTip="Endereço local da API ngrok. Padrão: http://127.0.0.1:4040/"/>
                     </StackPanel>
 
                     <CheckBox x:Name="IsDefaultCheck"
@@ -167,56 +170,47 @@
                                Margin="0,4,0,10"/>
 
                     <Grid Margin="0,0,0,12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="8"/>
-                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Protocolo"
-                                       Style="{StaticResource DevToolsInputLabel}"/>
-                            <ComboBox x:Name="ProtocolCombo"
-                                      Style="{StaticResource DevToolsSelectInput}"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="Porta *"
-                                       Style="{StaticResource DevToolsInputLabel}"/>
-                            <TextBox x:Name="StartPortInput"
-                                     Style="{StaticResource DevToolsTextInput}"
-                                     ToolTip="Ex: 5000"/>
-                        </StackPanel>
-                        <Button Grid.Column="4"
-                                Content="Iniciar túnel"
-                                Style="{StaticResource DevToolsPrimaryButton}"
-                                VerticalAlignment="Bottom"
-                                Click="StartHttp_Click"/>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="Protocolo"
+                                   Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="2"
+                                   Text="Porta *"
+                                   Style="{StaticResource DevToolsInputLabel}"/>
+                        <ComboBox x:Name="ProtocolCombo"
+                                  Grid.Row="1"
+                                  Grid.Column="0"
+                                  Style="{StaticResource DevToolsSelectInput}"/>
+                        <TextBox x:Name="StartPortInput"
+                                 Grid.Row="1"
+                                 Grid.Column="2"
+                                 Height="{Binding ElementName=ProtocolCombo, Path=ActualHeight}"
+                                 Style="{StaticResource DevToolsTextInput}"
+                                 ToolTip="Ex: 5000"/>
                     </Grid>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                        <Button Content="Listar túneis"
-                                Style="{StaticResource DevToolsSecondaryButton}"
-                                Margin="0,0,8,0"
-                                Click="ListTunnels_Click"/>
-                        <Button Content="Status"
-                                Style="{StaticResource DevToolsSecondaryButton}"
-                                Margin="0,0,8,0"
-                                Click="Status_Click"/>
-                        <Button Content="Encerrar tudo"
-                                Style="{StaticResource DevToolsSecondaryButton}"
-                                Click="KillAll_Click"/>
-                    </StackPanel>
 
                     <!-- ===== Túneis ativos ===== -->
                     <Border x:Name="TunnelListPanel"
                             Visibility="Collapsed"
-                            BorderThickness="1" CornerRadius="4"
+                            BorderThickness="1"
+                            CornerRadius="4"
                             BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                            Padding="10,8" Margin="0,0,0,8">
+                            Padding="10,8"
+                            Margin="0,0,0,8">
                         <StackPanel>
                             <TextBlock x:Name="TunnelListHeader"
-                                       FontWeight="SemiBold" FontSize="12"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"
                                        Foreground="{DynamicResource DevToolsTextPrimary}"
                                        Margin="0,0,0,8"/>
                             <ListBox x:Name="TunnelList"
@@ -227,8 +221,10 @@
                                     <DataTemplate>
                                         <Border Background="{DynamicResource DevToolsWindowBackground}"
                                                 BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                                                BorderThickness="1" CornerRadius="4"
-                                                Margin="0,0,0,6" Padding="10,8">
+                                                BorderThickness="1"
+                                                CornerRadius="4"
+                                                Margin="0,0,0,6"
+                                                Padding="10,8">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
@@ -236,11 +232,13 @@
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel>
                                                     <TextBlock Text="{Binding PublicUrl}"
-                                                               FontWeight="SemiBold" FontSize="12"
+                                                               FontWeight="SemiBold"
+                                                               FontSize="12"
                                                                Foreground="{DynamicResource DevToolsTextPrimary}"/>
                                                     <TextBlock Text="{Binding Name}"
                                                                Foreground="{DynamicResource DevToolsTextSecondary}"
-                                                               FontSize="11" Margin="0,2,0,0"/>
+                                                               FontSize="11"
+                                                               Margin="0,2,0,0"/>
                                                 </StackPanel>
                                                 <Button Grid.Column="1"
                                                         Content="Copiar URL"
@@ -260,7 +258,6 @@
                                        Visibility="Collapsed"/>
                         </StackPanel>
                     </Border>
-
                 </StackPanel>
             </ScrollViewer>
 
@@ -272,4 +269,3 @@
         </Grid>
     </Grid>
 </UserControl>
-

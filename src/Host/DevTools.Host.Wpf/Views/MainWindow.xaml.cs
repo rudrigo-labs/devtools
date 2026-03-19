@@ -5,6 +5,7 @@ using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using DevTools.Host.Wpf.Components;
 using DevTools.Host.Wpf.Facades;
+using DevTools.Ngrok.Models;
 using DevTools.SSHTunnel.Models;
 using H.NotifyIcon;
 
@@ -30,6 +31,7 @@ public partial class MainWindow : Window
 
     private readonly Dictionary<string, Func<System.Windows.Controls.UserControl>> _toolRegistry;
     private readonly ISshTunnelFacade _sshTunnelFacade;
+    private readonly INgrokFacade _ngrokFacade;
     private TaskbarIcon? _trayIcon;
     private string _activeToolTag = string.Empty;
     private WorkspaceIntent _activeIntent = WorkspaceIntent.Default;
@@ -52,10 +54,12 @@ public partial class MainWindow : Window
         SshTunnelWorkspaceView sshTunnelWorkspaceView,
         NgrokWorkspaceView ngrokWorkspaceView,
         NotesWorkspaceView notesWorkspaceView,
-        ISshTunnelFacade sshTunnelFacade)
+        ISshTunnelFacade sshTunnelFacade,
+        INgrokFacade ngrokFacade)
     {
         InitializeComponent();
         _sshTunnelFacade = sshTunnelFacade;
+        _ngrokFacade = ngrokFacade;
 
         _toolRegistry = new Dictionary<string, Func<System.Windows.Controls.UserControl>>(StringComparer.OrdinalIgnoreCase)
         {
@@ -352,58 +356,21 @@ public partial class MainWindow : Window
         var menu = new System.Windows.Controls.ContextMenu();
         menu.Opened += TrayContextMenu_Opened;
         _trayIcon.ContextMenu = menu;
-        RebuildTrayMenu();
+        _ = RebuildTrayMenuAsync();
     }
 
-    private void TrayContextMenu_Opened(object sender, RoutedEventArgs e)
-        => RebuildTrayMenu();
+    private async void TrayContextMenu_Opened(object sender, RoutedEventArgs e)
+        => await RebuildTrayMenuAsync().ConfigureAwait(true);
 
-    private void RebuildTrayMenu()
+    private async Task RebuildTrayMenuAsync()
     {
         if (_trayIcon?.ContextMenu is not System.Windows.Controls.ContextMenu menu)
             return;
 
         menu.Items.Clear();
 
-        var activeTunnels = _sshTunnelFacade.ActiveTunnels;
-        var activeCount = activeTunnels.Count;
-        var activeHeader = new System.Windows.Controls.MenuItem
-        {
-            Header = $"T\u00FAneis SSH ativos: {activeCount}",
-            IsEnabled = false
-        };
-        menu.Items.Add(activeHeader);
-        menu.Items.Add(new System.Windows.Controls.Separator());
-
-        if (activeCount == 0)
-        {
-            menu.Items.Add(new System.Windows.Controls.MenuItem
-            {
-                Header = "Nenhum t\u00FAnel ativo",
-                IsEnabled = false
-            });
-        }
-        else
-        {
-            foreach (var tunnel in activeTunnels.OrderBy(x => x.Configuration.Name, StringComparer.OrdinalIgnoreCase))
-            {
-                var label = string.IsNullOrWhiteSpace(tunnel.Configuration.Name)
-                    ? tunnel.Key
-                    : tunnel.Configuration.Name.Trim();
-
-                var headerText = tunnel.ProcessId.HasValue
-                    ? $"Parar {label} (PID {tunnel.ProcessId.Value})"
-                    : $"Parar {label}";
-
-                var stopItem = new System.Windows.Controls.MenuItem
-                {
-                    Header = headerText,
-                    Tag = tunnel.Key
-                };
-                stopItem.Click += TrayStopTunnel_Click;
-                menu.Items.Add(stopItem);
-            }
-        }
+        BuildSshTraySection(menu);
+        await BuildNgrokTraySectionAsync(menu).ConfigureAwait(true);
 
         menu.Items.Add(new System.Windows.Controls.Separator());
 
@@ -414,6 +381,103 @@ public partial class MainWindow : Window
         var exitItem = new System.Windows.Controls.MenuItem { Header = "Encerrar DevTools" };
         exitItem.Click += (_, _) => RequestExitWithConfirmation();
         menu.Items.Add(exitItem);
+    }
+
+    private void BuildSshTraySection(System.Windows.Controls.ContextMenu menu)
+    {
+        var activeTunnels = _sshTunnelFacade.ActiveTunnels;
+        var activeCount = activeTunnels.Count;
+
+        menu.Items.Add(new System.Windows.Controls.MenuItem
+        {
+            Header = $"T\u00FAneis SSH ativos: {activeCount}",
+            IsEnabled = false
+        });
+        menu.Items.Add(new System.Windows.Controls.Separator());
+
+        if (activeCount == 0)
+        {
+            menu.Items.Add(new System.Windows.Controls.MenuItem
+            {
+                Header = "Nenhum t\u00FAnel SSH ativo",
+                IsEnabled = false
+            });
+            menu.Items.Add(new System.Windows.Controls.Separator());
+            return;
+        }
+
+        foreach (var tunnel in activeTunnels.OrderBy(x => x.Configuration.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            var label = string.IsNullOrWhiteSpace(tunnel.Configuration.Name)
+                ? tunnel.Key
+                : tunnel.Configuration.Name.Trim();
+
+            var headerText = tunnel.ProcessId.HasValue
+                ? $"Parar {label} (PID {tunnel.ProcessId.Value})"
+                : $"Parar {label}";
+
+            var stopItem = new System.Windows.Controls.MenuItem
+            {
+                Header = headerText,
+                Tag = tunnel.Key
+            };
+            stopItem.Click += TrayStopTunnel_Click;
+            menu.Items.Add(stopItem);
+        }
+
+        menu.Items.Add(new System.Windows.Controls.Separator());
+    }
+
+    private async Task BuildNgrokTraySectionAsync(System.Windows.Controls.ContextMenu menu)
+    {
+        string baseUrl;
+        IReadOnlyList<TunnelInfo> tunnels;
+
+        try
+        {
+            baseUrl = await _ngrokFacade.ResolveBaseUrlAsync().ConfigureAwait(true);
+            tunnels = await _ngrokFacade.GetActiveTunnelsAsync(baseUrl).ConfigureAwait(true);
+        }
+        catch
+        {
+            baseUrl = "http://127.0.0.1:4040/";
+            tunnels = Array.Empty<TunnelInfo>();
+        }
+
+        menu.Items.Add(new System.Windows.Controls.MenuItem
+        {
+            Header = $"T\u00FAneis Ngrok ativos: {tunnels.Count}",
+            IsEnabled = false
+        });
+        menu.Items.Add(new System.Windows.Controls.Separator());
+
+        if (tunnels.Count == 0)
+        {
+            menu.Items.Add(new System.Windows.Controls.MenuItem
+            {
+                Header = "Nenhum t\u00FAnel Ngrok ativo",
+                IsEnabled = false
+            });
+            return;
+        }
+
+        foreach (var tunnel in tunnels.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            if (string.IsNullOrWhiteSpace(tunnel.Name))
+                continue;
+
+            var label = string.IsNullOrWhiteSpace(tunnel.PublicUrl)
+                ? tunnel.Name
+                : $"{tunnel.Name} ({tunnel.PublicUrl})";
+
+            var item = new System.Windows.Controls.MenuItem
+            {
+                Header = $"Parar {label}",
+                Tag = new NgrokTrayTunnelTag(tunnel.Name, baseUrl)
+            };
+            item.Click += TrayStopNgrokTunnel_Click;
+            menu.Items.Add(item);
+        }
     }
 
     private async void TrayStopTunnel_Click(object sender, RoutedEventArgs e)
@@ -431,7 +495,20 @@ public partial class MainWindow : Window
             ? "T\u00FAnel SSH encerrado pela bandeja do sistema."
             : string.Join(" | ", result.Errors.Select(x => x.Message));
 
-        RebuildTrayMenu();
+        await RebuildTrayMenuAsync().ConfigureAwait(true);
+    }
+
+    private async void TrayStopNgrokTunnel_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.MenuItem { Tag: NgrokTrayTunnelTag tag })
+            return;
+
+        var closed = await _ngrokFacade.CloseTunnelAsync(tag.TunnelName, tag.BaseUrl).ConfigureAwait(true);
+        MainStatusText.Text = closed
+            ? "T\u00FAnel Ngrok encerrado pela bandeja do sistema."
+            : "N\u00E3o foi poss\u00EDvel encerrar o t\u00FAnel Ngrok.";
+
+        await RebuildTrayMenuAsync().ConfigureAwait(true);
     }
 
     private void RestoreFromTray()
@@ -547,4 +624,6 @@ public partial class MainWindow : Window
         public RectNative WorkArea;
         public uint Flags;
     }
+
+    private sealed record NgrokTrayTunnelTag(string TunnelName, string BaseUrl);
 }
