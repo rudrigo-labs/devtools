@@ -7,8 +7,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
-    <ApplicationIcon>Assets\application.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   </PropertyGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Google.Apis.Auth" Version="1.73.0" />
@@ -36,8 +37,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="app-.ico">
+    <None Remove="app.ico" />
+    <Resource Include="app.ico" />
+    <Resource Include="Assets\app.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Resource>
+    <Resource Include="Assets\devtoolslogo-simbolo-ct.png" />
+    <Resource Include="Assets\devtoolslogo-texto-ct.png" />
   </ItemGroup>
 </Project>

@@ -113,25 +113,26 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="0,14,0,0">
+    <Grid Margin="0,28,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,18">
+        <StackPanel Grid.Row="0" Margin="16,0,0,22">
             <TextBlock Text="Ferramentas"
-                       FontSize="22"
-                       FontWeight="SemiBold"
+                       FontSize="24"
+                       FontWeight="Bold"
                        Foreground="{DynamicResource DevToolsTextPrimary}"/>
             <TextBlock Text="Clique em um card para abrir a ferramenta em modo de execução."
                        Foreground="{DynamicResource DevToolsTextSecondary}"
                        FontSize="12"
-                       Margin="0,6,0,0"
+                       Margin="0,8,0,0"
                        TextWrapping="Wrap"/>
             <Border Height="1"
                     Background="{DynamicResource DevToolsBrushBorder}"
-                    Margin="0,12,0,0"/>
+                    Opacity="0.6"
+                    Margin="0,14,0,0"/>
         </StackPanel>
 
         <ScrollViewer Grid.Row="1"
