@@ -302,6 +302,9 @@ public partial class SshTunnelWorkspaceView : System.Windows.Controls.UserContro
                 ExecutionStatusText.Text = action == SshTunnelAction.Start
                     ? "T\u00FAnel SSH iniciado."
                     : "T\u00FAnel SSH encerrado.";
+
+                if (action == SshTunnelAction.Start && Window.GetWindow(this) is MainWindow mainWindow)
+                    await mainWindow.MoveToBackgroundTrayAsync().ConfigureAwait(true);
             }
         }
         catch (OperationCanceledException)

@@ -510,6 +510,9 @@ public partial class NgrokWorkspaceView : System.Windows.Controls.UserControl
                     break;
             }
 
+            if (data.Action == NgrokAction.StartHttp && Window.GetWindow(this) is MainWindow mainWindow)
+                await mainWindow.MoveToBackgroundTrayAsync().ConfigureAwait(true);
+
             await RefreshTunnelListAsync().ConfigureAwait(true);
         }
         catch (Exception ex)

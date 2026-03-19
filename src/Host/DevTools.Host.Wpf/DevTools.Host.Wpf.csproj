@@ -45,6 +45,8 @@
     <Resource Include="Assets\app.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\tray-ssh.png" />
+    <Resource Include="Assets\tray-ngrok.png" />
     <Resource Include="Assets\devtoolslogo-simbolo-ct.png" />
     <Resource Include="Assets\devtoolslogo-texto-ct.png" />
   </ItemGroup>
