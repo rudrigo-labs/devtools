@@ -75,16 +75,15 @@
             <Setter Property="Height" Value="46"/>
             <Setter Property="CornerRadius" Value="23"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
-            <Setter Property="Background">
-                <Setter.Value>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#1E6A52" Offset="0"/>
-                        <GradientStop Color="#214033" Offset="1"/>
-                    </LinearGradientBrush>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="BorderBrush" Value="#52A986"/>
+            <Setter Property="Background" Value="#309E44"/>
+            <Setter Property="BorderBrush" Value="#258437"/>
             <Setter Property="BorderThickness" Value="1"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
+                    <Setter Property="Background" Value="#41B752"/>
+                    <Setter Property="BorderBrush" Value="#309E44"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="ConfigCardTitleStyle" TargetType="TextBlock">
@@ -102,25 +101,26 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="0,14,0,0">
+    <Grid Margin="0,28,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,18">
+        <StackPanel Grid.Row="0" Margin="16,0,0,22">
             <TextBlock Text="Configurações"
-                       FontSize="22"
-                       FontWeight="SemiBold"
+                       FontSize="24"
+                       FontWeight="Bold"
                        Foreground="{DynamicResource DevToolsTextPrimary}"/>
             <TextBlock Text="Escolha um card para editar configurações persistentes das ferramentas."
                        Foreground="{DynamicResource DevToolsTextSecondary}"
                        FontSize="12"
-                       Margin="0,6,0,0"
+                       Margin="0,8,0,0"
                        TextWrapping="Wrap"/>
             <Border Height="1"
                     Background="{DynamicResource DevToolsBrushBorder}"
-                    Margin="0,12,0,0"/>
+                    Opacity="0.6"
+                    Margin="0,14,0,0"/>
         </StackPanel>
 
         <ScrollViewer Grid.Row="1"
@@ -131,7 +131,7 @@
                 <Button Style="{StaticResource ConfigCardButtonStyle}" Tag="Snapshot" Click="OpenTool_Click">
                     <StackPanel>
                         <Border Style="{StaticResource ConfigCardIconBadgeStyle}">
-                            <TextBlock Text="&#xE7C3;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#DAFFE9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="&#xE7C3;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Snapshot" Style="{StaticResource ConfigCardTitleStyle}"/>
                         <TextBlock Text="Perfis de snapshot com caminhos, filtros e formatos de saída." Style="{StaticResource ConfigCardDescriptionStyle}"/>
@@ -141,7 +141,7 @@
                 <Button Style="{StaticResource ConfigCardButtonStyle}" Tag="Harvest" Click="OpenTool_Click">
                     <StackPanel>
                         <Border Style="{StaticResource ConfigCardIconBadgeStyle}">
-                            <TextBlock Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#DAFFE9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Harvest" Style="{StaticResource ConfigCardTitleStyle}"/>
                         <TextBlock Text="Perfis de mineração com origem, destino e regras de extração." Style="{StaticResource ConfigCardDescriptionStyle}"/>
@@ -151,7 +151,7 @@
                 <Button Style="{StaticResource ConfigCardButtonStyle}" Tag="Organizer" Click="OpenTool_Click">
                     <StackPanel>
                         <Border Style="{StaticResource ConfigCardIconBadgeStyle}">
-                            <TextBlock Text="&#xE8A1;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#DAFFE9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="&#xE8A1;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Organizer" Style="{StaticResource ConfigCardTitleStyle}"/>
                         <TextBlock Text="Perfis de organização com categorias, pesos e deduplicação." Style="{StaticResource ConfigCardDescriptionStyle}"/>
@@ -161,7 +161,7 @@
                 <Button Style="{StaticResource ConfigCardButtonStyle}" Tag="Migrations" Click="OpenTool_Click">
                     <StackPanel>
                         <Border Style="{StaticResource ConfigCardIconBadgeStyle}">
-                            <TextBlock Text="&#xE895;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#DAFFE9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="&#xE895;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Migrations" Style="{StaticResource ConfigCardTitleStyle}"/>
                         <TextBlock Text="Perfis de migração, contexto e parâmetros de banco." Style="{StaticResource ConfigCardDescriptionStyle}"/>
@@ -171,7 +171,7 @@
                 <Button Style="{StaticResource ConfigCardButtonStyle}" Tag="SshTunnel" Click="OpenTool_Click">
                     <StackPanel>
                         <Border Style="{StaticResource ConfigCardIconBadgeStyle}">
-                            <TextBlock Text="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#DAFFE9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="SSH Tunnel" Style="{StaticResource ConfigCardTitleStyle}"/>
                         <TextBlock Text="Conexões SSH nomeadas para acesso remoto rápido." Style="{StaticResource ConfigCardDescriptionStyle}"/>
@@ -181,7 +181,7 @@
                 <Button Style="{StaticResource ConfigCardButtonStyle}" Tag="Ngrok" Click="OpenTool_Click">
                     <StackPanel>
                         <Border Style="{StaticResource ConfigCardIconBadgeStyle}">
-                            <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#DAFFE9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Ngrok" Style="{StaticResource ConfigCardTitleStyle}"/>
                         <TextBlock Text="Token, executável e presets de túnel público." Style="{StaticResource ConfigCardDescriptionStyle}"/>
@@ -191,7 +191,7 @@
                 <Button Style="{StaticResource ConfigCardButtonStyle}" Tag="Notes" Click="OpenTool_Click">
                     <StackPanel>
                         <Border Style="{StaticResource ConfigCardIconBadgeStyle}">
-                            <TextBlock Text="&#xE70B;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#DAFFE9" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="&#xE70B;" FontFamily="Segoe MDL2 Assets" FontSize="21" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="Notes" Style="{StaticResource ConfigCardTitleStyle}"/>
                         <TextBlock Text="Configuração única da pasta de notas e Google Drive." Style="{StaticResource ConfigCardDescriptionStyle}"/>

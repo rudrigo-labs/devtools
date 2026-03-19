@@ -11,6 +11,7 @@
         AllowsTransparency="True"
         ResizeMode="CanResize"
         WindowStartupLocation="CenterScreen"
+        Icon="pack://application:,,,/Assets/app.ico"
         Background="Transparent"
         StateChanged="Window_StateChanged">
 
@@ -126,7 +127,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="48"/>
+                <RowDefinition Height="52"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
@@ -140,21 +141,27 @@
                     CornerRadius="8,0,0,8">
                 <DockPanel>
                     <!-- Logo -->
-                    <StackPanel DockPanel.Dock="Top" Margin="16,16,16,12">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE80F;"
-                                       FontFamily="Segoe MDL2 Assets"
-                                       FontSize="18"
-                                       Foreground="{DynamicResource DevToolsAccent}"
-                                       Margin="0,1,8,0"/>
-                            <TextBlock Text="DevTools"
-                                       Style="{StaticResource DevToolsSectionTitle}"/>
+                    <Grid DockPanel.Dock="Top"
+                          Height="52"
+                          Margin="12,0,12,0">
+                        <StackPanel Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <Image Width="40"
+                                   Height="40"
+                                   Stretch="Uniform"
+                                   SnapsToDevicePixels="True"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   Source="pack://application:,,,/Assets/devtoolslogo-simbolo-ct.png"/>
+                            <Image Width="112"
+                                   Height="22"
+                                   Margin="8,0,0,0"
+                                   VerticalAlignment="Center"
+                                   Stretch="Uniform"
+                                   SnapsToDevicePixels="True"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   Source="pack://application:,,,/Assets/devtoolslogo-texto-ct.png"/>
                         </StackPanel>
-                        <TextBlock Text="MENU"
-                                   Foreground="{DynamicResource DevToolsTextSecondary}"
-                                   FontSize="11"
-                                   Margin="0,6,0,0"/>
-                    </StackPanel>
+                    </Grid>
 
                     <!-- Separador -->
                     <Border DockPanel.Dock="Top"
@@ -234,12 +241,21 @@
                   MouseLeftButtonDown="WindowDragArea_MouseLeftButtonDown">
                 <Border BorderBrush="{DynamicResource DevToolsBrushBorder}"
                         BorderThickness="0,0,0,1"/>
-                <TextBlock x:Name="ActiveToolLabel"
-                           Text="Ferramentas"
-                           Foreground="{DynamicResource DevToolsTextSecondary}"
-                           VerticalAlignment="Center"
-                           Margin="16,0,0,0"/>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="36,1,0,0">
+                    <TextBlock x:Name="ActiveToolLabel"
+                               Text="Ferramentas"
+                               FontSize="17"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource DevToolsTextPrimary}"
+                               Margin="0,0,0,0"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Margin="0,1,0,0">
                     <Button x:Name="MinimizeButton"
                             Click="MinimizeButton_Click"
                             Content="&#xE921;"
@@ -271,7 +287,7 @@
                         </LinearGradientBrush>
                     </Border.Background>
                 </Border>
-                <ContentControl x:Name="WorkspaceHost" Margin="20,12,20,12"/>
+                <ContentControl x:Name="WorkspaceHost" Margin="20,16,20,12"/>
             </Grid>
 
             <!-- ======================== FOOTER / STATUS ======================== -->
