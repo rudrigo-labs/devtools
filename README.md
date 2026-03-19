@@ -1,7 +1,8 @@
 # DevTools
 
-> Status: Em desenvolvimento ativo.
-> Este projeto ainda esta em evolucao e pode sofrer mudancas de arquitetura, UX e contratos internos.
+> Status: Em fase de homologação.
+> Esta versão é destinada a testes e validação funcional antes da produção.
+> Durante a homologação, ajustes de UX, comportamento e contratos internos ainda podem ocorrer.
 
 Suite desktop em WPF para executar ferramentas de produtividade de desenvolvimento com arquitetura em camadas:
 - Host (WPF)
@@ -10,6 +11,15 @@ Suite desktop em WPF para executar ferramentas de produtividade de desenvolvimen
 - Infrastructure (persistencia SQLite com EF Core)
 
 Este README e a referencia de entrada do projeto: setup, arquitetura, navegacao, ferramentas e operacao.
+
+## 0. Homologação (leia antes de usar)
+
+Este projeto está em homologação e deve ser utilizado para testes.
+
+1. O foco desta fase é validar fluxos, identificar falhas e ajustar a experiência de uso.
+2. A branch de trabalho para homologação é `staging`.
+3. Se você for testar, valide os cenários principais de cada ferramenta e reporte qualquer inconsistência encontrada.
+4. Não considere esta versão como pronta para produção até o encerramento formal da homologação.
 
 ## 1. Visao geral
 
