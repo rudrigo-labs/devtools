@@ -26,7 +26,12 @@ public enum NgrokAction
 
 public sealed record TunnelInfo(string Name, string Proto, string PublicUrl, string? Addr);
 public sealed record TunnelGroup(string BaseName, TunnelInfo? Http, TunnelInfo? Https);
-public sealed record NgrokStartOptions(string Protocol, int Port, string? ExecutablePath = null, IReadOnlyList<string>? ExtraArgs = null);
+public sealed record NgrokStartOptions(
+    string Protocol,
+    int Port,
+    string? ExecutablePath = null,
+    IReadOnlyList<string>? ExtraArgs = null,
+    string? AuthToken = null);
 
 public sealed class NgrokRequest
 {

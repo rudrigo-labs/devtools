@@ -6,6 +6,18 @@ namespace DevTools.Image.Engine;
 
 internal sealed class ImageSplitter
 {
+    private static readonly PixelPoint[] NeighborOffsets =
+    [
+        new(1, 0),
+        new(-1, 0),
+        new(0, 1),
+        new(0, -1),
+        new(1, 1),
+        new(1, -1),
+        new(-1, 1),
+        new(-1, -1)
+    ];
+
     public byte AlphaThreshold { get; set; } = 10;
 
     public List<ImageRegion> FindConnectedComponents(Image<Rgba32> image, CancellationToken ct)
@@ -63,28 +75,19 @@ internal sealed class ImageSplitter
             if (p.Y < minY) minY = p.Y;
             if (p.Y > maxY) maxY = p.Y;
 
-            Span<PixelPoint> neighbors = stackalloc PixelPoint[]
+            foreach (var offset in NeighborOffsets)
             {
-                new(p.X + 1, p.Y),
-                new(p.X - 1, p.Y),
-                new(p.X,     p.Y + 1),
-                new(p.X,     p.Y - 1),
-                new(p.X + 1, p.Y + 1),
-                new(p.X + 1, p.Y - 1),
-                new(p.X - 1, p.Y + 1),
-                new(p.X - 1, p.Y - 1)
-            };
+                var nx = p.X + offset.X;
+                var ny = p.Y + offset.Y;
 
-            foreach (var n in neighbors)
-            {
-                if (n.X < 0 || n.X >= image.Width || n.Y < 0 || n.Y >= image.Height) continue;
-                if (visited[n.X, n.Y]) continue;
+                if (nx < 0 || nx >= image.Width || ny < 0 || ny >= image.Height) continue;
+                if (visited[nx, ny]) continue;
 
-                visited[n.X, n.Y] = true;
+                visited[nx, ny] = true;
 
-                var pixel = image[n.X, n.Y];
+                var pixel = image[nx, ny];
                 if (pixel.A > AlphaThreshold)
-                    queue.Enqueue(n);
+                    queue.Enqueue(new PixelPoint(nx, ny));
             }
         }
 

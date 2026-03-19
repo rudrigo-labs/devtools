@@ -27,7 +27,7 @@
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                            <Setter Property="Background" Value="#1AFFFFFF"/> <!-- Light hover effect on the whole area -->
+                            <Setter Property="Background" Value="#1AFFFFFF"/> <!-- Light hover effect on the whole área -->
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

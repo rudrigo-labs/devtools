@@ -62,7 +62,7 @@
 
             <!-- ==================== ACTION BAR ==================== -->
             <c:ActionBarControl Grid.Row="1"
-                                x:Name="Actions"
+                                x:Name="Actions" ShowHistory="True" ActionHistory="HistoryButton_Click"
                                 ShowNew="True"
                                 ShowSave="True"
                                 ShowDelete="True"
@@ -72,7 +72,9 @@
                                 ActionNew="ActionNew_Click"
                                 ActionSave="ActionSave_Click"
                                 ActionDelete="ActionDelete_Click"
-                                ActionCancel="ActionCancel_Click"/>
+                                ActionCancel="ActionCancel_Click"
+                                ActionGoToTool="ActionGoToTool_Click"
+                                ActionBack="ActionBack_Click"/>
 
             <!-- ==================== TOOL BODY ==================== -->
             <Grid Grid.Row="2">
@@ -212,7 +214,7 @@
                                          Grid.Column="0"
                                          Style="{StaticResource DevToolsTextInput}"
                                          FontSize="16" FontWeight="SemiBold"
-                                         ToolTip="Titulo da nota"/>
+                                         ToolTip="Título da nota"/>
                                 <ComboBox x:Name="ExtensionCombo"
                                           Grid.Column="2"
                                           Style="{StaticResource DevToolsSelectInput}"
@@ -277,56 +279,23 @@
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Margin="0,0,0,0">
-
-                        <!-- Seletor de configuração (condicional) -->
-                        <StackPanel x:Name="ConfigurationsLabel"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
-                            <TextBlock Text="Configurações salvas"
-                                       Style="{StaticResource DevToolsCardTitle}"/>
-                            <Border Margin="8,0,0,0"
-                                    VerticalAlignment="Center"
-                                    Width="16" Height="16"
-                                    CornerRadius="8"
-                                    BorderThickness="1"
-                                    BorderBrush="{DynamicResource DevToolsTextSecondary}"
-                                    ToolTipService.InitialShowDelay="200"
-                                    ToolTipService.ShowDuration="30000">
-                                <Border.ToolTip>
-                                    <ToolTip Placement="Right" MaxWidth="360">
-                                        <TextBlock TextWrapping="Wrap"
-                                                   Text="Escolha uma configuração salva ou selecione 'Configurar manualmente' para preencher os campos sem usar configuração salva."/>
-                                    </ToolTip>
-                                </Border.ToolTip>
-                                <TextBlock Text="?"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           FontWeight="Bold"
-                                           Foreground="{DynamicResource DevToolsTextSecondary}"/>
-                            </Border>
-                        </StackPanel>
-                        <ComboBox x:Name="ConfigurationsCombo"
-                                  Margin="0,8,0,16"
-                                  Style="{StaticResource DevToolsSelectInput}"
-                                  SelectionChanged="ConfigurationsCombo_SelectionChanged"
-                                  DisplayMemberPath="Label"/>
-
                         <Border x:Name="ConfigurationModeHint"
-                                Visibility="Collapsed"
+                                Visibility="Visible"
                                 BorderThickness="1"
                                 CornerRadius="4"
                                 BorderBrush="{DynamicResource DevToolsBrushBorder}"
                                 Background="{DynamicResource DevToolsSurface}"
                                 Padding="10,8"
                                 Margin="0,0,0,12">
-                            <TextBlock Text="Modo configuracao: preencha os campos abaixo para salvar uma configuracao reutilizavel."
+                            <TextBlock Text="Configuração única do Notes: os campos abaixo são salvos e reutilizados automaticamente."
                                        Foreground="{DynamicResource DevToolsTextSecondary}"
                                        TextWrapping="Wrap"/>
                         </Border>
 
-                        <!-- ===== Campos de configuracao (modo Configuracao) ===== -->
+                        <!-- ===== Campos de configuração (modo Configuração) ===== -->
                         <Grid x:Name="ConfigurationMetadataSection"
-                              Margin="0,0,0,12">
+                              Margin="0,0,0,12"
+                              Visibility="Collapsed">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="16"/>
@@ -339,7 +308,7 @@
                                          Style="{StaticResource DevToolsTextInput}"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Descricao"
+                                <TextBlock Text="Descrição"
                                            Style="{StaticResource DevToolsInputLabel}"/>
                                 <TextBox x:Name="DescriptionInput"
                                          Style="{StaticResource DevToolsTextInput}"/>
@@ -353,7 +322,7 @@
                                         Margin="0,0,0,12"/>
 
                         <CheckBox x:Name="IsDefaultCheck"
-                                  Content="Marcar como configuracao padrao"
+                                  Content="Marcar como configuração padrão"
                                   Style="{StaticResource DevToolsCheckBox}"
                                   Margin="0,0,0,12"/>
 
@@ -411,7 +380,7 @@
                                            FontSize="12" VerticalAlignment="Center"/>
                             </Grid>
 
-                            <Button Content="Ver guia de configuracao do Google Cloud"
+                            <Button Content="Ver guia de configuração do Google Cloud"
                                     Style="{StaticResource DevToolsSecondaryButton}"
                                     HorizontalAlignment="Left"
                                     Margin="0,0,0,12"

@@ -3,6 +3,25 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:DevTools.Host.Wpf.Components">
 
+    <UserControl.Resources>
+        <Style x:Key="ConfigurationGridRowStyle" TargetType="DataGridRow">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DevToolsBrushBorder}"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DevToolsSurface}"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DevToolsAccent}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
     <Grid x:Name="WorkspaceRoot" Margin="0">
         <Grid HorizontalAlignment="Stretch"
               VerticalAlignment="Top"
@@ -14,7 +33,6 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- ==================== TOOL HEADER ==================== -->
             <StackPanel Grid.Row="0" Margin="0,0,0,12">
                 <TextBlock x:Name="WorkspaceTitleText"
                            Text="Ngrok"
@@ -22,7 +40,7 @@
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource DevToolsTextPrimary}"/>
                 <TextBlock x:Name="WorkspaceSubtitleText"
-                           Text="Gerencia tuneis HTTP/HTTPS via ngrok. Inicia, lista, encerra e monitora processos ngrok."
+                           Text="Gerencia túneis HTTP/HTTPS via ngrok."
                            Foreground="{DynamicResource DevToolsTextSecondary}"
                            FontSize="12"
                            Margin="0,4,0,0"
@@ -32,58 +50,74 @@
                         Margin="0,10,0,0"/>
             </StackPanel>
 
-            <!-- ==================== ACTION BAR ==================== -->
             <c:ActionBarControl Grid.Row="1"
                                 x:Name="Actions"
+                                ShowHistory="True"
                                 ShowNew="True"
                                 ShowSave="True"
                                 ShowDelete="True"
                                 ShowCancel="False"
                                 ShowHelp="True"
-                                HelpText="Use Configurar para salvar auth token e executavel. Use Iniciar para expor uma porta local."
+                                ActionHistory="HistoryButton_Click"
                                 ActionNew="ActionNew_Click"
                                 ActionSave="ActionSave_Click"
                                 ActionDelete="ActionDelete_Click"
-                                ActionCancel="ActionCancel_Click"/>
+                                ActionCancel="ActionCancel_Click"
+                                ActionGoToTool="ActionGoToTool_Click"
+                                ActionBack="ActionBack_Click"/>
 
-            <!-- ==================== TOOL BODY ==================== -->
             <ScrollViewer Grid.Row="2"
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Margin="0,0,0,0">
 
-                    <!-- Seletor de configuração (condicional) -->
-                    <StackPanel x:Name="ConfigurationsLabel"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center">
+                    <StackPanel x:Name="ConfigurationListSection"
+                                Margin="0,0,0,12">
                         <TextBlock Text="Configurações salvas"
                                    Style="{StaticResource DevToolsCardTitle}"/>
-                        <Border Margin="8,0,0,0"
-                                VerticalAlignment="Center"
-                                Width="16" Height="16"
-                                CornerRadius="8"
+                        <Border Margin="0,8,0,0"
                                 BorderThickness="1"
-                                BorderBrush="{DynamicResource DevToolsTextSecondary}"
-                                ToolTipService.InitialShowDelay="200"
-                                ToolTipService.ShowDuration="30000">
-                            <Border.ToolTip>
-                                <ToolTip Placement="Right" MaxWidth="360">
-                                    <TextBlock TextWrapping="Wrap"
-                                               Text="Escolha uma configuração salva ou selecione 'Configurar manualmente' para preencher os campos sem usar configuração salva."/>
-                                </ToolTip>
-                            </Border.ToolTip>
-                            <TextBlock Text="?"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       FontWeight="Bold"
-                                       Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                                CornerRadius="6"
+                                BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                Background="{DynamicResource DevToolsWindowBackground}">
+                            <DataGrid x:Name="ConfigurationsGrid"
+                                      Height="210"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      CanUserResizeRows="False"
+                                      SelectionMode="Single"
+                                      SelectionUnit="FullRow"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="None"
+                                      BorderThickness="0"
+                                      Background="Transparent"
+                                      RowStyle="{StaticResource ConfigurationGridRowStyle}"
+                                      SelectionChanged="ConfigurationsGrid_SelectionChanged"
+                                      MouseDoubleClick="ConfigurationsGrid_MouseDoubleClick">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Nome"
+                                                        Binding="{Binding Name}"
+                                                        Width="220"/>
+                                    <DataGridTextColumn Header="Descrição"
+                                                        Binding="{Binding Description}"
+                                                        Width="*"/>
+                                    <DataGridTextColumn Header="Criado em"
+                                                        Binding="{Binding CreatedAtUtc, StringFormat={}{0:dd/MM/yyyy HH:mm}}"
+                                                        Width="150"/>
+                                    <DataGridTextColumn Header="Atualizado em"
+                                                        Binding="{Binding UpdatedAtUtc, StringFormat={}{0:dd/MM/yyyy HH:mm}}"
+                                                        Width="150"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
                         </Border>
+                        <TextBlock x:Name="GridHintText"
+                                   Text="Clique para selecionar. Duplo clique para iniciar edição."
+                                   Foreground="{DynamicResource DevToolsTextSecondary}"
+                                   Margin="0,8,0,0"
+                                   FontSize="11"/>
                     </StackPanel>
-                    <ComboBox x:Name="ConfigurationsCombo"
-                              Margin="0,8,0,16"
-                              Style="{StaticResource DevToolsSelectInput}"
-                              SelectionChanged="ConfigurationsCombo_SelectionChanged"
-                              DisplayMemberPath="Label"/>
 
                     <Border x:Name="ConfigurationModeHint"
                             Visibility="Collapsed"
@@ -93,176 +127,177 @@
                             Background="{DynamicResource DevToolsSurface}"
                             Padding="10,8"
                             Margin="0,0,0,12">
-                        <TextBlock Text="Modo configuracao: preencha os campos abaixo para salvar uma configuracao reutilizavel."
+                        <TextBlock Text=""
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    TextWrapping="Wrap"/>
                     </Border>
 
-                    <!-- ===== Campos de configuracao (modo Configuracao) ===== -->
-                    <Grid x:Name="ConfigurationMetadataSection"
-                          Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Nome"
+                    <StackPanel x:Name="ConfigurationFormSection">
+                        <Grid x:Name="ConfigurationMetadataSection"
+                              Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Nome"
+                                           Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="NameInput"
+                                         Style="{StaticResource DevToolsTextInput}"
+                                         TextChanged="ConfigurationField_Changed"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Descrição"
+                                           Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="DescriptionInput"
+                                         Style="{StaticResource DevToolsTextInput}"
+                                         TextChanged="ConfigurationField_Changed"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="Configuração"
+                                   Style="{StaticResource DevToolsCardTitle}"
+                                   Margin="0,4,0,10"/>
+
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="Auth token do ngrok *"
                                        Style="{StaticResource DevToolsInputLabel}"/>
-                            <TextBox x:Name="NameInput"
-                                     Style="{StaticResource DevToolsTextInput}"/>
+                            <TextBox x:Name="AuthTokenInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     TextChanged="ConfigurationField_Changed"
+                                     ToolTip="Token de autenticação do ngrok. Usado em: ngrok config add-authtoken"/>
                         </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="Descricao"
+
+                        <c:PathSelector x:Name="ExecutablePathSelector"
+                                        Title="Executável ngrok (opcional)"
+                                        IsFolderPicker="False"
+                                        Margin="0,0,0,12"/>
+
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="Argumentos adicionais (opcional)"
                                        Style="{StaticResource DevToolsInputLabel}"/>
-                            <TextBox x:Name="DescriptionInput"
-                                     Style="{StaticResource DevToolsTextInput}"/>
+                            <TextBox x:Name="AdditionalArgsInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     TextChanged="ConfigurationField_Changed"
+                                     ToolTip="Exemplo: --log stdout --log-format json"/>
                         </StackPanel>
-                    </Grid>
 
-                    <!-- ===== Configuracao ===== -->
-                    <TextBlock Text="Configuracao"
-                               Style="{StaticResource DevToolsCardTitle}"
-                               Margin="0,4,0,10"/>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="URL da API local do ngrok"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="BaseUrlInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     Text="http://127.0.0.1:4040/"
+                                     TextChanged="ConfigurationField_Changed"
+                                     ToolTip="Endereço local da API ngrok. Padrão: http://127.0.0.1:4040/"/>
+                        </StackPanel>
 
-                    <StackPanel Margin="0,0,0,12">
-                        <TextBlock Text="AuthToken"
-                                   Style="{StaticResource DevToolsInputLabel}"/>
-                        <TextBox x:Name="AuthTokenInput"
-                                 Style="{StaticResource DevToolsTextInput}"
-                                 ToolTip="Token de autenticacao do ngrok. Usado em: ngrok config add-authtoken"/>
+                        <CheckBox x:Name="IsDefaultCheck"
+                                  Content="Marcar como configuração padrão"
+                                  Style="{StaticResource DevToolsCheckBox}"
+                                  Checked="ConfigurationField_Changed"
+                                  Unchecked="ConfigurationField_Changed"
+                                  Margin="0,0,0,12"/>
                     </StackPanel>
 
-                    <c:PathSelector x:Name="ExecutablePathSelector"
-                                    Title="Executavel ngrok (opcional)"
-                                    IsFolderPicker="False"
-                                    Margin="0,0,0,12"/>
+                    <StackPanel x:Name="ExecutionSection">
+                        <TextBlock Text="Execução"
+                                   Style="{StaticResource DevToolsCardTitle}"
+                                   Margin="0,4,0,10"/>
 
-                    <StackPanel Margin="0,0,0,12">
-                        <TextBlock Text="Argumentos adicionais"
-                                   Style="{StaticResource DevToolsInputLabel}"/>
-                        <TextBox x:Name="AdditionalArgsInput"
-                                 Style="{StaticResource DevToolsTextInput}"/>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,0,0,12">
-                        <TextBlock Text="URL da API ngrok"
-                                   Style="{StaticResource DevToolsInputLabel}"/>
-                        <TextBox x:Name="BaseUrlInput"
-                                 Style="{StaticResource DevToolsTextInput}"
-                                 Text="http://127.0.0.1:4040/"
-                                 ToolTip="Endereco local da API ngrok. Padrao: http://127.0.0.1:4040/"/>
-                    </StackPanel>
-
-                    <CheckBox x:Name="IsDefaultCheck"
-                              Content="Marcar como configuracao padrao"
-                              Style="{StaticResource DevToolsCheckBox}"
-                              Margin="0,0,0,12"/>
-
-                    <!-- ===== Execucao ===== -->
-                    <TextBlock Text="Execucao"
-                               Style="{StaticResource DevToolsCardTitle}"
-                               Margin="0,4,0,10"/>
-
-                    <Grid Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="8"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="8"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Protocolo"
+                        <Grid Margin="0,0,0,12">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="0"
+                                       Text="Protocolo"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="2"
+                                       Text="Porta *"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <ComboBox x:Name="ProtocolCombo"
+                                      Grid.Row="1"
+                                      Grid.Column="0"
                                       Style="{StaticResource DevToolsSelectInput}"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="Porta *"
-                                       Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="StartPortInput"
+                                     Grid.Row="1"
+                                     Grid.Column="2"
+                                     Height="{Binding ElementName=ProtocolCombo, Path=ActualHeight}"
                                      Style="{StaticResource DevToolsTextInput}"
                                      ToolTip="Ex: 5000"/>
-                        </StackPanel>
-                        <Button Grid.Column="4"
-                                Content="Iniciar tunel"
-                                Style="{StaticResource DevToolsPrimaryButton}"
-                                VerticalAlignment="Bottom"
-                                Click="StartHttp_Click"/>
-                    </Grid>
+                        </Grid>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                        <Button Content="Listar tuneis"
-                                Style="{StaticResource DevToolsSecondaryButton}"
-                                Margin="0,0,8,0"
-                                Click="ListTunnels_Click"/>
-                        <Button Content="Status"
-                                Style="{StaticResource DevToolsSecondaryButton}"
-                                Margin="0,0,8,0"
-                                Click="Status_Click"/>
-                        <Button Content="Encerrar tudo"
-                                Style="{StaticResource DevToolsSecondaryButton}"
-                                Click="KillAll_Click"/>
+                        <Border x:Name="TunnelListPanel"
+                                Visibility="Collapsed"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                Padding="10,8"
+                                Margin="0,0,0,8">
+                            <StackPanel>
+                                <TextBlock x:Name="TunnelListHeader"
+                                           FontWeight="SemiBold"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource DevToolsTextPrimary}"
+                                           Margin="0,0,0,8"/>
+                                <ListBox x:Name="TunnelList"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource DevToolsWindowBackground}"
+                                                    BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="4"
+                                                    Margin="0,0,0,6"
+                                                    Padding="10,8">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding PublicUrl}"
+                                                                   FontWeight="SemiBold"
+                                                                   FontSize="12"
+                                                                   Foreground="{DynamicResource DevToolsTextPrimary}"/>
+                                                        <TextBlock Text="{Binding Name}"
+                                                                   Foreground="{DynamicResource DevToolsTextSecondary}"
+                                                                   FontSize="11"
+                                                                   Margin="0,2,0,0"/>
+                                                    </StackPanel>
+                                                    <Button Grid.Column="1"
+                                                            Content="Copiar URL"
+                                                            Style="{StaticResource DevToolsSecondaryButton}"
+                                                            Tag="{Binding PublicUrl}"
+                                                            Click="CopyUrl_Click"
+                                                            Margin="8,0,0,0"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <TextBlock x:Name="EmptyStateText"
+                                           Text="Nenhum túnel ativo no momento."
+                                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                                           Margin="0,8,0,0"
+                                           Visibility="Collapsed"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
-
-                    <!-- ===== Tuneis ativos ===== -->
-                    <Border x:Name="TunnelListPanel"
-                            Visibility="Collapsed"
-                            BorderThickness="1" CornerRadius="4"
-                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                            Padding="10,8" Margin="0,0,0,8">
-                        <StackPanel>
-                            <TextBlock x:Name="TunnelListHeader"
-                                       FontWeight="SemiBold" FontSize="12"
-                                       Foreground="{DynamicResource DevToolsTextPrimary}"
-                                       Margin="0,0,0,8"/>
-                            <ListBox x:Name="TunnelList"
-                                     Background="Transparent"
-                                     BorderThickness="0"
-                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{DynamicResource DevToolsWindowBackground}"
-                                                BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                                                BorderThickness="1" CornerRadius="4"
-                                                Margin="0,0,0,6" Padding="10,8">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-                                                <StackPanel>
-                                                    <TextBlock Text="{Binding PublicUrl}"
-                                                               FontWeight="SemiBold" FontSize="12"
-                                                               Foreground="{DynamicResource DevToolsTextPrimary}"/>
-                                                    <TextBlock Text="{Binding Name}"
-                                                               Foreground="{DynamicResource DevToolsTextSecondary}"
-                                                               FontSize="11" Margin="0,2,0,0"/>
-                                                </StackPanel>
-                                                <Button Grid.Column="1"
-                                                        Content="Copiar URL"
-                                                        Style="{StaticResource DevToolsSecondaryButton}"
-                                                        Tag="{Binding PublicUrl}"
-                                                        Click="CopyUrl_Click"
-                                                        Margin="8,0,0,0"/>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                            <TextBlock x:Name="EmptyStateText"
-                                       Text="Nenhum tunel ativo no momento."
-                                       Foreground="{DynamicResource DevToolsTextSecondary}"
-                                       Margin="0,8,0,0"
-                                       Visibility="Collapsed"/>
-                        </StackPanel>
-                    </Border>
-
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- ==================== STATUS ==================== -->
             <TextBlock x:Name="ExecutionStatusText"
                        Grid.Row="3"
                        Margin="0,10,0,0"

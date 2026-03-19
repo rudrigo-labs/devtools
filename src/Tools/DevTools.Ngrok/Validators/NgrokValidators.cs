@@ -47,6 +47,9 @@ public sealed class NgrokRequestValidator : IValidator<NgrokRequest>
 
                 if (!IsValidProtocol(instance.StartOptions.Protocol))
                     errors.Add(new ValidationError("protocol", "Protocol deve ser 'http' ou 'https'."));
+
+                if (string.IsNullOrWhiteSpace(instance.StartOptions.AuthToken))
+                    errors.Add(new ValidationError("authToken", "AuthToken é obrigatório para StartHttp."));
             }
         }
 
@@ -73,6 +76,9 @@ public sealed class NgrokEntityValidator : IValidator<NgrokEntity>
 
         if (string.IsNullOrWhiteSpace(instance.Name))
             errors.Add(new ValidationError("name", "Nome é obrigatório."));
+
+        if (string.IsNullOrWhiteSpace(instance.AuthToken))
+            errors.Add(new ValidationError("authToken", "AuthToken é obrigatório."));
 
         return errors.Count == 0 ? ValidationResult.Success : ValidationResult.Fail(errors);
     }

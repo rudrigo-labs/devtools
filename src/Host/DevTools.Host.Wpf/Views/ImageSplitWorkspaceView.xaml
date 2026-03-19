@@ -32,16 +32,17 @@
 
             <!-- ==================== ACTION BAR ==================== -->
             <c:ActionBarControl Grid.Row="1"
-                                x:Name="Actions"
+                                x:Name="Actions" ShowHistory="True" ActionHistory="HistoryButton_Click"
                                 ShowNew="False"
                                 ShowSave="True"
                                 ShowDelete="False"
-                                ShowCancel="True"
+                                ShowCancel="False"
+                                ShowBack="True"
                                 SaveText="Executar"
                                 ShowHelp="True"
-                                HelpText="Selecione a imagem, pasta de saida e ajustes de deteccao. Use Executar para recortar os componentes automaticamente."
+                                HelpText="Selecione a imagem, pasta de saída e ajustes de detecção. Use Executar para recortar os componentes automaticamente."
                                 ActionSave="ActionExecute_Click"
-                                ActionCancel="ActionCancel_Click"/>
+                                ActionBack="ActionBack_Click"/>
 
             <!-- ==================== TOOL BODY ==================== -->
             <ScrollViewer Grid.Row="2"
@@ -82,21 +83,21 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Extensão de saída"
+                            <TextBlock Text="Extensao de saída"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="OutputExtensionInput"
                                      Style="{StaticResource DevToolsTextInput}"
-                                     ToolTip="Ex: .png, .webp. Padrão: mesma extensão do arquivo de entrada."/>
+                                     ToolTip="Ex: .png, .webp. Padrão: mesma extensao do arquivo de entrada."/>
                         </StackPanel>
                     </Grid>
 
                     <StackPanel Margin="0,0,0,12">
-                        <TextBlock Text="Índice inicial dos arquivos"
+                        <TextBlock Text="Indice inicial dos arquivos"
                                    Style="{StaticResource DevToolsInputLabel}"/>
                         <TextBox x:Name="StartIndexInput"
                                  Style="{StaticResource DevToolsTextInput}"
                                  Text="1"
-                                 ToolTip="O primeiro arquivo gerado receberá este índice no nome. Ex: sprite_1.png, sprite_2.png..."/>
+                                 ToolTip="O primeiro arquivo gerado recebera este indice no nome. Ex: sprite_1.png, sprite_2.png..."/>
                     </StackPanel>
 
                     <!-- ===== Opções de detecção ===== -->
@@ -112,7 +113,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Limite de transparência (0–255)"
+                            <TextBlock Text="Limite de transparencia (0-255)"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="AlphaThresholdInput"
                                      Style="{StaticResource DevToolsTextInput}"
@@ -121,7 +122,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Tamanho mínimo (largura × altura px)"
+                            <TextBlock Text="Tamanho mínimo (largura x altura px)"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -133,9 +134,9 @@
                                          Grid.Column="0"
                                          Style="{StaticResource DevToolsTextInput}"
                                          Text="3"
-                                         ToolTip="Largura mínima em pixels para incluir um componente."/>
+                                         ToolTip="Largura minima em pixels para incluir um componente."/>
                                 <TextBlock Grid.Column="1"
-                                           Text="×"
+                                           Text="x"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
                                            Foreground="{DynamicResource DevToolsTextSecondary}"/>
@@ -143,7 +144,7 @@
                                          Grid.Column="2"
                                          Style="{StaticResource DevToolsTextInput}"
                                          Text="3"
-                                         ToolTip="Altura mínima em pixels para incluir um componente."/>
+                                         ToolTip="Altura minima em pixels para incluir um componente."/>
                             </Grid>
                         </StackPanel>
                     </Grid>
@@ -153,7 +154,7 @@
                               Content="Sobrescrever arquivos existentes"
                               Style="{StaticResource DevToolsCheckBox}"
                               Margin="0,0,0,12"
-                              ToolTip="Quando marcado, sobrescreve arquivos já existentes na pasta de saída."/>
+                              ToolTip="Quando marcado, sobrescreve arquivos ja existentes na pasta de saída."/>
 
                 </StackPanel>
             </ScrollViewer>

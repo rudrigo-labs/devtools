@@ -1,6 +1,7 @@
 <Window x:Class="DevTools.Host.Wpf.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:DevTools.Host.Wpf.Components"
         Title="DevTools"
         Width="1320"
         Height="820"
@@ -10,6 +11,7 @@
         AllowsTransparency="True"
         ResizeMode="CanResize"
         WindowStartupLocation="CenterScreen"
+        Icon="pack://application:,,,/Assets/app.ico"
         Background="Transparent"
         StateChanged="Window_StateChanged">
 
@@ -77,6 +79,12 @@
             </Setter>
         </Style>
 
+        <Style x:Key="SidebarSubNavButtonStyle" TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="30,0,0,0"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
         <!-- Botão de navegação lateral ATIVO -->
         <Style x:Key="SidebarNavButtonActiveStyle" TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
             <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
@@ -119,7 +127,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="48"/>
+                <RowDefinition Height="52"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
@@ -133,21 +141,27 @@
                     CornerRadius="8,0,0,8">
                 <DockPanel>
                     <!-- Logo -->
-                    <StackPanel DockPanel.Dock="Top" Margin="16,16,16,12">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE80F;"
-                                       FontFamily="Segoe MDL2 Assets"
-                                       FontSize="18"
-                                       Foreground="{DynamicResource DevToolsAccent}"
-                                       Margin="0,1,8,0"/>
-                            <TextBlock Text="DevTools"
-                                       Style="{StaticResource DevToolsSectionTitle}"/>
+                    <Grid DockPanel.Dock="Top"
+                          Height="52"
+                          Margin="12,0,12,0">
+                        <StackPanel Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <Image Width="40"
+                                   Height="40"
+                                   Stretch="Uniform"
+                                   SnapsToDevicePixels="True"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   Source="pack://application:,,,/Assets/devtoolslogo-simbolo-ct.png"/>
+                            <Image Width="112"
+                                   Height="22"
+                                   Margin="8,0,0,0"
+                                   VerticalAlignment="Center"
+                                   Stretch="Uniform"
+                                   SnapsToDevicePixels="True"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   Source="pack://application:,,,/Assets/devtoolslogo-texto-ct.png"/>
                         </StackPanel>
-                        <TextBlock Text="TOOLS"
-                                   Foreground="{DynamicResource DevToolsTextSecondary}"
-                                   FontSize="11"
-                                   Margin="0,6,0,0"/>
-                    </StackPanel>
+                    </Grid>
 
                     <!-- Separador -->
                     <Border DockPanel.Dock="Top"
@@ -157,77 +171,67 @@
 
                     <!-- Itens de navegação -->
                     <StackPanel DockPanel.Dock="Top">
-                        <Button x:Name="NavHome"
-                                Content="Home"
-                                Tag="Home"
-                                Style="{StaticResource SidebarNavButtonActiveStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavSnapshot"
-                                Content="Snapshot"
-                                Tag="Snapshot"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavRename"
-                                Content="Rename"
-                                Tag="Rename"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavHarvest"
-                                Content="Harvest"
-                                Tag="Harvest"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavImageSplit"
-                                Content="Image Split"
-                                Tag="ImageSplit"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavSearchText"
-                                Content="Search Text"
-                                Tag="SearchText"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavOrganizer"
-                                Content="Organizer"
-                                Tag="Organizer"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavUtf8Convert"
-                                Content="UTF-8 Convert"
-                                Tag="Utf8Convert"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavMigrations"
-                                Content="Migrations"
-                                Tag="Migrations"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavSshTunnel"
-                                Content="SSH Tunnel"
-                                Tag="SshTunnel"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavNgrok"
-                                Content="Ngrok"
-                                Tag="Ngrok"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
-                        <Button x:Name="NavNotes"
-                                Content="Notes"
-                                Tag="Notes"
-                                Style="{StaticResource SidebarNavButtonStyle}"
-                                Click="NavButton_Click"/>
+                        <c:SectionExpander x:Name="FerramentasSection" IsExpanded="True">
+                            <c:SectionExpander.Header>
+                                <TextBlock Text="FERRAMENTAS"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                            </c:SectionExpander.Header>
+                            <StackPanel>
+                                <c:SidebarNavItem x:Name="NavFerramentas"
+                                                  Content="Home Ferramentas"
+                                                  IconGlyph="&#xE7C3;"
+                                                  ToolTip="Abre o painel principal de execução das ferramentas."
+                                                  Tag="Ferramentas"
+                                                  Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecSnapshot" IsSubItem="True" Content="Snapshot" IconGlyph="&#xE7C3;" ToolTip="Gera snapshot do projeto." Tag="Exec:Snapshot" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecRename" IsSubItem="True" Content="Rename" IconGlyph="&#xE8AC;" ToolTip="Renomeia identificadores em lote." Tag="Exec:Rename" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecHarvest" IsSubItem="True" Content="Harvest" IconGlyph="&#xE9D2;" ToolTip="Extrai componentes reutilizáveis do código." Tag="Exec:Harvest" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecImageSplit" IsSubItem="True" Content="Image Split" IconGlyph="&#xE91B;" ToolTip="Recorta componentes de imagem automaticamente." Tag="Exec:ImageSplit" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecSearchText" IsSubItem="True" Content="Search Text" IconGlyph="&#xE721;" ToolTip="Busca texto em arquivos com filtros e regex." Tag="Exec:SearchText" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecOrganizer" IsSubItem="True" Content="Organizer" IconGlyph="&#xE8A1;" ToolTip="Organiza arquivos por categorias." Tag="Exec:Organizer" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecUtf8Convert" IsSubItem="True" Content="UTF8 Convert" IconGlyph="&#xE8D2;" ToolTip="Converte arquivos para UTF-8." Tag="Exec:Utf8Convert" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecMigrations" IsSubItem="True" Content="Migrations" IconGlyph="&#xE895;" ToolTip="Executa comandos de migration." Tag="Exec:Migrations" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecSshTunnel" IsSubItem="True" Content="SSH Tunnel" IconGlyph="&#xE7E8;" ToolTip="Inicia e gerencia túneis SSH." Tag="Exec:SshTunnel" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecNgrok" IsSubItem="True" Content="Ngrok" IconGlyph="&#xE8A5;" ToolTip="Inicia túneis Ngrok." Tag="Exec:Ngrok" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavExecNotes" IsSubItem="True" Content="Notes" IconGlyph="&#xE70B;" ToolTip="Abre o editor de notas." Tag="Exec:Notes" Click="NavButton_Click"/>
+                            </StackPanel>
+                        </c:SectionExpander>
+
+                        <c:SectionExpander x:Name="ConfiguracoesSection" IsExpanded="True">
+                            <c:SectionExpander.Header>
+                                <TextBlock Text="CONFIGURACOES"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                            </c:SectionExpander.Header>
+                            <StackPanel>
+                                <c:SidebarNavItem x:Name="NavConfiguracoes"
+                                                  Content="Home Configurações"
+                                                  IconGlyph="&#xE895;"
+                                                  ToolTip="Abre o painel de configurações persistentes."
+                                                  Tag="Configurações"
+                                                  Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgGeneral" IsSubItem="True" Content="Geral" IconGlyph="&#xE713;" ToolTip="Configura parâmetros globais do aplicativo." Tag="Cfg:GeneralSettings" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgSnapshot" IsSubItem="True" Content="Snapshot" IconGlyph="&#xE7C3;" ToolTip="Configura perfis de snapshot." Tag="Cfg:Snapshot" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgHarvest" IsSubItem="True" Content="Harvest" IconGlyph="&#xE9D2;" ToolTip="Configura perfis de mineração de código." Tag="Cfg:Harvest" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgOrganizer" IsSubItem="True" Content="Organizer" IconGlyph="&#xE8A1;" ToolTip="Configura categorias e regras do Organizer." Tag="Cfg:Organizer" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgMigrations" IsSubItem="True" Content="Migrations" IconGlyph="&#xE895;" ToolTip="Configura projetos de migrations." Tag="Cfg:Migrations" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgSshTunnel" IsSubItem="True" Content="SSH Tunnel" IconGlyph="&#xE7E8;" ToolTip="Configura conexões e túneis SSH." Tag="Cfg:SshTunnel" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgNgrok" IsSubItem="True" Content="Ngrok" IconGlyph="&#xE8A5;" ToolTip="Configura token e parâmetros do Ngrok." Tag="Cfg:Ngrok" Click="NavButton_Click"/>
+                                <c:SidebarNavItem x:Name="NavCfgNotes" IsSubItem="True" Content="Notes" IconGlyph="&#xE70B;" ToolTip="Configura pasta padrão e Google Drive do Notes." Tag="Cfg:Notes" Click="NavButton_Click"/>
+                            </StackPanel>
+                        </c:SectionExpander>
+
+                        <c:SidebarNavItem Content="Encerrar"
+                                          IconGlyph="&#xE8BB;"
+                                          ToolTip="Encerra o DevTools."
+                                          Click="ExitButton_Click"/>
                     </StackPanel>
 
-                    <!-- Encerrar (fixado na base da sidebar) -->
-                    <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,8">
-                        <Border Height="1"
-                                Background="{DynamicResource DevToolsBrushBorder}"
-                                Margin="0,0,0,8"/>
-                        <Button Content="Encerrar"
-                                Style="{StaticResource SidebarNavButtonExitStyle}"
-                                Click="ExitButton_Click"/>
-                    </StackPanel>
+                    <!-- Espaçador -->
+                    <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,8"/>
                 </DockPanel>
             </Border>
 
@@ -238,12 +242,21 @@
                   MouseLeftButtonDown="WindowDragArea_MouseLeftButtonDown">
                 <Border BorderBrush="{DynamicResource DevToolsBrushBorder}"
                         BorderThickness="0,0,0,1"/>
-                <TextBlock x:Name="ActiveToolLabel"
-                           Text="Home"
-                           Foreground="{DynamicResource DevToolsTextSecondary}"
-                           VerticalAlignment="Center"
-                           Margin="16,0,0,0"/>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="36,1,0,0">
+                    <TextBlock x:Name="ActiveToolLabel"
+                               Text="Ferramentas"
+                               FontSize="17"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource DevToolsTextPrimary}"
+                               Margin="0,0,0,0"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Margin="0,1,0,0">
                     <Button x:Name="MinimizeButton"
                             Click="MinimizeButton_Click"
                             Content="&#xE921;"
@@ -275,7 +288,7 @@
                         </LinearGradientBrush>
                     </Border.Background>
                 </Border>
-                <ContentControl x:Name="WorkspaceHost" Margin="20,12,20,12"/>
+                <ContentControl x:Name="WorkspaceHost" Margin="20,16,20,12"/>
             </Grid>
 
             <!-- ======================== FOOTER / STATUS ======================== -->

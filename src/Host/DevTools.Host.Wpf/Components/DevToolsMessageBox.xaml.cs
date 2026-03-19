@@ -89,8 +89,12 @@ public partial class DevToolsMessageBox : Window
         };
 
         IconText.Text = icon;
-        IconText.Foreground = new SolidColorBrush(
-            (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(color));
+        var accentColor = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(color);
+        IconText.Foreground = new SolidColorBrush(accentColor);
+
+        // Mantém a estrutura neutra (cinza) e usa cor apenas no ícone.
+        DialogBorder.SetResourceReference(System.Windows.Controls.Border.BorderBrushProperty, "DevToolsBrushBorder");
+        HeaderSeparator.SetResourceReference(System.Windows.Controls.Border.BackgroundProperty, "DevToolsBrushBorder");
     }
 
     private void BuildButtons(DevToolsMessageBoxType type)
@@ -133,18 +137,34 @@ public partial class DevToolsMessageBox : Window
 
         if (isAccent)
         {
-            btn.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#007ACC"));
-            btn.Foreground = System.Windows.Media.Brushes.White;
-            btn.BorderThickness = new Thickness(0);
+            if (System.Windows.Application.Current.TryFindResource("DevToolsPrimaryButton") is Style primaryStyle)
+            {
+                btn.Style = primaryStyle;
+            }
+            else
+            {
+                btn.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#007ACC"));
+                btn.Foreground = System.Windows.Media.Brushes.White;
+                btn.BorderThickness = new Thickness(0);
+            }
         }
         else
         {
-            btn.Background = System.Windows.Media.Brushes.Transparent;
-            btn.Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#A0A0A0"));
-            btn.BorderBrush = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#333333"));
-            btn.BorderThickness = new Thickness(1);
+            if (System.Windows.Application.Current.TryFindResource("DevToolsSecondaryButton") is Style secondaryStyle)
+            {
+                btn.Style = secondaryStyle;
+            }
+            else
+            {
+                btn.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#2D2D2D"));
+                btn.Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#E0E0E0"));
+                btn.BorderBrush = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#555555"));
+                btn.BorderThickness = new Thickness(1);
+            }
         }
 
+        btn.MinWidth = 88;
+        btn.Height = 34;
         btn.Click += (_, _) => onClick();
         return btn;
     }

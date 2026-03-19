@@ -1,4 +1,5 @@
 using System.Windows;
+using DevTools.Core.Models;
 using DevTools.Host.Wpf.Facades;
 using DevTools.Host.Wpf.Services;
 using DevTools.SearchText.Models;
@@ -7,15 +8,31 @@ namespace DevTools.Host.Wpf.Views;
 
 public partial class SearchTextWorkspaceView : System.Windows.Controls.UserControl
 {
+    private const string ToolHistorySlug = "search_text";
+    private const string ToolDisplayName = "Search Text";
+    private readonly AppSettings _appSettings;
     private readonly ISearchTextFacade _facade;
     private CancellationTokenSource? _executionCts;
     private bool _isExecuting;
+    private bool _defaultsApplied;
 
-    public SearchTextWorkspaceView(ISearchTextFacade facade)
+    public SearchTextWorkspaceView(ISearchTextFacade facade, AppSettings appSettings)
     {
         _facade = facade;
+        _appSettings = appSettings;
         InitializeComponent();
+        Loaded += SearchTextWorkspaceView_Loaded;
         ApplyModeState();
+    }
+
+    private void SearchTextWorkspaceView_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (_defaultsApplied)
+            return;
+
+        _defaultsApplied = true;
+        IncludeGlobsInput.Text = string.Join(Environment.NewLine, _appSettings.FileTools.DefaultIncludeGlobs);
+        ExcludeGlobsInput.Text = string.Join(Environment.NewLine, _appSettings.FileTools.DefaultExcludeGlobs);
     }
 
     private async void ActionExecute_Click(object sender, RoutedEventArgs e)
@@ -23,13 +40,20 @@ public partial class SearchTextWorkspaceView : System.Windows.Controls.UserContr
         await ExecuteAsync().ConfigureAwait(true);
     }
 
-    private void ActionCancel_Click(object sender, RoutedEventArgs e)
+    private async void HistoryButton_Click(object sender, RoutedEventArgs e)
+        => await ToolHistoryViewHelper.ShowAndApplyAsync(WorkspaceRoot, ToolHistorySlug, ToolDisplayName, ExecutionStatusText).ConfigureAwait(true);
+
+    private void ActionBack_Click(object sender, RoutedEventArgs e)
     {
         if (_isExecuting)
         {
             _executionCts?.Cancel();
             ExecutionStatusText.Text = "Cancelando...";
+            return;
         }
+
+        if (Window.GetWindow(this) is MainWindow mainWindow)
+            mainWindow.OpenFerramentasHome();
     }
 
     private async Task ExecuteAsync()
@@ -49,6 +73,7 @@ public partial class SearchTextWorkspaceView : System.Windows.Controls.UserContr
         }
 
         var request = BuildRequest();
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar busca").ConfigureAwait(true);
 
         _executionCts?.Dispose();
         _executionCts = new CancellationTokenSource();
@@ -104,6 +129,9 @@ public partial class SearchTextWorkspaceView : System.Windows.Controls.UserContr
 
     private SearchTextRequest BuildRequest()
     {
+        var includeGlobs = ParseLines(IncludeGlobsInput.Text) ?? _appSettings.FileTools.DefaultIncludeGlobs;
+        var excludeGlobs = ParseLines(ExcludeGlobsInput.Text) ?? _appSettings.FileTools.DefaultExcludeGlobs;
+
         return new SearchTextRequest
         {
             RootPath       = RootPathSelector.SelectedPath?.Trim() ?? string.Empty,
@@ -114,8 +142,8 @@ public partial class SearchTextWorkspaceView : System.Windows.Controls.UserContr
             SkipBinaryFiles = SkipBinaryCheck.IsChecked ?? true,
             MaxFileSizeKb  = int.TryParse(MaxFileSizeInput.Text.Trim(), out var sz) && sz > 0 ? sz : null,
             MaxMatchesPerFile = int.TryParse(MaxMatchesInput.Text.Trim(), out var mm) ? Math.Max(0, mm) : 0,
-            IncludeGlobs   = ParseLines(IncludeGlobsInput.Text),
-            ExcludeGlobs   = ParseLines(ExcludeGlobsInput.Text),
+            IncludeGlobs   = includeGlobs,
+            ExcludeGlobs   = excludeGlobs,
             ReturnLines    = true
         };
     }
@@ -133,9 +161,19 @@ public partial class SearchTextWorkspaceView : System.Windows.Controls.UserContr
 
     private void ApplyModeState()
     {
+        Actions.Visibility = Visibility.Visible;
+        Actions.ShowHelp = true;
+        Actions.HelpContextKey = "searchtext:execution";
+        Actions.ShowNew = false;
+        Actions.ShowDelete = false;
+        Actions.ShowCancel = false;
+        Actions.ShowSave = true;
+        Actions.SaveText = "Buscar";
+        Actions.SaveIconKind = "Play";
         Actions.CanSave = !_isExecuting;
-        Actions.CanCancel = _isExecuting;
-        Actions.ShowCancel = _isExecuting;
-        Actions.CancelText = "Cancelar";
+        Actions.ShowBack = true;
+        Actions.BackText = _isExecuting ? "Cancelar" : "Voltar";
+        Actions.BackIconKind = _isExecuting ? "CloseCircleOutline" : "ArrowLeft";
+        Actions.CanBack = true;
     }
 }

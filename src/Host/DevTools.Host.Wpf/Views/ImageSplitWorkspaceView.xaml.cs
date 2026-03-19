@@ -7,6 +7,8 @@ namespace DevTools.Host.Wpf.Views;
 
 public partial class ImageSplitWorkspaceView : System.Windows.Controls.UserControl
 {
+    private const string ToolHistorySlug = "image_split";
+    private const string ToolDisplayName = "Image Split";
     private readonly IImageSplitFacade _facade;
     private CancellationTokenSource? _executionCts;
     private bool _isExecuting;
@@ -23,13 +25,20 @@ public partial class ImageSplitWorkspaceView : System.Windows.Controls.UserContr
         await ExecuteAsync().ConfigureAwait(true);
     }
 
-    private void ActionCancel_Click(object sender, RoutedEventArgs e)
+    private async void HistoryButton_Click(object sender, RoutedEventArgs e)
+        => await ToolHistoryViewHelper.ShowAndApplyAsync(WorkspaceRoot, ToolHistorySlug, ToolDisplayName, ExecutionStatusText).ConfigureAwait(true);
+
+    private void ActionBack_Click(object sender, RoutedEventArgs e)
     {
         if (_isExecuting)
         {
             _executionCts?.Cancel();
             ExecutionStatusText.Text = "Cancelando execução...";
+            return;
         }
+
+        if (Window.GetWindow(this) is MainWindow mainWindow)
+            mainWindow.OpenFerramentasHome();
     }
 
     private async Task ExecuteAsync()
@@ -49,6 +58,7 @@ public partial class ImageSplitWorkspaceView : System.Windows.Controls.UserContr
         }
 
         var request = BuildRequest();
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar corte de imagem").ConfigureAwait(true);
 
         _executionCts?.Dispose();
         _executionCts = new CancellationTokenSource();
@@ -114,10 +124,19 @@ public partial class ImageSplitWorkspaceView : System.Windows.Controls.UserContr
 
     private void ApplyModeState()
     {
+        Actions.ShowHelp = true;
+        Actions.HelpContextKey = "imagesplit:execution";
+        Actions.ShowNew = false;
+        Actions.ShowDelete = false;
+        Actions.ShowCancel = false;
+        Actions.ShowSave = true;
+        Actions.SaveText = "Executar";
+        Actions.SaveIconKind = "Play";
         Actions.CanSave = !_isExecuting;
-        Actions.CanCancel = _isExecuting;
-        Actions.ShowCancel = _isExecuting;
-        Actions.CancelText = "Cancelar Execução";
+        Actions.ShowBack = true;
+        Actions.BackText = _isExecuting ? "Cancelar" : "Voltar";
+        Actions.BackIconKind = _isExecuting ? "CloseCircleOutline" : "ArrowLeft";
+        Actions.CanBack = true;
     }
 
     private void ClearInlineValidationStates()
@@ -126,3 +145,4 @@ public partial class ImageSplitWorkspaceView : System.Windows.Controls.UserContr
         ValidationUiService.SetPathSelectorInvalid(OutputDirectorySelector, false);
     }
 }
+

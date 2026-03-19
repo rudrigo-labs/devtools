@@ -5,7 +5,7 @@
         <Setter Property="AllowsTransparency" Value="True"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="ResizeMode" Value="NoResize"/>
-        <Setter Property="Icon" Value="pack://application:,,,/DevTools.Host.Wpf;component/Assets/application.ico"/>
+        <Setter Property="Icon" Value="pack://application:,,,/Assets/app.ico"/>
         <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>

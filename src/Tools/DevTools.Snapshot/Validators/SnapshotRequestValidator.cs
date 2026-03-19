@@ -16,15 +16,18 @@ public sealed class SnapshotRequestValidator : IValidator<SnapshotRequest>
     public ValidationResult Validate(SnapshotRequest instance)
     {
         if (instance is null)
-            return ValidationResult.Fail(new ValidationError("request", "Request nao pode ser nulo."));
+            return ValidationResult.Fail(new ValidationError("request", "Request não pode ser nulo."));
 
         var errors = new List<ValidationError>();
 
         if (string.IsNullOrWhiteSpace(instance.RootPath))
-            errors.Add(new ValidationError("rootPath", "Caminho raiz e obrigatorio."));
+            errors.Add(new ValidationError("rootPath", "Caminho raiz é obrigatório."));
+
+        if (string.IsNullOrWhiteSpace(instance.OutputBasePath))
+            errors.Add(new ValidationError("outputBasePath", "Caminho de saída é obrigatório."));
 
         if (!HasAnyOutputEnabled(instance))
-            errors.Add(new ValidationError("outputs", "Selecione pelo menos um formato de saida."));
+            errors.Add(new ValidationError("outputs", "Selecione pelo menos um formato de saída."));
 
         if (instance.MaxFileSizeKb.HasValue)
         {
@@ -32,7 +35,7 @@ public sealed class SnapshotRequestValidator : IValidator<SnapshotRequest>
                 errors.Add(new ValidationError("maxFileSizeKb", "MaxFileSizeKb deve ser maior que zero."));
             else if (instance.MaxFileSizeKb > _settings.FileTools.AbsoluteMaxFileSizeKb)
                 errors.Add(new ValidationError("maxFileSizeKb",
-                    $"MaxFileSizeKb nao pode exceder {_settings.FileTools.AbsoluteMaxFileSizeKb} KB."));
+                    $"MaxFileSizeKb não pode exceder {_settings.FileTools.AbsoluteMaxFileSizeKb} KB."));
         }
 
         return errors.Count == 0 ? ValidationResult.Success : ValidationResult.Fail(errors);

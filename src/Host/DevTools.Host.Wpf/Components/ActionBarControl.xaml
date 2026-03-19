@@ -13,6 +13,17 @@
                 Margin="0,0,0,6">
 
         <Button Style="{StaticResource ActionBarCancelButton}"
+                Click="ActionHistory_Click"
+                IsEnabled="{Binding CanHistory, ElementName=Root}"
+                Visibility="{Binding ShowHistory, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="History" Width="16" Height="16" Margin="0,0,6,0"/>
+                <TextBlock Text="{Binding HistoryText, ElementName=Root}"/>
+            </StackPanel>
+        </Button>
+
+        <Button Style="{StaticResource ActionBarCancelButton}"
+                Click="ActionHelp_Click"
                 IsEnabled="{Binding CanHelp, ElementName=Root}"
                 ToolTip="{Binding HelpText, ElementName=Root}"
                 Visibility="{Binding ShowHelp, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -37,7 +48,7 @@
                 IsEnabled="{Binding CanSave, ElementName=Root}"
                 Visibility="{Binding ShowSave, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
             <StackPanel Orientation="Horizontal">
-                <materialDesign:PackIcon Kind="ContentSave" Width="16" Height="16" Margin="0,0,6,0"/>
+                <materialDesign:PackIcon Kind="{Binding SaveIconKind, ElementName=Root}" Width="16" Height="16" Margin="0,0,6,0"/>
                 <TextBlock Text="{Binding SaveText, ElementName=Root}"/>
             </StackPanel>
         </Button>
@@ -59,6 +70,26 @@
             <StackPanel Orientation="Horizontal">
                 <materialDesign:PackIcon Kind="Close" Width="16" Height="16" Margin="0,0,6,0"/>
                 <TextBlock Text="{Binding CancelText, ElementName=Root}"/>
+            </StackPanel>
+        </Button>
+
+        <Button Style="{StaticResource ActionBarNewButton}"
+                Click="ActionGoToTool_Click"
+                IsEnabled="{Binding CanGoToTool, ElementName=Root}"
+                Visibility="{Binding ShowGoToTool, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="HammerWrench" Width="16" Height="16" Margin="0,0,6,0"/>
+                <TextBlock Text="{Binding GoToToolText, ElementName=Root}"/>
+            </StackPanel>
+        </Button>
+
+        <Button Style="{StaticResource ActionBarCancelButton}"
+                Click="ActionBack_Click"
+                IsEnabled="{Binding CanBack, ElementName=Root}"
+                Visibility="{Binding ShowBack, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="{Binding BackIconKind, ElementName=Root}" Width="16" Height="16" Margin="0,0,6,0"/>
+                <TextBlock Text="{Binding BackText, ElementName=Root}"/>
             </StackPanel>
         </Button>
 

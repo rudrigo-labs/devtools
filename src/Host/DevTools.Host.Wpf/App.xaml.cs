@@ -6,6 +6,7 @@ using DevTools.Harvest.Repositories;
 using DevTools.Harvest.Services;
 using DevTools.Host.Wpf.Configuration;
 using DevTools.Host.Wpf.Facades;
+using DevTools.Host.Wpf.Services;
 using DevTools.Host.Wpf.Views;
 using DevTools.Image.Engine;
 using DevTools.Infrastructure.Persistence;
@@ -17,6 +18,8 @@ using DevTools.Ngrok.Engine;
 using DevTools.Ngrok.Repositories;
 using DevTools.Ngrok.Services;
 using DevTools.Organizer.Engine;
+using DevTools.Organizer.Repositories;
+using DevTools.Organizer.Services;
 using DevTools.Rename.Engine;
 using DevTools.SearchText.Engine;
 using DevTools.Snapshot.Engine;
@@ -36,6 +39,15 @@ namespace DevTools.Host.Wpf;
 public partial class App : System.Windows.Application
 {
     private ServiceProvider? _serviceProvider;
+
+    public static T GetRequiredService<T>() where T : notnull
+    {
+        var app = Current as App;
+        if (app?._serviceProvider is null)
+            throw new InvalidOperationException("Service provider não inicializado.");
+
+        return app._serviceProvider.GetRequiredService<T>();
+    }
 
     protected override void OnStartup(System.Windows.StartupEventArgs e)
     {
@@ -79,6 +91,7 @@ public partial class App : System.Windows.Application
     {
         // Configuração estática da aplicação
         services.AddSingleton(appSettings);
+        services.AddSingleton<AppSettingsFileService>();
 
         // Infraestrutura — DbContextOptions resolvido uma única vez via factory.
         services.AddSingleton<SqlitePathProvider>();
@@ -86,6 +99,8 @@ public partial class App : System.Windows.Application
         services.AddSingleton(sp =>
             sp.GetRequiredService<SqliteDbContextOptionsFactory>().Create());
         services.AddSingleton<SqliteBootstrapper>();
+        services.AddSingleton<IToolUsageHistoryRepository, ToolUsageHistoryRepository>();
+        services.AddSingleton<ToolUsageHistoryUiService>();
 
         // Utilitários de processo
         services.AddSingleton<IProcessRunner, SystemProcessRunner>();
@@ -115,6 +130,8 @@ public partial class App : System.Windows.Application
         services.AddSingleton<ISearchTextFacade, SearchTextFacade>();
 
         // Organizer
+        services.AddSingleton<IOrganizerEntityRepository, OrganizerEntityRepository>();
+        services.AddSingleton<OrganizerEntityService>();
         services.AddSingleton<OrganizerEngine>();
         services.AddSingleton<IOrganizerFacade, OrganizerFacade>();
 
@@ -142,6 +159,8 @@ public partial class App : System.Windows.Application
 
         // Host WPF
         services.AddSingleton<HomeLauncherView>();
+        services.AddSingleton<ConfigurationLauncherView>();
+        services.AddSingleton<GeneralSettingsView>();
         services.AddSingleton<RenameWorkspaceView>();
         services.AddSingleton<SnapshotWorkspaceView>();
         services.AddSingleton<HarvestWorkspaceView>();

@@ -7,118 +7,409 @@
         <Grid HorizontalAlignment="Stretch"
               VerticalAlignment="Top"
               Margin="0,4,0,0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- HEADER -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,12">
-            <TextBlock Text="Organizer"
-                       FontSize="18" FontWeight="SemiBold"
-                       Foreground="{DynamicResource DevToolsTextPrimary}"/>
-            <TextBlock Text="Organiza documentos (PDF, Word, TXT) em categorias por palavras-chave. Detecta duplicatas por nome ou hash."
-                       Foreground="{DynamicResource DevToolsTextSecondary}"
-                       FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap"/>
-            <Border Height="1" Background="{DynamicResource DevToolsBrushBorder}" Margin="0,10,0,0"/>
-        </StackPanel>
-
-        <!-- ACTION BAR -->
-        <c:ActionBarControl Grid.Row="1" x:Name="Actions"
-                            ShowNew="False" ShowSave="True" ShowDelete="False" ShowCancel="True"
-                            SaveText="Executar"
-                            ShowHelp="True"
-                            HelpText="Pasta de entrada contem os arquivos. Pasta de saida define onde organizar. Score minimo controla a classificacao."
-                            ActionSave="ActionExecute_Click"
-                            ActionCancel="ActionCancel_Click"/>
-
-        <!-- BODY -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Margin="0,0,0,0">
-
-                <Border BorderThickness="1" CornerRadius="4"
-                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                        Background="{DynamicResource DevToolsSurface}"
-                        Padding="10,8" Margin="0,0,0,12">
-                    <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
-                        Como usar: escolha a pasta de entrada. Se quiser, escolha uma pasta de saida.
-                        Score minimo define a confianca da classificacao. Mover arquivos aplica de verdade;
-                        desmarcado faz simulacao.
-                    </TextBlock>
-                </Border>
-
-                <c:PathSelector x:Name="InboxPathSelector" Title="Pasta de entrada *" IsFolderPicker="True" Margin="0,0,0,12"/>
-                <c:PathSelector x:Name="OutputPathSelector" Title="Pasta de saída (opcional — padrão: mesma da entrada)" IsFolderPicker="True" Margin="0,0,0,12"/>
-
-                <Grid Margin="0,0,0,12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="16"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="Score mínimo para classificação" Style="{StaticResource DevToolsInputLabel}"/>
-                        <TextBox x:Name="MinScoreInput" Style="{StaticResource DevToolsTextInput}" Text="3"
-                                 ToolTip="Pontuação mínima de palavras-chave para mover o arquivo para uma categoria."/>
-                    </StackPanel>
-                    <CheckBox x:Name="ApplyCheck" Grid.Column="2"
-                              Content="Mover arquivos (aplicar)"
-                              Style="{StaticResource DevToolsCheckBox}"
-                              VerticalAlignment="Bottom"
-                              ToolTip="Quando desmarcado, apenas simula a organização sem mover nenhum arquivo."/>
-                </Grid>
-
-                <Button Content="Organizar Agora"
-                        Style="{StaticResource DevToolsPrimaryButton}"
-                        HorizontalAlignment="Left"
-                        Margin="0,0,0,12"
-                        Click="ActionExecute_Click"/>
-
-                <!-- Resumo dos resultados -->
-                <Border x:Name="ResultPanel" Visibility="Collapsed"
-                        BorderThickness="1" CornerRadius="4"
-                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                        Padding="10,8" Margin="0,0,0,8">
-                    <StackPanel>
-                        <TextBlock x:Name="ResultSummaryText"
-                                   Foreground="{DynamicResource DevToolsTextPrimary}"
-                                   FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
-                        <ListBox x:Name="ResultsList"
-                                 MaxHeight="240"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Auto">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="0,2,0,2">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="120"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="{Binding Category}"
-                                                   FontWeight="SemiBold" FontSize="11"
-                                                   Foreground="{DynamicResource DevToolsTextPrimary}"/>
-                                        <TextBlock Grid.Column="1"
-                                                   Text="{Binding Source}"
-                                                   FontSize="11"
-                                                   Foreground="{DynamicResource DevToolsTextSecondary}"
-                                                   TextTrimming="CharacterEllipsis"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </StackPanel>
-                </Border>
-
+            <!-- ==================== TOOL HEADER ==================== -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                <TextBlock x:Name="WorkspaceTitleText"
+                           Text="Organizer"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource DevToolsTextPrimary}"/>
+                <TextBlock x:Name="WorkspaceSubtitleText"
+                           Text="Organiza documentos por categorias usando palavras-chave e deduplicação."
+                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                           FontSize="12"
+                           Margin="0,4,0,0"
+                           TextWrapping="Wrap"/>
+                <Border Height="1"
+                        Background="{DynamicResource DevToolsBrushBorder}"
+                        Margin="0,10,0,0"/>
             </StackPanel>
-        </ScrollViewer>
 
-        <!-- STATUS -->
-        <TextBlock x:Name="ExecutionStatusText" Grid.Row="3"
-                   Margin="0,10,0,0"
-                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
-    </Grid>
+            <!-- ==================== ACTION BAR ==================== -->
+            <c:ActionBarControl Grid.Row="1"
+                                x:Name="Actions"
+                                ShowHistory="True"
+                                ActionHistory="HistoryButton_Click"
+                                ShowNew="True"
+                                ShowSave="True"
+                                ShowDelete="True"
+                                ShowCancel="True"
+                                ShowHelp="True"
+                                ActionNew="ActionNew_Click"
+                                ActionSave="ActionSave_Click"
+                                ActionDelete="ActionDelete_Click"
+                                ActionCancel="ActionCancel_Click"
+                                ActionGoToTool="ActionGoToTool_Click"
+                                ActionBack="ActionBack_Click"/>
+
+            <!-- ==================== TOOL BODY ==================== -->
+            <ScrollViewer Grid.Row="2"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Margin="0,0,0,0">
+
+                    <!-- Seletor de configurações -->
+                    <StackPanel x:Name="ConfigurationsLabel"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="Configurações salvas"
+                                   Style="{StaticResource DevToolsCardTitle}"/>
+                    </StackPanel>
+                    <ComboBox x:Name="ConfigurationsCombo"
+                              Margin="0,8,0,16"
+                              Style="{StaticResource DevToolsSelectInput}"
+                              SelectionChanged="ConfigurationsCombo_SelectionChanged"
+                              DisplayMemberPath="Name"/>
+
+                    <Border x:Name="ConfigurationModeHint"
+                            Visibility="Collapsed"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                            Background="{DynamicResource DevToolsSurface}"
+                            Padding="10,8"
+                            Margin="0,0,0,12">
+                        <TextBlock Text=""
+                                   Foreground="{DynamicResource DevToolsTextSecondary}"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+
+                    <!-- Metadados -->
+                    <Grid x:Name="ConfigurationMetadataSection"
+                          Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Nome"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="NameInput"
+                                     Style="{StaticResource DevToolsTextInput}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Descrição"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="DescriptionInput"
+                                     Style="{StaticResource DevToolsTextInput}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Caminhos -->
+                    <c:PathSelector x:Name="InboxPathSelector"
+                                    Title="Pasta de entrada *"
+                                    IsFolderPicker="True"
+                                    Margin="0,0,0,12"/>
+
+                    <c:PathSelector x:Name="OutputPathSelector"
+                                    Title="Pasta de saída (opcional - padrão: mesma da entrada)"
+                                    IsFolderPicker="True"
+                                    Margin="0,0,0,12"/>
+
+                    <!-- Execução -->
+                    <TextBlock Text="Execução"
+                               Style="{StaticResource DevToolsCardTitle}"
+                               Margin="0,4,0,10"/>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Score mínimo para classificação"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="MinScoreInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     Text="3"/>
+                        </StackPanel>
+                        <CheckBox x:Name="ApplyCheck"
+                                  Grid.Column="2"
+                                  Content="Mover arquivos (aplicar)"
+                                  Style="{StaticResource DevToolsCheckBox}"
+                                  VerticalAlignment="Bottom"/>
+                    </Grid>
+
+                    <!-- Regras gerais -->
+                    <TextBlock Text="Regras gerais"
+                               Style="{StaticResource DevToolsCardTitle}"
+                               Margin="0,4,0,10"/>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="Extensões permitidas (separadas por vírgula)"
+                                   Style="{StaticResource DevToolsInputLabel}"/>
+                        <TextBox x:Name="AllowedExtensionsInput"
+                                 Style="{StaticResource DevToolsTextInput}"
+                                 Text=".pdf, .txt, .md, .doc, .docx"/>
+                    </StackPanel>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Peso do nome do arquivo"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="FileNameWeightInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     Text="2.0"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Deduplicação por primeiras linhas"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="DeduplicateFirstLinesInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     Text="0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Pasta de duplicatas"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="DuplicatesFolderInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     Text="Duplicates"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Pasta fallback"
+                                       Style="{StaticResource DevToolsInputLabel}"/>
+                            <TextBox x:Name="OthersFolderInput"
+                                     Style="{StaticResource DevToolsTextInput}"
+                                     Text="Outros"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <CheckBox x:Name="DeduplicateByNameCheck"
+                                  Grid.Column="0"
+                                  Content="Deduplicar por nome"
+                                  Style="{StaticResource DevToolsCheckBox}"
+                                  IsChecked="True"/>
+
+                        <CheckBox x:Name="DeduplicateByHashCheck"
+                                  Grid.Column="2"
+                                  Content="Deduplicar por hash"
+                                  Style="{StaticResource DevToolsCheckBox}"
+                                  IsChecked="True"/>
+                    </Grid>
+
+                    <!-- Categorias -->
+                    <TextBlock Text="Categorias"
+                               Style="{StaticResource DevToolsCardTitle}"
+                               Margin="0,4,0,10"/>
+
+                    <TextBlock x:Name="CategoriesCountText"
+                               Text="0 categoria(s) configurada(s)"
+                               Foreground="{DynamicResource DevToolsTextSecondary}"
+                               FontSize="11"
+                               Margin="0,0,0,8"/>
+
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                Margin="0,0,0,8">
+                        <Button x:Name="AddCategoryButton"
+                                Content="Adicionar categoria"
+                                Style="{StaticResource DevToolsSecondaryButton}"
+                                Margin="0,0,8,0"
+                                Click="AddCategoryButton_Click"/>
+                        <Button x:Name="RemoveCategoryButton"
+                                Content="Remover categoria"
+                                Style="{StaticResource DevToolsSecondaryButton}"
+                                Click="RemoveCategoryButton_Click"/>
+                    </StackPanel>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="12"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                                Background="{DynamicResource DevToolsSurface}">
+                            <ListBox x:Name="CategoriesList"
+                                     Height="220"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     SelectionChanged="CategoriesList_SelectionChanged"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="8,6">
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource DevToolsTextPrimary}"
+                                                       FontSize="12"/>
+                                            <TextBlock Text="{Binding Folder, StringFormat=Pasta: {0}}"
+                                                       Foreground="{DynamicResource DevToolsTextSecondary}"
+                                                       FontSize="11"
+                                                       Margin="0,2,0,0"/>
+                                            <TextBlock Text="{Binding Keywords.Length, StringFormat=Keywords: {0}}"
+                                                       Foreground="{DynamicResource DevToolsTextSecondary}"
+                                                       FontSize="11"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+
+                        <StackPanel Grid.Row="2"
+                                    x:Name="CategoryEditorPanel"
+                                    Margin="0,0,0,0">
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Nome da categoria"
+                                               Style="{StaticResource DevToolsInputLabel}"/>
+                                    <TextBox x:Name="CategoryNameInput"
+                                             Style="{StaticResource DevToolsTextInput}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Pasta de destino"
+                                               Style="{StaticResource DevToolsInputLabel}"/>
+                                    <TextBox x:Name="CategoryFolderInput"
+                                             Style="{StaticResource DevToolsTextInput}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Peso keywords"
+                                               Style="{StaticResource DevToolsInputLabel}"/>
+                                    <TextBox x:Name="CategoryKeywordWeightInput"
+                                             Style="{StaticResource DevToolsTextInput}"
+                                             Text="2"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Peso negativas"
+                                               Style="{StaticResource DevToolsInputLabel}"/>
+                                    <TextBox x:Name="CategoryNegativeWeightInput"
+                                             Style="{StaticResource DevToolsTextInput}"
+                                             Text="2"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Margin="0,0,0,8">
+                                <TextBlock Text="MinScore da categoria (opcional)"
+                                           Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="CategoryMinScoreInput"
+                                         Style="{StaticResource DevToolsTextInput}"/>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,8">
+                                <TextBlock Text="Palavras-chave (separadas por vírgula)"
+                                           Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="CategoryKeywordsInput"
+                                         Style="{StaticResource DevToolsTextInput}"/>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,0">
+                                <TextBlock Text="Palavras-chave negativas (separadas por vírgula)"
+                                           Style="{StaticResource DevToolsInputLabel}"/>
+                                <TextBox x:Name="CategoryNegativeKeywordsInput"
+                                         Style="{StaticResource DevToolsTextInput}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <Button x:Name="ExecuteNowButton"
+                            Content="Organizar Agora"
+                            Style="{StaticResource DevToolsPrimaryButton}"
+                            HorizontalAlignment="Left"
+                            Margin="0,0,0,12"
+                            Click="ExecuteNowButton_Click"/>
+
+                    <!-- Resultado -->
+                    <Border x:Name="ResultPanel"
+                            Visibility="Collapsed"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                            Padding="10,8"
+                            Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock x:Name="ResultSummaryText"
+                                       Foreground="{DynamicResource DevToolsTextPrimary}"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"
+                                       Margin="0,0,0,6"/>
+                            <ListBox x:Name="ResultsList"
+                                     MaxHeight="240"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,2,0,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding Category}"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="11"
+                                                       Foreground="{DynamicResource DevToolsTextPrimary}"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding Source}"
+                                                       FontSize="11"
+                                                       Foreground="{DynamicResource DevToolsTextSecondary}"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ==================== STATUS ==================== -->
+            <TextBlock x:Name="ExecutionStatusText"
+                       Grid.Row="3"
+                       Margin="0,10,0,0"
+                       Foreground="{DynamicResource DevToolsTextSecondary}"/>
+        </Grid>
     </Grid>
 </UserControl>

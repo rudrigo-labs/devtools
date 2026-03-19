@@ -1,30 +1,49 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media.Imaging;
+using DevTools.Host.Wpf.Components;
+using DevTools.Host.Wpf.Facades;
+using DevTools.Ngrok.Models;
+using DevTools.SSHTunnel.Models;
+using H.NotifyIcon;
 
 namespace DevTools.Host.Wpf.Views;
 
 public partial class MainWindow : Window
 {
     private const uint MonitorDefaultToNearest = 0x00000002;
+    private const string FerramentasTag = "Ferramentas";
+    private const string ConfiguracoesTag = "ConfiguraÃ§Ãµes";
+    private const string GeneralSettingsTag = "GeneralSettings";
+    private static readonly string[] ResetOnHomeToolTags =
+    [
+        "Snapshot",
+        "Harvest",
+        "Organizer",
+        "Migrations",
+        "SshTunnel",
+        "Ngrok"
+    ];
+
     private enum WorkspaceIntent { Default, Configuration, Execution }
 
-    // Mapa de tool tag -> UserControl factory. Adicionar novas tools aqui.
     private readonly Dictionary<string, Func<System.Windows.Controls.UserControl>> _toolRegistry;
-    private static readonly HashSet<string> ConfigurationFirstTools = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "Snapshot",
-        "Migrations",
-        "Utf8Convert",
-        "Notes"
-    };
+    private readonly ISshTunnelFacade _sshTunnelFacade;
+    private readonly INgrokFacade _ngrokFacade;
+    private TaskbarIcon? _sshTrayIcon;
+    private TaskbarIcon? _ngrokTrayIcon;
     private string _activeToolTag = string.Empty;
     private WorkspaceIntent _activeIntent = WorkspaceIntent.Default;
+    private bool _isWorkAreaMaximized;
+    private Rect _restoreBounds;
+    private bool _isExitRequested;
 
     public MainWindow(
         HomeLauncherView homeLauncherView,
+        ConfigurationLauncherView configurationLauncherView,
+        GeneralSettingsView generalSettingsView,
         SnapshotWorkspaceView snapshotWorkspaceView,
         RenameWorkspaceView renameWorkspaceView,
         HarvestWorkspaceView harvestWorkspaceView,
@@ -35,56 +54,78 @@ public partial class MainWindow : Window
         MigrationsWorkspaceView migrationsWorkspaceView,
         SshTunnelWorkspaceView sshTunnelWorkspaceView,
         NgrokWorkspaceView ngrokWorkspaceView,
-        NotesWorkspaceView notesWorkspaceView)
+        NotesWorkspaceView notesWorkspaceView,
+        ISshTunnelFacade sshTunnelFacade,
+        INgrokFacade ngrokFacade)
     {
         InitializeComponent();
+        _sshTunnelFacade = sshTunnelFacade;
+        _ngrokFacade = ngrokFacade;
 
         _toolRegistry = new Dictionary<string, Func<System.Windows.Controls.UserControl>>(StringComparer.OrdinalIgnoreCase)
         {
-            ["Home"]        = () => homeLauncherView,
-            ["Snapshot"]    = () => snapshotWorkspaceView,
-            ["Rename"]      = () => renameWorkspaceView,
-            ["Harvest"]     = () => harvestWorkspaceView,
-            ["ImageSplit"]  = () => imageSplitWorkspaceView,
-            ["SearchText"]  = () => searchTextWorkspaceView,
-            ["Organizer"]   = () => organizerWorkspaceView,
+            [FerramentasTag] = () => homeLauncherView,
+            [ConfiguracoesTag] = () => configurationLauncherView,
+            [GeneralSettingsTag] = () => generalSettingsView,
+            ["Snapshot"] = () => snapshotWorkspaceView,
+            ["Rename"] = () => renameWorkspaceView,
+            ["Harvest"] = () => harvestWorkspaceView,
+            ["ImageSplit"] = () => imageSplitWorkspaceView,
+            ["SearchText"] = () => searchTextWorkspaceView,
+            ["Organizer"] = () => organizerWorkspaceView,
             ["Utf8Convert"] = () => utf8ConvertWorkspaceView,
-            ["Migrations"]  = () => migrationsWorkspaceView,
-            ["SshTunnel"]   = () => sshTunnelWorkspaceView,
-            ["Ngrok"]       = () => ngrokWorkspaceView,
-            ["Notes"]       = () => notesWorkspaceView,
+            ["Migrations"] = () => migrationsWorkspaceView,
+            ["SshTunnel"] = () => sshTunnelWorkspaceView,
+            ["Ngrok"] = () => ngrokWorkspaceView,
+            ["Notes"] = () => notesWorkspaceView
         };
 
         homeLauncherView.OpenToolRequested += toolTag =>
+            ActivateTool(toolTag, WorkspaceIntent.Execution);
+
+        configurationLauncherView.OpenToolRequested += toolTag =>
             ActivateTool(toolTag, WorkspaceIntent.Configuration);
 
         Loaded += (_, _) =>
         {
-            WindowState = WindowState.Maximized;
-            ActivateTool("Home");
+            _restoreBounds = new Rect(Left, Top, Width, Height);
+            MaximizeToWorkArea();
+            ActivateTool(FerramentasTag, WorkspaceIntent.Default);
         };
-    }
 
-    // -------------------------------------------------------------------------
-    // Navegação
-    // -------------------------------------------------------------------------
+        Closing += MainWindow_Closing;
+        Closed += MainWindow_Closed;
+    }
 
     private void NavButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not System.Windows.Controls.Button btn || btn.Tag is not string tag)
             return;
 
-        if (string.Equals(tag, "Home", StringComparison.OrdinalIgnoreCase))
+        if (tag.StartsWith("Exec:", StringComparison.OrdinalIgnoreCase))
         {
-            ActivateTool("Home");
+            var toolTag = tag["Exec:".Length..];
+            ActivateTool(toolTag, WorkspaceIntent.Execution);
             return;
         }
 
-        var intent = ConfigurationFirstTools.Contains(tag)
-            ? WorkspaceIntent.Configuration
-            : WorkspaceIntent.Default;
+        if (tag.StartsWith("Cfg:", StringComparison.OrdinalIgnoreCase))
+        {
+            var toolTag = tag["Cfg:".Length..];
+            ActivateTool(toolTag, WorkspaceIntent.Configuration);
+            return;
+        }
 
-        ActivateTool(tag, intent);
+        if (string.Equals(tag, FerramentasTag, StringComparison.OrdinalIgnoreCase))
+        {
+            ActivateTool(FerramentasTag, WorkspaceIntent.Default);
+            return;
+        }
+
+        if (string.Equals(tag, ConfiguracoesTag, StringComparison.OrdinalIgnoreCase))
+        {
+            ActivateTool(ConfiguracoesTag, WorkspaceIntent.Default);
+        }
     }
 
     private void ActivateTool(string tag, WorkspaceIntent intent = WorkspaceIntent.Default)
@@ -92,98 +133,174 @@ public partial class MainWindow : Window
         if (string.Equals(_activeToolTag, tag, StringComparison.OrdinalIgnoreCase) && _activeIntent == intent)
             return;
 
+        var goingToFerramentas = string.Equals(tag, FerramentasTag, StringComparison.OrdinalIgnoreCase);
+        var leavingConfigurationContext =
+            _activeIntent == WorkspaceIntent.Configuration
+            || string.Equals(_activeToolTag, ConfiguracoesTag, StringComparison.OrdinalIgnoreCase);
+
+        if (goingToFerramentas && leavingConfigurationContext)
+            ResetConfigurationWorkspacesToInitialState();
+
         if (!_toolRegistry.TryGetValue(tag, out var factory))
             return;
 
         var workspace = factory();
+        ApplyWorkspaceIntent(workspace, intent);
 
+        _activeToolTag = tag;
+        _activeIntent = intent;
+
+        WorkspaceHost.Content = workspace;
+        UpdateHeaderAndStatus(tag, intent);
+        UpdateNavStyles();
+    }
+
+    private void ResetConfigurationWorkspacesToInitialState()
+    {
+        foreach (var toolTag in ResetOnHomeToolTags)
+        {
+            if (!_toolRegistry.TryGetValue(toolTag, out var factory))
+                continue;
+
+            ApplyWorkspaceIntent(factory(), WorkspaceIntent.Execution);
+        }
+    }
+
+    public void OpenFerramentasHome()
+        => ActivateTool(FerramentasTag, WorkspaceIntent.Default);
+
+    public void OpenToolExecution(string toolTag)
+        => ActivateTool(toolTag, WorkspaceIntent.Execution);
+
+    private static void ApplyWorkspaceIntent(System.Windows.Controls.UserControl workspace, WorkspaceIntent intent)
+    {
         switch (workspace)
         {
             case SnapshotWorkspaceView snapshot:
                 if (intent == WorkspaceIntent.Configuration) snapshot.ActivateConfigurationMode();
                 else if (intent == WorkspaceIntent.Execution) snapshot.ActivateExecutionMode();
                 break;
+            case HarvestWorkspaceView harvest:
+                if (intent == WorkspaceIntent.Configuration) harvest.ActivateConfigurationMode();
+                else if (intent == WorkspaceIntent.Execution) harvest.ActivateExecutionMode();
+                break;
+            case OrganizerWorkspaceView organizer:
+                if (intent == WorkspaceIntent.Configuration) organizer.ActivateConfigurationMode();
+                else if (intent == WorkspaceIntent.Execution) organizer.ActivateExecutionMode();
+                break;
             case MigrationsWorkspaceView migrations:
                 if (intent == WorkspaceIntent.Configuration) migrations.ActivateConfigurationMode();
                 else if (intent == WorkspaceIntent.Execution) migrations.ActivateExecutionMode();
+                break;
+            case SshTunnelWorkspaceView sshTunnel:
+                if (intent == WorkspaceIntent.Configuration) sshTunnel.ActivateConfigurationMode();
+                else if (intent == WorkspaceIntent.Execution) sshTunnel.ActivateExecutionMode();
+                break;
+            case NgrokWorkspaceView ngrok:
+                if (intent == WorkspaceIntent.Configuration) ngrok.ActivateConfigurationMode();
+                else if (intent == WorkspaceIntent.Execution) ngrok.ActivateExecutionMode();
                 break;
             case NotesWorkspaceView notes:
                 if (intent == WorkspaceIntent.Configuration) notes.ActivateConfigurationMode();
                 else if (intent == WorkspaceIntent.Execution) notes.ActivateExecutionMode();
                 break;
         }
+    }
 
-        _activeToolTag = tag;
-        _activeIntent = intent;
-        WorkspaceHost.Content = workspace;
-
-        if (string.Equals(tag, "Home", StringComparison.OrdinalIgnoreCase))
+    private void UpdateHeaderAndStatus(string tag, WorkspaceIntent intent)
+    {
+        if (string.Equals(tag, FerramentasTag, StringComparison.OrdinalIgnoreCase))
         {
-            ActiveToolLabel.Text = "Home";
-            MainStatusText.Text = "Selecione uma ferramenta para começar.";
-        }
-        else
-        {
-            var suffix = intent switch
-            {
-                WorkspaceIntent.Configuration => "Configuration",
-                WorkspaceIntent.Execution => "Execution",
-                _ => string.Empty
-            };
-
-            ActiveToolLabel.Text = string.IsNullOrWhiteSpace(suffix) ? tag : $"{tag} {suffix}";
-            MainStatusText.Text = $"{ActiveToolLabel.Text} ativo.";
+            ActiveToolLabel.Text = "Ferramentas";
+            MainStatusText.Text = "Selecione uma ferramenta para executar.";
+            return;
         }
 
-        UpdateNavStyles();
+        if (string.Equals(tag, ConfiguracoesTag, StringComparison.OrdinalIgnoreCase))
+        {
+            ActiveToolLabel.Text = "ConfiguraÃ§Ãµes";
+            MainStatusText.Text = "Selecione uma ferramenta para editar configuraÃ§Ãµes.";
+            return;
+        }
+        if (string.Equals(tag, GeneralSettingsTag, StringComparison.OrdinalIgnoreCase))
+        {
+            ActiveToolLabel.Text = "ConfiguraÃ§Ãµes Gerais";
+            MainStatusText.Text = "Edite parÃ¢metros globais do aplicativo.";
+            return;
+        }
+
+
+        var suffix = intent switch
+        {
+            WorkspaceIntent.Configuration => "Configuration",
+            WorkspaceIntent.Execution => "Execution",
+            _ => string.Empty
+        };
+
+        ActiveToolLabel.Text = string.IsNullOrWhiteSpace(suffix) ? tag : $"{tag} {suffix}";
+        MainStatusText.Text = $"{ActiveToolLabel.Text} ativo.";
     }
 
     private void UpdateNavStyles()
     {
-        var activeStyle = TryFindResource("SidebarNavButtonActiveStyle") as Style;
-        var normalStyle = TryFindResource("SidebarNavButtonStyle") as Style;
+        var inFerramentasContext =
+            string.Equals(_activeToolTag, FerramentasTag, StringComparison.OrdinalIgnoreCase)
+            || _activeIntent == WorkspaceIntent.Execution;
 
-        // Percorrer botões de navegação na sidebar e aplicar estilo conforme ativo.
-        foreach (var btn in FindNavButtons())
-        {
-            var isActive = string.Equals(btn.Tag as string, _activeToolTag, StringComparison.OrdinalIgnoreCase);
-            btn.Style = isActive ? activeStyle : normalStyle;
-        }
+        var inConfiguracoesContext =
+            string.Equals(_activeToolTag, ConfiguracoesTag, StringComparison.OrdinalIgnoreCase)
+            || _activeIntent == WorkspaceIntent.Configuration;
+
+        SetNavActive(NavFerramentas, inFerramentasContext);
+        SetNavActive(NavConfiguracoes, inConfiguracoesContext);
+
+        SetNavActive(NavExecSnapshot, IsToolActive("Snapshot", WorkspaceIntent.Execution));
+        SetNavActive(NavExecRename, IsToolActive("Rename", WorkspaceIntent.Execution));
+        SetNavActive(NavExecHarvest, IsToolActive("Harvest", WorkspaceIntent.Execution));
+        SetNavActive(NavExecImageSplit, IsToolActive("ImageSplit", WorkspaceIntent.Execution));
+        SetNavActive(NavExecSearchText, IsToolActive("SearchText", WorkspaceIntent.Execution));
+        SetNavActive(NavExecOrganizer, IsToolActive("Organizer", WorkspaceIntent.Execution));
+        SetNavActive(NavExecUtf8Convert, IsToolActive("Utf8Convert", WorkspaceIntent.Execution));
+        SetNavActive(NavExecMigrations, IsToolActive("Migrations", WorkspaceIntent.Execution));
+        SetNavActive(NavExecSshTunnel, IsToolActive("SshTunnel", WorkspaceIntent.Execution));
+        SetNavActive(NavExecNgrok, IsToolActive("Ngrok", WorkspaceIntent.Execution));
+        SetNavActive(NavExecNotes, IsToolActive("Notes", WorkspaceIntent.Execution));
+
+        SetNavActive(NavCfgSnapshot, IsToolActive("Snapshot", WorkspaceIntent.Configuration));
+        SetNavActive(NavCfgGeneral, IsToolActive(GeneralSettingsTag, WorkspaceIntent.Configuration));
+        SetNavActive(NavCfgHarvest, IsToolActive("Harvest", WorkspaceIntent.Configuration));
+        SetNavActive(NavCfgOrganizer, IsToolActive("Organizer", WorkspaceIntent.Configuration));
+        SetNavActive(NavCfgMigrations, IsToolActive("Migrations", WorkspaceIntent.Configuration));
+        SetNavActive(NavCfgSshTunnel, IsToolActive("SshTunnel", WorkspaceIntent.Configuration));
+        SetNavActive(NavCfgNgrok, IsToolActive("Ngrok", WorkspaceIntent.Configuration));
+        SetNavActive(NavCfgNotes, IsToolActive("Notes", WorkspaceIntent.Configuration));
+
+        if (inConfiguracoesContext)
+            ConfiguracoesSection.IsExpanded = true;
+        else
+            FerramentasSection.IsExpanded = true;
     }
 
-    private IEnumerable<System.Windows.Controls.Button> FindNavButtons()
+    private bool IsToolActive(string toolTag, WorkspaceIntent intent)
+        => _activeIntent == intent
+           && string.Equals(_activeToolTag, toolTag, StringComparison.OrdinalIgnoreCase);
+
+    private static void SetNavActive(SidebarNavItem? item, bool isActive)
     {
-        // Localiza todos os botões de navegação que possuem Tag de string.
-        return FindVisualChildren<System.Windows.Controls.Button>(this)
-            .Where(b => b.Tag is string tag && _toolRegistry.ContainsKey(tag));
+        if (item is not null)
+            item.IsActive = isActive;
     }
-
-    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
-    {
-        if (parent is null) yield break;
-        var count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
-        for (int i = 0; i < count; i++)
-        {
-            var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
-            if (child is T t) yield return t;
-            foreach (var descendant in FindVisualChildren<T>(child))
-                yield return descendant;
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Shell — drag, minimize, close
-    // -------------------------------------------------------------------------
 
     private void WindowDragArea_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton != MouseButton.Left) return;
-        if (WindowState == WindowState.Maximized)
+        if (_isWorkAreaMaximized)
         {
-            WindowState = WindowState.Normal;
+            RestoreFromWorkArea();
             Left = e.GetPosition(this).X - (Width / 2);
             Top = 0;
         }
+
         try { DragMove(); } catch { }
     }
 
@@ -192,15 +309,297 @@ public partial class MainWindow : Window
 
     private void MaximizeButton_Click(object sender, RoutedEventArgs e)
     {
-        WindowState = WindowState == WindowState.Maximized
-            ? WindowState.Normal
-            : WindowState.Maximized;
+        if (_isWorkAreaMaximized)
+        {
+            RestoreFromWorkArea();
+            return;
+        }
+
+        _restoreBounds = new Rect(Left, Top, Width, Height);
+        MaximizeToWorkArea();
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
-        => Close();
+        => RequestExitWithConfirmation();
 
     private void ExitButton_Click(object sender, RoutedEventArgs e)
+        => RequestExitWithConfirmation();
+
+    private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (_isExitRequested)
+            return;
+
+        if (HasBackgroundTasksRunning())
+        {
+            e.Cancel = true;
+            HideToTray();
+            return;
+        }
+
+        e.Cancel = true;
+        RequestExitWithConfirmation();
+    }
+
+    private void MainWindow_Closed(object? sender, EventArgs e)
+    {
+        DisposeSshTrayIcon();
+        DisposeNgrokTrayIcon();
+    }
+
+    public async Task MoveToBackgroundTrayAsync()
+    {
+        await RefreshToolTrayIconsAsync().ConfigureAwait(true);
+        HideToTray();
+    }
+    private void EnsureSshTrayIcon()
+    {
+        if (_sshTrayIcon is not null)
+            return;
+        _sshTrayIcon = new TaskbarIcon
+        {
+            IconSource = BitmapFrame.Create(new Uri("pack://application:,,,/Assets/tray-ssh.png", UriKind.Absolute)),
+            ToolTipText = "DevTools SSH"
+        };
+        _sshTrayIcon.TrayLeftMouseDoubleClick += (_, _) => RestoreFromTray();
+        var menu = new System.Windows.Controls.ContextMenu();
+        menu.Opened += SshTrayContextMenu_Opened;
+        _sshTrayIcon.ContextMenu = menu;
+    }
+    private void EnsureNgrokTrayIcon()
+    {
+        if (_ngrokTrayIcon is not null)
+            return;
+        _ngrokTrayIcon = new TaskbarIcon
+        {
+            IconSource = BitmapFrame.Create(new Uri("pack://application:,,,/Assets/tray-ngrok.png", UriKind.Absolute)),
+            ToolTipText = "DevTools Ngrok"
+        };
+        _ngrokTrayIcon.TrayLeftMouseDoubleClick += (_, _) => RestoreFromTray();
+        var menu = new System.Windows.Controls.ContextMenu();
+        menu.Opened += NgrokTrayContextMenu_Opened;
+        _ngrokTrayIcon.ContextMenu = menu;
+    }
+    private void DisposeSshTrayIcon()
+    {
+        if (_sshTrayIcon is null)
+            return;
+        if (_sshTrayIcon.ContextMenu is not null)
+            _sshTrayIcon.ContextMenu.Opened -= SshTrayContextMenu_Opened;
+        _sshTrayIcon.Dispose();
+        _sshTrayIcon = null;
+    }
+    private void DisposeNgrokTrayIcon()
+    {
+        if (_ngrokTrayIcon is null)
+            return;
+        if (_ngrokTrayIcon.ContextMenu is not null)
+            _ngrokTrayIcon.ContextMenu.Opened -= NgrokTrayContextMenu_Opened;
+        _ngrokTrayIcon.Dispose();
+        _ngrokTrayIcon = null;
+    }
+    private async Task RefreshToolTrayIconsAsync()
+    {
+        var sshCount = _sshTunnelFacade.ActiveTunnels.Count;
+        if (sshCount > 0)
+        {
+            EnsureSshTrayIcon();
+            await RebuildSshTrayMenuAsync().ConfigureAwait(true);
+        }
+        else
+        {
+            DisposeSshTrayIcon();
+        }
+        var ngrokStatus = await _ngrokFacade.ExecuteAsync(new NgrokRequest
+        {
+            Action = NgrokAction.Status
+        }).ConfigureAwait(true);
+        var hasNgrok = ngrokStatus.IsSuccess && (ngrokStatus.Value?.HasAny ?? false);
+        if (hasNgrok)
+        {
+            EnsureNgrokTrayIcon();
+            await RebuildNgrokTrayMenuAsync().ConfigureAwait(true);
+        }
+        else
+        {
+            DisposeNgrokTrayIcon();
+        }
+    }
+    private async void SshTrayContextMenu_Opened(object sender, RoutedEventArgs e)
+        => await RebuildSshTrayMenuAsync().ConfigureAwait(true);
+    private async void NgrokTrayContextMenu_Opened(object sender, RoutedEventArgs e)
+        => await RebuildNgrokTrayMenuAsync().ConfigureAwait(true);
+    private async Task RebuildSshTrayMenuAsync()
+    {
+        if (_sshTrayIcon?.ContextMenu is not System.Windows.Controls.ContextMenu menu)
+            return;
+        var activeTunnels = _sshTunnelFacade.ActiveTunnels;
+        if (activeTunnels.Count == 0)
+        {
+            DisposeSshTrayIcon();
+            return;
+        }
+        menu.Items.Clear();
+        menu.Items.Add(new System.Windows.Controls.MenuItem
+        {
+            Header = $"Túneis SSH ativos: {activeTunnels.Count}",
+            IsEnabled = false
+        });
+        menu.Items.Add(new System.Windows.Controls.Separator());
+        foreach (var tunnel in activeTunnels.OrderBy(x => x.Configuration.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            var label = string.IsNullOrWhiteSpace(tunnel.Configuration.Name)
+                ? tunnel.Key
+                : tunnel.Configuration.Name.Trim();
+            var headerText = tunnel.ProcessId.HasValue
+                ? $"Parar {label} (PID {tunnel.ProcessId.Value})"
+                : $"Parar {label}";
+            var item = new System.Windows.Controls.MenuItem
+            {
+                Header = headerText,
+                Tag = tunnel.Key
+            };
+            item.Click += SshTrayStopTunnel_Click;
+            menu.Items.Add(item);
+        }
+        menu.Items.Add(new System.Windows.Controls.Separator());
+        var openItem = new System.Windows.Controls.MenuItem { Header = "Abrir DevTools" };
+        openItem.Click += (_, _) => RestoreFromTray();
+        menu.Items.Add(openItem);
+        var exitItem = new System.Windows.Controls.MenuItem { Header = "Encerrar DevTools" };
+        exitItem.Click += (_, _) => RequestExitWithConfirmation();
+        menu.Items.Add(exitItem);
+        await Task.CompletedTask;
+    }
+    private async Task RebuildNgrokTrayMenuAsync()
+    {
+        if (_ngrokTrayIcon?.ContextMenu is not System.Windows.Controls.ContextMenu menu)
+            return;
+        string baseUrl;
+        IReadOnlyList<TunnelInfo> tunnels;
+        try
+        {
+            baseUrl = await _ngrokFacade.ResolveBaseUrlAsync().ConfigureAwait(true);
+            tunnels = await _ngrokFacade.GetActiveTunnelsAsync(baseUrl).ConfigureAwait(true);
+        }
+        catch
+        {
+            baseUrl = "http://127.0.0.1:4040/";
+            tunnels = Array.Empty<TunnelInfo>();
+        }
+        var status = await _ngrokFacade.ExecuteAsync(new NgrokRequest { Action = NgrokAction.Status }).ConfigureAwait(true);
+        var hasProcess = status.IsSuccess && (status.Value?.HasAny ?? false);
+        if (!hasProcess)
+        {
+            DisposeNgrokTrayIcon();
+            return;
+        }
+        menu.Items.Clear();
+        menu.Items.Add(new System.Windows.Controls.MenuItem
+        {
+            Header = $"Túneis Ngrok ativos: {tunnels.Count}",
+            IsEnabled = false
+        });
+        menu.Items.Add(new System.Windows.Controls.Separator());
+        if (tunnels.Count == 0)
+        {
+            menu.Items.Add(new System.Windows.Controls.MenuItem
+            {
+                Header = "Processo ativo, aguardando túneis",
+                IsEnabled = false
+            });
+        }
+        else
+        {
+            foreach (var tunnel in tunnels.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrWhiteSpace(tunnel.Name))
+                    continue;
+                var label = string.IsNullOrWhiteSpace(tunnel.PublicUrl)
+                    ? tunnel.Name
+                    : $"{tunnel.Name} ({tunnel.PublicUrl})";
+                var item = new System.Windows.Controls.MenuItem
+                {
+                    Header = $"Parar {label}",
+                    Tag = new NgrokTrayTunnelTag(tunnel.Name, baseUrl)
+                };
+                item.Click += NgrokTrayStopTunnel_Click;
+                menu.Items.Add(item);
+            }
+        }
+        menu.Items.Add(new System.Windows.Controls.Separator());
+        var openItem = new System.Windows.Controls.MenuItem { Header = "Abrir DevTools" };
+        openItem.Click += (_, _) => RestoreFromTray();
+        menu.Items.Add(openItem);
+        var exitItem = new System.Windows.Controls.MenuItem { Header = "Encerrar DevTools" };
+        exitItem.Click += (_, _) => RequestExitWithConfirmation();
+        menu.Items.Add(exitItem);
+    }
+    private async void SshTrayStopTunnel_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.MenuItem { Tag: string tunnelKey } || string.IsNullOrWhiteSpace(tunnelKey))
+            return;
+        var result = await _sshTunnelFacade.ExecuteAsync(new SshTunnelRequest
+        {
+            Action = SshTunnelAction.Stop,
+            Configuration = new TunnelConfiguration { Name = tunnelKey }
+        }).ConfigureAwait(true);
+        MainStatusText.Text = result.IsSuccess
+            ? "Túnel SSH encerrado pela bandeja do sistema."
+            : string.Join(" | ", result.Errors.Select(x => x.Message));
+        await RefreshToolTrayIconsAsync().ConfigureAwait(true);
+    }
+    private async void NgrokTrayStopTunnel_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.MenuItem { Tag: NgrokTrayTunnelTag tag })
+            return;
+        var closed = await _ngrokFacade.CloseTunnelAsync(tag.TunnelName, tag.BaseUrl).ConfigureAwait(true);
+        MainStatusText.Text = closed
+            ? "Túnel Ngrok encerrado pela bandeja do sistema."
+            : "Não foi possível encerrar o túnel Ngrok.";
+        await RefreshToolTrayIconsAsync().ConfigureAwait(true);
+    }
+    private void RestoreFromTray()
+    {
+        if (!IsVisible)
+            Show();
+
+        ShowInTaskbar = true;
+        if (WindowState == WindowState.Minimized)
+            WindowState = WindowState.Normal;
+
+        Activate();
+    }
+
+    private void HideToTray()
+    {
+        _ = RefreshToolTrayIconsAsync();
+        ShowInTaskbar = false;
+        Hide();
+        MainStatusText.Text = "DevTools minimizado para a bandeja (SSH/Ngrok).";
+    }
+
+    private bool HasBackgroundTasksRunning()
+    {
+        if (_sshTunnelFacade.ActiveTunnels.Count > 0)
+            return true;
+
+        try
+        {
+            var result = _ngrokFacade.ExecuteAsync(new NgrokRequest
+            {
+                Action = NgrokAction.Status
+            }).GetAwaiter().GetResult();
+
+            return result.IsSuccess && (result.Value?.HasAny ?? false);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private void RequestExitWithConfirmation()
     {
         var result = DevTools.Host.Wpf.Components.DevToolsMessageBox.Confirm(
             this,
@@ -208,7 +607,10 @@ public partial class MainWindow : Window
             "Encerrar");
 
         if (result == DevTools.Host.Wpf.Components.DevToolsMessageBoxResult.Yes)
+        {
+            _isExitRequested = true;
             Close();
+        }
     }
 
     private void Window_StateChanged(object sender, EventArgs e)
@@ -217,23 +619,12 @@ public partial class MainWindow : Window
 
         if (WindowState == WindowState.Maximized)
         {
-            RootBorder.Margin = new Thickness(0);
-            RootBorder.CornerRadius = new CornerRadius(0);
-            MaximizeButton.Content = "\uE923"; // ícone restaurar
-        }
-        else
-        {
-            RootBorder.Margin = new Thickness(10);
-            RootBorder.CornerRadius = new CornerRadius(8);
-            MaximizeButton.Content = "\uE922"; // ícone maximizar
+            _restoreBounds = new Rect(RestoreBounds.Left, RestoreBounds.Top, RestoreBounds.Width, RestoreBounds.Height);
+            MaximizeToWorkArea();
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Bounds do monitor corrente
-    // -------------------------------------------------------------------------
-
-    private void ApplyWorkAreaBounds()
+    private void MaximizeToWorkArea()
     {
         var workArea = ResolveCurrentWorkArea();
         WindowState = WindowState.Normal;
@@ -241,8 +632,23 @@ public partial class MainWindow : Window
         Top = workArea.Top;
         Width = workArea.Width;
         Height = workArea.Height;
-        MaxWidth = workArea.Width;
-        MaxHeight = workArea.Height;
+        _isWorkAreaMaximized = true;
+        RootBorder.Margin = new Thickness(0);
+        RootBorder.CornerRadius = new CornerRadius(0);
+        MaximizeButton.Content = "\uE923";
+    }
+
+    private void RestoreFromWorkArea()
+    {
+        WindowState = WindowState.Normal;
+        Left = _restoreBounds.Left;
+        Top = _restoreBounds.Top;
+        Width = _restoreBounds.Width;
+        Height = _restoreBounds.Height;
+        _isWorkAreaMaximized = false;
+        RootBorder.Margin = new Thickness(10);
+        RootBorder.CornerRadius = new CornerRadius(8);
+        MaximizeButton.Content = "\uE922";
     }
 
     private Rect ResolveCurrentWorkArea()
@@ -271,7 +677,13 @@ public partial class MainWindow : Window
     private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInfo monitorInfo);
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct RectNative { public int Left, Top, Right, Bottom; }
+    private struct RectNative
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     private struct MonitorInfo
@@ -281,4 +693,7 @@ public partial class MainWindow : Window
         public RectNative WorkArea;
         public uint Flags;
     }
+
+    private sealed record NgrokTrayTunnelTag(string TunnelName, string BaseUrl);
 }
+

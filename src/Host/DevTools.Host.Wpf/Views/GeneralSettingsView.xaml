@@ -1,0 +1,470 @@
+﻿<UserControl x:Class="DevTools.Host.Wpf.Views.GeneralSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Margin="0,28,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="16,0,0,22">
+            <TextBlock Text="Configurações Gerais"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource DevToolsTextPrimary}"/>
+            <TextBlock Text="Painel único com famílias de configuração. Ajustes são salvos no appsettings.json."
+                       Foreground="{DynamicResource DevToolsTextSecondary}"
+                       FontSize="12"
+                       Margin="0,8,0,0"
+                       TextWrapping="Wrap"/>
+            <Border Height="1"
+                    Background="{DynamicResource DevToolsBrushBorder}"
+                    Opacity="0.6"
+                    Margin="0,14,0,0"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="16,10,16,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    CornerRadius="14"
+                    Padding="10"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                    Background="{DynamicResource DevToolsSurface}">
+                <ListBox x:Name="CategoryListBox"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         Foreground="{DynamicResource DevToolsTextPrimary}"
+                         SelectionChanged="CategoryListBox_SelectionChanged">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Foreground" Value="{DynamicResource DevToolsTextSecondary}"/>
+                            <Setter Property="Padding" Value="10,8"/>
+                            <Setter Property="Margin" Value="0,2,0,2"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="ItemBorder"
+                                                CornerRadius="8"
+                                                Padding="{TemplateBinding Padding}"
+                                                Background="Transparent"
+                                                BorderBrush="Transparent"
+                                                BorderThickness="1">
+                                            <ContentPresenter/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource DevToolsWindowBackground}"/>
+                                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource DevToolsAccent}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource DevToolsWindowBackground}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource DevToolsTextPrimary}"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+
+                    <ListBoxItem Tag="TextFamily">Família de Texto</ListBoxItem>
+                    <ListBoxItem Tag="History">Histórico</ListBoxItem>
+                    <ListBoxItem Tag="Tools">Ferramentas</ListBoxItem>
+                </ListBox>
+            </Border>
+
+            <Border Grid.Column="2"
+                    CornerRadius="14"
+                    Padding="18"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                    Background="{DynamicResource DevToolsSurface}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <ScrollViewer Grid.Row="0"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <Grid>
+                            <StackPanel x:Name="TextFamilyPanel" Visibility="Visible">
+                                <TextBlock Text="Família de Texto"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource DevToolsTextPrimary}"/>
+                                <TextBlock Text="Limites globais para ferramentas que varrem arquivos de texto."
+                                           Margin="0,8,0,0"
+                                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                                           TextWrapping="Wrap"/>
+
+                                <Grid Margin="0,18,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="280"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Center">
+                                        <TextBlock Text="Tamanho máximo padrão (KB)"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                                        <Button x:Name="MaxFileSizeHelpButton"
+                                                Width="24"
+                                                Height="24"
+                                                Margin="8,0,0,0"
+                                                VerticalAlignment="Center"
+                                                ToolTip="Ajuda deste campo"
+                                                Style="{DynamicResource IconButtonStyle}"
+                                                Click="MaxFileSizeHelpButton_Click">
+                                            <TextBlock Text="&#xE946;"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="13"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center"/>
+                                        </Button>
+                                    </StackPanel>
+                                    <TextBox x:Name="MaxFileSizeKbTextBox"
+                                             Grid.Column="1"
+                                             MinWidth="220"
+                                             HorizontalAlignment="Left"
+                                             Padding="10,6"/>
+                                </Grid>
+
+                                <Grid Margin="0,12,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="280"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Center">
+                                        <TextBlock Text="Teto absoluto (KB)"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                                        <Button x:Name="AbsoluteMaxHelpButton"
+                                                Width="24"
+                                                Height="24"
+                                                Margin="8,0,0,0"
+                                                VerticalAlignment="Center"
+                                                ToolTip="Ajuda deste campo"
+                                                Style="{DynamicResource IconButtonStyle}"
+                                                Click="AbsoluteMaxHelpButton_Click">
+                                            <TextBlock Text="&#xE946;"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="13"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center"/>
+                                        </Button>
+                                    </StackPanel>
+                                    <TextBox x:Name="AbsoluteMaxFileSizeKbTextBox"
+                                             Grid.Column="1"
+                                             MinWidth="220"
+                                             HorizontalAlignment="Left"
+                                             Padding="10,6"/>
+                                </Grid>
+
+                                <Grid Margin="0,12,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="280"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Top">
+                                        <TextBlock Text="Globs padrão de inclusão"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                                        <Button x:Name="DefaultIncludeGlobsHelpButton"
+                                                Width="24"
+                                                Height="24"
+                                                Margin="8,0,0,0"
+                                                VerticalAlignment="Center"
+                                                ToolTip="Ajuda deste campo"
+                                                Style="{DynamicResource IconButtonStyle}"
+                                                Click="DefaultIncludeGlobsHelpButton_Click">
+                                            <TextBlock Text="&#xE946;"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="13"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center"/>
+                                        </Button>
+                                    </StackPanel>
+                                    <TextBox x:Name="DefaultIncludeGlobsTextBox"
+                                             Grid.Column="1"
+                                             MinWidth="280"
+                                             Height="72"
+                                             AcceptsReturn="True"
+                                             TextWrapping="Wrap"
+                                             VerticalScrollBarVisibility="Auto"
+                                             HorizontalAlignment="Left"
+                                             Padding="10,6"/>
+                                </Grid>
+
+                                <Grid Margin="0,12,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="280"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Top">
+                                        <TextBlock Text="Globs padrão de exclusão"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                                        <Button x:Name="DefaultExcludeGlobsHelpButton"
+                                                Width="24"
+                                                Height="24"
+                                                Margin="8,0,0,0"
+                                                VerticalAlignment="Center"
+                                                ToolTip="Ajuda deste campo"
+                                                Style="{DynamicResource IconButtonStyle}"
+                                                Click="DefaultExcludeGlobsHelpButton_Click">
+                                            <TextBlock Text="&#xE946;"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="13"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center"/>
+                                        </Button>
+                                    </StackPanel>
+                                    <TextBox x:Name="DefaultExcludeGlobsTextBox"
+                                             Grid.Column="1"
+                                             MinWidth="280"
+                                             Height="96"
+                                             AcceptsReturn="True"
+                                             TextWrapping="Wrap"
+                                             VerticalScrollBarVisibility="Auto"
+                                             HorizontalAlignment="Left"
+                                             Padding="10,6"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <StackPanel x:Name="HistoryPanel" Visibility="Collapsed">
+                                <TextBlock Text="Histórico"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource DevToolsTextPrimary}"/>
+                                <TextBlock Text="Controle global para exibição e gravação de histórico nas ferramentas."
+                                           Margin="0,8,0,0"
+                                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                                           TextWrapping="Wrap"/>
+
+                                <Grid Margin="0,18,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox x:Name="HistoryEnabledCheckBox"
+                                              Content="Usar histórico"
+                                              Style="{StaticResource DevToolsCheckBox}"
+                                              IsChecked="True"/>
+                                    <Button x:Name="HistoryEnabledHelpButton"
+                                            Grid.Column="1"
+                                            Width="24"
+                                            Height="24"
+                                            Margin="8,0,0,0"
+                                            VerticalAlignment="Center"
+                                            ToolTip="Ajuda deste campo"
+                                            Style="{DynamicResource IconButtonStyle}"
+                                            Click="HistoryEnabledHelpButton_Click">
+                                        <TextBlock Text="&#xE946;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="13"/>
+                                    </Button>
+                                </Grid>
+
+                                <TextBlock Margin="0,10,0,0"
+                                           Text="Quando desativado, o histórico deixa de ser mostrado e as próximas execuções não são registradas."
+                                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <StackPanel x:Name="ToolsPanel" Visibility="Collapsed">
+                                <TextBlock Text="Ferramentas"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource DevToolsTextPrimary}"/>
+                                <TextBlock Text="Escolha quais ferramentas aparecem por padrão no aplicativo."
+                                           Margin="0,8,0,0"
+                                           Foreground="{DynamicResource DevToolsTextSecondary}"
+                                           TextWrapping="Wrap"/>
+
+                                <StackPanel Margin="0,16,0,0">
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="SnapshotEnabledCheckBox" Content="Snapshot" Style="{StaticResource DevToolsCheckBox}" IsChecked="True"/>
+                                        <Button Grid.Column="1" Width="24" Height="24" Margin="8,0,0,0" Style="{DynamicResource IconButtonStyle}" Tag="Snapshot" Click="ToolEnabledHelpButton_Click">
+                                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                                        </Button>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="RenameEnabledCheckBox" Content="Rename" Style="{StaticResource DevToolsCheckBox}" IsChecked="True"/>
+                                        <Button Grid.Column="1" Width="24" Height="24" Margin="8,0,0,0" Style="{DynamicResource IconButtonStyle}" Tag="Rename" Click="ToolEnabledHelpButton_Click">
+                                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                                        </Button>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="HarvestEnabledCheckBox" Content="Harvest" Style="{StaticResource DevToolsCheckBox}" IsChecked="True"/>
+                                        <Button Grid.Column="1" Width="24" Height="24" Margin="8,0,0,0" Style="{DynamicResource IconButtonStyle}" Tag="Harvest" Click="ToolEnabledHelpButton_Click">
+                                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                                        </Button>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="ImageSplitEnabledCheckBox" Content="Image Split" Style="{StaticResource DevToolsCheckBox}" IsChecked="True"/>
+                                        <Button Grid.Column="1" Width="24" Height="24" Margin="8,0,0,0" Style="{DynamicResource IconButtonStyle}" Tag="ImageSplit" Click="ToolEnabledHelpButton_Click">
+                                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                                        </Button>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="SearchTextEnabledCheckBox" Content="Search Text" Style="{StaticResource DevToolsCheckBox}" IsChecked="True"/>
+                                        <Button Grid.Column="1" Width="24" Height="24" Margin="8,0,0,0" Style="{DynamicResource IconButtonStyle}" Tag="SearchText" Click="ToolEnabledHelpButton_Click">
+                                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                                        </Button>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="OrganizerEnabledCheckBox" Content="Organizer" Style="{StaticResource DevToolsCheckBox}" IsChecked="True"/>
+                                        <Button Grid.Column="1" Width="24" Height="24" Margin="8,0,0,0" Style="{DynamicResource IconButtonStyle}" Tag="Organizer" Click="ToolEnabledHelpButton_Click">
+                                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                                        </Button>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="Utf8ConvertEnabledCheckBox" Content="UTF8 Convert" Style="{StaticResource DevToolsCheckBox}" IsChecked="True"/>
+                                        <Button Grid.Column="1" Width="24" Height="24" Margin="8,0,0,0" Style="{DynamicResource IconButtonStyle}" Tag="Utf8Convert" Click="ToolEnabledHelpButton_Click">
+                                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                                        </Button>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="MigrationsEnabledCheckBox" Content="Migrations" Style="{StaticResource DevToolsCheckBox}" IsChecked="True"/>
+                                        <Button Grid.Column="1" Width="24" Height="24" Margin="8,0,0,0" Style="{DynamicResource IconButtonStyle}" Tag="Migrations" Click="ToolEnabledHelpButton_Click">
+                                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                                        </Button>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="SshTunnelEnabledCheckBox" Content="SSH Tunnel" Style="{StaticResource DevToolsCheckBox}" IsChecked="True"/>
+                                        <Button Grid.Column="1" Width="24" Height="24" Margin="8,0,0,0" Style="{DynamicResource IconButtonStyle}" Tag="SshTunnel" Click="ToolEnabledHelpButton_Click">
+                                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                                        </Button>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="NgrokEnabledCheckBox" Content="Ngrok" Style="{StaticResource DevToolsCheckBox}" IsChecked="True"/>
+                                        <Button Grid.Column="1" Width="24" Height="24" Margin="8,0,0,0" Style="{DynamicResource IconButtonStyle}" Tag="Ngrok" Click="ToolEnabledHelpButton_Click">
+                                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                                        </Button>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="NotesEnabledCheckBox" Content="Notes" Style="{StaticResource DevToolsCheckBox}" IsChecked="True"/>
+                                        <Button Grid.Column="1" Width="24" Height="24" Margin="8,0,0,0" Style="{DynamicResource IconButtonStyle}" Tag="Notes" Click="ToolEnabledHelpButton_Click">
+                                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="13"/>
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+
+                    <StackPanel Grid.Row="1"
+                                Margin="0,16,0,0">
+                        <TextBlock Text="Arquivo de configuração:"
+                                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                        <TextBlock x:Name="SettingsPathTextBlock"
+                                   Margin="0,4,0,0"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource DevToolsTextPrimary}"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <Button x:Name="SaveButton"
+                                    Content="Salvar"
+                                    Width="140"
+                                    Style="{DynamicResource DevToolsPrimaryButton}"
+                                    Click="SaveButton_Click"/>
+                            <Button x:Name="ReloadButton"
+                                    Content="Recarregar"
+                                    Width="140"
+                                    Margin="10,0,0,0"
+                                    Style="{DynamicResource DevToolsSecondaryButton}"
+                                    Click="ReloadButton_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Border Grid.Row="2"
+                            Margin="0,14,0,0"
+                            Padding="14,10"
+                            CornerRadius="10"
+                            BorderThickness="1"
+                            BorderBrush="{DynamicResource DevToolsBrushBorder}"
+                            Background="{DynamicResource DevToolsWindowBackground}">
+                        <TextBlock x:Name="StatusTextBlock"
+                                   Text="Pronto."
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

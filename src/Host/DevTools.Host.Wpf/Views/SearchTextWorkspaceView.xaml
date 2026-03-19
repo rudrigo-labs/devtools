@@ -26,35 +26,24 @@
         </StackPanel>
 
         <!-- ACTION BAR -->
-        <c:ActionBarControl Grid.Row="1" x:Name="Actions"
-                            ShowNew="False" ShowSave="True" ShowDelete="False" ShowCancel="True"
+        <c:ActionBarControl Grid.Row="1" x:Name="Actions" ShowHistory="True" ActionHistory="HistoryButton_Click"
+                            ShowNew="False" ShowSave="True" ShowDelete="False" ShowCancel="False"
+                            ShowBack="True"
                             SaveText="Buscar"
                             ShowHelp="True"
-                            HelpText="Preencha pasta e padrao. Ative Regex apenas se souber expressoes regulares. Use globs para filtrar arquivos."
                             ActionSave="ActionExecute_Click"
-                            ActionCancel="ActionCancel_Click"/>
+                            ActionBack="ActionBack_Click"/>
 
         <!-- BODY -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="0,0,0,0">
-
-                <Border BorderThickness="1" CornerRadius="4"
-                        BorderBrush="{DynamicResource DevToolsBrushBorder}"
-                        Background="{DynamicResource DevToolsSurface}"
-                        Padding="10,8" Margin="0,0,0,12">
-                    <TextBlock Foreground="{DynamicResource DevToolsTextSecondary}" TextWrapping="Wrap">
-                        Como usar: informe a pasta raiz e o texto a procurar. Regex aceita padroes avancados.
-                        Case sensitive diferencia maiusculas/minusculas. Palavra inteira evita partes de palavra.
-                        Globs sao filtros como **/*.cs e **/bin/**.
-                    </TextBlock>
-                </Border>
 
                 <c:PathSelector x:Name="RootPathSelector" Title="Pasta raiz *" IsFolderPicker="True" Margin="0,0,0,12"/>
 
                 <StackPanel Margin="0,0,0,12">
                     <TextBlock Text="Padrão de busca *" Style="{StaticResource DevToolsInputLabel}"/>
                     <TextBox x:Name="PatternInput" Style="{StaticResource DevToolsTextInput}"
-                             ToolTip="Texto ou expressão regular para buscar."/>
+                             ToolTip="Texto simples ou regex para procurar dentro dos arquivos."/>
                 </StackPanel>
 
                 <Grid Margin="0,0,0,12">
@@ -66,14 +55,20 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <CheckBox x:Name="UseRegexCheck" Grid.Column="0"
-                              Content="Usar Regex" Style="{StaticResource DevToolsCheckBox}"/>
+                              Content="Usar Regex"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              ToolTip="Ative para usar expressoes regulares no padrão de busca."/>
                     <CheckBox x:Name="CaseSensitiveCheck" Grid.Column="2"
-                              Content="Case sensitive" Style="{StaticResource DevToolsCheckBox}"/>
+                              Content="Case sensitive"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              ToolTip="Diferencia letras maiusculas e minusculas."/>
                     <CheckBox x:Name="WholeWordCheck" Grid.Column="4"
-                              Content="Palavra inteira" Style="{StaticResource DevToolsCheckBox}"/>
+                              Content="Palavra inteira"
+                              Style="{StaticResource DevToolsCheckBox}"
+                              ToolTip="Evita encontrar partes de palavras maiores."/>
                 </Grid>
 
-                <TextBlock Text="Globs: um padrao por linha. Inclusao: **/*.cs  |  Exclusao: **/obj/**"
+                <TextBlock Text="Globs: um padrão por linha. Inclusao: **/*.cs  |  Exclusao: **/obj/**"
                            Foreground="{DynamicResource DevToolsTextSecondary}"
                            FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap"/>
 
@@ -116,13 +111,8 @@
                 </Grid>
 
                 <CheckBox x:Name="SkipBinaryCheck" Content="Ignorar arquivos binários"
-                          Style="{StaticResource DevToolsCheckBox}" IsChecked="True" Margin="0,0,0,12"/>
-
-                <Button Content="Buscar Agora"
-                        Style="{StaticResource DevToolsPrimaryButton}"
-                        HorizontalAlignment="Left"
-                        Margin="0,0,0,12"
-                        Click="ActionExecute_Click"/>
+                          Style="{StaticResource DevToolsCheckBox}" IsChecked="True" Margin="0,0,0,12"
+                          ToolTip="Recomendado para buscas de texto em código e documentos."/>
 
                 <!-- Resultados -->
                 <TextBlock x:Name="ResultSummaryText"
@@ -163,3 +153,4 @@
     </Grid>
     </Grid>
 </UserControl>
+

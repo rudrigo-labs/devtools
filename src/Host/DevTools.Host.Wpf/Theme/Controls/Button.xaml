@@ -10,7 +10,7 @@
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <!-- ADICIONADO: garante um BorderBrush vÃ¡lido para o TemplatedParent -->
+        <!-- ADICIONADO: garante um BorderBrush válido para o TemplatedParent -->
         <Setter Property="BorderBrush" Value="{DynamicResource DevToolsBrushBorder}"/>
         <Setter Property="Template">
             <Setter.Value>

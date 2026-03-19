@@ -14,6 +14,9 @@ public interface ISshTunnelFacade
     Task<RunResult<SshTunnelResult>> ExecuteAsync(SshTunnelRequest request, CancellationToken ct = default);
     TunnelState CurrentState { get; }
     bool IsRunning { get; }
+    TunnelConfiguration? CurrentConfiguration { get; }
+    int? CurrentProcessId { get; }
+    IReadOnlyList<SshActiveTunnelInfo> ActiveTunnels { get; }
 }
 
 public sealed class SshTunnelFacade : ISshTunnelFacade
@@ -41,4 +44,7 @@ public sealed class SshTunnelFacade : ISshTunnelFacade
 
     public TunnelState CurrentState => _engine.CurrentState;
     public bool IsRunning => _engine.IsRunning;
+    public TunnelConfiguration? CurrentConfiguration => _engine.CurrentConfiguration;
+    public int? CurrentProcessId => _engine.CurrentProcessId;
+    public IReadOnlyList<SshActiveTunnelInfo> ActiveTunnels => _engine.ActiveTunnels;
 }

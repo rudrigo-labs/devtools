@@ -38,6 +38,13 @@ public sealed class SshTunnelRequest
     public TunnelConfiguration? Configuration { get; set; }
 }
 
+public sealed record SshActiveTunnelInfo(
+    string Key,
+    TunnelState State,
+    TunnelConfiguration Configuration,
+    int? ProcessId,
+    string? LastError);
+
 public sealed record SshTunnelResult(
     SshTunnelAction Action,
     TunnelState State,

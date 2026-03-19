@@ -13,22 +13,22 @@
 		<MenuItem Header="Abrir Painel (Dashboard)" FontWeight="Bold" Tag="Dashboard"/>
 		<Separator/>
 
-		<!-- Topo: status / tÃ­tulo (opcional) -->
+		<!-- Topo: status / título (opcional) -->
 		<MenuItem Header="DevTools" IsEnabled="False"/>
 		<Separator/>
 
-		<!-- Grupo: ExecuÃ§Ãµes -->
-		<MenuItem Header="Centro de ExecuÃ§Ãµes (Jobs)" Tag="Jobs"/>
+		<!-- Grupo: Execuções -->
+		<MenuItem Header="Centro de Execuções (Jobs)" Tag="Jobs"/>
 		<Separator/>
 
 		<!-- Grupo: Ferramentas -->
-		<MenuItem Header="Notas RÃ¡pidas" Tag="Notes"/>
+		<MenuItem Header="Notas Rápidas" Tag="Notes"/>
 		<MenuItem Header="Organizador de Arquivos" Tag="Organizer"/>
 		<MenuItem Header="Divisor de Imagens" Tag="ImageSplitter"/>
 		<MenuItem Header="Renomeador em Massa" Tag="Rename"/>
 		<MenuItem Header="Conversor UTF-8" Tag="Utf8Convert"/>
 		<MenuItem Header="Snapshot de Projeto" Tag="Snapshot"/>
-		<MenuItem Header="TÃºnel SSH" Tag="SSHTunnel"/>
+		<MenuItem Header="Túnel SSH" Tag="SSHTunnel"/>
 		<MenuItem Header="Ngrok Controller" Tag="Ngrok"/>
 		<MenuItem Header="Harvest (Scanner)" Tag="Harvest"/>
 		<MenuItem Header="Busca de Texto" Tag="SearchText"/>
@@ -36,7 +36,7 @@
 
 		<Separator/>
 
-		<!-- Grupo: saÃ­da -->
+		<!-- Grupo: saída -->
 		<MenuItem Header="Logs do Sistema" Tag="Logs"/>
 		<MenuItem Header="Sair" Tag="Exit"/>
 

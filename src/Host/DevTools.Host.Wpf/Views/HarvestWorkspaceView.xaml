@@ -20,7 +20,7 @@
                            FontSize="18"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource DevToolsTextPrimary}"/>
-                <TextBlock Text="Minera codigo reutilizavel em projetos .NET. Identifica utilitarios, helpers e extension methods por relevancia."
+                <TextBlock Text="Minera código reutilizável em projetos .NET. Identifica utilitários, helpers e extension methods por relevância."
                            Foreground="{DynamicResource DevToolsTextSecondary}"
                            FontSize="12"
                            Margin="0,4,0,0"
@@ -32,7 +32,7 @@
 
             <!-- ==================== ACTION BAR ==================== -->
             <c:ActionBarControl Grid.Row="1"
-                                x:Name="Actions"
+                                x:Name="Actions" ShowHistory="True" ActionHistory="HistoryButton_Click"
                                 ShowNew="True"
                                 ShowSave="True"
                                 ShowDelete="True"
@@ -42,7 +42,9 @@
                                 ActionNew="ActionNew_Click"
                                 ActionSave="ActionSave_Click"
                                 ActionDelete="ActionDelete_Click"
-                                ActionCancel="ActionCancel_Click"/>
+                                ActionCancel="ActionCancel_Click"
+                                ActionGoToTool="ActionGoToTool_Click"
+                                ActionBack="ActionBack_Click"/>
 
             <!-- ==================== TOOL BODY ==================== -->
             <ScrollViewer Grid.Row="2"
@@ -81,7 +83,7 @@
                               Margin="0,8,0,16"
                               Style="{StaticResource DevToolsSelectInput}"
                               SelectionChanged="ConfigurationsCombo_SelectionChanged"
-                              DisplayMemberPath="Label"/>
+                              DisplayMemberPath="Name"/>
 
                     <Border x:Name="ConfigurationModeHint"
                             Visibility="Collapsed"
@@ -91,12 +93,12 @@
                             Background="{DynamicResource DevToolsSurface}"
                             Padding="10,8"
                             Margin="0,0,0,12">
-                        <TextBlock Text="Modo configuracao: preencha os campos abaixo para salvar uma configuracao reutilizavel."
+                        <TextBlock Text=""
                                    Foreground="{DynamicResource DevToolsTextSecondary}"
                                    TextWrapping="Wrap"/>
                     </Border>
 
-                    <!-- ===== Campos de configuracao (modo Configuracao) ===== -->
+                    <!-- ===== Campos de configuração (modo Configuração) ===== -->
                     <Grid x:Name="ConfigurationMetadataSection"
                           Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
@@ -111,7 +113,7 @@
                                      Style="{StaticResource DevToolsTextInput}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Descricao"
+                            <TextBlock Text="Descrição"
                                        Style="{StaticResource DevToolsInputLabel}"/>
                             <TextBox x:Name="DescriptionInput"
                                      Style="{StaticResource DevToolsTextInput}"/>
@@ -157,7 +159,7 @@
                     </StackPanel>
 
                     <!-- ===== Execução ===== -->
-                    <TextBlock Text="Execucao"
+                    <TextBlock Text="Execução"
                                Style="{StaticResource DevToolsCardTitle}"
                                Margin="0,4,0,10"/>
 

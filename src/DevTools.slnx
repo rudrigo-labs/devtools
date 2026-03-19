@@ -8,6 +8,9 @@
   <Folder Name="/Infrastructure/">
     <Project Path="Infrastructure/DevTools.Infrastructure/DevTools.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/DevTools.IntegrationTests/DevTools.IntegrationTests.csproj" />
+  </Folder>
   <Folder Name="/Tools/">
     <Project Path="Tools/DevTools.Snapshot/DevTools.Snapshot.csproj" />
     <Project Path="Tools/DevTools.Rename/DevTools.Rename.csproj" />

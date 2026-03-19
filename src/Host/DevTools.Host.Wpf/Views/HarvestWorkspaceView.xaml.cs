@@ -9,6 +9,8 @@ namespace DevTools.Host.Wpf.Views;
 
 public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
 {
+    private const string ToolHistorySlug = "harvest";
+    private const string ToolDisplayName = "Harvest";
     private const string NoConfigurationOptionLabel = "Configurar manualmente";
 
     private enum HarvestWorkspaceMode
@@ -26,6 +28,7 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
     private bool _isExecuting;
     private bool _initialized;
     private bool _suppressConfigurationSelectionChanged;
+    private bool _isConfigurationDraft;
 
     public HarvestWorkspaceView(IHarvestFacade facade)
     {
@@ -54,6 +57,7 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
             _currentEntity = CreateUnboundExecutionEntity();
 
         BindEntityToForm(_currentEntity);
+        _isConfigurationDraft = false;
         SetMode(HarvestWorkspaceMode.Execution, "Modo execução ativado.");
     }
 
@@ -62,11 +66,15 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
         if (_isExecuting)
             return;
 
+        SetMode(HarvestWorkspaceMode.Configuration, "Modo configuração ativado.");
         if (_currentEntity is null)
             _currentEntity = CreateUnboundExecutionEntity();
 
+        _isConfigurationDraft = true;
         BindEntityToForm(_currentEntity);
-        SetMode(HarvestWorkspaceMode.Configuration, "Modo configuração ativado.");
+        ClearInlineValidationStates();
+        ValidationUiService.ClearInline(ExecutionStatusText);
+        ApplyModeState();
     }
 
     private async Task ReloadEntitiesAsync()
@@ -120,6 +128,11 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
             return;
 
         ApplySelectedConfigurationOption(option);
+        if (_currentMode == HarvestWorkspaceMode.Configuration)
+        {
+            _isConfigurationDraft = option.Entity is not null;
+            ApplyModeState();
+        }
     }
 
     private async void ActionSave_Click(object sender, RoutedEventArgs e)
@@ -130,6 +143,12 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
         if (_currentMode == HarvestWorkspaceMode.Execution)
         {
             await ExecuteCurrentAsync().ConfigureAwait(true);
+            return;
+        }
+
+        if (!_isConfigurationDraft)
+        {
+            ValidationUiService.ShowInline(ExecutionStatusText, "Clique em Novo para iniciar uma configuração.");
             return;
         }
 
@@ -150,7 +169,7 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
         _currentEntity = entity;
         await ReloadEntitiesAsync().ConfigureAwait(true);
         ExecutionStatusText.Text = $"Configuração '{entity.Name}' salva.";
-        SetMode(HarvestWorkspaceMode.Execution);
+        ResetConfigurationState();
     }
 
     private async void ActionDelete_Click(object sender, RoutedEventArgs e)
@@ -182,11 +201,11 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
         if (_currentMode == HarvestWorkspaceMode.Execution)
         {
             SetMode(HarvestWorkspaceMode.Configuration, "Modo configuração ativado.");
-            if (_currentEntity is not null)
-                BindEntityToForm(_currentEntity);
+            ResetConfigurationState();
             return;
         }
 
+        _isConfigurationDraft = true;
         CreateNewEntity();
         ValidationUiService.ClearInline(ExecutionStatusText);
         ExecutionStatusText.Text = "Nova configuração criada (não salva).";
@@ -195,6 +214,30 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
 
     private void ActionCancel_Click(object sender, RoutedEventArgs e)
     {
+        if (_currentMode == HarvestWorkspaceMode.Configuration)
+        {
+            ResetConfigurationState();
+            ValidationUiService.ClearInline(ExecutionStatusText);
+            ExecutionStatusText.Text = "Configuração cancelada.";
+            return;
+        }
+
+        ActionBack_Click(sender, e);
+    }
+
+    private void ActionGoToTool_Click(object sender, RoutedEventArgs e)
+    {
+        if (Window.GetWindow(this) is MainWindow mainWindow)
+        {
+            mainWindow.OpenToolExecution("Harvest");
+            return;
+        }
+
+        SetMode(HarvestWorkspaceMode.Execution, "Modo execução ativado.");
+    }
+
+    private void ActionBack_Click(object sender, RoutedEventArgs e)
+    {
         if (_isExecuting)
         {
             _executionCts?.Cancel();
@@ -202,24 +245,14 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
             return;
         }
 
-        if (_currentMode == HarvestWorkspaceMode.Configuration)
-        {
-            if (_currentEntity is not null)
-                BindEntityToForm(_currentEntity);
-
-            SetMode(HarvestWorkspaceMode.Execution, "Modo execução ativado.");
-            return;
-        }
-
-        if (_currentEntity is not null)
-            BindEntityToForm(_currentEntity);
-
-        ValidationUiService.ClearInline(ExecutionStatusText);
-        ExecutionStatusText.Text = "Execução pronta.";
-        ApplyModeState();
+        if (Window.GetWindow(this) is MainWindow mainWindow)
+            mainWindow.OpenFerramentasHome();
     }
 
-    // ── Execução ─────────────────────────────────────────────────────────────
+    private async void HistoryButton_Click(object sender, RoutedEventArgs e)
+        => await ToolHistoryViewHelper.ShowAndApplyAsync(WorkspaceRoot, ToolHistorySlug, ToolDisplayName, ExecutionStatusText).ConfigureAwait(true);
+
+    // -- Execução -------------------------------------------------------------
 
     private async Task ExecuteCurrentAsync()
     {
@@ -253,6 +286,8 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
             LargeFilePenalty = entity.LargeFilePenalty,
             Categories = entity.Categories
         };
+
+        await ToolHistoryViewHelper.RecordAsync(ToolHistorySlug, WorkspaceRoot, "Executar harvest").ConfigureAwait(true);
 
         _executionCts?.Dispose();
         _executionCts = new CancellationTokenSource();
@@ -288,15 +323,14 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
         }
     }
 
-    // ── Criação e vínculo de entidade ─────────────────────────────────────────
+    // -- Criação e vínculo de entidade -----------------------------------------
 
     private void CreateNewEntity()
     {
-        var nextIndex = _entities.Count + 1;
         _currentEntity = new HarvestEntity
         {
-            Name = $"Harvest {nextIndex}",
-            Description = "Nova configuração",
+            Name = "Harvest 1",
+            Description = string.Empty,
             IsActive = true,
             CopyFiles = true,
             IgnoredDirectories = HarvestDefaults.DefaultIgnoredDirectories,
@@ -375,16 +409,16 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
         return true;
     }
 
-    // ── Modo ─────────────────────────────────────────────────────────────────
+    // -- Modo -----------------------------------------------------------------
 
     private void SetMode(HarvestWorkspaceMode mode, string? statusMessage = null)
     {
         _currentMode = mode;
+        ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
 
         if (!string.IsNullOrWhiteSpace(statusMessage))
         {
-            ValidationUiService.ClearInline(ExecutionStatusText);
             ExecutionStatusText.Text = statusMessage;
         }
     }
@@ -392,29 +426,43 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
     private void ApplyModeState()
     {
         var hasSelected = _currentEntity is not null;
-        var hasPersisted = hasSelected && !string.IsNullOrWhiteSpace(_currentEntity!.Id) && _entities.Any(x => x.Id == _currentEntity.Id);
         var hasConfigurations = _entities.Count > 0;
         var inConfiguration = _currentMode == HarvestWorkspaceMode.Configuration;
+        var inExecution = _currentMode == HarvestWorkspaceMode.Execution;
 
         ConfigurationsLabel.Visibility = hasConfigurations ? Visibility.Visible : Visibility.Collapsed;
         ConfigurationsCombo.Visibility = hasConfigurations ? Visibility.Visible : Visibility.Collapsed;
         ConfigurationMetadataSection.Visibility = inConfiguration ? Visibility.Visible : Visibility.Collapsed;
+        ConfigurationModeHint.Visibility = Visibility.Collapsed;
 
-        Actions.NewText = inConfiguration ? "Novo" : "Configurar";
+        Actions.NewText = "Novo";
         Actions.SaveText = inConfiguration ? "Salvar" : "Executar";
-        Actions.CancelText = _isExecuting ? "Cancelar Execução" : "Cancelar";
+        Actions.SaveIconKind = inConfiguration ? "ContentSave" : "Play";
+        Actions.CancelText = "Cancelar";
+        Actions.GoToToolText = "Ir para ferramenta";
+        Actions.BackText = _isExecuting ? "Cancelar execução" : "Voltar";
+        Actions.BackIconKind = _isExecuting ? "CloseCircleOutline" : "ArrowLeft";
 
-        Actions.ShowNew = !_isExecuting;
-        Actions.ShowSave = !_isExecuting;
-        Actions.ShowDelete = inConfiguration && !_isExecuting;
-        Actions.ShowCancel = _isExecuting || hasSelected;
-        Actions.CanNew = !_isExecuting;
-        Actions.CanSave = hasSelected && !_isExecuting;
-        Actions.CanDelete = inConfiguration && hasPersisted && !_isExecuting;
-        Actions.CanCancel = _isExecuting || hasSelected;
+        Actions.ShowHelp = true;
+        Actions.ShowHistory = inExecution;
+        Actions.HelpContextKey = inConfiguration ? "harvest:configuration" : "harvest:execution";
+        Actions.ShowNew = inConfiguration;
+        Actions.ShowSave = inConfiguration || inExecution;
+        Actions.ShowDelete = false;
+        Actions.ShowCancel = inConfiguration;
+        Actions.ShowGoToTool = false;
+        Actions.ShowBack = inExecution;
+
+        Actions.CanHelp = true;
+        Actions.CanNew = inConfiguration && !_isExecuting && !_isConfigurationDraft;
+        Actions.CanSave = !_isExecuting && (inExecution ? hasSelected : _isConfigurationDraft);
+        Actions.CanDelete = false;
+        Actions.CanCancel = inConfiguration && !_isExecuting && _isConfigurationDraft;
+        Actions.CanGoToTool = false;
+        Actions.CanBack = inExecution;
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // -- Helpers ---------------------------------------------------------------
 
     private static HarvestEntity CloneEntity(HarvestEntity source) => new()
     {
@@ -500,6 +548,19 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
 
         BindEntityToForm(_currentEntity);
         ValidationUiService.ClearInline(ExecutionStatusText);
+        if (_currentMode == HarvestWorkspaceMode.Configuration)
+            _isConfigurationDraft = option?.Entity is not null;
+        ApplyModeState();
+    }
+
+    private void ResetConfigurationState()
+    {
+        _isConfigurationDraft = false;
+        _currentEntity = CreateUnboundExecutionEntity();
+        SetSelectedConfigurationOption(GetNoConfigurationOption());
+        BindEntityToForm(_currentEntity);
+        ClearInlineValidationStates();
+        ValidationUiService.ClearInline(ExecutionStatusText);
         ApplyModeState();
     }
 
@@ -534,3 +595,4 @@ public partial class HarvestWorkspaceView : System.Windows.Controls.UserControl
         public HarvestEntity? Entity { get; }
     }
 }
+

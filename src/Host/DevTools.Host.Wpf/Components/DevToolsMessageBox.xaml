@@ -11,9 +11,10 @@
         MinWidth="360"
         MaxWidth="520">
 
-    <Border Background="{DynamicResource DevToolsSurface}"
+    <Border x:Name="DialogBorder"
+            Background="{DynamicResource DevToolsSurface}"
             BorderBrush="{DynamicResource DevToolsBrushBorder}"
-            BorderThickness="1"
+            BorderThickness="2"
             CornerRadius="8"
             Padding="28,24,28,24"
             SnapsToDevicePixels="True">
@@ -35,7 +36,8 @@
             </StackPanel>
 
             <!-- Separador -->
-            <Border Height="1"
+            <Border x:Name="HeaderSeparator"
+                    Height="1"
                     Background="{DynamicResource DevToolsBrushBorder}"
                     Margin="0,0,0,18"/>
 

@@ -1,98 +1,113 @@
-# DevTools - Navegacao e UX de Telas
+# DevTools - Navegação, UX e Padronização
 
-Status: ativo
-Data: 2026-03-13
+Status: ativo  
+Data: 2026-03-15
 
 ## Objetivo
-Este documento descreve como a navegacao de telas esta organizada no Host WPF, sem alterar arquitetura (Host -> Facade -> Engine), engines, infraestrutura ou layout base.
+Descrever o comportamento real de navegação e o padrão atual das telas de ferramentas no Host WPF.
 
-## Fluxo principal da aplicacao
-1. Start
-2. Home
-3. Escolher ferramenta
-4. Tela de Configuracao da ferramenta
-5. Tela de Execucao da ferramenta
+## Navegação principal (estado atual)
+1. A aplicação inicia em `Ferramentas` (launcher de execução).
+2. O launcher de execução (`HomeLauncherView`) abre as ferramentas em modo de execução.
+3. O launcher de configuração (`ConfigurationLauncherView`) abre as ferramentas em modo de configuração.
+4. A sidebar mantém acesso direto por:
+- `Exec:<Tool>` (execução)
+- `Cfg:<Tool>` (configuração, quando a ferramenta suporta esse modo)
 
-## Home
-Arquivo: `src/Host/DevTools.Host.Wpf/Views/HomeLauncherView.xaml`
+## Launchers
 
-A Home funciona como launcher de ferramentas com cards:
+### Ferramentas (`HomeLauncherView`)
+Cards disponíveis:
 - Snapshot
-- Migrations
-- UTF-8 Convert
-- Notes
-
-Cada card tem:
-- icone
-- nome
-- descricao curta
-- botao `Abrir configuracao`
-
-Ao clicar no card, a Home envia evento `OpenToolRequested` para a MainWindow, que abre a ferramenta no modo de configuracao.
-
-## Sidebar
-Arquivo: `src/Host/DevTools.Host.Wpf/Views/MainWindow.xaml`
-
-A sidebar mantem navegacao lateral e agora inclui `Home` no topo.
-- Clique em `Home`: abre a tela Home
-- Clique em tool com fluxo configuracao-primeiro: abre em `Configuration`
-
-Tools com fluxo configuracao-primeiro:
-- Snapshot
-- Migrations
+- Rename
+- Harvest
+- ImageSplit
+- SearchText
+- Organizer
 - Utf8Convert
+- Migrations
+- SshTunnel
+- Ngrok
 - Notes
 
-## MainWindow e intents de workspace
-Arquivo: `src/Host/DevTools.Host.Wpf/Views/MainWindow.xaml.cs`
+### Configurações (`ConfigurationLauncherView`)
+Cards disponíveis:
+- Snapshot
+- Harvest
+- Organizer
+- Migrations
+- SshTunnel
+- Ngrok
+- Notes
 
-A navegacao usa intents:
+## Intents e ativação de modo
+`MainWindow` usa intents:
 - `Default`
 - `Configuration`
 - `Execution`
 
-Quando a tool suporta metodos de ativacao, a MainWindow aplica o modo antes de renderizar:
-- `ActivateConfigurationMode()`
-- `ActivateExecutionMode()`
+`ApplyWorkspaceIntent` aplica `ActivateConfigurationMode()` e `ActivateExecutionMode()` para:
+- Snapshot
+- Harvest
+- Organizer
+- Migrations
+- SshTunnel
+- Ngrok
+- Notes
 
-## Separacao Configuracao x Execucao por ferramenta
+Ferramentas de execução direta (sem modo de configuração no fluxo atual):
+- Rename
+- ImageSplit
+- SearchText
+- Utf8Convert
 
-### Snapshot
-- Entrada via Home/Sidebar abre em configuracao.
-- View alterna entre modos de configuracao e execucao.
+## Padronização de configuração (exceto Notes)
+Ferramentas: Snapshot, Harvest, Organizer, Migrations, SshTunnel e Ngrok.
 
-### Migrations
-- Entrada via Home/Sidebar abre em configuracao.
-- Configuracao salva parametros.
-- Execucao roda `dotnet ef` com os parametros.
+### ActionBar no modo configuração
+- Exibe: `Novo`, `Salvar`, `Cancelar` (e `Ajuda`).
+- Exceção: no `Organizer`, o botão `Excluir` também fica visível em configuração.
+- Oculta: `Histórico`, `Ir para ferramenta`, `Voltar`.
+- Regra de habilitação:
+1. `Novo` habilitado somente quando não existe rascunho.
+2. Após clicar em `Novo`, `Novo` é desabilitado.
+3. `Salvar` e `Cancelar` ficam habilitados para o rascunho atual.
+4. Ao cancelar, volta ao estado inicial da configuração.
 
-### Notes
-- Entrada via Home/Sidebar abre em configuracao.
-- Modo execucao mostra lista/editor de notas.
-- Modo configuracao mostra setup local + Google Drive.
+### Comportamento de `Novo`
+Ao clicar em `Novo` no modo configuração:
+1. Cria um rascunho local não persistido.
+2. Nome padrão do rascunho:
+- `Snapshot 1`
+- `Harvest 1`
+- `Organizer 1`
+- `Migrations 1`
+- `SSH Tunnel 1`
+- `Ngrok 1`
 
-### Utf8Convert
-- Entrada via Home/Sidebar abre em configuracao (intent aplicado pela MainWindow).
-- Mantem arquitetura atual da ferramenta.
+### Comportamento de `Cancelar`
+Ao clicar em `Cancelar` no modo configuração:
+1. Descarta o rascunho.
+2. Limpa o objeto corrente de configuração.
+3. Remove o nome temporário da tela (volta para entidade não vinculada).
+4. Reabilita `Novo`.
+5. Desabilita novamente `Salvar` e `Cancelar`.
 
-### Demais ferramentas
-- Mantem fluxo padrao atual do projeto.
-- Nao houve mudanca de engine/infra.
+## Persistência de configurações das ferramentas
+As configurações de ferramentas persistem no banco SQLite em `tool_configurations`:
+- identificação por `tool_slug` + `name`
+- carga útil em `payload_json`
 
-## Regras UX aplicadas
-- Home e launcher inicial (nao inicia direto em tool).
-- Nome da tela ativa no topo reflete contexto (`Tool Configuration`, etc.).
-- Configuracao e execucao seguem responsabilidades separadas por modo.
-- Acoes de configuracao nao disparam execucao automaticamente.
+Observação:
+- `appsettings.json` permanece para configurações gerais do host.
+- Perfis das ferramentas não são persistidos em arquivo JSON de tela.
 
-## Arquivos chave alterados
-- `src/Host/DevTools.Host.Wpf/Views/HomeLauncherView.xaml`
-- `src/Host/DevTools.Host.Wpf/Views/HomeLauncherView.xaml.cs`
-- `src/Host/DevTools.Host.Wpf/Views/MainWindow.xaml`
-- `src/Host/DevTools.Host.Wpf/Views/MainWindow.xaml.cs`
-- `src/Host/DevTools.Host.Wpf/App.xaml.cs`
+## Organizer (categorias)
+No modo de configuração do Organizer:
+1. A lista de categorias ocupa a largura total do bloco de categorias.
+2. O editor de categoria fica abaixo da lista.
+3. É possível adicionar/remover categorias dinamicamente.
+4. A configuração salva leva as categorias no payload da ferramenta.
 
-## Observacoes
-- A arquitetura de camadas foi preservada.
-- Nao houve mudanca em engines das ferramentas.
-- Nao houve mudanca na infraestrutura de persistencia.
+## Exceção conhecida
+`Notes` mantém fluxo próprio (configuração + execução no mesmo workspace com comportamento específico de editor), portanto não segue integralmente o mesmo padrão das demais telas configuráveis.
