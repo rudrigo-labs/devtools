@@ -68,7 +68,12 @@ public sealed class NgrokEngine : IDevToolEngine<NgrokRequest, NgrokResult>
                 {
                     progress?.Report(new ProgressEvent("Iniciando ngrok", 20, "start"));
                     var options    = request.StartOptions!;
-                    var normalized = new NgrokStartOptions(NormalizeProtocol(options.Protocol), options.Port, options.ExecutablePath, options.ExtraArgs);
+                    var normalized = new NgrokStartOptions(
+                        NormalizeProtocol(options.Protocol),
+                        options.Port,
+                        options.ExecutablePath,
+                        options.ExtraArgs,
+                        options.AuthToken);
                     var pid        = _processService.StartHttp(normalized);
                     progress?.Report(new ProgressEvent("Ngrok iniciado", 100, "done"));
                     return RunResult<NgrokResult>.Success(new NgrokResult(request.Action, baseUrl, ProcessId: pid));
