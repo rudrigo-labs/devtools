@@ -21,6 +21,17 @@ public sealed class FileToolsSettings
 {
     public int MaxFileSizeKb { get; set; } = 500;
     public int AbsoluteMaxFileSizeKb { get; set; } = 10_000;
+    public List<string> DefaultIncludeGlobs { get; set; } = ["**/*"];
+    public List<string> DefaultExcludeGlobs { get; set; } =
+    [
+        "**/.git/**",
+        "**/bin/**",
+        "**/obj/**",
+        "**/.vs/**",
+        "**/.idea/**",
+        "**/.vscode/**",
+        "**/node_modules/**"
+    ];
 }
 
 /// <summary>

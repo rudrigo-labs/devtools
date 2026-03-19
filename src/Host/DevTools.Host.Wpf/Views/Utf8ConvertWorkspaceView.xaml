@@ -88,12 +88,6 @@
                               Margin="0,0,0,12"
                               ToolTip="Mostra o que seria convertido, sem alterar arquivos."/>
 
-                    <Button Content="Converter Agora"
-                            Style="{StaticResource DevToolsPrimaryButton}"
-                            HorizontalAlignment="Left"
-                            Margin="0,0,0,12"
-                            Click="ActionExecute_Click"/>
-
                     <!-- Resumo -->
                     <Border x:Name="ResultPanel" Visibility="Collapsed"
                             BorderThickness="1" CornerRadius="4"

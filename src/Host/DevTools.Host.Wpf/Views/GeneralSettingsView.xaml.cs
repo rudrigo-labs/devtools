@@ -81,8 +81,16 @@ public partial class GeneralSettingsView : System.Windows.Controls.UserControl
         var owner = Window.GetWindow(this);
         DevToolsMessageBox.Info(
             owner,
-            "Define o tamanho máximo padrão de arquivo (em KB) usado pelas ferramentas de varredura quando esse valor não é informado manualmente.\n\n" +
-            "Valor recomendado: mantenha baixo para ganhar desempenho e evitar leitura de arquivos muito grandes.",
+            "O que é:\n" +
+            "Valor padrão de tamanho máximo por arquivo (em KB) para ferramentas da família de texto.\n\n" +
+            "Como funciona:\n" +
+            "Se a ferramenta não receber um valor específico, ela usa este número automaticamente.\n\n" +
+            "Exemplo:\n" +
+            "500 = arquivos até 500 KB por padrão.\n\n" +
+            "Quando aumentar:\n" +
+            "Quando precisar processar arquivos grandes.\n\n" +
+            "Impacto:\n" +
+            "Valores maiores podem aumentar tempo de processamento e uso de memória.",
             "Ajuda - Tamanho máximo padrão");
     }
 
@@ -91,10 +99,54 @@ public partial class GeneralSettingsView : System.Windows.Controls.UserControl
         var owner = Window.GetWindow(this);
         DevToolsMessageBox.Info(
             owner,
-            "Define o teto absoluto (em KB) aceito pelo sistema.\n\n" +
-            "Qualquer valor acima desse limite será rejeitado pela validação, mesmo que informado manualmente na ferramenta.\n\n" +
-            "Regra: este valor deve ser maior ou igual ao tamanho máximo padrão.",
+            "O que é:\n" +
+            "Limite máximo global (em KB) que o sistema permite.\n\n" +
+            "Como funciona:\n" +
+            "Mesmo que alguém informe um valor maior em uma ferramenta, o sistema bloqueia.\n\n" +
+            "Regra obrigatória:\n" +
+            "Este valor deve ser maior ou igual ao 'Tamanho máximo padrão (KB)'.\n\n" +
+            "Exemplo:\n" +
+            "Padrão = 500 e Teto = 10000.\n\n" +
+            "Impacto:\n" +
+            "Se reduzir demais, execuções válidas podem ser impedidas.",
             "Ajuda - Teto absoluto");
+    }
+
+    private void DefaultIncludeGlobsHelpButton_Click(object sender, RoutedEventArgs e)
+    {
+        var owner = Window.GetWindow(this);
+        DevToolsMessageBox.Info(
+            owner,
+            "O que é:\n" +
+            "Lista de padrões (1 por linha) para dizer quais arquivos entram por padrão.\n\n" +
+            "Onde é usado:\n" +
+            "Search Text e UTF-8 Convert carregam estes valores automaticamente.\n\n" +
+            "Exemplos úteis:\n" +
+            "**/*\n" +
+            "**/*.cs\n" +
+            "**/*.json\n\n" +
+            "Dica prática:\n" +
+            "Se quiser incluir tudo, use **/* e refine no campo de exclusão.",
+            "Ajuda - Globs padrão de inclusão");
+    }
+
+    private void DefaultExcludeGlobsHelpButton_Click(object sender, RoutedEventArgs e)
+    {
+        var owner = Window.GetWindow(this);
+        DevToolsMessageBox.Info(
+            owner,
+            "O que é:\n" +
+            "Lista de padrões (1 por linha) para remover arquivos/pastas da varredura padrão.\n\n" +
+            "Prioridade:\n" +
+            "A exclusão vence a inclusão quando um caminho bate nos dois filtros.\n\n" +
+            "Exemplos recomendados:\n" +
+            "**/bin/**\n" +
+            "**/obj/**\n" +
+            "**/.git/**\n" +
+            "**/node_modules/**\n\n" +
+            "Impacto:\n" +
+            "Exclusões corretas deixam a execução mais rápida e evitam ruído.",
+            "Ajuda - Globs padrão de exclusão");
     }
 
     private void HistoryEnabledHelpButton_Click(object sender, RoutedEventArgs e)
@@ -102,8 +154,14 @@ public partial class GeneralSettingsView : System.Windows.Controls.UserControl
         var owner = Window.GetWindow(this);
         DevToolsMessageBox.Info(
             owner,
-            "Ativa ou desativa o histórico global de uso.\n\n" +
-            "Com o histórico desligado, o botão de histórico deve sumir das ferramentas e novas execuções deixam de ser registradas.",
+            "O que é:\n" +
+            "Liga ou desliga o histórico global das ferramentas.\n\n" +
+            "Quando ligado:\n" +
+            "As execuções ficam registradas e o botão de histórico aparece nas telas.\n\n" +
+            "Quando desligado:\n" +
+            "Novas execuções não são registradas e o histórico deixa de aparecer.\n\n" +
+            "Use desligado quando:\n" +
+            "Você não quiser armazenar rastros locais de uso.",
             "Ajuda - Usar histórico");
     }
 
@@ -117,8 +175,15 @@ public partial class GeneralSettingsView : System.Windows.Controls.UserControl
 
         var toolDisplayName = GetToolDisplayName(toolTag);
         var message =
-            $"Controla a visibilidade da ferramenta '{toolDisplayName}' na navegação principal.\n\n" +
-            "Se desmarcar, a ferramenta deve deixar de aparecer para execução e configuração após recarregar o aplicativo.";
+            $"O que este campo faz:\n" +
+            $"Liga/desliga a exibição da ferramenta '{toolDisplayName}' no aplicativo.\n\n" +
+            "Quando desmarcado:\n" +
+            "- some da navegação de execução\n" +
+            "- some da navegação de configuração\n\n" +
+            "Quando marcado:\n" +
+            "- volta a aparecer normalmente\n\n" +
+            "Aplicação da mudança:\n" +
+            "Salve e recarregue o aplicativo para refletir em toda a interface.";
 
         DevToolsMessageBox.Info(owner, message, $"Ajuda - {toolDisplayName}");
     }
@@ -145,6 +210,20 @@ public partial class GeneralSettingsView : System.Windows.Controls.UserControl
                 "Teto absoluto alterado",
                 "Impacto: muda o teto global aceito pelo sistema. " +
                 "Valores menores podem bloquear execuções que antes eram permitidas.");
+
+        DefaultIncludeGlobsTextBox.LostFocus += (_, _) =>
+            ConfirmTextConfigImpact(
+                "FileTools.DefaultIncludeGlobs",
+                DefaultIncludeGlobsTextBox,
+                "Globs padrão de inclusão alterados",
+                "Impacto: muda o filtro padrão de inclusão da família de texto em ferramentas como Search Text e UTF-8 Convert.");
+
+        DefaultExcludeGlobsTextBox.LostFocus += (_, _) =>
+            ConfirmTextConfigImpact(
+                "FileTools.DefaultExcludeGlobs",
+                DefaultExcludeGlobsTextBox,
+                "Globs padrão de exclusão alterados",
+                "Impacto: muda o filtro padrão de exclusão da família de texto em ferramentas como Search Text e UTF-8 Convert.");
 
         HistoryEnabledCheckBox.Checked += (_, _) =>
             ConfirmBooleanConfigImpact(
@@ -187,7 +266,7 @@ public partial class GeneralSettingsView : System.Windows.Controls.UserControl
         if (_isLoading || _isRevertingConfigChange)
             return;
 
-        var currentValue = textBox.Text.Trim();
+        var currentValue = NormalizeMultilineText(textBox.Text);
         if (!_lastKnownConfigValues.TryGetValue(configKey, out var previousValue))
         {
             _lastKnownConfigValues[configKey] = currentValue;
@@ -267,6 +346,8 @@ public partial class GeneralSettingsView : System.Windows.Controls.UserControl
         if (!TryReadAndValidateInputs(
                 out var maxFileSizeKb,
                 out var absoluteMaxFileSizeKb,
+                out var defaultIncludeGlobs,
+                out var defaultExcludeGlobs,
                 out var historyEnabled,
                 out var disabledTools,
                 out var error))
@@ -280,6 +361,8 @@ public partial class GeneralSettingsView : System.Windows.Controls.UserControl
             _appSettingsFileService.SaveGeneralSettings(
                 maxFileSizeKb,
                 absoluteMaxFileSizeKb,
+                defaultIncludeGlobs,
+                defaultExcludeGlobs,
                 historyEnabled,
                 disabledTools);
 
@@ -299,6 +382,8 @@ public partial class GeneralSettingsView : System.Windows.Controls.UserControl
             var snapshot = _appSettingsFileService.Load();
             MaxFileSizeKbTextBox.Text = snapshot.Settings.FileTools.MaxFileSizeKb.ToString(CultureInfo.InvariantCulture);
             AbsoluteMaxFileSizeKbTextBox.Text = snapshot.Settings.FileTools.AbsoluteMaxFileSizeKb.ToString(CultureInfo.InvariantCulture);
+            DefaultIncludeGlobsTextBox.Text = string.Join(Environment.NewLine, snapshot.Settings.FileTools.DefaultIncludeGlobs);
+            DefaultExcludeGlobsTextBox.Text = string.Join(Environment.NewLine, snapshot.Settings.FileTools.DefaultExcludeGlobs);
             HistoryEnabledCheckBox.IsChecked = snapshot.Settings.History.Enabled;
 
             foreach (var check in _toolVisibilityChecks.Values)
@@ -337,12 +422,16 @@ public partial class GeneralSettingsView : System.Windows.Controls.UserControl
     private bool TryReadAndValidateInputs(
         out int maxFileSizeKb,
         out int absoluteMaxFileSizeKb,
+        out IReadOnlyCollection<string> defaultIncludeGlobs,
+        out IReadOnlyCollection<string> defaultExcludeGlobs,
         out bool historyEnabled,
         out IReadOnlyCollection<string> disabledTools,
         out string error)
     {
         maxFileSizeKb = 0;
         absoluteMaxFileSizeKb = 0;
+        defaultIncludeGlobs = Array.Empty<string>();
+        defaultExcludeGlobs = Array.Empty<string>();
         historyEnabled = true;
         disabledTools = Array.Empty<string>();
         error = string.Empty;
@@ -383,6 +472,12 @@ public partial class GeneralSettingsView : System.Windows.Controls.UserControl
             return false;
         }
 
+        defaultIncludeGlobs = ParseGlobLines(DefaultIncludeGlobsTextBox.Text);
+        if (defaultIncludeGlobs.Count == 0)
+            defaultIncludeGlobs = ["**/*"];
+
+        defaultExcludeGlobs = ParseGlobLines(DefaultExcludeGlobsTextBox.Text);
+
         historyEnabled = HistoryEnabledCheckBox.IsChecked == true;
 
         var disabledToolTags = _toolVisibilityChecks
@@ -403,12 +498,33 @@ public partial class GeneralSettingsView : System.Windows.Controls.UserControl
 
     private void CaptureCurrentConfigValues()
     {
-        _lastKnownConfigValues["FileTools.MaxFileSizeKb"] = MaxFileSizeKbTextBox.Text.Trim();
-        _lastKnownConfigValues["FileTools.AbsoluteMaxFileSizeKb"] = AbsoluteMaxFileSizeKbTextBox.Text.Trim();
+        _lastKnownConfigValues["FileTools.MaxFileSizeKb"] = NormalizeMultilineText(MaxFileSizeKbTextBox.Text);
+        _lastKnownConfigValues["FileTools.AbsoluteMaxFileSizeKb"] = NormalizeMultilineText(AbsoluteMaxFileSizeKbTextBox.Text);
+        _lastKnownConfigValues["FileTools.DefaultIncludeGlobs"] = NormalizeMultilineText(DefaultIncludeGlobsTextBox.Text);
+        _lastKnownConfigValues["FileTools.DefaultExcludeGlobs"] = NormalizeMultilineText(DefaultExcludeGlobsTextBox.Text);
         _lastKnownConfigValues["History.Enabled"] = (HistoryEnabledCheckBox.IsChecked == true).ToString();
 
         foreach (var (toolTag, checkBox) in _toolVisibilityChecks)
             _lastKnownConfigValues[$"ToolVisibility.{toolTag}"] = (checkBox.IsChecked == true).ToString();
+    }
+
+    private static IReadOnlyCollection<string> ParseGlobLines(string rawText)
+        => rawText
+            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => x.Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+    private static string NormalizeMultilineText(string rawText)
+    {
+        var lines = rawText
+            .Replace("\r", string.Empty, StringComparison.Ordinal)
+            .Split('\n', StringSplitOptions.None)
+            .Select(x => x.TrimEnd())
+            .ToArray();
+
+        return string.Join(Environment.NewLine, lines).Trim();
     }
 
     private static string GetToolDisplayName(string toolTag)

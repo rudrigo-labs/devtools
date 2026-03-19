@@ -58,6 +58,8 @@ public sealed class AppSettingsFileService
         SaveGeneralSettings(
             maxFileSizeKb,
             absoluteMaxFileSizeKb,
+            current.FileTools.DefaultIncludeGlobs,
+            current.FileTools.DefaultExcludeGlobs,
             current.History.Enabled,
             current.ToolVisibility.DisabledTools);
     }
@@ -65,6 +67,8 @@ public sealed class AppSettingsFileService
     public void SaveGeneralSettings(
         int maxFileSizeKb,
         int absoluteMaxFileSizeKb,
+        IReadOnlyCollection<string> defaultIncludeGlobs,
+        IReadOnlyCollection<string> defaultExcludeGlobs,
         bool historyEnabled,
         IReadOnlyCollection<string> disabledTools)
     {
@@ -77,6 +81,8 @@ public sealed class AppSettingsFileService
         if (absoluteMaxFileSizeKb < maxFileSizeKb)
             throw new InvalidOperationException("AbsoluteMaxFileSizeKb deve ser maior ou igual a MaxFileSizeKb.");
 
+        var normalizedIncludeGlobs = NormalizeGlobs(defaultIncludeGlobs, fallbackWhenEmpty: ["**/*"]);
+        var normalizedExcludeGlobs = NormalizeGlobs(defaultExcludeGlobs);
         var normalizedDisabledTools = (disabledTools ?? Array.Empty<string>())
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Select(x => x.Trim())
@@ -91,6 +97,8 @@ public sealed class AppSettingsFileService
         var fileTools = EnsureObject(devTools, "FileTools");
         fileTools["MaxFileSizeKb"] = maxFileSizeKb;
         fileTools["AbsoluteMaxFileSizeKb"] = absoluteMaxFileSizeKb;
+        fileTools["DefaultIncludeGlobs"] = ToJsonArray(normalizedIncludeGlobs);
+        fileTools["DefaultExcludeGlobs"] = ToJsonArray(normalizedExcludeGlobs);
 
         var history = EnsureObject(devTools, "History");
         history["Enabled"] = historyEnabled;
@@ -116,16 +124,23 @@ public sealed class AppSettingsFileService
         if (!root.TryGetPropertyValue("DevTools", out var devToolsNode) || devToolsNode is not JsonObject devTools)
             return result;
 
-        if (!devTools.TryGetPropertyValue("FileTools", out var fileToolsNode) || fileToolsNode is not JsonObject fileTools)
-            return result;
+        if (devTools.TryGetPropertyValue("FileTools", out var fileToolsNode) && fileToolsNode is JsonObject fileTools)
+        {
+            var max = TryGetPositiveInt(fileTools, "MaxFileSizeKb");
+            if (max.HasValue)
+                result.FileTools.MaxFileSizeKb = max.Value;
 
-        var max = TryGetPositiveInt(fileTools, "MaxFileSizeKb");
-        if (max.HasValue)
-            result.FileTools.MaxFileSizeKb = max.Value;
+            var absolute = TryGetPositiveInt(fileTools, "AbsoluteMaxFileSizeKb");
+            if (absolute.HasValue)
+                result.FileTools.AbsoluteMaxFileSizeKb = absolute.Value;
 
-        var absolute = TryGetPositiveInt(fileTools, "AbsoluteMaxFileSizeKb");
-        if (absolute.HasValue)
-            result.FileTools.AbsoluteMaxFileSizeKb = absolute.Value;
+            var includeGlobs = TryGetStringArray(fileTools, "DefaultIncludeGlobs");
+            if (includeGlobs.Count > 0)
+                result.FileTools.DefaultIncludeGlobs = includeGlobs;
+
+            var excludeGlobs = TryGetStringArray(fileTools, "DefaultExcludeGlobs");
+            result.FileTools.DefaultExcludeGlobs = excludeGlobs;
+        }
 
         if (devTools.TryGetPropertyValue("History", out var historyNode) &&
             historyNode is JsonObject history &&
@@ -156,6 +171,52 @@ public sealed class AppSettingsFileService
         }
 
         return result;
+    }
+
+    private static List<string> TryGetStringArray(JsonObject parent, string propertyName)
+    {
+        if (!parent.TryGetPropertyValue(propertyName, out var node) || node is not JsonArray array)
+            return [];
+
+        return array
+            .Select(x =>
+            {
+                try { return x?.GetValue<string>(); }
+                catch { return null; }
+            })
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x!.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static string[] NormalizeGlobs(
+        IReadOnlyCollection<string>? globs,
+        IReadOnlyCollection<string>? fallbackWhenEmpty = null)
+    {
+        var normalized = (globs ?? Array.Empty<string>())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (normalized.Length > 0)
+            return normalized;
+
+        return (fallbackWhenEmpty ?? Array.Empty<string>())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+
+    private static JsonArray ToJsonArray(IEnumerable<string> values)
+    {
+        var array = new JsonArray();
+        foreach (var value in values)
+            array.Add(value);
+
+        return array;
     }
 
     private static int? TryGetPositiveInt(JsonObject node, string property)

@@ -175,6 +175,80 @@
                                              HorizontalAlignment="Left"
                                              Padding="10,6"/>
                                 </Grid>
+
+                                <Grid Margin="0,12,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="280"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Top">
+                                        <TextBlock Text="Globs padrão de inclusão"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                                        <Button x:Name="DefaultIncludeGlobsHelpButton"
+                                                Width="24"
+                                                Height="24"
+                                                Margin="8,0,0,0"
+                                                VerticalAlignment="Center"
+                                                ToolTip="Ajuda deste campo"
+                                                Style="{DynamicResource IconButtonStyle}"
+                                                Click="DefaultIncludeGlobsHelpButton_Click">
+                                            <TextBlock Text="&#xE946;"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="13"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center"/>
+                                        </Button>
+                                    </StackPanel>
+                                    <TextBox x:Name="DefaultIncludeGlobsTextBox"
+                                             Grid.Column="1"
+                                             MinWidth="280"
+                                             Height="72"
+                                             AcceptsReturn="True"
+                                             TextWrapping="Wrap"
+                                             VerticalScrollBarVisibility="Auto"
+                                             HorizontalAlignment="Left"
+                                             Padding="10,6"/>
+                                </Grid>
+
+                                <Grid Margin="0,12,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="280"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Top">
+                                        <TextBlock Text="Globs padrão de exclusão"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource DevToolsTextSecondary}"/>
+                                        <Button x:Name="DefaultExcludeGlobsHelpButton"
+                                                Width="24"
+                                                Height="24"
+                                                Margin="8,0,0,0"
+                                                VerticalAlignment="Center"
+                                                ToolTip="Ajuda deste campo"
+                                                Style="{DynamicResource IconButtonStyle}"
+                                                Click="DefaultExcludeGlobsHelpButton_Click">
+                                            <TextBlock Text="&#xE946;"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="13"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center"/>
+                                        </Button>
+                                    </StackPanel>
+                                    <TextBox x:Name="DefaultExcludeGlobsTextBox"
+                                             Grid.Column="1"
+                                             MinWidth="280"
+                                             Height="96"
+                                             AcceptsReturn="True"
+                                             TextWrapping="Wrap"
+                                             VerticalScrollBarVisibility="Auto"
+                                             HorizontalAlignment="Left"
+                                             Padding="10,6"/>
+                                </Grid>
                             </StackPanel>
 
                             <StackPanel x:Name="HistoryPanel" Visibility="Collapsed">
