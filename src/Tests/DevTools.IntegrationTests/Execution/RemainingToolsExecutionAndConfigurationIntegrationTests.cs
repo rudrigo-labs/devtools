@@ -150,6 +150,7 @@ public sealed class RemainingToolsExecutionAndConfigurationIntegrationTests
         var config = new NgrokEntity
         {
             Name = "Ngrok V1",
+            AuthToken = "token-integration-test",
             BaseUrl = "http://127.0.0.1:4040/"
         };
 
