@@ -114,12 +114,6 @@
                           Style="{StaticResource DevToolsCheckBox}" IsChecked="True" Margin="0,0,0,12"
                           ToolTip="Recomendado para buscas de texto em código e documentos."/>
 
-                <Button Content="Buscar Agora"
-                        Style="{StaticResource DevToolsPrimaryButton}"
-                        HorizontalAlignment="Left"
-                        Margin="0,0,0,12"
-                        Click="ActionExecute_Click"/>
-
                 <!-- Resultados -->
                 <TextBlock x:Name="ResultSummaryText"
                            Foreground="{DynamicResource DevToolsTextSecondary}"

@@ -288,15 +288,34 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
     {
         if (_isExecuting) return;
 
-        if (_currentEntity is null || string.IsNullOrWhiteSpace(_currentEntity.RootPath))
-        {
-            ValidationUiService.ShowInline(ExecutionStatusText, "Selecione ou configure uma configuração antes de executar.");
-            return;
-        }
+        _currentEntity ??= new MigrationsEntity();
+        ReadFormIntoEntity();
+
+        ClearInlineValidationStates();
+        ValidationUiService.ClearInline(ExecutionStatusText);
 
         var action = ActionCombo.SelectedItem is MigrationsAction a ? a : MigrationsAction.AddMigration;
         var provider = ProviderCombo.SelectedItem is DatabaseProvider p ? p : DatabaseProvider.Sqlite;
         var migrationName = MigrationNameInput.Text.Trim();
+        var providerProjectInput = provider == DatabaseProvider.SqlServer ? SqlServerProjectInput : SqliteProjectInput;
+
+        if (!ValidationUiService.ValidateRequiredFields(
+                out var requiredError,
+                ValidationUiService.RequiredPath("Pasta raiz", RootPathSelector, RootPathSelector.SelectedPath),
+                ValidationUiService.RequiredPath("Startup project", StartupProjectSelector, StartupProjectSelector.SelectedPath),
+                ValidationUiService.RequiredControl("DbContext", DbContextInput, DbContextInput.Text)))
+        {
+            ValidationUiService.ShowInline(ExecutionStatusText, requiredError);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(providerProjectInput.Text))
+        {
+            ValidationUiService.SetControlInvalid(providerProjectInput, true);
+            var providerName = provider == DatabaseProvider.SqlServer ? "SQL Server" : "SQLite";
+            ValidationUiService.ShowInline(ExecutionStatusText, $"Informe o projeto de migration para {providerName} antes de executar.");
+            return;
+        }
 
         if (action == MigrationsAction.AddMigration && string.IsNullOrWhiteSpace(migrationName))
         {
@@ -443,6 +462,8 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
         ValidationUiService.SetPathSelectorInvalid(RootPathSelector, false);
         ValidationUiService.SetPathSelectorInvalid(StartupProjectSelector, false);
         ValidationUiService.SetControlInvalid(DbContextInput, false);
+        ValidationUiService.SetControlInvalid(SqlServerProjectInput, false);
+        ValidationUiService.SetControlInvalid(SqliteProjectInput, false);
         ValidationUiService.SetControlInvalid(MigrationNameInput, false);
     }
     private void ApplyModeState()
@@ -479,7 +500,7 @@ public partial class MigrationsWorkspaceView : System.Windows.Controls.UserContr
 
         Actions.CanHelp = true;
         Actions.CanNew = inConfiguration && !_isExecuting && !_isConfigurationDraft;
-        Actions.CanSave = !_isExecuting && (inExecution ? hasSelected : _isConfigurationDraft);
+        Actions.CanSave = !_isExecuting && (inExecution || _isConfigurationDraft);
         Actions.CanDelete = false;
         Actions.CanCancel = inConfiguration && !_isExecuting && _isConfigurationDraft;
         Actions.CanGoToTool = false;

@@ -1,4 +1,5 @@
 using System.Windows;
+using DevTools.Core.Models;
 using DevTools.Host.Wpf.Facades;
 using DevTools.Host.Wpf.Services;
 using DevTools.Utf8Convert.Models;
@@ -9,15 +10,29 @@ public partial class Utf8ConvertWorkspaceView : System.Windows.Controls.UserCont
 {
     private const string ToolHistorySlug = "utf8_convert";
     private const string ToolDisplayName = "UTF-8 Convert";
+    private readonly AppSettings _appSettings;
     private readonly IUtf8ConvertFacade _facade;
     private CancellationTokenSource? _executionCts;
     private bool _isExecuting;
+    private bool _defaultsApplied;
 
-    public Utf8ConvertWorkspaceView(IUtf8ConvertFacade facade)
+    public Utf8ConvertWorkspaceView(IUtf8ConvertFacade facade, AppSettings appSettings)
     {
         _facade = facade;
+        _appSettings = appSettings;
         InitializeComponent();
+        Loaded += Utf8ConvertWorkspaceView_Loaded;
         ApplyModeState();
+    }
+
+    private void Utf8ConvertWorkspaceView_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (_defaultsApplied)
+            return;
+
+        _defaultsApplied = true;
+        IncludeGlobsInput.Text = string.Join(Environment.NewLine, _appSettings.FileTools.DefaultIncludeGlobs);
+        ExcludeGlobsInput.Text = string.Join(Environment.NewLine, _appSettings.FileTools.DefaultExcludeGlobs);
     }
 
     private async void ActionExecute_Click(object sender, RoutedEventArgs e)
@@ -110,16 +125,22 @@ public partial class Utf8ConvertWorkspaceView : System.Windows.Controls.UserCont
         }
     }
 
-    private Utf8ConvertRequest BuildRequest() => new()
+    private Utf8ConvertRequest BuildRequest()
     {
-        RootPath     = RootPathSelector.SelectedPath?.Trim() ?? string.Empty,
-        Recursive    = RecursiveCheck.IsChecked ?? true,
-        OutputBom    = OutputBomCheck.IsChecked ?? true,
-        CreateBackup = CreateBackupCheck.IsChecked ?? true,
-        DryRun       = DryRunCheck.IsChecked ?? false,
-        IncludeGlobs = ParseLines(IncludeGlobsInput.Text),
-        ExcludeGlobs = ParseLines(ExcludeGlobsInput.Text)
-    };
+        var includeGlobs = ParseLines(IncludeGlobsInput.Text) ?? _appSettings.FileTools.DefaultIncludeGlobs;
+        var excludeGlobs = ParseLines(ExcludeGlobsInput.Text) ?? _appSettings.FileTools.DefaultExcludeGlobs;
+
+        return new Utf8ConvertRequest
+        {
+            RootPath     = RootPathSelector.SelectedPath?.Trim() ?? string.Empty,
+            Recursive    = RecursiveCheck.IsChecked ?? true,
+            OutputBom    = OutputBomCheck.IsChecked ?? true,
+            CreateBackup = CreateBackupCheck.IsChecked ?? true,
+            DryRun       = DryRunCheck.IsChecked ?? false,
+            IncludeGlobs = includeGlobs,
+            ExcludeGlobs = excludeGlobs
+        };
+    }
 
     private static IReadOnlyList<string>? ParseLines(string text)
     {

@@ -2,7 +2,11 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 using DevTools.Host.Wpf.Components;
+using DevTools.Host.Wpf.Facades;
+using DevTools.SSHTunnel.Models;
+using H.NotifyIcon;
 
 namespace DevTools.Host.Wpf.Views;
 
@@ -25,10 +29,13 @@ public partial class MainWindow : Window
     private enum WorkspaceIntent { Default, Configuration, Execution }
 
     private readonly Dictionary<string, Func<System.Windows.Controls.UserControl>> _toolRegistry;
+    private readonly ISshTunnelFacade _sshTunnelFacade;
+    private TaskbarIcon? _trayIcon;
     private string _activeToolTag = string.Empty;
     private WorkspaceIntent _activeIntent = WorkspaceIntent.Default;
     private bool _isWorkAreaMaximized;
     private Rect _restoreBounds;
+    private bool _isExitRequested;
 
     public MainWindow(
         HomeLauncherView homeLauncherView,
@@ -44,9 +51,11 @@ public partial class MainWindow : Window
         MigrationsWorkspaceView migrationsWorkspaceView,
         SshTunnelWorkspaceView sshTunnelWorkspaceView,
         NgrokWorkspaceView ngrokWorkspaceView,
-        NotesWorkspaceView notesWorkspaceView)
+        NotesWorkspaceView notesWorkspaceView,
+        ISshTunnelFacade sshTunnelFacade)
     {
         InitializeComponent();
+        _sshTunnelFacade = sshTunnelFacade;
 
         _toolRegistry = new Dictionary<string, Func<System.Windows.Controls.UserControl>>(StringComparer.OrdinalIgnoreCase)
         {
@@ -77,7 +86,11 @@ public partial class MainWindow : Window
             _restoreBounds = new Rect(Left, Top, Width, Height);
             MaximizeToWorkArea();
             ActivateTool(FerramentasTag, WorkspaceIntent.Default);
+            InitializeTrayIcon();
         };
+
+        Closing += MainWindow_Closing;
+        Closed += MainWindow_Closed;
     }
 
     private void NavButton_Click(object sender, RoutedEventArgs e)
@@ -303,9 +316,144 @@ public partial class MainWindow : Window
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
-        => Close();
+        => HideToTray();
 
     private void ExitButton_Click(object sender, RoutedEventArgs e)
+        => RequestExitWithConfirmation();
+
+    private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (_isExitRequested)
+            return;
+
+        e.Cancel = true;
+        HideToTray();
+    }
+
+    private void MainWindow_Closed(object? sender, EventArgs e)
+    {
+        _trayIcon?.Dispose();
+        _trayIcon = null;
+    }
+
+    private void InitializeTrayIcon()
+    {
+        if (_trayIcon is not null)
+            return;
+
+        _trayIcon = new TaskbarIcon
+        {
+            IconSource = BitmapFrame.Create(new Uri("pack://application:,,,/Assets/app.ico", UriKind.Absolute)),
+            ToolTipText = "DevTools"
+        };
+
+        _trayIcon.TrayLeftMouseDoubleClick += (_, _) => RestoreFromTray();
+
+        var menu = new System.Windows.Controls.ContextMenu();
+        menu.Opened += TrayContextMenu_Opened;
+        _trayIcon.ContextMenu = menu;
+        RebuildTrayMenu();
+    }
+
+    private void TrayContextMenu_Opened(object sender, RoutedEventArgs e)
+        => RebuildTrayMenu();
+
+    private void RebuildTrayMenu()
+    {
+        if (_trayIcon?.ContextMenu is not System.Windows.Controls.ContextMenu menu)
+            return;
+
+        menu.Items.Clear();
+
+        var activeTunnels = _sshTunnelFacade.ActiveTunnels;
+        var activeCount = activeTunnels.Count;
+        var activeHeader = new System.Windows.Controls.MenuItem
+        {
+            Header = $"T\u00FAneis SSH ativos: {activeCount}",
+            IsEnabled = false
+        };
+        menu.Items.Add(activeHeader);
+        menu.Items.Add(new System.Windows.Controls.Separator());
+
+        if (activeCount == 0)
+        {
+            menu.Items.Add(new System.Windows.Controls.MenuItem
+            {
+                Header = "Nenhum t\u00FAnel ativo",
+                IsEnabled = false
+            });
+        }
+        else
+        {
+            foreach (var tunnel in activeTunnels.OrderBy(x => x.Configuration.Name, StringComparer.OrdinalIgnoreCase))
+            {
+                var label = string.IsNullOrWhiteSpace(tunnel.Configuration.Name)
+                    ? tunnel.Key
+                    : tunnel.Configuration.Name.Trim();
+
+                var headerText = tunnel.ProcessId.HasValue
+                    ? $"Parar {label} (PID {tunnel.ProcessId.Value})"
+                    : $"Parar {label}";
+
+                var stopItem = new System.Windows.Controls.MenuItem
+                {
+                    Header = headerText,
+                    Tag = tunnel.Key
+                };
+                stopItem.Click += TrayStopTunnel_Click;
+                menu.Items.Add(stopItem);
+            }
+        }
+
+        menu.Items.Add(new System.Windows.Controls.Separator());
+
+        var openItem = new System.Windows.Controls.MenuItem { Header = "Abrir DevTools" };
+        openItem.Click += (_, _) => RestoreFromTray();
+        menu.Items.Add(openItem);
+
+        var exitItem = new System.Windows.Controls.MenuItem { Header = "Encerrar DevTools" };
+        exitItem.Click += (_, _) => RequestExitWithConfirmation();
+        menu.Items.Add(exitItem);
+    }
+
+    private async void TrayStopTunnel_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.MenuItem { Tag: string tunnelKey } || string.IsNullOrWhiteSpace(tunnelKey))
+            return;
+
+        var result = await _sshTunnelFacade.ExecuteAsync(new SshTunnelRequest
+        {
+            Action = SshTunnelAction.Stop,
+            Configuration = new TunnelConfiguration { Name = tunnelKey }
+        }).ConfigureAwait(true);
+
+        MainStatusText.Text = result.IsSuccess
+            ? "T\u00FAnel SSH encerrado pela bandeja do sistema."
+            : string.Join(" | ", result.Errors.Select(x => x.Message));
+
+        RebuildTrayMenu();
+    }
+
+    private void RestoreFromTray()
+    {
+        if (!IsVisible)
+            Show();
+
+        ShowInTaskbar = true;
+        if (WindowState == WindowState.Minimized)
+            WindowState = WindowState.Normal;
+
+        Activate();
+    }
+
+    private void HideToTray()
+    {
+        ShowInTaskbar = false;
+        Hide();
+        MainStatusText.Text = "DevTools minimizado para a bandeja do sistema.";
+    }
+
+    private void RequestExitWithConfirmation()
     {
         var result = DevTools.Host.Wpf.Components.DevToolsMessageBox.Confirm(
             this,
@@ -313,7 +461,10 @@ public partial class MainWindow : Window
             "Encerrar");
 
         if (result == DevTools.Host.Wpf.Components.DevToolsMessageBoxResult.Yes)
+        {
+            _isExitRequested = true;
             Close();
+        }
     }
 
     private void Window_StateChanged(object sender, EventArgs e)

@@ -1,4 +1,5 @@
 using System.Windows;
+using DevTools.Core.Models;
 using DevTools.Host.Wpf.Facades;
 using DevTools.Host.Wpf.Services;
 using DevTools.SearchText.Models;
@@ -9,15 +10,29 @@ public partial class SearchTextWorkspaceView : System.Windows.Controls.UserContr
 {
     private const string ToolHistorySlug = "search_text";
     private const string ToolDisplayName = "Search Text";
+    private readonly AppSettings _appSettings;
     private readonly ISearchTextFacade _facade;
     private CancellationTokenSource? _executionCts;
     private bool _isExecuting;
+    private bool _defaultsApplied;
 
-    public SearchTextWorkspaceView(ISearchTextFacade facade)
+    public SearchTextWorkspaceView(ISearchTextFacade facade, AppSettings appSettings)
     {
         _facade = facade;
+        _appSettings = appSettings;
         InitializeComponent();
+        Loaded += SearchTextWorkspaceView_Loaded;
         ApplyModeState();
+    }
+
+    private void SearchTextWorkspaceView_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (_defaultsApplied)
+            return;
+
+        _defaultsApplied = true;
+        IncludeGlobsInput.Text = string.Join(Environment.NewLine, _appSettings.FileTools.DefaultIncludeGlobs);
+        ExcludeGlobsInput.Text = string.Join(Environment.NewLine, _appSettings.FileTools.DefaultExcludeGlobs);
     }
 
     private async void ActionExecute_Click(object sender, RoutedEventArgs e)
@@ -114,6 +129,9 @@ public partial class SearchTextWorkspaceView : System.Windows.Controls.UserContr
 
     private SearchTextRequest BuildRequest()
     {
+        var includeGlobs = ParseLines(IncludeGlobsInput.Text) ?? _appSettings.FileTools.DefaultIncludeGlobs;
+        var excludeGlobs = ParseLines(ExcludeGlobsInput.Text) ?? _appSettings.FileTools.DefaultExcludeGlobs;
+
         return new SearchTextRequest
         {
             RootPath       = RootPathSelector.SelectedPath?.Trim() ?? string.Empty,
@@ -124,8 +142,8 @@ public partial class SearchTextWorkspaceView : System.Windows.Controls.UserContr
             SkipBinaryFiles = SkipBinaryCheck.IsChecked ?? true,
             MaxFileSizeKb  = int.TryParse(MaxFileSizeInput.Text.Trim(), out var sz) && sz > 0 ? sz : null,
             MaxMatchesPerFile = int.TryParse(MaxMatchesInput.Text.Trim(), out var mm) ? Math.Max(0, mm) : 0,
-            IncludeGlobs   = ParseLines(IncludeGlobsInput.Text),
-            ExcludeGlobs   = ParseLines(ExcludeGlobsInput.Text),
+            IncludeGlobs   = includeGlobs,
+            ExcludeGlobs   = excludeGlobs,
             ReturnLines    = true
         };
     }

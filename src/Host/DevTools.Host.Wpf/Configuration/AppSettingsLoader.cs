@@ -39,6 +39,37 @@ public static class AppSettingsLoader
                 if (fileToolsElement.TryGetProperty("AbsoluteMaxFileSizeKb", out var absEl) &&
                     absEl.TryGetInt32(out var abs) && abs > 0)
                     settings.FileTools.AbsoluteMaxFileSizeKb = abs;
+
+                if (fileToolsElement.TryGetProperty("DefaultIncludeGlobs", out var includeGlobsEl) &&
+                    includeGlobsEl.ValueKind == JsonValueKind.Array)
+                {
+                    var includeGlobs = includeGlobsEl
+                        .EnumerateArray()
+                        .Where(x => x.ValueKind == JsonValueKind.String)
+                        .Select(x => x.GetString())
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Select(x => x!.Trim())
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+
+                    if (includeGlobs.Count > 0)
+                        settings.FileTools.DefaultIncludeGlobs = includeGlobs;
+                }
+
+                if (fileToolsElement.TryGetProperty("DefaultExcludeGlobs", out var excludeGlobsEl) &&
+                    excludeGlobsEl.ValueKind == JsonValueKind.Array)
+                {
+                    var excludeGlobs = excludeGlobsEl
+                        .EnumerateArray()
+                        .Where(x => x.ValueKind == JsonValueKind.String)
+                        .Select(x => x.GetString())
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Select(x => x!.Trim())
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+
+                    settings.FileTools.DefaultExcludeGlobs = excludeGlobs;
+                }
             }
 
             if (devToolsElement.TryGetProperty("History", out var historyElement))
