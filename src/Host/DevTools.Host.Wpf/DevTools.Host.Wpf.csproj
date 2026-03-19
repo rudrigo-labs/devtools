@@ -37,6 +37,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Remove="app.ico" />
     <Resource Include="app.ico" />
     <Resource Include="Assets\app.ico">

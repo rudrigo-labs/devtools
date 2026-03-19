@@ -8,6 +8,8 @@ namespace DevTools.Core.Models;
 public sealed class AppSettings
 {
     public FileToolsSettings FileTools { get; set; } = new();
+    public HistorySettings History { get; set; } = new();
+    public ToolVisibilitySettings ToolVisibility { get; set; } = new();
 }
 
 /// <summary>
@@ -19,4 +21,22 @@ public sealed class FileToolsSettings
 {
     public int MaxFileSizeKb { get; set; } = 500;
     public int AbsoluteMaxFileSizeKb { get; set; } = 10_000;
+}
+
+/// <summary>
+/// Configurações globais do histórico de uso das ferramentas.
+/// Enabled: quando false, o histórico deixa de ser exibido e de ser registrado.
+/// </summary>
+public sealed class HistorySettings
+{
+    public bool Enabled { get; set; } = true;
+}
+
+/// <summary>
+/// Configurações globais de visibilidade das ferramentas no host.
+/// DisabledTools: lista de tags de ferramentas que devem ficar ocultas.
+/// </summary>
+public sealed class ToolVisibilitySettings
+{
+    public List<string> DisabledTools { get; set; } = [];
 }
